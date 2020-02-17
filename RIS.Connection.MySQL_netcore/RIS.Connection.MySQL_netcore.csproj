@@ -1,0 +1,21 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <RootNamespace>RIS.Connection.MySQL</RootNamespace>
+    <AssemblyName>RIS.Connection.MySQL_netcore</AssemblyName>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <DocumentationFile>D:\Visual Studio 2019 Projects\RIS-Libraries\RIS.Connection.MySQL_netcore\RIS.Connection.MySQL_netcore.xml</DocumentationFile>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="MySql.Data" Version="8.0.18" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\RIS_netcore\RIS_netcore.csproj" />
+  </ItemGroup>
+
+</Project>

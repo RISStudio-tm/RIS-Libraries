@@ -1,0 +1,13 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <RootNamespace>RIS.Reflection.Call</RootNamespace>
+    <AssemblyName>RIS.Reflection.Call_netcore</AssemblyName>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\RIS_netcore\RIS_netcore.csproj" />
+  </ItemGroup>
+
+</Project>

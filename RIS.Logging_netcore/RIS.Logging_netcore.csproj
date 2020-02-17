@@ -1,0 +1,14 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <RootNamespace>RIS.Logging</RootNamespace>
+    <AssemblyName>RIS.Logging_netcore</AssemblyName>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\RIS.Collections_netcore\RIS.Collections_netcore.csproj" />
+    <ProjectReference Include="..\RIS_netcore\RIS_netcore.csproj" />
+  </ItemGroup>
+
+</Project>
