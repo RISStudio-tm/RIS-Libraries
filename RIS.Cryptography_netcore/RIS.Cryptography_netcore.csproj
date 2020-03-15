@@ -13,6 +13,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\RIS.Text.Encoding_netcore\RIS.Text.Encoding_netcore.csproj" />
     <ProjectReference Include="..\RIS_netcore\RIS_netcore.csproj" />
   </ItemGroup>
 

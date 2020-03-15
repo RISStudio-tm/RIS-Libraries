@@ -10,4 +10,8 @@
     <Folder Include="Utils\" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\RIS_netcore\RIS_netcore.csproj" />
+  </ItemGroup>
+
 </Project>

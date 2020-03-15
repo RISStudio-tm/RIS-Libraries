@@ -1,11 +1,12 @@
 ﻿using System;
 using System.Text.RegularExpressions;
+using RIS.Text.Encoding.Base;
 
 namespace RIS.Cryptography.Hash
 {
     public class BCryptMetadata
     {
-        public static Regex HashInfoRegex { get; set; } = new Regex(@"^\$(?<version>2[a-z]{1}?)\$(?<work_factor>\d\d?)\$(?<hash>[A-Za-z0-9\./]{53})$", RegexOptions.Singleline);
+        public static Regex HashInfoRegex { get; } = new Regex(@"^\$(?<version>2[a-z]{1}?)\$(?<work_factor>\d\d?)\$(?<hash>[A-Za-z0-9\./]{53})$", RegexOptions.Singleline);
 
         public event RMessageHandler ShowMessage;
         public event RErrorHandler ShowError;
@@ -40,7 +41,7 @@ namespace RIS.Cryptography.Hash
             }
             catch (global::BCrypt.Net.HashInformationException)
             {
-                var exception = new Exception($"Invalid hash format in metadata[{ this.GetType().FullName }]");
+                var exception = new FormatException($"Invalid hash format in metadata[{ this.GetType().FullName }]");
                 Events.DShowError?.Invoke(this, new RErrorEventArgs(exception.Message, exception.StackTrace));
                 ShowError?.Invoke(this, new RErrorEventArgs(exception.Message, exception.StackTrace));
                 throw exception;
@@ -59,7 +60,7 @@ namespace RIS.Cryptography.Hash
 
     public class Argon2Metadata
     {
-        public static Regex HashInfoRegex { get; } = new Regex(@"^\$(?<type>argon2[a-z]{0,2}?)\$v=(?<version>\d+?)\$m=(?<memory_size>\d+?),t=(?<iterations>\d+?),p=(?<degree_of_parallelism>\d+?)\$(?<salt>[A-Za-z0-9/+=]+)\$(?<hash>[A-Za-z0-9/+=]+)$", RegexOptions.Singleline);
+        public static Regex HashInfoRegex { get; } = new Regex(@"^\$(?<type>argon2[a-z]{0,2}?)\$v=(?<version>\d+?)\$m=(?<memory_size>\d+?),t=(?<iterations>\d+?),p=(?<degree_of_parallelism>\d+?)\$(?<salt>[A-Za-z0-9/+]+)\$(?<hash>[A-Za-z0-9/+]+)$", RegexOptions.Singleline);
 
         public event RMessageHandler ShowMessage;
         public event RErrorHandler ShowError;
@@ -193,7 +194,7 @@ namespace RIS.Cryptography.Hash
 
             if (!hashInfo.Success)
             {
-                var exception = new Exception($"Invalid hash format in metadata[{ this.GetType().FullName }]");
+                var exception = new FormatException($"Invalid hash format in metadata[{ this.GetType().FullName }]");
                 Events.DShowError?.Invoke(this, new RErrorEventArgs(exception.Message, exception.StackTrace));
                 ShowError?.Invoke(this, new RErrorEventArgs(exception.Message, exception.StackTrace));
                 throw exception;
@@ -205,13 +206,13 @@ namespace RIS.Cryptography.Hash
             MemorySize = Convert.ToInt32(hashInfo.Groups["memory_size"].Value);
             Iterations = Convert.ToInt32(hashInfo.Groups["iterations"].Value);
             DegreeOfParallelism = Convert.ToInt32(hashInfo.Groups["degree_of_parallelism"].Value);
-            Salt = hashInfo.Groups["salt"].Value;
-            Hash = hashInfo.Groups["hash"].Value;
+            Salt = Base64.RestorePadding(hashInfo.Groups["salt"].Value);
+            Hash = Base64.RestorePadding(hashInfo.Groups["hash"].Value);
         }
 
         public override string ToString()
         {
-            return $"${Enum.GetName(typeof(Argon2Type), Type)?.ToLower()}$v={Version}$m={MemorySize},t={Iterations},p={DegreeOfParallelism}${Salt}${Hash}";
+            return $"${Enum.GetName(typeof(Argon2Type), Type)?.ToLower()}$v={Version}$m={MemorySize},t={Iterations},p={DegreeOfParallelism}${Base64.RemovePadding(Salt)}${Base64.RemovePadding(Hash)}";
         }
     }
 }

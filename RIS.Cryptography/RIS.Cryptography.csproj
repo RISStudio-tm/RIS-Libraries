@@ -67,6 +67,10 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\RIS.Text.Encoding\RIS.Text.Encoding.csproj">
+      <Project>{11add61a-1ecb-4d34-993b-d7cb85d31c78}</Project>
+      <Name>RIS.Text.Encoding</Name>
+    </ProjectReference>
     <ProjectReference Include="..\RIS\RIS.csproj">
       <Project>{31ef299f-4c06-4506-aa4f-cfe3581b5c82}</Project>
       <Name>RIS</Name>

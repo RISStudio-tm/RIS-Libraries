@@ -3,6 +3,7 @@ using System.Reflection;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.RegularExpressions;
+using RIS.Text.Encoding.Base;
 
 namespace RIS.Cryptography.Hash
 {
@@ -2040,7 +2041,7 @@ namespace RIS.Cryptography.Hash
                     hashText.Append(hashBytes[i].ToString("x2"));
                 }
 
-                string hashString = $"${Enum.GetName(typeof(Argon2Type), Argon2Type.Argon2i)?.ToLower()}$v=19$m={memorySize},t={iterations},p={degreeOfParallelism}${Convert.ToBase64String(hashSalt)}${Convert.ToBase64String(TextEncoding.GetBytes(hashText.ToString()))}";
+                string hashString = $"${Enum.GetName(typeof(Argon2Type), Argon2Type.Argon2i)?.ToLower()}$v=19$m={memorySize},t={iterations},p={degreeOfParallelism}${Base64.RemovePadding(Convert.ToBase64String(hashSalt))}${Base64.RemovePadding(Convert.ToBase64String(TextEncoding.GetBytes(hashText.ToString())))}";
 
                 return hashString;
             }
@@ -2135,7 +2136,7 @@ namespace RIS.Cryptography.Hash
                     hashText.Append(hashBytes[i].ToString("x2"));
                 }
 
-                string hashString = $"${Enum.GetName(typeof(Argon2Type), Argon2Type.Argon2i)?.ToLower()}$v=19$m={memorySize},t={iterations},p={degreeOfParallelism}${Convert.ToBase64String(hashSalt)}${Convert.ToBase64String(TextEncoding.GetBytes(hashText.ToString()))}";
+                string hashString = $"${Enum.GetName(typeof(Argon2Type), Argon2Type.Argon2i)?.ToLower()}$v=19$m={memorySize},t={iterations},p={degreeOfParallelism}${Base64.RemovePadding(Convert.ToBase64String(hashSalt))}${Base64.RemovePadding(Convert.ToBase64String(TextEncoding.GetBytes(hashText.ToString())))}";
 
                 return hashString;
             }
@@ -2451,7 +2452,7 @@ namespace RIS.Cryptography.Hash
                     hashText.Append(hashBytes[i].ToString("x2"));
                 }
 
-                string hashString = $"${Enum.GetName(typeof(Argon2Type), Argon2Type.Argon2d)?.ToLower()}$v=19$m={memorySize},t={iterations},p={degreeOfParallelism}${Convert.ToBase64String(hashSalt)}${Convert.ToBase64String(TextEncoding.GetBytes(hashText.ToString()))}";
+                string hashString = $"${Enum.GetName(typeof(Argon2Type), Argon2Type.Argon2d)?.ToLower()}$v=19$m={memorySize},t={iterations},p={degreeOfParallelism}${Base64.RemovePadding(Convert.ToBase64String(hashSalt))}${Base64.RemovePadding(Convert.ToBase64String(TextEncoding.GetBytes(hashText.ToString())))}";
 
                 return hashString;
             }
@@ -2546,7 +2547,7 @@ namespace RIS.Cryptography.Hash
                     hashText.Append(hashBytes[i].ToString("x2"));
                 }
 
-                string hashString = $"${Enum.GetName(typeof(Argon2Type), Argon2Type.Argon2d)?.ToLower()}$v=19$m={memorySize},t={iterations},p={degreeOfParallelism}${Convert.ToBase64String(hashSalt)}${Convert.ToBase64String(TextEncoding.GetBytes(hashText.ToString()))}";
+                string hashString = $"${Enum.GetName(typeof(Argon2Type), Argon2Type.Argon2d)?.ToLower()}$v=19$m={memorySize},t={iterations},p={degreeOfParallelism}${Base64.RemovePadding(Convert.ToBase64String(hashSalt))}${Base64.RemovePadding(Convert.ToBase64String(TextEncoding.GetBytes(hashText.ToString())))}";
 
                 return hashString;
             }
@@ -2862,7 +2863,7 @@ namespace RIS.Cryptography.Hash
                     hashText.Append(hashBytes[i].ToString("x2"));
                 }
 
-                string hashString = $"${Enum.GetName(typeof(Argon2Type), Argon2Type.Argon2id)?.ToLower()}$v=19$m={memorySize},t={iterations},p={degreeOfParallelism}${Convert.ToBase64String(hashSalt)}${Convert.ToBase64String(TextEncoding.GetBytes(hashText.ToString()))}";
+                string hashString = $"${Enum.GetName(typeof(Argon2Type), Argon2Type.Argon2id)?.ToLower()}$v=19$m={memorySize},t={iterations},p={degreeOfParallelism}${Base64.RemovePadding(Convert.ToBase64String(hashSalt))}${Base64.RemovePadding(Convert.ToBase64String(TextEncoding.GetBytes(hashText.ToString())))}";
 
                 return hashString;
             }
@@ -2957,7 +2958,7 @@ namespace RIS.Cryptography.Hash
                     hashText.Append(hashBytes[i].ToString("x2"));
                 }
 
-                string hashString = $"${Enum.GetName(typeof(Argon2Type), Argon2Type.Argon2id)?.ToLower()}$v=19$m={memorySize},t={iterations},p={degreeOfParallelism}${Convert.ToBase64String(hashSalt)}${Convert.ToBase64String(TextEncoding.GetBytes(hashText.ToString()))}";
+                string hashString = $"${Enum.GetName(typeof(Argon2Type), Argon2Type.Argon2id)?.ToLower()}$v=19$m={memorySize},t={iterations},p={degreeOfParallelism}${Base64.RemovePadding(Convert.ToBase64String(hashSalt))}${Base64.RemovePadding(Convert.ToBase64String(TextEncoding.GetBytes(hashText.ToString())))}";
 
                 return hashString;
             }
