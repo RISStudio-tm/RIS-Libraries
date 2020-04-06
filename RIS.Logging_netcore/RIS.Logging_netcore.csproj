@@ -4,8 +4,8 @@
     <TargetFramework>netcoreapp3.1</TargetFramework>
     <RootNamespace>RIS.Logging</RootNamespace>
     <AssemblyName>RIS.Logging_netcore</AssemblyName>
-    <AssemblyVersion>1.0.4.20097</AssemblyVersion>
-    <FileVersion>1.0.4.20097</FileVersion>
+    <AssemblyVersion>1.0.5.20097</AssemblyVersion>
+    <FileVersion>1.0.5.20097</FileVersion>
   </PropertyGroup>
 
   <ItemGroup>
