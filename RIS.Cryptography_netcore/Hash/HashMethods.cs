@@ -439,6 +439,21 @@ namespace RIS.Cryptography.Hash
                     }
                 }
             }
+            private ushort _hashLength;
+            public ushort HashLength
+            {
+                get
+                {
+                    return _hashLength;
+                }
+                set
+                {
+                    if (value < 6)
+                        value = 6;
+
+                    _hashLength = value;
+                }
+            }
             private int _degreeOfParallelism;
             public int DegreeOfParallelism
             {
@@ -544,17 +559,21 @@ namespace RIS.Cryptography.Hash
                     }
                 }
             }
+            public bool FixedHashLength { get; set; }
 
             public bool Initialized { get; }
 
             public Argon2iRaw()
             {
                 SaltBytes = new byte[8];
+                HashLength = 6;
                 DegreeOfParallelism = 2 * 2;
                 Iterations = 4;
                 MemorySize = (1 * 1024) * 128;
                 AssociatedDataBytes = Array.Empty<byte>();
                 KnownSecretBytes = Array.Empty<byte>();
+
+                FixedHashLength = true;
 
                 Initialized = true;
             }
@@ -573,7 +592,7 @@ namespace RIS.Cryptography.Hash
                     KnownSecret = KnownSecretBytes
                 };
 
-                byte[] hashBytes = argon2Service.GetBytes(SaltBytes.Length);
+                byte[] hashBytes = argon2Service.GetBytes(FixedHashLength ? HashLength : SaltBytes.Length);
 
                 StringBuilder hashText = new StringBuilder();
                 for (int i = 0; i < hashBytes.Length; ++i)
@@ -632,6 +651,21 @@ namespace RIS.Cryptography.Hash
                     }
                 }
             }
+            private ushort _hashLength;
+            public ushort HashLength
+            {
+                get
+                {
+                    return _hashLength;
+                }
+                set
+                {
+                    if (value < 6)
+                        value = 6;
+
+                    _hashLength = value;
+                }
+            }
             private int _degreeOfParallelism;
             public int DegreeOfParallelism
             {
@@ -737,17 +771,21 @@ namespace RIS.Cryptography.Hash
                     }
                 }
             }
+            public bool FixedHashLength { get; set; }
 
             public bool Initialized { get; }
 
             public Argon2dRaw()
             {
                 SaltBytes = new byte[8];
+                HashLength = 6;
                 DegreeOfParallelism = 2 * 2;
                 Iterations = 4;
                 MemorySize = (1 * 1024) * 128;
                 AssociatedDataBytes = Array.Empty<byte>();
                 KnownSecretBytes = Array.Empty<byte>();
+
+                FixedHashLength = true;
 
                 Initialized = true;
             }
@@ -766,7 +804,7 @@ namespace RIS.Cryptography.Hash
                     KnownSecret = KnownSecretBytes
                 };
 
-                byte[] hashBytes = argon2Service.GetBytes(SaltBytes.Length);
+                byte[] hashBytes = argon2Service.GetBytes(FixedHashLength ? HashLength : SaltBytes.Length);
 
                 StringBuilder hashText = new StringBuilder();
                 for (int i = 0; i < hashBytes.Length; ++i)
@@ -825,6 +863,21 @@ namespace RIS.Cryptography.Hash
                     }
                 }
             }
+            private ushort _hashLength;
+            public ushort HashLength
+            {
+                get
+                {
+                    return _hashLength;
+                }
+                set
+                {
+                    if (value < 6)
+                        value = 6;
+
+                    _hashLength = value;
+                }
+            }
             private int _degreeOfParallelism;
             public int DegreeOfParallelism
             {
@@ -930,17 +983,21 @@ namespace RIS.Cryptography.Hash
                     }
                 }
             }
+            public bool FixedHashLength { get; set; }
 
             public bool Initialized { get; }
 
             public Argon2idRaw()
             {
                 SaltBytes = new byte[8];
+                HashLength = 6;
                 DegreeOfParallelism = 2 * 2;
                 Iterations = 4;
                 MemorySize = (1 * 1024) * 128;
                 AssociatedDataBytes = Array.Empty<byte>();
                 KnownSecretBytes = Array.Empty<byte>();
+
+                FixedHashLength = true;
 
                 Initialized = true;
             }
@@ -959,7 +1016,7 @@ namespace RIS.Cryptography.Hash
                     KnownSecret = KnownSecretBytes
                 };
 
-                byte[] hashBytes = argon2Service.GetBytes(SaltBytes.Length);
+                byte[] hashBytes = argon2Service.GetBytes(FixedHashLength ? HashLength : SaltBytes.Length);
 
                 StringBuilder hashText = new StringBuilder();
                 for (int i = 0; i < hashBytes.Length; ++i)
@@ -994,6 +1051,21 @@ namespace RIS.Cryptography.Hash
                     _saltLength = value;
                 }
             }
+            private ushort _hashLength;
+            public ushort HashLength
+            {
+                get
+                {
+                    return _hashLength;
+                }
+                set
+                {
+                    if (value < 6)
+                        value = 6;
+
+                    _hashLength = value;
+                }
+            }
             private int _degreeOfParallelism;
             public int DegreeOfParallelism
             {
@@ -1099,17 +1171,21 @@ namespace RIS.Cryptography.Hash
                     }
                 }
             }
+            public bool FixedHashLength { get; set; }
 
             public bool Initialized { get; }
 
             public Argon2iWNP()
             {
-                SaltLength = 64;
+                SaltLength = 8;
+                HashLength = 6;
                 DegreeOfParallelism = 2 * 2;
                 Iterations = 4;
                 MemorySize = (1 * 1024) * 128;
                 AssociatedDataBytes = Array.Empty<byte>();
                 KnownSecretBytes = Array.Empty<byte>();
+
+                FixedHashLength = true;
 
                 Initialized = true;
             }
@@ -1130,7 +1206,7 @@ namespace RIS.Cryptography.Hash
                     KnownSecret = KnownSecretBytes
                 };
 
-                byte[] hashBytes = argon2Service.GetBytes(hashSalt.Length);
+                byte[] hashBytes = argon2Service.GetBytes(FixedHashLength ? HashLength : hashSalt.Length);
 
                 StringBuilder hashText = new StringBuilder();
                 for (int i = 0; i < hashBytes.Length; ++i)
@@ -1167,7 +1243,7 @@ namespace RIS.Cryptography.Hash
                     KnownSecret = KnownSecretBytes
                 };
 
-                byte[] hashBytes = argon2Service.GetBytes(hashSalt.Length);
+                byte[] hashBytes = argon2Service.GetBytes(FixedHashLength ? HashLength : hashSalt.Length);
 
                 StringBuilder hashText = new StringBuilder();
                 for (int i = 0; i < hashBytes.Length; ++i)
@@ -1214,6 +1290,21 @@ namespace RIS.Cryptography.Hash
                     _saltLength = value;
                 }
             }
+            private ushort _hashLength;
+            public ushort HashLength
+            {
+                get
+                {
+                    return _hashLength;
+                }
+                set
+                {
+                    if (value < 6)
+                        value = 6;
+
+                    _hashLength = value;
+                }
+            }
             private int _degreeOfParallelism;
             public int DegreeOfParallelism
             {
@@ -1319,17 +1410,21 @@ namespace RIS.Cryptography.Hash
                     }
                 }
             }
+            public bool FixedHashLength { get; set; }
 
             public bool Initialized { get; }
 
             public Argon2dWNP()
             {
-                SaltLength = 64;
+                SaltLength = 8;
+                HashLength = 6;
                 DegreeOfParallelism = 2 * 2;
                 Iterations = 4;
                 MemorySize = (1 * 1024) * 128;
                 AssociatedDataBytes = Array.Empty<byte>();
                 KnownSecretBytes = Array.Empty<byte>();
+
+                FixedHashLength = true;
 
                 Initialized = true;
             }
@@ -1350,7 +1445,7 @@ namespace RIS.Cryptography.Hash
                     KnownSecret = KnownSecretBytes
                 };
 
-                byte[] hashBytes = argon2Service.GetBytes(hashSalt.Length);
+                byte[] hashBytes = argon2Service.GetBytes(FixedHashLength ? HashLength : hashSalt.Length);
 
                 StringBuilder hashText = new StringBuilder();
                 for (int i = 0; i < hashBytes.Length; ++i)
@@ -1387,7 +1482,7 @@ namespace RIS.Cryptography.Hash
                     KnownSecret = KnownSecretBytes
                 };
 
-                byte[] hashBytes = argon2Service.GetBytes(hashSalt.Length);
+                byte[] hashBytes = argon2Service.GetBytes(FixedHashLength ? HashLength : hashSalt.Length);
 
                 StringBuilder hashText = new StringBuilder();
                 for (int i = 0; i < hashBytes.Length; ++i)
@@ -1434,6 +1529,21 @@ namespace RIS.Cryptography.Hash
                     _saltLength = value;
                 }
             }
+            private ushort _hashLength;
+            public ushort HashLength
+            {
+                get
+                {
+                    return _hashLength;
+                }
+                set
+                {
+                    if (value < 6)
+                        value = 6;
+
+                    _hashLength = value;
+                }
+            }
             private int _degreeOfParallelism;
             public int DegreeOfParallelism
             {
@@ -1539,17 +1649,21 @@ namespace RIS.Cryptography.Hash
                     }
                 }
             }
+            public bool FixedHashLength { get; set; }
 
             public bool Initialized { get; }
 
             public Argon2idWNP()
             {
-                SaltLength = 64;
+                SaltLength = 8;
+                HashLength = 6;
                 DegreeOfParallelism = 2 * 2;
                 Iterations = 4;
                 MemorySize = (1 * 1024) * 128;
                 AssociatedDataBytes = Array.Empty<byte>();
                 KnownSecretBytes = Array.Empty<byte>();
+
+                FixedHashLength = true;
 
                 Initialized = true;
             }
@@ -1570,7 +1684,7 @@ namespace RIS.Cryptography.Hash
                     KnownSecret = KnownSecretBytes
                 };
 
-                byte[] hashBytes = argon2Service.GetBytes(hashSalt.Length);
+                byte[] hashBytes = argon2Service.GetBytes(FixedHashLength ? HashLength : hashSalt.Length);
 
                 StringBuilder hashText = new StringBuilder();
                 for (int i = 0; i < hashBytes.Length; ++i)
@@ -1607,7 +1721,7 @@ namespace RIS.Cryptography.Hash
                     KnownSecret = KnownSecretBytes
                 };
 
-                byte[] hashBytes = argon2Service.GetBytes(hashSalt.Length);
+                byte[] hashBytes = argon2Service.GetBytes(FixedHashLength ? HashLength : hashSalt.Length);
 
                 StringBuilder hashText = new StringBuilder();
                 for (int i = 0; i < hashBytes.Length; ++i)
@@ -1654,6 +1768,21 @@ namespace RIS.Cryptography.Hash
                     _saltLength = value;
                 }
             }
+            private ushort _hashLength;
+            public ushort HashLength
+            {
+                get
+                {
+                    return _hashLength;
+                }
+                set
+                {
+                    if (value < 6)
+                        value = 6;
+
+                    _hashLength = value;
+                }
+            }
             private int _degreeOfParallelism;
             public int DegreeOfParallelism
             {
@@ -1759,17 +1888,21 @@ namespace RIS.Cryptography.Hash
                     }
                 }
             }
+            public bool FixedHashLength { get; set; }
 
             public bool Initialized { get; }
 
             public Argon2iWP()
             {
-                SaltLength = 64;
+                SaltLength = 8;
+                HashLength = 6;
                 DegreeOfParallelism = 2 * 2;
                 Iterations = 4;
                 MemorySize = (1 * 1024) * 128;
                 AssociatedDataBytes = Array.Empty<byte>();
                 KnownSecretBytes = Array.Empty<byte>();
+
+                FixedHashLength = true;
 
                 Initialized = true;
             }
@@ -1854,7 +1987,7 @@ namespace RIS.Cryptography.Hash
                     KnownSecret = knownSecretBytes
                 };
 
-                byte[] hashBytes = argon2Service.GetBytes(hashSalt.Length);
+                byte[] hashBytes = argon2Service.GetBytes(FixedHashLength ? HashLength : hashSalt.Length);
 
                 StringBuilder hashText = new StringBuilder();
                 for (int i = 0; i < hashBytes.Length; ++i)
@@ -1949,7 +2082,7 @@ namespace RIS.Cryptography.Hash
                     KnownSecret = knownSecretBytes
                 };
 
-                byte[] hashBytes = argon2Service.GetBytes(hashSalt.Length);
+                byte[] hashBytes = argon2Service.GetBytes(FixedHashLength ? HashLength : hashSalt.Length);
 
                 StringBuilder hashText = new StringBuilder();
                 for (int i = 0; i < hashBytes.Length; ++i)
@@ -2065,6 +2198,21 @@ namespace RIS.Cryptography.Hash
                     _saltLength = value;
                 }
             }
+            private ushort _hashLength;
+            public ushort HashLength
+            {
+                get
+                {
+                    return _hashLength;
+                }
+                set
+                {
+                    if (value < 6)
+                        value = 6;
+
+                    _hashLength = value;
+                }
+            }
             private int _degreeOfParallelism;
             public int DegreeOfParallelism
             {
@@ -2170,17 +2318,21 @@ namespace RIS.Cryptography.Hash
                     }
                 }
             }
+            public bool FixedHashLength { get; set; }
 
             public bool Initialized { get; }
 
             public Argon2dWP()
             {
-                SaltLength = 64;
+                SaltLength = 8;
+                HashLength = 6;
                 DegreeOfParallelism = 2 * 2;
                 Iterations = 4;
                 MemorySize = (1 * 1024) * 128;
                 AssociatedDataBytes = Array.Empty<byte>();
                 KnownSecretBytes = Array.Empty<byte>();
+
+                FixedHashLength = true;
 
                 Initialized = true;
             }
@@ -2265,7 +2417,7 @@ namespace RIS.Cryptography.Hash
                     KnownSecret = knownSecretBytes
                 };
 
-                byte[] hashBytes = argon2Service.GetBytes(hashSalt.Length);
+                byte[] hashBytes = argon2Service.GetBytes(FixedHashLength ? HashLength : hashSalt.Length);
 
                 StringBuilder hashText = new StringBuilder();
                 for (int i = 0; i < hashBytes.Length; ++i)
@@ -2360,7 +2512,7 @@ namespace RIS.Cryptography.Hash
                     KnownSecret = knownSecretBytes
                 };
 
-                byte[] hashBytes = argon2Service.GetBytes(hashSalt.Length);
+                byte[] hashBytes = argon2Service.GetBytes(FixedHashLength ? HashLength : hashSalt.Length);
 
                 StringBuilder hashText = new StringBuilder();
                 for (int i = 0; i < hashBytes.Length; ++i)
@@ -2476,6 +2628,21 @@ namespace RIS.Cryptography.Hash
                     _saltLength = value;
                 }
             }
+            private ushort _hashLength;
+            public ushort HashLength
+            {
+                get
+                {
+                    return _hashLength;
+                }
+                set
+                {
+                    if (value < 6)
+                        value = 6;
+
+                    _hashLength = value;
+                }
+            }
             private int _degreeOfParallelism;
             public int DegreeOfParallelism
             {
@@ -2581,17 +2748,21 @@ namespace RIS.Cryptography.Hash
                     }
                 }
             }
+            public bool FixedHashLength { get; set; }
 
             public bool Initialized { get; }
 
             public Argon2idWP()
             {
-                SaltLength = 64;
+                SaltLength = 8;
+                HashLength = 6;
                 DegreeOfParallelism = 2 * 2;
                 Iterations = 4;
                 MemorySize = (1 * 1024) * 128;
                 AssociatedDataBytes = Array.Empty<byte>();
                 KnownSecretBytes = Array.Empty<byte>();
+
+                FixedHashLength = true;
 
                 Initialized = true;
             }
@@ -2676,7 +2847,7 @@ namespace RIS.Cryptography.Hash
                     KnownSecret = knownSecretBytes
                 };
 
-                byte[] hashBytes = argon2Service.GetBytes(hashSalt.Length);
+                byte[] hashBytes = argon2Service.GetBytes(FixedHashLength ? HashLength : hashSalt.Length);
 
                 StringBuilder hashText = new StringBuilder();
                 for (int i = 0; i < hashBytes.Length; ++i)
@@ -2771,7 +2942,7 @@ namespace RIS.Cryptography.Hash
                     KnownSecret = knownSecretBytes
                 };
 
-                byte[] hashBytes = argon2Service.GetBytes(hashSalt.Length);
+                byte[] hashBytes = argon2Service.GetBytes(FixedHashLength ? HashLength : hashSalt.Length);
 
                 StringBuilder hashText = new StringBuilder();
                 for (int i = 0; i < hashBytes.Length; ++i)

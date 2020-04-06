@@ -102,7 +102,7 @@ namespace RIS.Collections.ChunkedCollections
 
         public ChunkedArrayLog2SD()
         {
-            ChunkSize = RIS.Environment.LargeObjectHeapEntrySizeLimit / RIS.Environment.GetElementSize<T>();
+            ChunkSize = RIS.Environment.GCLOHThresholdSize / RIS.Environment.GetSize<T>();
             if (ChunkSize < 1)
             {
                 var exception = new Exception("Размер чанка не может быть меньше 1");
@@ -110,6 +110,9 @@ namespace RIS.Collections.ChunkedCollections
                 ShowError?.Invoke(this, new RErrorEventArgs(exception.Message, exception.StackTrace));
                 throw exception;
             }
+
+            if (default(T) is double)
+                ChunkSize = 512;
 
             SyncRoot = new object();
             IsSynchronized = false;
@@ -121,7 +124,7 @@ namespace RIS.Collections.ChunkedCollections
         }
         public ChunkedArrayLog2SD(long length)
         {
-            ChunkSize = RIS.Environment.LargeObjectHeapEntrySizeLimit / RIS.Environment.GetElementSize<T>();
+            ChunkSize = RIS.Environment.GCLOHThresholdSize / RIS.Environment.GetSize<T>();
             if (ChunkSize < 1)
             {
                 var exception = new Exception("Размер чанка не может быть меньше 1");
@@ -136,6 +139,9 @@ namespace RIS.Collections.ChunkedCollections
                 ShowError?.Invoke(this, new RErrorEventArgs(exception.Message, exception.StackTrace));
                 throw exception;
             }
+
+            if (default(T) is double)
+                ChunkSize = 512;
 
             SyncRoot = new object();
             IsSynchronized = false;
@@ -167,6 +173,9 @@ namespace RIS.Collections.ChunkedCollections
                 ShowError?.Invoke(this, new RErrorEventArgs(exception.Message, exception.StackTrace));
                 throw exception;
             }
+
+            if (default(T) is double)
+                ChunkSize = 512;
 
             SyncRoot = new object();
             IsSynchronized = false;

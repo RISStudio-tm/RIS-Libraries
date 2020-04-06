@@ -20,7 +20,7 @@ namespace RIS.Logging.Parsing
         private string[] SituationsNames { get; set; }
         private LogSituation[] Situations { get; set; }
         private long[] SituationsMeetsCounts { get; set; }
-        private ChunkedArraySD<long>[] SituationsMeetsLines { get; set; }
+        private ChunkedArrayD<long>[] SituationsMeetsLines { get; set; }
         private long LinesCount { get; set; }
 
         public string FileDirectory { get; private set; }
@@ -103,7 +103,7 @@ namespace RIS.Logging.Parsing
             SituationsNames = new string[SituationsOriginalNames.Length];
             Situations = new LogSituation[SituationsOriginalNames.Length];
             SituationsMeetsCounts = new long[SituationsOriginalNames.Length];
-            SituationsMeetsLines = new ChunkedArraySD<long>[SituationsOriginalNames.Length];
+            SituationsMeetsLines = new ChunkedArrayD<long>[SituationsOriginalNames.Length];
 
             for (int i = 0; i < Situations.Length; ++i)
             {
@@ -111,7 +111,7 @@ namespace RIS.Logging.Parsing
                 LogUtilities.GetTextFromSituation(Situations[i], out string situationText);
                 SituationsNames[i] = situationText;
 
-                SituationsMeetsLines[i] = new ChunkedArraySD<long>();
+                SituationsMeetsLines[i] = new ChunkedArrayD<long>();
             }
 
             while (!LogFile.EndOfStream)
@@ -176,7 +176,7 @@ namespace RIS.Logging.Parsing
         
         public List<long> GetSituationMeetsLinesList(LogSituation situation)
         {
-            ChunkedArraySD<long> linesArray = SituationsMeetsLines[(int) situation - 1];
+            ChunkedArrayD<long> linesArray = SituationsMeetsLines[(int) situation - 1];
             int linesCount = ((ICollection) linesArray).Count;
             List<long> linesList = new List<long>(linesCount);
 
@@ -185,7 +185,7 @@ namespace RIS.Logging.Parsing
 
             return linesList;
         }
-        public ChunkedArraySD<long> GetSituationMeetsLinesArray(LogSituation situation)
+        public ChunkedArrayD<long> GetSituationMeetsLinesArray(LogSituation situation)
         {
             return SituationsMeetsLines[(int)situation - 1];
         }

@@ -3,6 +3,8 @@
   <PropertyGroup>
     <TargetFramework>netcoreapp3.1</TargetFramework>
     <RootNamespace>RIS.Cryptography</RootNamespace>
+    <AssemblyVersion>1.0.2.20097</AssemblyVersion>
+    <FileVersion>1.0.2.20097</FileVersion>
   </PropertyGroup>
 
   <ItemGroup>
