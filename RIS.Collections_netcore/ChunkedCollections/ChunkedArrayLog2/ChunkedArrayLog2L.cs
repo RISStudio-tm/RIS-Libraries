@@ -112,7 +112,8 @@ namespace RIS.Collections.ChunkedCollections
             }
 
             if (default(T) is double)
-                ChunkSize = 512;
+                if (ChunkSize > 999)
+                    ChunkSize = 999;
 
             SyncRoot = new object();
             IsSynchronized = false;
@@ -141,7 +142,8 @@ namespace RIS.Collections.ChunkedCollections
             }
 
             if (default(T) is double)
-                ChunkSize = 512;
+                if (ChunkSize > 999)
+                    ChunkSize = 999;
 
             SyncRoot = new object();
             IsSynchronized = false;
@@ -175,7 +177,8 @@ namespace RIS.Collections.ChunkedCollections
             }
 
             if (default(T) is double)
-                ChunkSize = 512;
+                if (ChunkSize > 999)
+                    ChunkSize = 999;
 
             SyncRoot = new object();
             IsSynchronized = false;
