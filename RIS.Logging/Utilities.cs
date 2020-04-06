@@ -4,18 +4,6 @@ using System.IO;
 
 namespace RIS.Logging
 {
-    public enum LogSituation
-    {
-        Unknown = 1,
-        ApplicationAction = 2,
-        UserAction = 3,
-        LogAction = 4,
-        Information = 5,
-        Warning = 6,
-        Error = 7,
-        CriticalError = 8
-    }
-
     public static class LogUtilities
     {
         public static event RMessageHandler ShowMessage;
