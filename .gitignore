@@ -520,8 +520,4 @@ MigrationBackup/
 .git/
 .vs/
 ConsoleTest/
-ConsoleTest_netcore/
-RIS.Collections/_oldfiles/
-RIS.Connection.MySQL/_oldfiles/
-RIS.Collections/_oldfiles/
 

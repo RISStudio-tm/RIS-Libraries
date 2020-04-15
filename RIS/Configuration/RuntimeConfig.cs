@@ -2,11 +2,15 @@
 using System.Configuration;
 using System.IO;
 using System.Threading.Tasks;
-using System.Xml;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 
 namespace RIS.Configuration
 {
-    public static class AppConfig
+
+#if NETCOREAPP
+
+    public static class RuntimeConfig
     {
         public static event RMessageHandler ShowMessage;
         public static event RErrorHandler ShowError;
@@ -14,33 +18,28 @@ namespace RIS.Configuration
         private static object ReadWriteLockObj { get; }
         private static object ConfigWatcherLockObj { get; }
         private static FileSystemWatcher ConfigWatcher { get; set; }
-        public static System.Configuration.Configuration Configuration { get; private set; }
-        public static XmlDocument Config { get; private set; }
-        public static AppConfigElementList Elements { get; }
-        public static bool ConfigurationIsLoaded { get; private set; }
+        public static JObject Config { get; private set; }
+        public static string ConfigPath { get; }
+        public static RuntimeConfigElementList Elements { get; }
         public static bool ConfigIsLoaded { get; private set; }
 
-        static AppConfig()
+        static RuntimeConfig()
         {
             ReadWriteLockObj = new object();
             ConfigWatcherLockObj = new object();
 
-            try
-            {
-                Configuration = ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.None);
+            ConfigPath = Path.Combine(Environment.ExecAppDirectoryName, $"{Environment.ExecAppFileNameWithoutExtension}.runtimeconfig.json");
 
-                ConfigurationIsLoaded = true;
-            }
-            catch (Exception)
+            if (!File.Exists(ConfigPath))
             {
-                ConfigurationIsLoaded = false;
+                ConfigIsLoaded = false;
                 return;
             }
 
             try
             {
-                Config = new XmlDocument();
-                Elements = new AppConfigElementList(false);
+                Config = new JObject();
+                Elements = new RuntimeConfigElementList(false);
 
                 ReadConfig();
 
@@ -52,7 +51,7 @@ namespace RIS.Configuration
                 return;
             }
 
-            ConfigWatcher = new FileSystemWatcher(Path.GetDirectoryName(Configuration.FilePath), Path.GetFileName(Configuration.FilePath));
+            ConfigWatcher = new FileSystemWatcher(Path.GetDirectoryName(ConfigPath), Path.GetFileName(ConfigPath));
             ConfigWatcher.IncludeSubdirectories = false;
             ConfigWatcher.NotifyFilter = NotifyFilters.LastWrite;
             ConfigWatcher.Changed += ConfigWatcher_Changed;
@@ -76,52 +75,42 @@ namespace RIS.Configuration
         {
             lock (ReadWriteLockObj)
             {
-                Config.Load(Configuration.FilePath);
-                ReadChildNodes(Config.DocumentElement, "/");
+                using (StreamReader reader = File.OpenText(ConfigPath))
+                {
+                    Config = (JObject)JToken.ReadFrom(new JsonTextReader(reader));
+                }
+
+                ReadChildNodes(Config.Root);
             }
         }
 
-        private static void ReadChildNodes(XmlNode rootNode, string xmlPath)
+        private static void ReadChildNodes(JToken rootToken)
         {
-            string currentXmlPath = xmlPath + $"/{rootNode.Name}";
-
-            foreach (XmlNode node in rootNode.ChildNodes)
+            foreach (JToken token in rootToken.Children())
             {
-                string nodeXmlPath = $"{currentXmlPath}/{node.Name}";
+                string tokenJsonPath = $"${token.Path}";
+                string tokenName;
 
-                if (nodeXmlPath == "//configuration/system.runtime.caching"
-                    || nodeXmlPath == "//configuration/system.runtime.remoting"
-                    || nodeXmlPath == "//configuration/system.web"
-                    || nodeXmlPath == "//configuration/system.web.extensions"
-                    || nodeXmlPath == "//configuration/system.identityModel"
-                    || nodeXmlPath == "//configuration/location"
-                    || nodeXmlPath == "//configuration/connectionStrings"
-                    || nodeXmlPath == "//configuration/System.Windows.Forms.ApplicationConfigurationSection"
-                    || nodeXmlPath == "//configuration/appSettings"
-                    || nodeXmlPath == "//configuration/applicationSettings"
-                    || nodeXmlPath == "//configuration/userSettings"
-                    || nodeXmlPath == "//configuration/system.codedom"
-                    || nodeXmlPath == "//configuration/system.diagnostics"
-                    || nodeXmlPath == "//configuration/configSections"
-                    || nodeXmlPath == "//configuration/mscorlib"
-                    || nodeXmlPath == "//configuration/system.net/connectionManagement"
-                    || nodeXmlPath == "//configuration/system.net/authenticationModules"
-                    || nodeXmlPath == "//configuration/system.net/webRequestModules"
-                    || nodeXmlPath == "//configuration/runtime/assemblyBinding")
+                if (tokenJsonPath[tokenJsonPath.Length - 1] == ']')
+                    tokenName = tokenJsonPath.Substring(tokenJsonPath.LastIndexOf('[') + 2, tokenJsonPath.Length - tokenJsonPath.LastIndexOf('[') - 4);
+                else
+                    tokenName = tokenJsonPath.Substring(tokenJsonPath.LastIndexOfAny(new[] { '.', '$' }) + 1);
+
+                if (token.Type == JTokenType.Property)
                 {
-                    continue;
+                    Elements.Add(tokenName, new RuntimeConfigElement(tokenName, tokenJsonPath));
+
+                    if (token.HasValues)
+                        ReadChildNodes(token);
                 }
+                
+                if (token.Type == JTokenType.Object)
+                {
+                    //Elements.Add(tokenName, new RuntimeConfigElement(tokenName, tokenJsonPath));
 
-                //if (node.HasChildNodes)
-                //{
-                //    ReadChildNodes(node, currentXmlPath);
-                //    continue;
-                //}
-
-                Elements.Add(node.Name, new AppConfigElement(node.Name, nodeXmlPath));
-
-                if (node.HasChildNodes)
-                    ReadChildNodes(node, currentXmlPath);
+                    if (token.HasValues)
+                        ReadChildNodes(token);
+                }
             }
         }
 
@@ -143,7 +132,10 @@ namespace RIS.Configuration
                     {
                         StopConfigWatcher();
 
-                        Config.Save(Configuration.FilePath);
+                        using (StreamWriter writer = File.CreateText(ConfigPath))
+                        {
+                            Config.Root.WriteTo(new JsonTextWriter(writer));
+                        }
 
                         StartConfigWatcher();
                     }
@@ -157,27 +149,27 @@ namespace RIS.Configuration
                 throw exception;
             }
         }
-
-        public static XmlNode GetXmlElement(AppConfigElement element)
+        
+        public static JToken GetJsonElement(RuntimeConfigElement element)
         {
-            XmlNode node;
+            JToken token;
 
             try
             {
-                node = Config.SelectSingleNode(element.XmlPath);
+                token = Config.SelectToken(element.JsonPath.Substring(1), false);
 
-                if (node == null)
-                    throw new XmlException();
+                if (token == null)
+                    throw new JsonException();
             }
             catch (Exception)
             {
-                var exception = new XmlException("Не удалось найти указанный xml элемент");
+                var exception = new JsonException("Не удалось найти указанный json элемент");
                 Events.DShowError?.Invoke(null, new RErrorEventArgs(exception.Message, exception.StackTrace));
                 ShowError?.Invoke(null, new RErrorEventArgs(exception.Message, exception.StackTrace));
                 throw exception;
             }
 
-            return node;
+            return token;
         }
 
         private static void ConfigWatcher_Changed(object sender, FileSystemEventArgs e)
@@ -198,4 +190,7 @@ namespace RIS.Configuration
             });
         }
     }
+
+#endif
+
 }

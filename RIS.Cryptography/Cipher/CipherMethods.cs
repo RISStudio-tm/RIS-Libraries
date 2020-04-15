@@ -13,19 +13,16 @@ namespace RIS.Cryptography.Cipher
         private static string[] CipherMethodsNames { get; }
         private static int CipherMethodsCount { get; }
 
-        public static Encoding TextEncoding { get; set; }
+        public static Encoding TextEncoding { get; }
 
         static CipherMethods()
         {
-            TextEncoding = Encoding.Unicode;
+            TextEncoding = Encoding.UTF8;
 
             Type cipherMethodsType = typeof(CipherMethods);
-            MemberInfo[] cipherMethods = cipherMethodsType.FindMembers(
-                    MemberTypes.NestedType, 
-                    BindingFlags.Public,
-                    (info, criteria) => cipherMethodsType.GetNestedType(info.Name).IsClass 
-                                        && typeof(ICipherMethod).IsAssignableFrom(cipherMethodsType.GetNestedType(info.Name)), 
-                    "IsClass");
+            MemberInfo[] cipherMethods =
+                cipherMethodsType.FindMembers(MemberTypes.NestedType, BindingFlags.Public,
+                    (info, criteria) => cipherMethodsType.GetNestedType(info.Name).IsClass && typeof(ICipherMethod).IsAssignableFrom(cipherMethodsType.GetNestedType(info.Name)), "IsClass");
 
             CipherMethodsCount = cipherMethods.Length;
 
@@ -1578,8 +1575,8 @@ namespace RIS.Cryptography.Cipher
 
                     encryptedData = transform.TransformFinalBlock(data, 0, data.Length);
 
-                    if (GenIVAfterEncrypt) 
-                    { 
+                    if (GenIVAfterEncrypt)
+                    {
                         RijndaelService.GenerateIV();
                     }
 

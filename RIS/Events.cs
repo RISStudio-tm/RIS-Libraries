@@ -28,7 +28,7 @@ namespace RIS
             }
         }
         public static RMessageHandler DShowMessage { get; private set; }
-        
+
         private static object LockObjErrorEvent { get; } = new object();
         private static event RErrorHandler PShowError;
         public static event RErrorHandler ShowError

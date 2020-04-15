@@ -12,7 +12,7 @@ namespace RIS
         }
     }
     public delegate void RMessageHandler(object sender, RMessageEventArgs eventArgs);
-    
+
     public class RErrorEventArgs : EventArgs
     {
         public string Message { get; }

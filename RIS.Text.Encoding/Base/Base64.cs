@@ -11,7 +11,7 @@ namespace RIS.Text.Encoding.Base
 
         public static Regex Base64FormatRegex { get; } = new Regex(@"^([A-Za-z0-9+/]{4})*([A-Za-z0-9+/]{4}|[A-Za-z0-9+/]{3}=|[A-Za-z0-9+/]{2}==)?$", RegexOptions.Singleline);
         public static Regex Base64WithoutPaddingFormatRegex { get; } = new Regex(@"^([A-Za-z0-9+/]{4})*([A-Za-z0-9+/]{4}|[A-Za-z0-9+/]{3}|[A-Za-z0-9+/]{2})?$", RegexOptions.Singleline);
-        
+
         public override bool HasSpecial => true;
 
         public Base64(string alphabet = DefaultAlphabet, char special = DefaultSpecial,

@@ -9,10 +9,10 @@ namespace RIS.Text.Encoding.Base
 
         public uint BlockMaxBitsCount { get; }
 
-        public bool ReverseOrder { get; }
-        
         public override bool HasSpecial => false;
-        
+
+        public bool ReverseOrder { get; }
+
         public BaseN(string alphabet, uint blockMaxBitsCount = 32,
             System.Text.Encoding encoding = null, bool reverseOrder = false, bool parallel = false)
             : base((uint)alphabet.Length, alphabet, '\0', encoding, parallel)

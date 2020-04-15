@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <doc>
     <assembly>
-        <name>RIS.Connection.MySQL_netcore</name>
+        <name>RIS.Connection.MySQL</name>
     </assembly>
     <members>
         <member name="T:RIS.Connection.MySQL.MySQLConnection">
@@ -191,6 +191,20 @@
                 Позволяет получать и устанавливать стандартное время ожидания SQL-команд.
             </summary>
         </member>
+        <member name="P:RIS.Connection.MySQL.Requests.GlobalCancellationToken">
+            <summary>
+                Позволяет получать глобальный токен отмены SQL-команд.
+            </summary>
+        </member>
+        <member name="M:RIS.Connection.MySQL.Requests.CancelAllRequests">
+            <summary>
+                Вызывает отмену всех SQL-команд.
+            </summary>
+            <returns>
+                Имеет возвращаемый тип <see langword="void"/>.
+            </returns>
+            <exception cref="T:System.Exception"></exception>
+        </member>
         <member name="M:RIS.Connection.MySQL.Requests.ExecStoredProcedure(System.String,System.ValueTuple{System.String,System.String}[],System.String[],System.String[]@,System.Data.IsolationLevel)">
             <summary>
                 Вызывает выполнение хранимой процедуры с названием <paramref name="nameProcedure"/>, входными параметрами <paramref name="inParametersProcedure"/> и выходными параметрами <paramref name="outParametersNamesProcedure"/>.
@@ -270,7 +284,7 @@
                 Уровень изоляции транзакции.
             </param>
             <returns>
-                Значение типа <see cref="T:System.Int64"/>, возвращённое оператором RETURN.
+                Имеет возвращаемый тип <see langword="void"/>.
             </returns>
             <exception cref="T:MySql.Data.MySqlClient.MySqlException"></exception>
             <exception cref="T:System.TimeoutException"></exception>
@@ -300,7 +314,7 @@
                 Уровень изоляции транзакции.
             </param>
             <returns>
-                Значение типа <see cref="T:System.Int64"/>, возвращённое оператором RETURN.
+                Имеет возвращаемый тип <see langword="void"/>.
             </returns>
             <exception cref="T:MySql.Data.MySqlClient.MySqlException"></exception>
             <exception cref="T:System.TimeoutException"></exception>

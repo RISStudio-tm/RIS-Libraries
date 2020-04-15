@@ -1,7 +1,10 @@
 ﻿using System;
+using Newtonsoft.Json.Linq;
 
 namespace RIS.Configuration
 {
+#if NETFRAMEWORK
+
     public struct AppConfigElement
     {
         public string Name { get; }
@@ -13,4 +16,20 @@ namespace RIS.Configuration
             XmlPath = xmlPath;
         }
     }
+
+#elif NETCOREAPP
+
+    public struct RuntimeConfigElement
+    {
+        public string Name { get; }
+        public string JsonPath { get; }
+        
+        internal RuntimeConfigElement(string name, string jsonPath)
+        {
+            Name = name;
+            JsonPath = jsonPath;
+        }
+    }
+
+#endif
 }

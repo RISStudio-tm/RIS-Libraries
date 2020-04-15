@@ -2,7 +2,7 @@
 using System.Reflection;
 using System.Security.Cryptography;
 using System.Text;
-using System.Text.RegularExpressions;
+using RIS.Cryptography.Hash.Algorithms;
 using RIS.Text.Encoding.Base;
 
 namespace RIS.Cryptography.Hash
@@ -16,20 +16,17 @@ namespace RIS.Cryptography.Hash
         private static int HashMethodsCount { get; }
         private static RNGCryptoServiceProvider RNGProvider { get; }
 
-        public static Encoding TextEncoding { get; set; }
+        public static Encoding TextEncoding { get; }
 
         static HashMethods()
         {
-            TextEncoding = Encoding.Unicode;
+            TextEncoding = Encoding.UTF8;
             RNGProvider = new RNGCryptoServiceProvider();
             
             Type hashMethodsType = typeof(HashMethods);
-            MemberInfo[] hashMethods = hashMethodsType.FindMembers(
-                    MemberTypes.NestedType, 
-                    BindingFlags.Public,
-                    (info, criteria) => hashMethodsType.GetNestedType(info.Name).IsClass 
-                                        && typeof(IHashMethod).IsAssignableFrom(hashMethodsType.GetNestedType(info.Name)), 
-                    "IsClass");
+            MemberInfo[] hashMethods =
+                hashMethodsType.FindMembers(MemberTypes.NestedType, BindingFlags.Public,
+                    (info, criteria) => hashMethodsType.GetNestedType(info.Name).IsClass && typeof(IHashMethod).IsAssignableFrom(hashMethodsType.GetNestedType(info.Name)), "IsClass");
 
             HashMethodsCount = hashMethods.Length;
 
@@ -65,42 +62,9 @@ namespace RIS.Cryptography.Hash
 
             return Convert.ToBase64String(salt);
         }
-        
-        public sealed class SHA1iCSP : IHashMethod
-        {
-            private SHA1CryptoServiceProvider SHAService { get; }
 
-            public bool Initialized { get; }
+#if NETFRAMEWORK
 
-            public SHA1iCSP()
-            {
-                SHAService = new SHA1CryptoServiceProvider();
-                SHAService.Initialize();
-
-                Initialized = true;
-            }
-
-            public string GetHash(string plainText)
-            {
-                byte[] data = TextEncoding.GetBytes(plainText);
-                byte[] hashBytes = SHAService.ComputeHash(data);
-
-                StringBuilder hashText = new StringBuilder();
-                for (int i = 0; i < hashBytes.Length; ++i)
-                {
-                    hashText.Append(hashBytes[i].ToString("x2"));
-                }
-
-                return hashText.ToString();
-            }
-            public bool VerifyHash(string plainText, string hashText)
-            {
-                string plainTextHash = GetHash(plainText);
-                StringComparer comparer = StringComparer.OrdinalIgnoreCase;
-
-                return comparer.Compare(plainTextHash, hashText) == 0;
-            }
-        }
         public sealed class SHA1iCNG : IHashMethod
         {
             private SHA1Cng SHAService { get; }
@@ -136,41 +100,7 @@ namespace RIS.Cryptography.Hash
                 return comparer.Compare(plainTextHash, hashText) == 0;
             }
         }
-        public sealed class SHA256iCSP : IHashMethod
-        {
-            private SHA256CryptoServiceProvider SHAService { get; }
 
-            public bool Initialized { get; }
-
-            public SHA256iCSP()
-            {
-                SHAService = new SHA256CryptoServiceProvider();
-                SHAService.Initialize();
-
-                Initialized = true;
-            }
-
-            public string GetHash(string plainText)
-            {
-                byte[] data = TextEncoding.GetBytes(plainText);
-                byte[] hashBytes = SHAService.ComputeHash(data);
-
-                StringBuilder hashText = new StringBuilder();
-                for (int i = 0; i < hashBytes.Length; ++i)
-                {
-                    hashText.Append(hashBytes[i].ToString("x2"));
-                }
-
-                return hashText.ToString();
-            }
-            public bool VerifyHash(string plainText, string hashText)
-            {
-                var plainTextHash = GetHash(plainText);
-                StringComparer comparer = StringComparer.OrdinalIgnoreCase;
-
-                return comparer.Compare(plainTextHash, hashText) == 0;
-            }
-        }
         public sealed class SHA256iCNG : IHashMethod
         {
             private SHA256Cng SHAService { get; }
@@ -206,41 +136,7 @@ namespace RIS.Cryptography.Hash
                 return comparer.Compare(plainTextHash, hashText) == 0;
             }
         }
-        public sealed class SHA384iCSP : IHashMethod
-        {
-            private SHA384CryptoServiceProvider SHAService { get; }
 
-            public bool Initialized { get; }
-
-            public SHA384iCSP()
-            {
-                SHAService = new SHA384CryptoServiceProvider();
-                SHAService.Initialize();
-
-                Initialized = true;
-            }
-
-            public string GetHash(string plainText)
-            {
-                byte[] data = TextEncoding.GetBytes(plainText);
-                byte[] hashBytes = SHAService.ComputeHash(data);
-
-                StringBuilder hashText = new StringBuilder();
-                for (int i = 0; i < hashBytes.Length; ++i)
-                {
-                    hashText.Append(hashBytes[i].ToString("x2"));
-                }
-
-                return hashText.ToString();
-            }
-            public bool VerifyHash(string plainText, string hashText)
-            {
-                var plainTextHash = GetHash(plainText);
-                StringComparer comparer = StringComparer.OrdinalIgnoreCase;
-
-                return comparer.Compare(plainTextHash, hashText) == 0;
-            }
-        }
         public sealed class SHA384iCNG : IHashMethod
         {
             private SHA384Cng SHAService { get; }
@@ -276,41 +172,7 @@ namespace RIS.Cryptography.Hash
                 return comparer.Compare(plainTextHash, hashText) == 0;
             }
         }
-        public sealed class SHA512iCSP : IHashMethod
-        {
-            private SHA512CryptoServiceProvider SHAService { get; }
 
-            public bool Initialized { get; }
-
-            public SHA512iCSP()
-            {
-                SHAService = new SHA512CryptoServiceProvider();
-                SHAService.Initialize();
-
-                Initialized = true;
-            }
-
-            public string GetHash(string plainText)
-            {
-                byte[] data = TextEncoding.GetBytes(plainText);
-                byte[] hashBytes = SHAService.ComputeHash(data);
-
-                StringBuilder hashText = new StringBuilder();
-                for (int i = 0; i < hashBytes.Length; ++i)
-                {
-                    hashText.Append(hashBytes[i].ToString("x2"));
-                }
-
-                return hashText.ToString();
-            }
-            public bool VerifyHash(string plainText, string hashText)
-            {
-                var plainTextHash = GetHash(plainText);
-                StringComparer comparer = StringComparer.OrdinalIgnoreCase;
-
-                return comparer.Compare(plainTextHash, hashText) == 0;
-            }
-        }
         public sealed class SHA512iCNG : IHashMethod
         {
             private SHA512Cng SHAService { get; }
@@ -346,41 +208,7 @@ namespace RIS.Cryptography.Hash
                 return comparer.Compare(plainTextHash, hashText) == 0;
             }
         }
-        public sealed class MD5iCSP : IHashMethod
-        {
-            private MD5CryptoServiceProvider MDService { get; }
 
-            public bool Initialized { get; }
-
-            public MD5iCSP()
-            {
-                MDService = new MD5CryptoServiceProvider();
-                MDService.Initialize();
-
-                Initialized = true;
-            }
-
-            public string GetHash(string plainText)
-            {
-                byte[] data = TextEncoding.GetBytes(plainText);
-                byte[] hashBytes = MDService.ComputeHash(data);
-
-                StringBuilder hashText = new StringBuilder();
-                for (int i = 0; i < hashBytes.Length; ++i)
-                {
-                    hashText.Append(hashBytes[i].ToString("x2"));
-                }
-
-                return hashText.ToString();
-            }
-            public bool VerifyHash(string plainText, string hashText)
-            {
-                var plainTextHash = GetHash(plainText);
-                StringComparer comparer = StringComparer.OrdinalIgnoreCase;
-
-                return comparer.Compare(plainTextHash, hashText) == 0;
-            }
-        }
         public sealed class MD5iCNG : IHashMethod
         {
             private MD5Cng MDService { get; }
@@ -416,16 +244,201 @@ namespace RIS.Cryptography.Hash
                 return comparer.Compare(plainTextHash, hashText) == 0;
             }
         }
-        public sealed class RIPEMD160 : IHashMethod
+
+#endif
+
+        public sealed class SHA1iCSP : IHashMethod
         {
-            private RIPEMD160Managed RIPEMDService { get; }
+            private SHA1CryptoServiceProvider SHAService { get; }
 
             public bool Initialized { get; }
 
+            public SHA1iCSP()
+            {
+                SHAService = new SHA1CryptoServiceProvider();
+                SHAService.Initialize();
+
+                Initialized = true;
+            }
+
+            public string GetHash(string plainText)
+            {
+                byte[] data = TextEncoding.GetBytes(plainText);
+                byte[] hashBytes = SHAService.ComputeHash(data);
+
+                StringBuilder hashText = new StringBuilder();
+                for (int i = 0; i < hashBytes.Length; ++i)
+                {
+                    hashText.Append(hashBytes[i].ToString("x2"));
+                }
+
+                return hashText.ToString();
+            }
+            public bool VerifyHash(string plainText, string hashText)
+            {
+                string plainTextHash = GetHash(plainText);
+                StringComparer comparer = StringComparer.OrdinalIgnoreCase;
+
+                return comparer.Compare(plainTextHash, hashText) == 0;
+            }
+        }
+
+        public sealed class SHA256iCSP : IHashMethod
+        {
+            private SHA256CryptoServiceProvider SHAService { get; }
+
+            public bool Initialized { get; }
+
+            public SHA256iCSP()
+            {
+                SHAService = new SHA256CryptoServiceProvider();
+                SHAService.Initialize();
+
+                Initialized = true;
+            }
+
+            public string GetHash(string plainText)
+            {
+                byte[] data = TextEncoding.GetBytes(plainText);
+                byte[] hashBytes = SHAService.ComputeHash(data);
+
+                StringBuilder hashText = new StringBuilder();
+                for (int i = 0; i < hashBytes.Length; ++i)
+                {
+                    hashText.Append(hashBytes[i].ToString("x2"));
+                }
+
+                return hashText.ToString();
+            }
+            public bool VerifyHash(string plainText, string hashText)
+            {
+                var plainTextHash = GetHash(plainText);
+                StringComparer comparer = StringComparer.OrdinalIgnoreCase;
+
+                return comparer.Compare(plainTextHash, hashText) == 0;
+            }
+        }
+
+        public sealed class SHA384iCSP : IHashMethod
+        {
+            private SHA384CryptoServiceProvider SHAService { get; }
+
+            public bool Initialized { get; }
+
+            public SHA384iCSP()
+            {
+                SHAService = new SHA384CryptoServiceProvider();
+                SHAService.Initialize();
+
+                Initialized = true;
+            }
+
+            public string GetHash(string plainText)
+            {
+                byte[] data = TextEncoding.GetBytes(plainText);
+                byte[] hashBytes = SHAService.ComputeHash(data);
+
+                StringBuilder hashText = new StringBuilder();
+                for (int i = 0; i < hashBytes.Length; ++i)
+                {
+
+                    hashText.Append(hashBytes[i].ToString("x2"));
+                }
+
+                return hashText.ToString();
+            }
+            public bool VerifyHash(string plainText, string hashText)
+            {
+                var plainTextHash = GetHash(plainText);
+                StringComparer comparer = StringComparer.OrdinalIgnoreCase;
+
+                return comparer.Compare(plainTextHash, hashText) == 0;
+            }
+        }
+
+        public sealed class SHA512iCSP : IHashMethod
+        {
+            private SHA512CryptoServiceProvider SHAService { get; }
+
+            public bool Initialized { get; }
+
+            public SHA512iCSP()
+            {
+                SHAService = new SHA512CryptoServiceProvider();
+                SHAService.Initialize();
+
+                Initialized = true;
+            }
+
+            public string GetHash(string plainText)
+            {
+                byte[] data = TextEncoding.GetBytes(plainText);
+                byte[] hashBytes = SHAService.ComputeHash(data);
+
+                StringBuilder hashText = new StringBuilder();
+                for (int i = 0; i < hashBytes.Length; ++i)
+                {
+                    hashText.Append(hashBytes[i].ToString("x2"));
+                }
+
+                return hashText.ToString();
+            }
+            public bool VerifyHash(string plainText, string hashText)
+            {
+                var plainTextHash = GetHash(plainText);
+                StringComparer comparer = StringComparer.OrdinalIgnoreCase;
+
+                return comparer.Compare(plainTextHash, hashText) == 0;
+            }
+        }
+
+        public sealed class MD5iCSP : IHashMethod
+        {
+            private MD5CryptoServiceProvider MDService { get; }
+
+            public bool Initialized { get; }
+
+            public MD5iCSP()
+            {
+                MDService = new MD5CryptoServiceProvider();
+                MDService.Initialize();
+
+                Initialized = true;
+            }
+
+            public string GetHash(string plainText)
+            {
+                byte[] data = TextEncoding.GetBytes(plainText);
+                byte[] hashBytes = MDService.ComputeHash(data);
+
+                StringBuilder hashText = new StringBuilder();
+                for (int i = 0; i < hashBytes.Length; ++i)
+                {
+                    hashText.Append(hashBytes[i].ToString("x2"));
+                }
+
+                return hashText.ToString();
+            }
+            public bool VerifyHash(string plainText, string hashText)
+            {
+                var plainTextHash = GetHash(plainText);
+                StringComparer comparer = StringComparer.OrdinalIgnoreCase;
+
+                return comparer.Compare(plainTextHash, hashText) == 0;
+            }
+        }
+
+        public sealed class RIPEMD160 : IHashMethod
+        {
+            private RIS.Cryptography.Hash.Algorithms.RIPEMD160Managed RIPEMDService { get; }
+            
+            public bool Initialized { get; }
+            
             public RIPEMD160()
             {
-                RIPEMDService = new RIPEMD160Managed();
+                RIPEMDService = new RIS.Cryptography.Hash.Algorithms.RIPEMD160Managed();
                 RIPEMDService.Initialize();
+                
 
                 Initialized = true;
             }
@@ -451,6 +464,7 @@ namespace RIS.Cryptography.Hash
                 return comparer.Compare(plainTextHash, hashText) == 0;
             }
         }
+
         public sealed class BCrypt : IHashMethod
         {
             private global::BCrypt.Net.HashType _hashMethod;
@@ -542,7 +556,7 @@ namespace RIS.Cryptography.Hash
                 isUpdated = false;
                 newHashText = hashText;
 
-                if (UseEnhancedAlgorithm) 
+                if (UseEnhancedAlgorithm)
                     result = global::BCrypt.Net.BCrypt.EnhancedVerify(plainText, hashText, HashMethodOriginal);
                 else
                     result = global::BCrypt.Net.BCrypt.Verify(plainText, hashText, false, HashMethodOriginal);
@@ -563,12 +577,12 @@ namespace RIS.Cryptography.Hash
                     if (UseEnhancedAlgorithm)
                         newHashText = global::BCrypt.Net.BCrypt.EnhancedHashPassword(
                             plainText,
-                            HashMethodOriginal, 
+                            HashMethodOriginal,
                             newWorkFactor);
                     else
                         newHashText = global::BCrypt.Net.BCrypt.HashPassword(
-                            plainText, 
-                            global::BCrypt.Net.BCrypt.GenerateSalt(newWorkFactor), 
+                            plainText,
+                            global::BCrypt.Net.BCrypt.GenerateSalt(newWorkFactor),
                             false,
                             HashMethodOriginal);
                 else
@@ -577,6 +591,7 @@ namespace RIS.Cryptography.Hash
                 return true;
             }
         }
+
         public sealed class Argon2iRaw : IHashMethod
         {
             private byte[] _salt;
@@ -789,6 +804,7 @@ namespace RIS.Cryptography.Hash
                 return comparer.Compare(plainTextHash, hashText) == 0;
             }
         }
+
         public sealed class Argon2dRaw : IHashMethod
         {
             private byte[] _salt;
@@ -1001,6 +1017,7 @@ namespace RIS.Cryptography.Hash
                 return comparer.Compare(plainTextHash, hashText) == 0;
             }
         }
+
         public sealed class Argon2idRaw : IHashMethod
         {
             private byte[] _salt;
@@ -1213,6 +1230,7 @@ namespace RIS.Cryptography.Hash
                 return comparer.Compare(plainTextHash, hashText) == 0;
             }
         }
+
         public sealed class Argon2iWNP : IHashMethod
         {
             private ushort _saltLength;
@@ -1310,7 +1328,7 @@ namespace RIS.Cryptography.Hash
                 }
                 set
                 {
-                    try 
+                    try
                     {
                         _associatedData = Convert.FromBase64String(value);
                     }
@@ -1452,6 +1470,7 @@ namespace RIS.Cryptography.Hash
                 return comparer.Compare(plainTextHash, hashText) == 0;
             }
         }
+
         public sealed class Argon2dWNP : IHashMethod
         {
             private ushort _saltLength;
@@ -1691,6 +1710,7 @@ namespace RIS.Cryptography.Hash
                 return comparer.Compare(plainTextHash, hashText) == 0;
             }
         }
+
         public sealed class Argon2idWNP : IHashMethod
         {
             private ushort _saltLength;
@@ -1930,6 +1950,7 @@ namespace RIS.Cryptography.Hash
                 return comparer.Compare(plainTextHash, hashText) == 0;
             }
         }
+
         public sealed class Argon2iWP : IHashMethod
         {
             private ushort _saltLength;
@@ -2360,6 +2381,7 @@ namespace RIS.Cryptography.Hash
                 return true;
             }
         }
+
         public sealed class Argon2dWP : IHashMethod
         {
             private ushort _saltLength;
@@ -2790,6 +2812,7 @@ namespace RIS.Cryptography.Hash
                 return true;
             }
         }
+
         public sealed class Argon2idWP : IHashMethod
         {
             private ushort _saltLength;
@@ -2930,7 +2953,7 @@ namespace RIS.Cryptography.Hash
             public bool FixedHashLength { get; set; }
 
             public bool Initialized { get; }
-            
+
             public Argon2idWP()
             {
                 SaltLength = 8;
@@ -3043,7 +3066,7 @@ namespace RIS.Cryptography.Hash
                 return GetHash(plainText, salt, MemorySize, Iterations,
                     DegreeOfParallelism, AssociatedData, KnownSecret);
             }
-            public string GetHash(string plainText, string salt, int memorySize, int iterations, 
+            public string GetHash(string plainText, string salt, int memorySize, int iterations,
                 int degreeOfParallelism)
             {
                 return GetHash(plainText, salt, memorySize, iterations,
@@ -3055,10 +3078,10 @@ namespace RIS.Cryptography.Hash
                 return GetHash(plainText, salt, memorySize, iterations,
                     degreeOfParallelism, Convert.ToBase64String(associatedData), KnownSecret);
             }
-            public string GetHash(string plainText, string salt, int memorySize, int iterations, 
+            public string GetHash(string plainText, string salt, int memorySize, int iterations,
                 int degreeOfParallelism, string associatedData)
             {
-                return GetHash(plainText, salt, memorySize, iterations, 
+                return GetHash(plainText, salt, memorySize, iterations,
                     degreeOfParallelism, associatedData, KnownSecret);
             }
             public string GetHash(string plainText, string salt, int memorySize, int iterations,
@@ -3067,7 +3090,7 @@ namespace RIS.Cryptography.Hash
                 return GetHash(plainText, salt, memorySize, iterations,
                     degreeOfParallelism, Convert.ToBase64String(associatedData), Convert.ToBase64String(knownSecret));
             }
-            public string GetHash(string plainText, string salt, int memorySize, int iterations, 
+            public string GetHash(string plainText, string salt, int memorySize, int iterations,
                 int degreeOfParallelism, string associatedData, string knownSecret)
             {
                 byte[] data = TextEncoding.GetBytes(plainText);
@@ -3121,7 +3144,7 @@ namespace RIS.Cryptography.Hash
                     KnownSecret = knownSecretBytes
                 };
 
-                byte[] hashBytes = argon2Service.GetBytes(HashLength);
+                byte[] hashBytes = argon2Service.GetBytes(FixedHashLength ? HashLength : hashSalt.Length);
 
                 StringBuilder hashText = new StringBuilder();
                 for (int i = 0; i < hashBytes.Length; ++i)
@@ -3146,7 +3169,7 @@ namespace RIS.Cryptography.Hash
             }
             public bool VerifyHash(string plainText, string hashText, string associatedData)
             {
-                return VerifyHash(plainText, hashText, associatedData, 
+                return VerifyHash(plainText, hashText, associatedData,
                     KnownSecret);
             }
             public bool VerifyHash(string plainText, string hashText, byte[] associatedData, byte[] knownSecret)
@@ -3167,7 +3190,7 @@ namespace RIS.Cryptography.Hash
 
             public bool VerifyAndUpdateHash(string plainText, string hashText, out bool isUpdated, out string newHashText)
             {
-                return VerifyAndUpdateHash(plainText, hashText, MemorySize, Iterations, 
+                return VerifyAndUpdateHash(plainText, hashText, MemorySize, Iterations,
                     DegreeOfParallelism, AssociatedData, KnownSecret, out isUpdated, out newHashText);
             }
             public bool VerifyAndUpdateHash(string plainText, string hashText, int newMemorySize, int newIterations,
@@ -3180,7 +3203,7 @@ namespace RIS.Cryptography.Hash
                 int newDegreeOfParallelism, byte[] associatedData, out bool isUpdated, out string newHashText)
             {
                 return VerifyAndUpdateHash(plainText, hashText, newMemorySize, newIterations,
-                    newDegreeOfParallelism, Convert.ToBase64String(associatedData), KnownSecret, 
+                    newDegreeOfParallelism, Convert.ToBase64String(associatedData), KnownSecret,
                     out isUpdated, out newHashText);
             }
             public bool VerifyAndUpdateHash(string plainText, string hashText, int newMemorySize, int newIterations,
@@ -3193,10 +3216,10 @@ namespace RIS.Cryptography.Hash
                 int newDegreeOfParallelism, byte[] associatedData, byte[] knownSecret, out bool isUpdated, out string newHashText)
             {
                 return VerifyAndUpdateHash(plainText, hashText, newMemorySize, newIterations,
-                    newDegreeOfParallelism, Convert.ToBase64String(associatedData), Convert.ToBase64String(knownSecret), 
+                    newDegreeOfParallelism, Convert.ToBase64String(associatedData), Convert.ToBase64String(knownSecret),
                     out isUpdated, out newHashText);
             }
-            public bool VerifyAndUpdateHash(string plainText, string hashText, int newMemorySize, int newIterations, 
+            public bool VerifyAndUpdateHash(string plainText, string hashText, int newMemorySize, int newIterations,
                 int newDegreeOfParallelism, string associatedData, string knownSecret, out bool isUpdated, out string newHashText)
             {
                 bool result;

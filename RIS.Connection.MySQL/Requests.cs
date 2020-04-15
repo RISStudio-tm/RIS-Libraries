@@ -12,10 +12,22 @@ namespace RIS.Connection.MySQL
     /// </summary>
     public sealed class Requests
     {
-        //проверить, работает ли исключение timeout
         private object[] LockObjExecReaders { get; }
         private MySqlConnection[] Connections { get; }
-
+        private object LockObjNextConnection { get; }
+        private ushort _nextConnectionIndex;
+        private ushort NextConnectionIndex
+        {
+            get
+            {
+                lock (LockObjNextConnection)
+                {
+                    if (_nextConnectionIndex > Connections.Length - 1)
+                        _nextConnectionIndex = 0;
+                    return _nextConnectionIndex++;
+                }
+            }
+        }
         private TimeSpan _commandTimeout;
         /// <summary>
         ///     Позволяет получать и устанавливать стандартное время ожидания SQL-команд.
@@ -38,21 +50,10 @@ namespace RIS.Connection.MySQL
                 }
             }
         }
-
-        private object LockObjNextConnection { get; }
-        private ushort _nextConnectionIndex;
-        private ushort NextConnectionIndex
-        {
-            get
-            {
-                lock (LockObjNextConnection)
-                {
-                    if (_nextConnectionIndex > Connections.Length - 1)
-                        _nextConnectionIndex = 0;
-                    return _nextConnectionIndex++;
-                }
-            }
-        }
+        /// <summary>
+        ///     Позволяет получать глобальный токен отмены SQL-команд.
+        /// </summary>
+        public CancellationTokenSource GlobalCancellationToken { get; }
 
         private MySQLConnection CurrentMySQLConnection { get; }
 
@@ -68,6 +69,8 @@ namespace RIS.Connection.MySQL
                 LockObjExecReaders[i] = new object();
             }
             LockObjNextConnection = new object();
+
+            GlobalCancellationToken = new CancellationTokenSource();
         }
         internal Requests(MySQLConnection sqlConnection, MySqlConnection[] connections, TimeSpan timeSpanTimeout)
         {
@@ -81,8 +84,34 @@ namespace RIS.Connection.MySQL
                 LockObjExecReaders[i] = new object();
             }
             LockObjNextConnection = new object();
+
+            GlobalCancellationToken = new CancellationTokenSource();
         }
 
+        /// <summary>
+        ///     Вызывает отмену всех SQL-команд.
+        /// </summary>
+        /// <returns>
+        ///     Имеет возвращаемый тип <see langword="void"/>.
+        /// </returns>
+        /// <exception cref="Exception"></exception>
+        public void CancelAllRequests()
+        {
+            try
+            {
+                GlobalCancellationToken.Cancel();
+            }
+            catch (Exception)
+            {
+                var exception = new Exception("Failed to cancel all requests");
+                Events.DShowError?.Invoke(this, 
+                    new RErrorEventArgs(exception.Message, exception.StackTrace));
+                CurrentMySQLConnection.DShowError?.Invoke(this,
+                    new RErrorEventArgs(exception.Message, exception.StackTrace));
+                throw exception;
+            }
+        }
+        
         private MySqlConnection GetNextMySqlConnection(out ushort connectionIndex)
         {
             connectionIndex = NextConnectionIndex;
@@ -183,6 +212,14 @@ namespace RIS.Connection.MySQL
             if (value == "'CURRENT_TIMESTAMP'")
                 command.Parameters[parameterName].Value = "CURRENT_TIMESTAMP";
         }
+        private void ReplaceFunctionParameterValue(string value, ref MySqlCommand command,
+            string parameterName, ref StringBuilder sqlBuilder)
+        {
+            if (value == "CURRENT_TIMESTAMP")
+                sqlBuilder = sqlBuilder.Replace(parameterName, "CURRENT_TIMESTAMP");
+            if (value == "'CURRENT_TIMESTAMP'")
+                command.Parameters[parameterName].Value = "CURRENT_TIMESTAMP";
+        }
         private void ReplaceFunctionParameterValue(string value, ref MySqlDataAdapter adapter,
             string parameterName, ref string sql)
         {
@@ -190,14 +227,6 @@ namespace RIS.Connection.MySQL
                 sql = sql.Replace(parameterName, "CURRENT_TIMESTAMP");
             if (value == "'CURRENT_TIMESTAMP'")
                 adapter.SelectCommand.Parameters[parameterName].Value = "CURRENT_TIMESTAMP";
-        }
-        private void ReplaceFunctionParameterValue(string value, ref MySqlCommand command, 
-            string parameterName, ref StringBuilder sqlBuilder)
-        {
-            if (value == "CURRENT_TIMESTAMP")
-                sqlBuilder = sqlBuilder.Replace(parameterName, "CURRENT_TIMESTAMP");
-            if (value == "'CURRENT_TIMESTAMP'")
-                command.Parameters[parameterName].Value = "CURRENT_TIMESTAMP";
         }
         private void ReplaceFunctionParameterValue(string value, ref MySqlDataAdapter adapter,
             string parameterName, ref StringBuilder sqlBuilder)
@@ -252,7 +281,8 @@ namespace RIS.Connection.MySQL
                 throw exception;
             }
 
-            CancellationTokenSource cancellationToken = new CancellationTokenSource();
+            CancellationTokenSource requestCancellationToken = new CancellationTokenSource();
+            CancellationTokenSource cancellationToken = CancellationTokenSource.CreateLinkedTokenSource(requestCancellationToken.Token, GlobalCancellationToken.Token);
             Task read = Task.Factory.StartNew(() =>
             {
                 MySqlCommand command;
@@ -337,6 +367,7 @@ namespace RIS.Connection.MySQL
                 }
                 finally
                 {
+                    requestCancellationToken.Dispose();
                     cancellationToken.Dispose();
                 }
             }, cancellationToken.Token);
@@ -392,7 +423,8 @@ namespace RIS.Connection.MySQL
                 throw exception;
             }
 
-            CancellationTokenSource cancellationToken = new CancellationTokenSource();
+            CancellationTokenSource requestCancellationToken = new CancellationTokenSource();
+            CancellationTokenSource cancellationToken = CancellationTokenSource.CreateLinkedTokenSource(requestCancellationToken.Token, GlobalCancellationToken.Token);
             Task read = Task.Factory.StartNew(() =>
             {
                 MySqlCommand command;
@@ -477,6 +509,7 @@ namespace RIS.Connection.MySQL
                 }
                 finally
                 {
+                    requestCancellationToken.Dispose();
                     cancellationToken.Dispose();
                 }
             }, cancellationToken.Token);
@@ -510,7 +543,7 @@ namespace RIS.Connection.MySQL
         ///     Уровень изоляции транзакции.
         /// </param>
         /// <returns>
-        ///     Значение типа <see cref="long"/>, возвращённое оператором RETURN.
+        ///     Имеет возвращаемый тип <see langword="void"/>.
         /// </returns>
         /// <exception cref="MySql.Data.MySqlClient.MySqlException"></exception>
         /// <exception cref="TimeoutException"></exception>
@@ -530,7 +563,8 @@ namespace RIS.Connection.MySQL
                 throw exception;
             }
 
-            CancellationTokenSource cancellationToken = new CancellationTokenSource();
+            CancellationTokenSource requestCancellationToken = new CancellationTokenSource();
+            CancellationTokenSource cancellationToken = CancellationTokenSource.CreateLinkedTokenSource(requestCancellationToken.Token, GlobalCancellationToken.Token);
             Task read = Task.Factory.StartNew(() =>
             {
                 MySqlCommand command;
@@ -610,6 +644,7 @@ namespace RIS.Connection.MySQL
                 }
                 finally
                 {
+                    requestCancellationToken.Dispose();
                     cancellationToken.Dispose();
                 }
             }, cancellationToken.Token);
@@ -643,7 +678,7 @@ namespace RIS.Connection.MySQL
         ///     Уровень изоляции транзакции.
         /// </param>
         /// <returns>
-        ///     Значение типа <see cref="long"/>, возвращённое оператором RETURN.
+        ///     Имеет возвращаемый тип <see langword="void"/>.
         /// </returns>
         /// <exception cref="MySql.Data.MySqlClient.MySqlException"></exception>
         /// <exception cref="TimeoutException"></exception>
@@ -663,7 +698,8 @@ namespace RIS.Connection.MySQL
                 throw exception;
             }
 
-            CancellationTokenSource cancellationToken = new CancellationTokenSource();
+            CancellationTokenSource requestCancellationToken = new CancellationTokenSource();
+            CancellationTokenSource cancellationToken = CancellationTokenSource.CreateLinkedTokenSource(requestCancellationToken.Token, GlobalCancellationToken.Token);
             Task read = Task.Factory.StartNew(() =>
             {
                 MySqlCommand command;
@@ -743,6 +779,7 @@ namespace RIS.Connection.MySQL
                 }
                 finally
                 {
+                    requestCancellationToken.Dispose();
                     cancellationToken.Dispose();
                 }
             }, cancellationToken.Token);
@@ -784,7 +821,8 @@ namespace RIS.Connection.MySQL
                 throw exception;
             }
 
-            CancellationTokenSource cancellationToken = new CancellationTokenSource();
+            CancellationTokenSource requestCancellationToken = new CancellationTokenSource();
+            CancellationTokenSource cancellationToken = CancellationTokenSource.CreateLinkedTokenSource(requestCancellationToken.Token, GlobalCancellationToken.Token);
             Task read = Task.Factory.StartNew(() =>
             {
                 string sql = string.Empty;
@@ -805,7 +843,7 @@ namespace RIS.Connection.MySQL
                 }
                 catch (OperationCanceledException)
                 {
-                    var exception = new TimeoutException($"MySQLRequest[{sql}] waiting timeout[{CommandTimeout}]");
+                    var exception = new TimeoutException($"MySQLRequest[{sql}] waiting timeout[{CommandTimeout}] or canceled");
                     Events.DShowError?.Invoke(this,
                         new RErrorEventArgs(exception.Message, exception.StackTrace));
                     CurrentMySQLConnection.DShowError?.Invoke(this,
@@ -833,6 +871,7 @@ namespace RIS.Connection.MySQL
                 }
                 finally
                 {
+                    requestCancellationToken.Dispose();
                     cancellationToken.Dispose();
                 }
             }, cancellationToken.Token);
@@ -874,7 +913,8 @@ namespace RIS.Connection.MySQL
                 throw exception;
             }
 
-            CancellationTokenSource cancellationToken = new CancellationTokenSource();
+            CancellationTokenSource requestCancellationToken = new CancellationTokenSource();
+            CancellationTokenSource cancellationToken = CancellationTokenSource.CreateLinkedTokenSource(requestCancellationToken.Token, GlobalCancellationToken.Token);
             Task read = Task.Factory.StartNew(() =>
             {
                 string sql = string.Empty;
@@ -895,7 +935,7 @@ namespace RIS.Connection.MySQL
                 }
                 catch (OperationCanceledException)
                 {
-                    var exception = new TimeoutException($"MySQLRequest[{sql}] waiting timeout[{timeout}]");
+                    var exception = new TimeoutException($"MySQLRequest[{sql}] waiting timeout[{timeout}] or canceled");
                     Events.DShowError?.Invoke(this,
                         new RErrorEventArgs(exception.Message, exception.StackTrace));
                     CurrentMySQLConnection.DShowError?.Invoke(this,
@@ -923,6 +963,7 @@ namespace RIS.Connection.MySQL
                 }
                 finally
                 {
+                    requestCancellationToken.Dispose();
                     cancellationToken.Dispose();
                 }
             }, cancellationToken.Token);
@@ -967,7 +1008,8 @@ namespace RIS.Connection.MySQL
                 throw exception;
             }
 
-            CancellationTokenSource cancellationToken = new CancellationTokenSource();
+            CancellationTokenSource requestCancellationToken = new CancellationTokenSource();
+            CancellationTokenSource cancellationToken = CancellationTokenSource.CreateLinkedTokenSource(requestCancellationToken.Token, GlobalCancellationToken.Token);
             Task read = Task.Factory.StartNew(() =>
             {
                 string sql = string.Empty;
@@ -998,7 +1040,7 @@ namespace RIS.Connection.MySQL
                 }
                 catch (OperationCanceledException)
                 {
-                    var exception = new TimeoutException($"MySQLRequest[{sql}] waiting timeout[{CommandTimeout}]");
+                    var exception = new TimeoutException($"MySQLRequest[{sql}] waiting timeout[{CommandTimeout}] or canceled");
                     Events.DShowError?.Invoke(this,
                         new RErrorEventArgs(exception.Message, exception.StackTrace));
                     CurrentMySQLConnection.DShowError?.Invoke(this,
@@ -1026,6 +1068,7 @@ namespace RIS.Connection.MySQL
                 }
                 finally
                 {
+                    requestCancellationToken.Dispose();
                     cancellationToken.Dispose();
                 }
             }, cancellationToken.Token);
@@ -1072,7 +1115,8 @@ namespace RIS.Connection.MySQL
                 throw exception;
             }
 
-            CancellationTokenSource cancellationToken = new CancellationTokenSource();
+            CancellationTokenSource requestCancellationToken = new CancellationTokenSource();
+            CancellationTokenSource cancellationToken = CancellationTokenSource.CreateLinkedTokenSource(requestCancellationToken.Token, GlobalCancellationToken.Token);
             Task read = Task.Factory.StartNew(() =>
             {
                 string sql = string.Empty;
@@ -1103,7 +1147,7 @@ namespace RIS.Connection.MySQL
                 }
                 catch (OperationCanceledException)
                 {
-                    var exception = new TimeoutException($"MySQLRequest[{sql}] waiting timeout[{timeout}]");
+                    var exception = new TimeoutException($"MySQLRequest[{sql}] waiting timeout[{timeout}] or canceled");
                     Events.DShowError?.Invoke(this,
                         new RErrorEventArgs(exception.Message, exception.StackTrace));
                     CurrentMySQLConnection.DShowError?.Invoke(this,
@@ -1131,6 +1175,7 @@ namespace RIS.Connection.MySQL
                 }
                 finally
                 {
+                    requestCancellationToken.Dispose();
                     cancellationToken.Dispose();
                 }
             }, cancellationToken.Token);
@@ -1169,7 +1214,8 @@ namespace RIS.Connection.MySQL
                 throw exception;
             }
 
-            CancellationTokenSource cancellationToken = new CancellationTokenSource();
+            CancellationTokenSource requestCancellationToken = new CancellationTokenSource();
+            CancellationTokenSource cancellationToken = CancellationTokenSource.CreateLinkedTokenSource(requestCancellationToken.Token, GlobalCancellationToken.Token);
             Task read = Task.Factory.StartNew(() =>
             {
                 string sql = string.Empty;
@@ -1190,7 +1236,7 @@ namespace RIS.Connection.MySQL
                 }
                 catch (OperationCanceledException)
                 {
-                    var exception = new TimeoutException($"MySQLRequest[{sql}] waiting timeout[{CommandTimeout}]");
+                    var exception = new TimeoutException($"MySQLRequest[{sql}] waiting timeout[{CommandTimeout}] or canceled");
                     Events.DShowError?.Invoke(this,
                         new RErrorEventArgs(exception.Message, exception.StackTrace));
                     CurrentMySQLConnection.DShowError?.Invoke(this,
@@ -1218,6 +1264,7 @@ namespace RIS.Connection.MySQL
                 }
                 finally
                 {
+                    requestCancellationToken.Dispose();
                     cancellationToken.Dispose();
                 }
 
@@ -1256,7 +1303,8 @@ namespace RIS.Connection.MySQL
                 throw exception;
             }
 
-            CancellationTokenSource cancellationToken = new CancellationTokenSource();
+            CancellationTokenSource requestCancellationToken = new CancellationTokenSource();
+            CancellationTokenSource cancellationToken = CancellationTokenSource.CreateLinkedTokenSource(requestCancellationToken.Token, GlobalCancellationToken.Token);
             Task read = Task.Factory.StartNew(() =>
             {
                 string sql = string.Empty;
@@ -1277,7 +1325,7 @@ namespace RIS.Connection.MySQL
                 }
                 catch (OperationCanceledException)
                 {
-                    var exception = new TimeoutException($"MySQLRequest[{sql}] waiting timeout[{timeout}]");
+                    var exception = new TimeoutException($"MySQLRequest[{sql}] waiting timeout[{timeout}] or canceled");
                     Events.DShowError?.Invoke(this,
                         new RErrorEventArgs(exception.Message, exception.StackTrace));
                     CurrentMySQLConnection.DShowError?.Invoke(this,
@@ -1305,6 +1353,7 @@ namespace RIS.Connection.MySQL
                 }
                 finally
                 {
+                    requestCancellationToken.Dispose();
                     cancellationToken.Dispose();
                 }
 
@@ -1346,7 +1395,8 @@ namespace RIS.Connection.MySQL
                 throw exception;
             }
 
-            CancellationTokenSource cancellationToken = new CancellationTokenSource();
+            CancellationTokenSource requestCancellationToken = new CancellationTokenSource();
+            CancellationTokenSource cancellationToken = CancellationTokenSource.CreateLinkedTokenSource(requestCancellationToken.Token, GlobalCancellationToken.Token);
             Task read = Task.Factory.StartNew(() =>
             {
                 string sql = string.Empty;
@@ -1377,7 +1427,7 @@ namespace RIS.Connection.MySQL
                 }
                 catch (OperationCanceledException)
                 {
-                    var exception = new TimeoutException($"MySQLRequest[{sql}] waiting timeout[{CommandTimeout}]");
+                    var exception = new TimeoutException($"MySQLRequest[{sql}] waiting timeout[{CommandTimeout}] or canceled");
                     Events.DShowError?.Invoke(this,
                         new RErrorEventArgs(exception.Message, exception.StackTrace));
                     CurrentMySQLConnection.DShowError?.Invoke(this,
@@ -1405,6 +1455,7 @@ namespace RIS.Connection.MySQL
                 }
                 finally
                 {
+                    requestCancellationToken.Dispose();
                     cancellationToken.Dispose();
                 }
             }, cancellationToken.Token);
@@ -1447,7 +1498,8 @@ namespace RIS.Connection.MySQL
                 throw exception;
             }
 
-            CancellationTokenSource cancellationToken = new CancellationTokenSource();
+            CancellationTokenSource requestCancellationToken = new CancellationTokenSource();
+            CancellationTokenSource cancellationToken = CancellationTokenSource.CreateLinkedTokenSource(requestCancellationToken.Token, GlobalCancellationToken.Token);
             Task read = Task.Factory.StartNew(() =>
             {
                 string sql = string.Empty;
@@ -1478,7 +1530,7 @@ namespace RIS.Connection.MySQL
                 }
                 catch (OperationCanceledException)
                 {
-                    var exception = new TimeoutException($"MySQLRequest[{sql}] waiting timeout[{timeout}]");
+                    var exception = new TimeoutException($"MySQLRequest[{sql}] waiting timeout[{timeout}] or canceled");
                     Events.DShowError?.Invoke(this,
                         new RErrorEventArgs(exception.Message, exception.StackTrace));
                     CurrentMySQLConnection.DShowError?.Invoke(this,
@@ -1506,6 +1558,7 @@ namespace RIS.Connection.MySQL
                 }
                 finally
                 {
+                    requestCancellationToken.Dispose();
                     cancellationToken.Dispose();
                 }
             }, cancellationToken.Token);
@@ -1548,7 +1601,8 @@ namespace RIS.Connection.MySQL
                 throw exception;
             }
 
-            CancellationTokenSource cancellationToken = new CancellationTokenSource();
+            CancellationTokenSource requestCancellationToken = new CancellationTokenSource();
+            CancellationTokenSource cancellationToken = CancellationTokenSource.CreateLinkedTokenSource(requestCancellationToken.Token, GlobalCancellationToken.Token);
             Task read = Task.Factory.StartNew(() =>
             {
                 MySqlCommand command;
@@ -1625,6 +1679,7 @@ namespace RIS.Connection.MySQL
                 }
                 finally
                 {
+                    requestCancellationToken.Dispose();
                     cancellationToken.Dispose();
                 }
             }, cancellationToken.Token);
@@ -1669,7 +1724,8 @@ namespace RIS.Connection.MySQL
                 throw exception;
             }
 
-            CancellationTokenSource cancellationToken = new CancellationTokenSource();
+            CancellationTokenSource requestCancellationToken = new CancellationTokenSource();
+            CancellationTokenSource cancellationToken = CancellationTokenSource.CreateLinkedTokenSource(requestCancellationToken.Token, GlobalCancellationToken.Token);
             Task read = Task.Factory.StartNew(() =>
             {
                 MySqlCommand command;
@@ -1746,6 +1802,7 @@ namespace RIS.Connection.MySQL
                 }
                 finally
                 {
+                    requestCancellationToken.Dispose();
                     cancellationToken.Dispose();
                 }
             }, cancellationToken.Token);
@@ -1791,7 +1848,8 @@ namespace RIS.Connection.MySQL
                 throw exception;
             }
 
-            CancellationTokenSource cancellationToken = new CancellationTokenSource();
+            CancellationTokenSource requestCancellationToken = new CancellationTokenSource();
+            CancellationTokenSource cancellationToken = CancellationTokenSource.CreateLinkedTokenSource(requestCancellationToken.Token, GlobalCancellationToken.Token);
             Task read = Task.Factory.StartNew(() =>
             {
                 MySqlCommand command;
@@ -1868,6 +1926,7 @@ namespace RIS.Connection.MySQL
                 }
                 finally
                 {
+                    requestCancellationToken.Dispose();
                     cancellationToken.Dispose();
                 }
             }, cancellationToken.Token);
@@ -1915,7 +1974,8 @@ namespace RIS.Connection.MySQL
                 throw exception;
             }
 
-            CancellationTokenSource cancellationToken = new CancellationTokenSource();
+            CancellationTokenSource requestCancellationToken = new CancellationTokenSource();
+            CancellationTokenSource cancellationToken = CancellationTokenSource.CreateLinkedTokenSource(requestCancellationToken.Token, GlobalCancellationToken.Token);
             Task read = Task.Factory.StartNew(() =>
             {
                 MySqlCommand command;
@@ -1992,6 +2052,7 @@ namespace RIS.Connection.MySQL
                 }
                 finally
                 {
+                    requestCancellationToken.Dispose();
                     cancellationToken.Dispose();
                 }
             }, cancellationToken.Token);
@@ -2042,7 +2103,8 @@ namespace RIS.Connection.MySQL
                 throw exception;
             }
 
-            CancellationTokenSource cancellationToken = new CancellationTokenSource();
+            CancellationTokenSource requestCancellationToken = new CancellationTokenSource();
+            CancellationTokenSource cancellationToken = CancellationTokenSource.CreateLinkedTokenSource(requestCancellationToken.Token, GlobalCancellationToken.Token);
             Task read = Task.Factory.StartNew(() =>
             {
                 string sql = string.Empty;
@@ -2079,7 +2141,7 @@ namespace RIS.Connection.MySQL
                 }
                 catch (OperationCanceledException)
                 {
-                    var exception = new TimeoutException($"MySQLRequest[{sql}] waiting timeout[{CommandTimeout}]");
+                    var exception = new TimeoutException($"MySQLRequest[{sql}] waiting timeout[{CommandTimeout}] or canceled");
                     Events.DShowError?.Invoke(this, 
                         new RErrorEventArgs(exception.Message, exception.StackTrace));
                     CurrentMySQLConnection.DShowError?.Invoke(this,
@@ -2107,6 +2169,7 @@ namespace RIS.Connection.MySQL
                 }
                 finally
                 {
+                    requestCancellationToken.Dispose();
                     cancellationToken.Dispose();
                 }
             }, cancellationToken.Token);
@@ -2157,7 +2220,8 @@ namespace RIS.Connection.MySQL
                 throw exception;
             }
 
-            CancellationTokenSource cancellationToken = new CancellationTokenSource();
+            CancellationTokenSource requestCancellationToken = new CancellationTokenSource();
+            CancellationTokenSource cancellationToken = CancellationTokenSource.CreateLinkedTokenSource(requestCancellationToken.Token, GlobalCancellationToken.Token);
             Task read = Task.Factory.StartNew(() =>
             {
                 string sql = string.Empty;
@@ -2194,7 +2258,7 @@ namespace RIS.Connection.MySQL
                 }
                 catch (OperationCanceledException)
                 {
-                    var exception = new TimeoutException($"MySQLRequest[{sql}] waiting timeout[{timeout}]");
+                    var exception = new TimeoutException($"MySQLRequest[{sql}] waiting timeout[{timeout}] or canceled");
                     Events.DShowError?.Invoke(this, 
                         new RErrorEventArgs(exception.Message, exception.StackTrace));
                     CurrentMySQLConnection.DShowError?.Invoke(this,
@@ -2222,6 +2286,7 @@ namespace RIS.Connection.MySQL
                 }
                 finally
                 {
+                    requestCancellationToken.Dispose();
                     cancellationToken.Dispose();
                 }
             }, cancellationToken.Token);
@@ -2276,7 +2341,8 @@ namespace RIS.Connection.MySQL
                 throw exception;
             }
 
-            CancellationTokenSource cancellationToken = new CancellationTokenSource();
+            CancellationTokenSource requestCancellationToken = new CancellationTokenSource();
+            CancellationTokenSource cancellationToken = CancellationTokenSource.CreateLinkedTokenSource(requestCancellationToken.Token, GlobalCancellationToken.Token);
             Task read = Task.Factory.StartNew(() =>
             {
                 string sql = string.Empty;
@@ -2318,7 +2384,7 @@ namespace RIS.Connection.MySQL
                 }
                 catch (OperationCanceledException)
                 {
-                    var exception = new TimeoutException($"MySQLRequest[{sql}] waiting timeout[{CommandTimeout}]");
+                    var exception = new TimeoutException($"MySQLRequest[{sql}] waiting timeout[{CommandTimeout}] or canceled");
                     Events.DShowError?.Invoke(this, 
                         new RErrorEventArgs(exception.Message, exception.StackTrace));
                     CurrentMySQLConnection.DShowError?.Invoke(this,
@@ -2346,6 +2412,7 @@ namespace RIS.Connection.MySQL
                 }
                 finally
                 {
+                    requestCancellationToken.Dispose();
                     cancellationToken.Dispose();
                 }
             }, cancellationToken.Token);
@@ -2402,7 +2469,8 @@ namespace RIS.Connection.MySQL
                 throw exception;
             }
 
-            CancellationTokenSource cancellationToken = new CancellationTokenSource();
+            CancellationTokenSource requestCancellationToken = new CancellationTokenSource();
+            CancellationTokenSource cancellationToken = CancellationTokenSource.CreateLinkedTokenSource(requestCancellationToken.Token, GlobalCancellationToken.Token);
             Task read = Task.Factory.StartNew(() =>
             {
                 string sql = string.Empty;
@@ -2444,7 +2512,7 @@ namespace RIS.Connection.MySQL
                 }
                 catch (OperationCanceledException)
                 {
-                    var exception = new TimeoutException($"MySQLRequest[{sql}] waiting timeout[{timeout}]");
+                    var exception = new TimeoutException($"MySQLRequest[{sql}] waiting timeout[{timeout}] or canceled");
                     Events.DShowError?.Invoke(this, 
                         new RErrorEventArgs(exception.Message, exception.StackTrace));
                     CurrentMySQLConnection.DShowError?.Invoke(this,
@@ -2472,6 +2540,7 @@ namespace RIS.Connection.MySQL
                 }
                 finally
                 {
+                    requestCancellationToken.Dispose();
                     cancellationToken.Dispose();
                 }
             }, cancellationToken.Token);
@@ -2533,7 +2602,8 @@ namespace RIS.Connection.MySQL
                 throw exception;
             }
 
-            CancellationTokenSource cancellationToken = new CancellationTokenSource();
+            CancellationTokenSource requestCancellationToken = new CancellationTokenSource();
+            CancellationTokenSource cancellationToken = CancellationTokenSource.CreateLinkedTokenSource(requestCancellationToken.Token, GlobalCancellationToken.Token);
             Task read = Task.Factory.StartNew(() =>
             {
                 string sql = string.Empty;
@@ -2580,7 +2650,7 @@ namespace RIS.Connection.MySQL
                 }
                 catch (OperationCanceledException)
                 {
-                    var exception = new TimeoutException($"MySQLRequest[{sql}] waiting timeout[{CommandTimeout}]");
+                    var exception = new TimeoutException($"MySQLRequest[{sql}] waiting timeout[{CommandTimeout}] or canceled");
                     Events.DShowError?.Invoke(this, 
                         new RErrorEventArgs(exception.Message, exception.StackTrace));
                     CurrentMySQLConnection.DShowError?.Invoke(this,
@@ -2608,6 +2678,7 @@ namespace RIS.Connection.MySQL
                 }
                 finally
                 {
+                    requestCancellationToken.Dispose();
                     cancellationToken.Dispose();
                 }
             }, cancellationToken.Token);
@@ -2671,7 +2742,8 @@ namespace RIS.Connection.MySQL
                 throw exception;
             }
 
-            CancellationTokenSource cancellationToken = new CancellationTokenSource();
+            CancellationTokenSource requestCancellationToken = new CancellationTokenSource();
+            CancellationTokenSource cancellationToken = CancellationTokenSource.CreateLinkedTokenSource(requestCancellationToken.Token, GlobalCancellationToken.Token);
             Task read = Task.Factory.StartNew(() =>
             {
                 string sql = string.Empty;
@@ -2718,7 +2790,7 @@ namespace RIS.Connection.MySQL
                 }
                 catch (OperationCanceledException)
                 {
-                    var exception = new TimeoutException($"MySQLRequest[{sql}] waiting timeout[{timeout}]");
+                    var exception = new TimeoutException($"MySQLRequest[{sql}] waiting timeout[{timeout}] or canceled");
                     Events.DShowError?.Invoke(this, 
                         new RErrorEventArgs(exception.Message, exception.StackTrace));
                     CurrentMySQLConnection.DShowError?.Invoke(this,
@@ -2746,6 +2818,7 @@ namespace RIS.Connection.MySQL
                 }
                 finally
                 {
+                    requestCancellationToken.Dispose();
                     cancellationToken.Dispose();
                 }
             }, cancellationToken.Token);
@@ -2809,7 +2882,8 @@ namespace RIS.Connection.MySQL
                 throw exception;
             }
 
-            CancellationTokenSource cancellationToken = new CancellationTokenSource();
+            CancellationTokenSource requestCancellationToken = new CancellationTokenSource();
+            CancellationTokenSource cancellationToken = CancellationTokenSource.CreateLinkedTokenSource(requestCancellationToken.Token, GlobalCancellationToken.Token);
             Task read = Task.Factory.StartNew(() =>
             {
                 MySqlDataAdapter adapter;
@@ -2892,6 +2966,7 @@ namespace RIS.Connection.MySQL
                 }
                 finally
                 {
+                    requestCancellationToken.Dispose();
                     cancellationToken.Dispose();
                 }
             }, cancellationToken.Token);
@@ -2957,7 +3032,8 @@ namespace RIS.Connection.MySQL
                 throw exception;
             }
 
-            CancellationTokenSource cancellationToken = new CancellationTokenSource();
+            CancellationTokenSource requestCancellationToken = new CancellationTokenSource();
+            CancellationTokenSource cancellationToken = CancellationTokenSource.CreateLinkedTokenSource(requestCancellationToken.Token, GlobalCancellationToken.Token);
             Task read = Task.Factory.StartNew(() =>
             {
                 MySqlDataAdapter adapter;
@@ -3040,6 +3116,7 @@ namespace RIS.Connection.MySQL
                 }
                 finally
                 {
+                    requestCancellationToken.Dispose();
                     cancellationToken.Dispose();
                 }
             }, cancellationToken.Token);
@@ -3090,7 +3167,8 @@ namespace RIS.Connection.MySQL
                 throw exception;
             }
 
-            CancellationTokenSource cancellationToken = new CancellationTokenSource();
+            CancellationTokenSource requestCancellationToken = new CancellationTokenSource();
+            CancellationTokenSource cancellationToken = CancellationTokenSource.CreateLinkedTokenSource(requestCancellationToken.Token, GlobalCancellationToken.Token);
             Task read = Task.Factory.StartNew(() =>
             {
                 string sql = string.Empty;
@@ -3131,7 +3209,7 @@ namespace RIS.Connection.MySQL
                 }
                 catch (OperationCanceledException)
                 {
-                    var exception = new TimeoutException($"MySQLRequest[{sql}] waiting timeout[{CommandTimeout}]");
+                    var exception = new TimeoutException($"MySQLRequest[{sql}] waiting timeout[{CommandTimeout}] or canceled");
                     Events.DShowError?.Invoke(this, 
                         new RErrorEventArgs(exception.Message, exception.StackTrace));
                     CurrentMySQLConnection.DShowError?.Invoke(this,
@@ -3159,6 +3237,7 @@ namespace RIS.Connection.MySQL
                 }
                 finally
                 {
+                    requestCancellationToken.Dispose();
                     cancellationToken.Dispose();
                 }
             }, cancellationToken.Token);
@@ -3209,7 +3288,8 @@ namespace RIS.Connection.MySQL
                 throw exception;
             }
 
-            CancellationTokenSource cancellationToken = new CancellationTokenSource();
+            CancellationTokenSource requestCancellationToken = new CancellationTokenSource();
+            CancellationTokenSource cancellationToken = CancellationTokenSource.CreateLinkedTokenSource(requestCancellationToken.Token, GlobalCancellationToken.Token);
             Task read = Task.Factory.StartNew(() =>
             {
                 string sql = string.Empty;
@@ -3250,7 +3330,7 @@ namespace RIS.Connection.MySQL
                 }
                 catch (OperationCanceledException)
                 {
-                    var exception = new TimeoutException($"MySQLRequest[{sql}] waiting timeout[{timeout}]");
+                    var exception = new TimeoutException($"MySQLRequest[{sql}] waiting timeout[{timeout}] or canceled");
                     Events.DShowError?.Invoke(this, 
                         new RErrorEventArgs(exception.Message, exception.StackTrace));
                     CurrentMySQLConnection.DShowError?.Invoke(this,
@@ -3278,6 +3358,7 @@ namespace RIS.Connection.MySQL
                 }
                 finally
                 {
+                    requestCancellationToken.Dispose();
                     cancellationToken.Dispose();
                 }
             }, cancellationToken.Token);
@@ -3331,7 +3412,8 @@ namespace RIS.Connection.MySQL
                 throw exception;
             }
 
-            CancellationTokenSource cancellationToken = new CancellationTokenSource();
+            CancellationTokenSource requestCancellationToken = new CancellationTokenSource();
+            CancellationTokenSource cancellationToken = CancellationTokenSource.CreateLinkedTokenSource(requestCancellationToken.Token, GlobalCancellationToken.Token);
             Task read = Task.Factory.StartNew(() =>
             {
                 MySqlDataAdapter adapter;
@@ -3406,6 +3488,7 @@ namespace RIS.Connection.MySQL
                 }
                 finally
                 {
+                    requestCancellationToken.Dispose();
                     cancellationToken.Dispose();
                 }
             }, cancellationToken.Token);
@@ -3461,7 +3544,8 @@ namespace RIS.Connection.MySQL
                 throw exception;
             }
 
-            CancellationTokenSource cancellationToken = new CancellationTokenSource();
+            CancellationTokenSource requestCancellationToken = new CancellationTokenSource();
+            CancellationTokenSource cancellationToken = CancellationTokenSource.CreateLinkedTokenSource(requestCancellationToken.Token, GlobalCancellationToken.Token);
             Task read = Task.Factory.StartNew(() =>
             {
                 MySqlDataAdapter adapter;
@@ -3536,6 +3620,7 @@ namespace RIS.Connection.MySQL
                 }
                 finally
                 {
+                    requestCancellationToken.Dispose();
                     cancellationToken.Dispose();
                 }
             }, cancellationToken.Token);
@@ -3586,7 +3671,8 @@ namespace RIS.Connection.MySQL
                 throw exception;
             }
 
-            CancellationTokenSource cancellationToken = new CancellationTokenSource();
+            CancellationTokenSource requestCancellationToken = new CancellationTokenSource();
+            CancellationTokenSource cancellationToken = CancellationTokenSource.CreateLinkedTokenSource(requestCancellationToken.Token, GlobalCancellationToken.Token);
             Task read = Task.Factory.StartNew(() =>
             {
                 string sql = string.Empty;
@@ -3613,7 +3699,7 @@ namespace RIS.Connection.MySQL
                 }
                 catch (OperationCanceledException)
                 {
-                    var exception = new TimeoutException($"MySQLRequest[{sql}] waiting timeout[{CommandTimeout}]");
+                    var exception = new TimeoutException($"MySQLRequest[{sql}] waiting timeout[{CommandTimeout}] or canceled");
                     Events.DShowError?.Invoke(this,
                         new RErrorEventArgs(exception.Message, exception.StackTrace));
                     CurrentMySQLConnection.DShowError?.Invoke(this,
@@ -3641,6 +3727,7 @@ namespace RIS.Connection.MySQL
                 }
                 finally
                 {
+                    requestCancellationToken.Dispose();
                     cancellationToken.Dispose();
                 }
             }, cancellationToken.Token);
@@ -3691,7 +3778,8 @@ namespace RIS.Connection.MySQL
                 throw exception;
             }
 
-            CancellationTokenSource cancellationToken = new CancellationTokenSource();
+            CancellationTokenSource requestCancellationToken = new CancellationTokenSource();
+            CancellationTokenSource cancellationToken = CancellationTokenSource.CreateLinkedTokenSource(requestCancellationToken.Token, GlobalCancellationToken.Token);
             Task read = Task.Factory.StartNew(() =>
             {
                 string sql = string.Empty;
@@ -3718,7 +3806,7 @@ namespace RIS.Connection.MySQL
                 }
                 catch (OperationCanceledException)
                 {
-                    var exception = new TimeoutException($"MySQLRequest[{sql}] waiting timeout[{timeout}]");
+                    var exception = new TimeoutException($"MySQLRequest[{sql}] waiting timeout[{timeout}] or canceled");
                     Events.DShowError?.Invoke(this,
                         new RErrorEventArgs(exception.Message, exception.StackTrace));
                     CurrentMySQLConnection.DShowError?.Invoke(this,
@@ -3746,6 +3834,7 @@ namespace RIS.Connection.MySQL
                 }
                 finally
                 {
+                    requestCancellationToken.Dispose();
                     cancellationToken.Dispose();
                 }
             }, cancellationToken.Token);
@@ -3801,7 +3890,8 @@ namespace RIS.Connection.MySQL
                 throw exception;
             }
 
-            CancellationTokenSource cancellationToken = new CancellationTokenSource();
+            CancellationTokenSource requestCancellationToken = new CancellationTokenSource();
+            CancellationTokenSource cancellationToken = CancellationTokenSource.CreateLinkedTokenSource(requestCancellationToken.Token, GlobalCancellationToken.Token);
             Task read = Task.Factory.StartNew(() =>
             {
                 string sql = string.Empty;
@@ -3833,7 +3923,7 @@ namespace RIS.Connection.MySQL
                 }
                 catch (OperationCanceledException)
                 {
-                    var exception = new TimeoutException($"MySQLRequest[{sql}] waiting timeout[{CommandTimeout}]");
+                    var exception = new TimeoutException($"MySQLRequest[{sql}] waiting timeout[{CommandTimeout}] or canceled");
                     Events.DShowError?.Invoke(this,
                         new RErrorEventArgs(exception.Message, exception.StackTrace));
                     CurrentMySQLConnection.DShowError?.Invoke(this,
@@ -3861,6 +3951,7 @@ namespace RIS.Connection.MySQL
                 }
                 finally
                 {
+                    requestCancellationToken.Dispose();
                     cancellationToken.Dispose();
                 }
             }, cancellationToken.Token);
@@ -3918,7 +4009,8 @@ namespace RIS.Connection.MySQL
                 throw exception;
             }
 
-            CancellationTokenSource cancellationToken = new CancellationTokenSource();
+            CancellationTokenSource requestCancellationToken = new CancellationTokenSource();
+            CancellationTokenSource cancellationToken = CancellationTokenSource.CreateLinkedTokenSource(requestCancellationToken.Token, GlobalCancellationToken.Token);
             Task read = Task.Factory.StartNew(() =>
             {
                 string sql = string.Empty;
@@ -3950,7 +4042,7 @@ namespace RIS.Connection.MySQL
                 }
                 catch (OperationCanceledException)
                 {
-                    var exception = new TimeoutException($"MySQLRequest[{sql}] waiting timeout[{timeout}]");
+                    var exception = new TimeoutException($"MySQLRequest[{sql}] waiting timeout[{timeout}] or canceled");
                     Events.DShowError?.Invoke(this,
                         new RErrorEventArgs(exception.Message, exception.StackTrace));
                     CurrentMySQLConnection.DShowError?.Invoke(this,
@@ -3978,6 +4070,7 @@ namespace RIS.Connection.MySQL
                 }
                 finally
                 {
+                    requestCancellationToken.Dispose();
                     cancellationToken.Dispose();
                 }
             }, cancellationToken.Token);
@@ -4035,7 +4128,8 @@ namespace RIS.Connection.MySQL
                 throw exception;
             }
 
-            CancellationTokenSource cancellationToken = new CancellationTokenSource();
+            CancellationTokenSource requestCancellationToken = new CancellationTokenSource();
+            CancellationTokenSource cancellationToken = CancellationTokenSource.CreateLinkedTokenSource(requestCancellationToken.Token, GlobalCancellationToken.Token);
             Task read = Task.Factory.StartNew(() =>
             {
                 string sql = string.Empty;
@@ -4076,7 +4170,7 @@ namespace RIS.Connection.MySQL
                 }
                 catch (OperationCanceledException)
                 {
-                    var exception = new TimeoutException($"MySQLRequest[{sql}] waiting timeout[{CommandTimeout}]");
+                    var exception = new TimeoutException($"MySQLRequest[{sql}] waiting timeout[{CommandTimeout}] or canceled");
                     Events.DShowError?.Invoke(this,
                         new RErrorEventArgs(exception.Message, exception.StackTrace));
                     CurrentMySQLConnection.DShowError?.Invoke(this,
@@ -4104,6 +4198,7 @@ namespace RIS.Connection.MySQL
                 }
                 finally
                 {
+                    requestCancellationToken.Dispose();
                     cancellationToken.Dispose();
                 }
 
@@ -4164,7 +4259,8 @@ namespace RIS.Connection.MySQL
                 throw exception;
             }
 
-            CancellationTokenSource cancellationToken = new CancellationTokenSource();
+            CancellationTokenSource requestCancellationToken = new CancellationTokenSource();
+            CancellationTokenSource cancellationToken = CancellationTokenSource.CreateLinkedTokenSource(requestCancellationToken.Token, GlobalCancellationToken.Token);
             Task read = Task.Factory.StartNew(() =>
             {
                 string sql = string.Empty;
@@ -4205,7 +4301,7 @@ namespace RIS.Connection.MySQL
                 }
                 catch (OperationCanceledException)
                 {
-                    var exception = new TimeoutException($"MySQLRequest[{sql}] waiting timeout[{timeout}]");
+                    var exception = new TimeoutException($"MySQLRequest[{sql}] waiting timeout[{timeout}] or canceled");
                     Events.DShowError?.Invoke(this,
                         new RErrorEventArgs(exception.Message, exception.StackTrace));
                     CurrentMySQLConnection.DShowError?.Invoke(this,
@@ -4233,6 +4329,7 @@ namespace RIS.Connection.MySQL
                 }
                 finally
                 {
+                    requestCancellationToken.Dispose();
                     cancellationToken.Dispose();
                 }
 
@@ -4283,7 +4380,8 @@ namespace RIS.Connection.MySQL
                 throw exception;
             }
 
-            CancellationTokenSource cancellationToken = new CancellationTokenSource();
+            CancellationTokenSource requestCancellationToken = new CancellationTokenSource();
+            CancellationTokenSource cancellationToken = CancellationTokenSource.CreateLinkedTokenSource(requestCancellationToken.Token, GlobalCancellationToken.Token);
             Task read = Task.Factory.StartNew(() =>
             {
                 string sql = string.Empty;
@@ -4310,7 +4408,7 @@ namespace RIS.Connection.MySQL
                 }
                 catch (OperationCanceledException)
                 {
-                    var exception = new TimeoutException($"MySQLRequest[{sql}] waiting timeout[{CommandTimeout}]");
+                    var exception = new TimeoutException($"MySQLRequest[{sql}] waiting timeout[{CommandTimeout}] or canceled");
                     Events.DShowError?.Invoke(this,
                         new RErrorEventArgs(exception.Message, exception.StackTrace));
                     CurrentMySQLConnection.DShowError?.Invoke(this,
@@ -4338,6 +4436,7 @@ namespace RIS.Connection.MySQL
                 }
                 finally
                 {
+                    requestCancellationToken.Dispose();
                     cancellationToken.Dispose();
                 }
             }, cancellationToken.Token);
@@ -4388,7 +4487,8 @@ namespace RIS.Connection.MySQL
                 throw exception;
             }
 
-            CancellationTokenSource cancellationToken = new CancellationTokenSource();
+            CancellationTokenSource requestCancellationToken = new CancellationTokenSource();
+            CancellationTokenSource cancellationToken = CancellationTokenSource.CreateLinkedTokenSource(requestCancellationToken.Token, GlobalCancellationToken.Token);
             Task read = Task.Factory.StartNew(() =>
             {
                 string sql = string.Empty;
@@ -4415,7 +4515,7 @@ namespace RIS.Connection.MySQL
                 }
                 catch (OperationCanceledException)
                 {
-                    var exception = new TimeoutException($"MySQLRequest[{sql}] waiting timeout[{timeout}]");
+                    var exception = new TimeoutException($"MySQLRequest[{sql}] waiting timeout[{timeout}] or canceled");
                     Events.DShowError?.Invoke(this,
                         new RErrorEventArgs(exception.Message, exception.StackTrace));
                     CurrentMySQLConnection.DShowError?.Invoke(this,
@@ -4443,6 +4543,7 @@ namespace RIS.Connection.MySQL
                 }
                 finally
                 {
+                    requestCancellationToken.Dispose();
                     cancellationToken.Dispose();
                 }
             }, cancellationToken.Token);
@@ -4498,7 +4599,8 @@ namespace RIS.Connection.MySQL
                 throw exception;
             }
 
-            CancellationTokenSource cancellationToken = new CancellationTokenSource();
+            CancellationTokenSource requestCancellationToken = new CancellationTokenSource();
+            CancellationTokenSource cancellationToken = CancellationTokenSource.CreateLinkedTokenSource(requestCancellationToken.Token, GlobalCancellationToken.Token);
             Task read = Task.Factory.StartNew(() =>
             {
                 string sql = string.Empty;
@@ -4530,7 +4632,7 @@ namespace RIS.Connection.MySQL
                 }
                 catch (OperationCanceledException)
                 {
-                    var exception = new TimeoutException($"MySQLRequest[{sql}] waiting timeout[{CommandTimeout}]");
+                    var exception = new TimeoutException($"MySQLRequest[{sql}] waiting timeout[{CommandTimeout}] or canceled");
                     Events.DShowError?.Invoke(this,
                         new RErrorEventArgs(exception.Message, exception.StackTrace));
                     CurrentMySQLConnection.DShowError?.Invoke(this,
@@ -4558,6 +4660,7 @@ namespace RIS.Connection.MySQL
                 }
                 finally
                 {
+                    requestCancellationToken.Dispose();
                     cancellationToken.Dispose();
                 }
             }, cancellationToken.Token);
@@ -4615,7 +4718,8 @@ namespace RIS.Connection.MySQL
                 throw exception;
             }
 
-            CancellationTokenSource cancellationToken = new CancellationTokenSource();
+            CancellationTokenSource requestCancellationToken = new CancellationTokenSource();
+            CancellationTokenSource cancellationToken = CancellationTokenSource.CreateLinkedTokenSource(requestCancellationToken.Token, GlobalCancellationToken.Token);
             Task read = Task.Factory.StartNew(() =>
             {
                 string sql = string.Empty;
@@ -4647,7 +4751,7 @@ namespace RIS.Connection.MySQL
                 }
                 catch (OperationCanceledException)
                 {
-                    var exception = new TimeoutException($"MySQLRequest[{sql}] waiting timeout[{timeout}]");
+                    var exception = new TimeoutException($"MySQLRequest[{sql}] waiting timeout[{timeout}] or canceled");
                     Events.DShowError?.Invoke(this,
                         new RErrorEventArgs(exception.Message, exception.StackTrace));
                     CurrentMySQLConnection.DShowError?.Invoke(this,
@@ -4675,6 +4779,7 @@ namespace RIS.Connection.MySQL
                 }
                 finally
                 {
+                    requestCancellationToken.Dispose();
                     cancellationToken.Dispose();
                 }
             }, cancellationToken.Token);
@@ -4732,7 +4837,8 @@ namespace RIS.Connection.MySQL
                 throw exception;
             }
 
-            CancellationTokenSource cancellationToken = new CancellationTokenSource();
+            CancellationTokenSource requestCancellationToken = new CancellationTokenSource();
+            CancellationTokenSource cancellationToken = CancellationTokenSource.CreateLinkedTokenSource(requestCancellationToken.Token, GlobalCancellationToken.Token);
             Task read = Task.Factory.StartNew(() =>
             {
                 string sql = string.Empty;
@@ -4773,7 +4879,7 @@ namespace RIS.Connection.MySQL
                 }
                 catch (OperationCanceledException)
                 {
-                    var exception = new TimeoutException($"MySQLRequest[{sql}] waiting timeout[{CommandTimeout}]");
+                    var exception = new TimeoutException($"MySQLRequest[{sql}] waiting timeout[{CommandTimeout}] or canceled");
                     Events.DShowError?.Invoke(this,
                         new RErrorEventArgs(exception.Message, exception.StackTrace));
                     CurrentMySQLConnection.DShowError?.Invoke(this,
@@ -4801,6 +4907,7 @@ namespace RIS.Connection.MySQL
                 }
                 finally
                 {
+                    requestCancellationToken.Dispose();
                     cancellationToken.Dispose();
                 }
             }, cancellationToken.Token);
@@ -4860,7 +4967,8 @@ namespace RIS.Connection.MySQL
                 throw exception;
             }
 
-            CancellationTokenSource cancellationToken = new CancellationTokenSource();
+            CancellationTokenSource requestCancellationToken = new CancellationTokenSource();
+            CancellationTokenSource cancellationToken = CancellationTokenSource.CreateLinkedTokenSource(requestCancellationToken.Token, GlobalCancellationToken.Token);
             Task read = Task.Factory.StartNew(() =>
             {
                 string sql = string.Empty;
@@ -4901,7 +5009,7 @@ namespace RIS.Connection.MySQL
                 }
                 catch (OperationCanceledException)
                 {
-                    var exception = new TimeoutException($"MySQLRequest[{sql}] waiting timeout[{timeout}]");
+                    var exception = new TimeoutException($"MySQLRequest[{sql}] waiting timeout[{timeout}] or canceled");
                     Events.DShowError?.Invoke(this,
                         new RErrorEventArgs(exception.Message, exception.StackTrace));
                     CurrentMySQLConnection.DShowError?.Invoke(this,
@@ -4929,6 +5037,7 @@ namespace RIS.Connection.MySQL
                 }
                 finally
                 {
+                    requestCancellationToken.Dispose();
                     cancellationToken.Dispose();
                 }
             }, cancellationToken.Token);
@@ -4968,7 +5077,8 @@ namespace RIS.Connection.MySQL
                 throw exception;
             }
 
-            CancellationTokenSource cancellationToken = new CancellationTokenSource();
+            CancellationTokenSource requestCancellationToken = new CancellationTokenSource();
+            CancellationTokenSource cancellationToken = CancellationTokenSource.CreateLinkedTokenSource(requestCancellationToken.Token, GlobalCancellationToken.Token);
             Task read = Task.Factory.StartNew(() =>
             {
                 string sql = string.Empty;
@@ -4989,7 +5099,7 @@ namespace RIS.Connection.MySQL
                 }
                 catch (OperationCanceledException)
                 {
-                    var exception = new TimeoutException($"MySQLRequest[{sql}] waiting timeout[{CommandTimeout}]");
+                    var exception = new TimeoutException($"MySQLRequest[{sql}] waiting timeout[{CommandTimeout}] or canceled");
                     Events.DShowError?.Invoke(this,
                         new RErrorEventArgs(exception.Message, exception.StackTrace));
                     CurrentMySQLConnection.DShowError?.Invoke(this,
@@ -5017,6 +5127,7 @@ namespace RIS.Connection.MySQL
                 }
                 finally
                 {
+                    requestCancellationToken.Dispose();
                     cancellationToken.Dispose();
                 }
             }, cancellationToken.Token);
@@ -5054,7 +5165,8 @@ namespace RIS.Connection.MySQL
                 throw exception;
             }
 
-            CancellationTokenSource cancellationToken = new CancellationTokenSource();
+            CancellationTokenSource requestCancellationToken = new CancellationTokenSource();
+            CancellationTokenSource cancellationToken = CancellationTokenSource.CreateLinkedTokenSource(requestCancellationToken.Token, GlobalCancellationToken.Token);
             Task read = Task.Factory.StartNew(() =>
             {
                 string sql = string.Empty;
@@ -5075,7 +5187,7 @@ namespace RIS.Connection.MySQL
                 }
                 catch (OperationCanceledException)
                 {
-                    var exception = new TimeoutException($"MySQLRequest[{sql}] waiting timeout[{timeout}]");
+                    var exception = new TimeoutException($"MySQLRequest[{sql}] waiting timeout[{timeout}] or canceled");
                     Events.DShowError?.Invoke(this,
                         new RErrorEventArgs(exception.Message, exception.StackTrace));
                     CurrentMySQLConnection.DShowError?.Invoke(this,
@@ -5103,6 +5215,7 @@ namespace RIS.Connection.MySQL
                 }
                 finally
                 {
+                    requestCancellationToken.Dispose();
                     cancellationToken.Dispose();
                 }
             }, cancellationToken.Token);
@@ -5144,7 +5257,8 @@ namespace RIS.Connection.MySQL
                 throw exception;
             }
 
-            CancellationTokenSource cancellationToken = new CancellationTokenSource();
+            CancellationTokenSource requestCancellationToken = new CancellationTokenSource();
+            CancellationTokenSource cancellationToken = CancellationTokenSource.CreateLinkedTokenSource(requestCancellationToken.Token, GlobalCancellationToken.Token);
             Task read = Task.Factory.StartNew(() =>
             {
                 string sql = string.Empty;
@@ -5170,7 +5284,7 @@ namespace RIS.Connection.MySQL
                 }
                 catch (OperationCanceledException)
                 {
-                    var exception = new TimeoutException($"MySQLRequest[{sql}] waiting timeout[{CommandTimeout}]");
+                    var exception = new TimeoutException($"MySQLRequest[{sql}] waiting timeout[{CommandTimeout}] or canceled");
                     Events.DShowError?.Invoke(this,
                         new RErrorEventArgs(exception.Message, exception.StackTrace));
                     CurrentMySQLConnection.DShowError?.Invoke(this,
@@ -5198,6 +5312,7 @@ namespace RIS.Connection.MySQL
                 }
                 finally
                 {
+                    requestCancellationToken.Dispose();
                     cancellationToken.Dispose();
                 }
             }, cancellationToken.Token);
@@ -5241,7 +5356,8 @@ namespace RIS.Connection.MySQL
                 throw exception;
             }
 
-            CancellationTokenSource cancellationToken = new CancellationTokenSource();
+            CancellationTokenSource requestCancellationToken = new CancellationTokenSource();
+            CancellationTokenSource cancellationToken = CancellationTokenSource.CreateLinkedTokenSource(requestCancellationToken.Token, GlobalCancellationToken.Token);
             Task read = Task.Factory.StartNew(() =>
             {
                 string sql = string.Empty;
@@ -5267,7 +5383,7 @@ namespace RIS.Connection.MySQL
                 }
                 catch (OperationCanceledException)
                 {
-                    var exception = new TimeoutException($"MySQLRequest[{sql}] waiting timeout[{timeout}]");
+                    var exception = new TimeoutException($"MySQLRequest[{sql}] waiting timeout[{timeout}] or canceled");
                     Events.DShowError?.Invoke(this,
                         new RErrorEventArgs(exception.Message, exception.StackTrace));
                     CurrentMySQLConnection.DShowError?.Invoke(this,
@@ -5295,6 +5411,7 @@ namespace RIS.Connection.MySQL
                 }
                 finally
                 {
+                    requestCancellationToken.Dispose();
                     cancellationToken.Dispose();
                 }
             }, cancellationToken.Token);
@@ -5343,7 +5460,8 @@ namespace RIS.Connection.MySQL
                 throw exception;
             }
 
-            CancellationTokenSource cancellationToken = new CancellationTokenSource();
+            CancellationTokenSource requestCancellationToken = new CancellationTokenSource();
+            CancellationTokenSource cancellationToken = CancellationTokenSource.CreateLinkedTokenSource(requestCancellationToken.Token, GlobalCancellationToken.Token);
             Task read = Task.Factory.StartNew(() =>
             {
                 string sql = string.Empty;
@@ -5374,7 +5492,7 @@ namespace RIS.Connection.MySQL
                 }
                 catch (OperationCanceledException)
                 {
-                    var exception = new TimeoutException($"MySQLRequest[{sql}] waiting timeout[{CommandTimeout}]");
+                    var exception = new TimeoutException($"MySQLRequest[{sql}] waiting timeout[{CommandTimeout}] or canceled");
                     Events.DShowError?.Invoke(this,
                         new RErrorEventArgs(exception.Message, exception.StackTrace));
                     CurrentMySQLConnection.DShowError?.Invoke(this,
@@ -5402,6 +5520,7 @@ namespace RIS.Connection.MySQL
                 }
                 finally
                 {
+                    requestCancellationToken.Dispose();
                     cancellationToken.Dispose();
                 }
             }, cancellationToken.Token);
@@ -5452,7 +5571,8 @@ namespace RIS.Connection.MySQL
                 throw exception;
             }
 
-            CancellationTokenSource cancellationToken = new CancellationTokenSource();
+            CancellationTokenSource requestCancellationToken = new CancellationTokenSource();
+            CancellationTokenSource cancellationToken = CancellationTokenSource.CreateLinkedTokenSource(requestCancellationToken.Token, GlobalCancellationToken.Token);
             Task read = Task.Factory.StartNew(() =>
             {
                 string sql = string.Empty;
@@ -5483,7 +5603,7 @@ namespace RIS.Connection.MySQL
                 }
                 catch (OperationCanceledException)
                 {
-                    var exception = new TimeoutException($"MySQLRequest[{sql}] waiting timeout[{timeout}]");
+                    var exception = new TimeoutException($"MySQLRequest[{sql}] waiting timeout[{timeout}] or canceled");
                     Events.DShowError?.Invoke(this,
                         new RErrorEventArgs(exception.Message, exception.StackTrace));
                     CurrentMySQLConnection.DShowError?.Invoke(this,
@@ -5511,6 +5631,7 @@ namespace RIS.Connection.MySQL
                 }
                 finally
                 {
+                    requestCancellationToken.Dispose();
                     cancellationToken.Dispose();
                 }
             }, cancellationToken.Token);
@@ -5561,7 +5682,8 @@ namespace RIS.Connection.MySQL
                 throw exception;
             }
 
-            CancellationTokenSource cancellationToken = new CancellationTokenSource();
+            CancellationTokenSource requestCancellationToken = new CancellationTokenSource();
+            CancellationTokenSource cancellationToken = CancellationTokenSource.CreateLinkedTokenSource(requestCancellationToken.Token, GlobalCancellationToken.Token);
             Task read = Task.Factory.StartNew(() =>
             {
                 MySqlCommand command;
@@ -5629,6 +5751,7 @@ namespace RIS.Connection.MySQL
                 }
                 finally
                 {
+                    requestCancellationToken.Dispose();
                     cancellationToken.Dispose();
                 }
             }, cancellationToken.Token);
@@ -5681,7 +5804,8 @@ namespace RIS.Connection.MySQL
                 throw exception;
             }
 
-            CancellationTokenSource cancellationToken = new CancellationTokenSource();
+            CancellationTokenSource requestCancellationToken = new CancellationTokenSource();
+            CancellationTokenSource cancellationToken = CancellationTokenSource.CreateLinkedTokenSource(requestCancellationToken.Token, GlobalCancellationToken.Token);
             Task read = Task.Factory.StartNew(() =>
             {
                 MySqlCommand command;
@@ -5749,6 +5873,7 @@ namespace RIS.Connection.MySQL
                 }
                 finally
                 {
+                    requestCancellationToken.Dispose();
                     cancellationToken.Dispose();
                 }
             }, cancellationToken.Token);
@@ -5792,7 +5917,8 @@ namespace RIS.Connection.MySQL
                 throw exception;
             }
 
-            CancellationTokenSource cancellationToken = new CancellationTokenSource();
+            CancellationTokenSource requestCancellationToken = new CancellationTokenSource();
+            CancellationTokenSource cancellationToken = CancellationTokenSource.CreateLinkedTokenSource(requestCancellationToken.Token, GlobalCancellationToken.Token);
             Task read = Task.Factory.StartNew(() =>
             {
                 string sql = string.Empty;
@@ -5822,7 +5948,7 @@ namespace RIS.Connection.MySQL
                 }
                 catch (OperationCanceledException)
                 {
-                    var exception = new TimeoutException($"MySQLRequest[{sql}] waiting timeout[{CommandTimeout}]");
+                    var exception = new TimeoutException($"MySQLRequest[{sql}] waiting timeout[{CommandTimeout}] or canceled");
                     Events.DShowError?.Invoke(this,
                         new RErrorEventArgs(exception.Message, exception.StackTrace));
                     CurrentMySQLConnection.DShowError?.Invoke(this,
@@ -5850,6 +5976,7 @@ namespace RIS.Connection.MySQL
                 }
                 finally
                 {
+                    requestCancellationToken.Dispose();
                     cancellationToken.Dispose();
                 }
             }, cancellationToken.Token);
@@ -5893,7 +6020,8 @@ namespace RIS.Connection.MySQL
                 throw exception;
             }
 
-            CancellationTokenSource cancellationToken = new CancellationTokenSource();
+            CancellationTokenSource requestCancellationToken = new CancellationTokenSource();
+            CancellationTokenSource cancellationToken = CancellationTokenSource.CreateLinkedTokenSource(requestCancellationToken.Token, GlobalCancellationToken.Token);
             Task read = Task.Factory.StartNew(() =>
             {
                 string sql = string.Empty;
@@ -5923,7 +6051,7 @@ namespace RIS.Connection.MySQL
                 }
                 catch (OperationCanceledException)
                 {
-                    var exception = new TimeoutException($"MySQLRequest[{sql}] waiting timeout[{timeout}]");
+                    var exception = new TimeoutException($"MySQLRequest[{sql}] waiting timeout[{timeout}] or canceled");
                     Events.DShowError?.Invoke(this,
                         new RErrorEventArgs(exception.Message, exception.StackTrace));
                     CurrentMySQLConnection.DShowError?.Invoke(this,
@@ -5951,6 +6079,7 @@ namespace RIS.Connection.MySQL
                 }
                 finally
                 {
+                    requestCancellationToken.Dispose();
                     cancellationToken.Dispose();
                 }
             }, cancellationToken.Token);
@@ -5999,7 +6128,8 @@ namespace RIS.Connection.MySQL
                 throw exception;
             }
 
-            CancellationTokenSource cancellationToken = new CancellationTokenSource();
+            CancellationTokenSource requestCancellationToken = new CancellationTokenSource();
+            CancellationTokenSource cancellationToken = CancellationTokenSource.CreateLinkedTokenSource(requestCancellationToken.Token, GlobalCancellationToken.Token);
             Task read = Task.Factory.StartNew(() =>
             {
                 string sql = string.Empty;
@@ -6035,7 +6165,7 @@ namespace RIS.Connection.MySQL
                 }
                 catch (OperationCanceledException)
                 {
-                    var exception = new TimeoutException($"MySQLRequest[{sql}] waiting timeout[{CommandTimeout}]");
+                    var exception = new TimeoutException($"MySQLRequest[{sql}] waiting timeout[{CommandTimeout}] or canceled");
                     Events.DShowError?.Invoke(this,
                         new RErrorEventArgs(exception.Message, exception.StackTrace));
                     CurrentMySQLConnection.DShowError?.Invoke(this,
@@ -6063,6 +6193,7 @@ namespace RIS.Connection.MySQL
                 }
                 finally
                 {
+                    requestCancellationToken.Dispose();
                     cancellationToken.Dispose();
                 }
             }, cancellationToken.Token);
@@ -6113,7 +6244,8 @@ namespace RIS.Connection.MySQL
                 throw exception;
             }
 
-            CancellationTokenSource cancellationToken = new CancellationTokenSource();
+            CancellationTokenSource requestCancellationToken = new CancellationTokenSource();
+            CancellationTokenSource cancellationToken = CancellationTokenSource.CreateLinkedTokenSource(requestCancellationToken.Token, GlobalCancellationToken.Token);
             Task read = Task.Factory.StartNew(() =>
             {
                 string sql = string.Empty;
@@ -6149,7 +6281,7 @@ namespace RIS.Connection.MySQL
                 }
                 catch (OperationCanceledException)
                 {
-                    var exception = new TimeoutException($"MySQLRequest[{sql}] waiting timeout[{timeout}]");
+                    var exception = new TimeoutException($"MySQLRequest[{sql}] waiting timeout[{timeout}] or canceled");
                     Events.DShowError?.Invoke(this,
                         new RErrorEventArgs(exception.Message, exception.StackTrace));
                     CurrentMySQLConnection.DShowError?.Invoke(this,
@@ -6177,6 +6309,7 @@ namespace RIS.Connection.MySQL
                 }
                 finally
                 {
+                    requestCancellationToken.Dispose();
                     cancellationToken.Dispose();
                 }
             }, cancellationToken.Token);
@@ -6231,7 +6364,8 @@ namespace RIS.Connection.MySQL
                 throw exception;
             }
 
-            CancellationTokenSource cancellationToken = new CancellationTokenSource();
+            CancellationTokenSource requestCancellationToken = new CancellationTokenSource();
+            CancellationTokenSource cancellationToken = CancellationTokenSource.CreateLinkedTokenSource(requestCancellationToken.Token, GlobalCancellationToken.Token);
             Task read = Task.Factory.StartNew(() =>
             {
                 string sql = string.Empty;
@@ -6272,7 +6406,7 @@ namespace RIS.Connection.MySQL
                 }
                 catch (OperationCanceledException)
                 {
-                    var exception = new TimeoutException($"MySQLRequest[{sql}] waiting timeout[{CommandTimeout}]");
+                    var exception = new TimeoutException($"MySQLRequest[{sql}] waiting timeout[{CommandTimeout}] or canceled");
                     Events.DShowError?.Invoke(this,
                         new RErrorEventArgs(exception.Message, exception.StackTrace));
                     CurrentMySQLConnection.DShowError?.Invoke(this,
@@ -6300,6 +6434,7 @@ namespace RIS.Connection.MySQL
                 }
                 finally
                 {
+                    requestCancellationToken.Dispose();
                     cancellationToken.Dispose();
                 }
             }, cancellationToken.Token);
@@ -6356,7 +6491,8 @@ namespace RIS.Connection.MySQL
                 throw exception;
             }
 
-            CancellationTokenSource cancellationToken = new CancellationTokenSource();
+            CancellationTokenSource requestCancellationToken = new CancellationTokenSource();
+            CancellationTokenSource cancellationToken = CancellationTokenSource.CreateLinkedTokenSource(requestCancellationToken.Token, GlobalCancellationToken.Token);
             Task read = Task.Factory.StartNew(() =>
             {
                 string sql = string.Empty;
@@ -6397,7 +6533,7 @@ namespace RIS.Connection.MySQL
                 }
                 catch (OperationCanceledException)
                 {
-                    var exception = new TimeoutException($"MySQLRequest[{sql}] waiting timeout[{timeout}]");
+                    var exception = new TimeoutException($"MySQLRequest[{sql}] waiting timeout[{timeout}] or canceled");
                     Events.DShowError?.Invoke(this,
                         new RErrorEventArgs(exception.Message, exception.StackTrace));
                     CurrentMySQLConnection.DShowError?.Invoke(this,
@@ -6425,6 +6561,7 @@ namespace RIS.Connection.MySQL
                 }
                 finally
                 {
+                    requestCancellationToken.Dispose();
                     cancellationToken.Dispose();
                 }
             }, cancellationToken.Token);
@@ -6481,7 +6618,8 @@ namespace RIS.Connection.MySQL
                 throw exception;
             }
 
-            CancellationTokenSource cancellationToken = new CancellationTokenSource();
+            CancellationTokenSource requestCancellationToken = new CancellationTokenSource();
+            CancellationTokenSource cancellationToken = CancellationTokenSource.CreateLinkedTokenSource(requestCancellationToken.Token, GlobalCancellationToken.Token);
             Task read = Task.Factory.StartNew(() =>
             {
                 MySqlCommand command;
@@ -6558,6 +6696,7 @@ namespace RIS.Connection.MySQL
                 }
                 finally
                 {
+                    requestCancellationToken.Dispose();
                     cancellationToken.Dispose();
                 }
             }, cancellationToken.Token);
@@ -6616,7 +6755,8 @@ namespace RIS.Connection.MySQL
                 throw exception;
             }
 
-            CancellationTokenSource cancellationToken = new CancellationTokenSource();
+            CancellationTokenSource requestCancellationToken = new CancellationTokenSource();
+            CancellationTokenSource cancellationToken = CancellationTokenSource.CreateLinkedTokenSource(requestCancellationToken.Token, GlobalCancellationToken.Token);
             Task read = Task.Factory.StartNew(() =>
             {
                 MySqlCommand command;
@@ -6693,6 +6833,7 @@ namespace RIS.Connection.MySQL
                 }
                 finally
                 {
+                    requestCancellationToken.Dispose();
                     cancellationToken.Dispose();
                 }
             }, cancellationToken.Token);
@@ -6735,7 +6876,8 @@ namespace RIS.Connection.MySQL
                 throw exception;
             }
 
-            CancellationTokenSource cancellationToken = new CancellationTokenSource();
+            CancellationTokenSource requestCancellationToken = new CancellationTokenSource();
+            CancellationTokenSource cancellationToken = CancellationTokenSource.CreateLinkedTokenSource(requestCancellationToken.Token, GlobalCancellationToken.Token);
             Task read = Task.Factory.StartNew(() =>
             {
                 MySqlCommand command;
@@ -6811,6 +6953,7 @@ namespace RIS.Connection.MySQL
                 }
                 finally
                 {
+                    requestCancellationToken.Dispose();
                     cancellationToken.Dispose();
                 }
             }, cancellationToken.Token);
@@ -6855,7 +6998,8 @@ namespace RIS.Connection.MySQL
                 throw exception;
             }
 
-            CancellationTokenSource cancellationToken = new CancellationTokenSource();
+            CancellationTokenSource requestCancellationToken = new CancellationTokenSource();
+            CancellationTokenSource cancellationToken = CancellationTokenSource.CreateLinkedTokenSource(requestCancellationToken.Token, GlobalCancellationToken.Token);
             Task read = Task.Factory.StartNew(() =>
             {
                 MySqlCommand command;
@@ -6931,6 +7075,7 @@ namespace RIS.Connection.MySQL
                 }
                 finally
                 {
+                    requestCancellationToken.Dispose();
                     cancellationToken.Dispose();
                 }
             }, cancellationToken.Token);
@@ -6970,7 +7115,8 @@ namespace RIS.Connection.MySQL
                 throw exception;
             }
 
-            CancellationTokenSource cancellationToken = new CancellationTokenSource();
+            CancellationTokenSource requestCancellationToken = new CancellationTokenSource();
+            CancellationTokenSource cancellationToken = CancellationTokenSource.CreateLinkedTokenSource(requestCancellationToken.Token, GlobalCancellationToken.Token);
             Task read = Task.Factory.StartNew(() =>
             {
                 string sql = string.Empty;
@@ -6991,7 +7137,7 @@ namespace RIS.Connection.MySQL
                 }
                 catch (OperationCanceledException)
                 {
-                    var exception = new TimeoutException($"MySQLRequest[{sql}] waiting timeout[{CommandTimeout}]");
+                    var exception = new TimeoutException($"MySQLRequest[{sql}] waiting timeout[{CommandTimeout}] or canceled");
                     Events.DShowError?.Invoke(this,
                         new RErrorEventArgs(exception.Message, exception.StackTrace));
                     CurrentMySQLConnection.DShowError?.Invoke(this,
@@ -7019,6 +7165,7 @@ namespace RIS.Connection.MySQL
                 }
                 finally
                 {
+                    requestCancellationToken.Dispose();
                     cancellationToken.Dispose();
                 }
             }, cancellationToken.Token);
@@ -7056,7 +7203,8 @@ namespace RIS.Connection.MySQL
                 throw exception;
             }
 
-            CancellationTokenSource cancellationToken = new CancellationTokenSource();
+            CancellationTokenSource requestCancellationToken = new CancellationTokenSource();
+            CancellationTokenSource cancellationToken = CancellationTokenSource.CreateLinkedTokenSource(requestCancellationToken.Token, GlobalCancellationToken.Token);
             Task read = Task.Factory.StartNew(() =>
             {
                 string sql = string.Empty;
@@ -7077,7 +7225,7 @@ namespace RIS.Connection.MySQL
                 }
                 catch (OperationCanceledException)
                 {
-                    var exception = new TimeoutException($"MySQLRequest[{sql}] waiting timeout[{timeout}]");
+                    var exception = new TimeoutException($"MySQLRequest[{sql}] waiting timeout[{timeout}] or canceled");
                     Events.DShowError?.Invoke(this,
                         new RErrorEventArgs(exception.Message, exception.StackTrace));
                     CurrentMySQLConnection.DShowError?.Invoke(this,
@@ -7105,6 +7253,7 @@ namespace RIS.Connection.MySQL
                 }
                 finally
                 {
+                    requestCancellationToken.Dispose();
                     cancellationToken.Dispose();
                 }
             }, cancellationToken.Token);
@@ -7154,7 +7303,8 @@ namespace RIS.Connection.MySQL
                 throw exception;
             }
 
-            CancellationTokenSource cancellationToken = new CancellationTokenSource();
+            CancellationTokenSource requestCancellationToken = new CancellationTokenSource();
+            CancellationTokenSource cancellationToken = CancellationTokenSource.CreateLinkedTokenSource(requestCancellationToken.Token, GlobalCancellationToken.Token);
             Task read = Task.Factory.StartNew(() =>
             {
                 string sql = string.Empty;
@@ -7255,6 +7405,7 @@ namespace RIS.Connection.MySQL
                 }
                 finally
                 {
+                    requestCancellationToken.Dispose();
                     cancellationToken.Dispose();
                 }
             }, cancellationToken.Token);
@@ -7306,7 +7457,8 @@ namespace RIS.Connection.MySQL
                 throw exception;
             }
 
-            CancellationTokenSource cancellationToken = new CancellationTokenSource();
+            CancellationTokenSource requestCancellationToken = new CancellationTokenSource();
+            CancellationTokenSource cancellationToken = CancellationTokenSource.CreateLinkedTokenSource(requestCancellationToken.Token, GlobalCancellationToken.Token);
             Task read = Task.Factory.StartNew(() =>
             {
                 string sql = string.Empty;
@@ -7407,6 +7559,7 @@ namespace RIS.Connection.MySQL
                 }
                 finally
                 {
+                    requestCancellationToken.Dispose();
                     cancellationToken.Dispose();
                 }
             }, cancellationToken.Token);
@@ -7459,7 +7612,8 @@ namespace RIS.Connection.MySQL
                 throw exception;
             }
 
-            CancellationTokenSource cancellationToken = new CancellationTokenSource();
+            CancellationTokenSource requestCancellationToken = new CancellationTokenSource();
+            CancellationTokenSource cancellationToken = CancellationTokenSource.CreateLinkedTokenSource(requestCancellationToken.Token, GlobalCancellationToken.Token);
             Task read = Task.Factory.StartNew(() =>
             {
                 string sql = string.Empty;
@@ -7560,6 +7714,7 @@ namespace RIS.Connection.MySQL
                 }
                 finally
                 {
+                    requestCancellationToken.Dispose();
                     cancellationToken.Dispose();
                 }
             }, cancellationToken.Token);
@@ -7614,7 +7769,8 @@ namespace RIS.Connection.MySQL
                 throw exception;
             }
 
-            CancellationTokenSource cancellationToken = new CancellationTokenSource();
+            CancellationTokenSource requestCancellationToken = new CancellationTokenSource();
+            CancellationTokenSource cancellationToken = CancellationTokenSource.CreateLinkedTokenSource(requestCancellationToken.Token, GlobalCancellationToken.Token);
             Task read = Task.Factory.StartNew(() =>
             {
                 string sql = string.Empty;
@@ -7715,6 +7871,7 @@ namespace RIS.Connection.MySQL
                 }
                 finally
                 {
+                    requestCancellationToken.Dispose();
                     cancellationToken.Dispose();
                 }
             }, cancellationToken.Token);

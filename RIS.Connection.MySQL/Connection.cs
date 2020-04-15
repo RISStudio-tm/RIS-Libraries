@@ -376,6 +376,7 @@ namespace RIS.Connection.MySQL
             if (ConnectionComplete)
             {
                 ConnectionComplete = false;
+                Requests.CancelAllRequests();
                 Requests = null;
                 foreach (var connection in Connections)
                 {
@@ -518,19 +519,6 @@ namespace RIS.Connection.MySQL
 
         private void Connection_StateChange(object sender, StateChangeEventArgs e)
         {
-            /*
-            if (e.CurrentState == ConnectionState.Executing || e.CurrentState == ConnectionState.Fetching)
-            {
-                
-
-                return;
-            }
-            else
-            {
-                
-            }
-            */
-
             if (e.CurrentState == ConnectionState.Closed)
             {
                 CloseConnection();

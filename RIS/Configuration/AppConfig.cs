@@ -6,6 +6,9 @@ using System.Xml;
 
 namespace RIS.Configuration
 {
+
+#if NETFRAMEWORK
+
     public static class AppConfig
     {
         public static event RMessageHandler ShowMessage;
@@ -83,7 +86,7 @@ namespace RIS.Configuration
 
         private static void ReadChildNodes(XmlNode rootNode, string xmlPath)
         {
-            string currentXmlPath = xmlPath + $"/{rootNode.Name}";
+            string currentXmlPath = $"{xmlPath}/{rootNode.Name}";
 
             foreach (XmlNode node in rootNode.ChildNodes)
             {
@@ -198,4 +201,7 @@ namespace RIS.Configuration
             });
         }
     }
+
+#endif
+
 }
