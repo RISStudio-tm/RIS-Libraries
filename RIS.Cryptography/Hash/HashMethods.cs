@@ -1,8 +1,12 @@
 ﻿using System;
+using System.Globalization;
 using System.Reflection;
+#if NETCOREAPP
+using System.Runtime.Intrinsics.X86;
+#endif
 using System.Security.Cryptography;
 using System.Text;
-using RIS.Cryptography.Hash.Algorithms;
+using RIS.Cryptography.Hash;
 using RIS.Text.Encoding.Base;
 
 namespace RIS.Cryptography.Hash
@@ -20,13 +24,16 @@ namespace RIS.Cryptography.Hash
 
         static HashMethods()
         {
-            TextEncoding = Encoding.UTF8;
+            TextEncoding = Utils.SecureUTF8;
             RNGProvider = new RNGCryptoServiceProvider();
             
             Type hashMethodsType = typeof(HashMethods);
             MemberInfo[] hashMethods =
                 hashMethodsType.FindMembers(MemberTypes.NestedType, BindingFlags.Public,
-                    (info, criteria) => hashMethodsType.GetNestedType(info.Name).IsClass && typeof(IHashMethod).IsAssignableFrom(hashMethodsType.GetNestedType(info.Name)), "IsClass");
+                    (info, criteria) =>
+                        typeof(HashMethods).GetNestedType(info.Name).IsClass &&
+                        typeof(IHashMethod).IsAssignableFrom(typeof(HashMethods).GetNestedType(info.Name)),
+                    "IsClass && IsAssignableFrom");
 
             HashMethodsCount = hashMethods.Length;
 
@@ -95,9 +102,8 @@ namespace RIS.Cryptography.Hash
             public bool VerifyHash(string plainText, string hashText)
             {
                 string plainTextHash = GetHash(plainText);
-                StringComparer comparer = StringComparer.OrdinalIgnoreCase;
 
-                return comparer.Compare(plainTextHash, hashText) == 0;
+                return Utils.SecureEquals(plainTextHash, hashText, true, true);
             }
         }
 
@@ -131,9 +137,8 @@ namespace RIS.Cryptography.Hash
             public bool VerifyHash(string plainText, string hashText)
             {
                 var plainTextHash = GetHash(plainText);
-                StringComparer comparer = StringComparer.OrdinalIgnoreCase;
 
-                return comparer.Compare(plainTextHash, hashText) == 0;
+                return Utils.SecureEquals(plainTextHash, hashText, true, true);
             }
         }
 
@@ -167,9 +172,8 @@ namespace RIS.Cryptography.Hash
             public bool VerifyHash(string plainText, string hashText)
             {
                 var plainTextHash = GetHash(plainText);
-                StringComparer comparer = StringComparer.OrdinalIgnoreCase;
 
-                return comparer.Compare(plainTextHash, hashText) == 0;
+                return Utils.SecureEquals(plainTextHash, hashText, true, true);
             }
         }
 
@@ -203,9 +207,8 @@ namespace RIS.Cryptography.Hash
             public bool VerifyHash(string plainText, string hashText)
             {
                 var plainTextHash = GetHash(plainText);
-                StringComparer comparer = StringComparer.OrdinalIgnoreCase;
 
-                return comparer.Compare(plainTextHash, hashText) == 0;
+                return Utils.SecureEquals(plainTextHash, hashText, true, true);
             }
         }
 
@@ -239,9 +242,8 @@ namespace RIS.Cryptography.Hash
             public bool VerifyHash(string plainText, string hashText)
             {
                 var plainTextHash = GetHash(plainText);
-                StringComparer comparer = StringComparer.OrdinalIgnoreCase;
 
-                return comparer.Compare(plainTextHash, hashText) == 0;
+                return Utils.SecureEquals(plainTextHash, hashText, true, true);
             }
         }
 
@@ -277,9 +279,8 @@ namespace RIS.Cryptography.Hash
             public bool VerifyHash(string plainText, string hashText)
             {
                 string plainTextHash = GetHash(plainText);
-                StringComparer comparer = StringComparer.OrdinalIgnoreCase;
 
-                return comparer.Compare(plainTextHash, hashText) == 0;
+                return Utils.SecureEquals(plainTextHash, hashText, true, true);
             }
         }
 
@@ -313,9 +314,8 @@ namespace RIS.Cryptography.Hash
             public bool VerifyHash(string plainText, string hashText)
             {
                 var plainTextHash = GetHash(plainText);
-                StringComparer comparer = StringComparer.OrdinalIgnoreCase;
 
-                return comparer.Compare(plainTextHash, hashText) == 0;
+                return Utils.SecureEquals(plainTextHash, hashText, true, true);
             }
         }
 
@@ -350,9 +350,8 @@ namespace RIS.Cryptography.Hash
             public bool VerifyHash(string plainText, string hashText)
             {
                 var plainTextHash = GetHash(plainText);
-                StringComparer comparer = StringComparer.OrdinalIgnoreCase;
 
-                return comparer.Compare(plainTextHash, hashText) == 0;
+                return Utils.SecureEquals(plainTextHash, hashText, true, true);
             }
         }
 
@@ -386,9 +385,8 @@ namespace RIS.Cryptography.Hash
             public bool VerifyHash(string plainText, string hashText)
             {
                 var plainTextHash = GetHash(plainText);
-                StringComparer comparer = StringComparer.OrdinalIgnoreCase;
 
-                return comparer.Compare(plainTextHash, hashText) == 0;
+                return Utils.SecureEquals(plainTextHash, hashText, true, true);
             }
         }
 
@@ -422,9 +420,8 @@ namespace RIS.Cryptography.Hash
             public bool VerifyHash(string plainText, string hashText)
             {
                 var plainTextHash = GetHash(plainText);
-                StringComparer comparer = StringComparer.OrdinalIgnoreCase;
 
-                return comparer.Compare(plainTextHash, hashText) == 0;
+                return Utils.SecureEquals(plainTextHash, hashText, true, true);
             }
         }
 
@@ -438,7 +435,6 @@ namespace RIS.Cryptography.Hash
             {
                 RIPEMDService = new RIS.Cryptography.Hash.Algorithms.RIPEMD160Managed();
                 RIPEMDService.Initialize();
-                
 
                 Initialized = true;
             }
@@ -459,9 +455,244 @@ namespace RIS.Cryptography.Hash
             public bool VerifyHash(string plainText, string hashText)
             {
                 var plainTextHash = GetHash(plainText);
-                StringComparer comparer = StringComparer.OrdinalIgnoreCase;
+                
+                return Utils.SecureEquals(plainTextHash, hashText, true, true);
+            }
+        }
 
-                return comparer.Compare(plainTextHash, hashText) == 0;
+        public sealed class CRC32 : IHashMethod
+        {
+            private Algorithms.CRC32 CRCService { get; }
+
+            public bool Initialized { get; }
+
+            public CRC32()
+            {
+                CRCService = new Algorithms.CRC32();
+                CRCService.Initialize();
+
+                Initialized = true;
+            }
+
+            public string GetHash(string plainText)
+            {
+                byte[] data = TextEncoding.GetBytes(plainText);
+                uint hashValue = BitConverter.ToUInt32(CRCService.ComputeHash(data), 0);
+
+                return hashValue.ToString("x2", CultureInfo.InvariantCulture);
+            }
+            public bool VerifyHash(string plainText, string hashText)
+            {
+                var plainTextHash = GetHash(plainText);
+                
+                return Utils.SecureEquals(plainTextHash, hashText, true, true);
+            }
+        }
+
+        public sealed class CRC32C : IHashMethod
+        {
+            private Algorithms.CRC32C CRCService { get; }
+
+            public bool Initialized { get; }
+
+            public CRC32C()
+            {
+
+#if NETCOREAPP
+                if (!Sse42.X64.IsSupported && !Sse42.IsSupported)
+                {
+                    CRCService = new Algorithms.CRC32C();
+                    CRCService.Initialize();
+                }
+
+#elif NETFRAMEWORK
+
+                CRCService = new Algorithms.CRC32C();
+                CRCService.Initialize();
+
+#endif
+
+                Initialized = true;
+            }
+            
+            public string GetHash(string plainText)
+            {
+                
+#if NETCOREAPP
+
+                byte[] data = TextEncoding.GetBytes(plainText);
+                ulong hashValue = 0xFFFFFFFF;
+
+                if (Sse42.X64.IsSupported)
+                {
+                    //hashValue ^= 0xFFFFFFFF;
+
+                    Span<byte> dataSpan = new Span<byte>(data);
+                    int remainingCount = dataSpan.Length % 8;
+
+                    for (int i = 0; i < dataSpan.Length - remainingCount; i += 8)
+                        hashValue = Sse42.X64.Crc32(hashValue, BitConverter.ToUInt64(dataSpan.Slice(i, 8)));
+
+                    if (remainingCount % 2 == 0)
+                        for (int i = 0; i < remainingCount; i += 2)
+                            hashValue = Sse42.Crc32((uint)hashValue,
+                                BitConverter.ToUInt16(dataSpan.Slice(dataSpan.Length - remainingCount + i, 2)));
+                    else
+                        for (int i = 0; i < remainingCount; ++i)
+                            hashValue = Sse42.Crc32((uint)hashValue,
+                                dataSpan.Slice(dataSpan.Length - remainingCount + i, 1)[0]);
+
+                    //if (remainingCount == 1)
+                    //{
+                    //    hashValue = Sse42.Crc32((uint)hashValue, dataSpan.Slice(dataSpan.Length - 1, 1)[0]);
+                    //}
+                    //else if (remainingCount == 2)
+                    //{
+                    //    hashValue = Sse42.Crc32((uint)hashValue, BitConverter.ToUInt16(dataSpan.Slice(dataSpan.Length - 2, 2)));
+                    //}
+                    //else if (remainingCount == 3)
+                    //{
+                    //    hashValue = Sse42.Crc32((uint)hashValue, BitConverter.ToUInt16(dataSpan.Slice(dataSpan.Length - 3, 2)));
+                    //    hashValue = Sse42.Crc32((uint)hashValue, dataSpan.Slice(dataSpan.Length - 1, 1)[0]);
+                    //}
+                    //else if (remainingCount == 4)
+                    //{
+                    //    hashValue = Sse42.Crc32((uint)hashValue, BitConverter.ToUInt32(dataSpan.Slice(dataSpan.Length - 4, 4)));
+                    //}
+                    //else if (remainingCount == 5)
+                    //{
+                    //    hashValue = Sse42.Crc32((uint)hashValue, BitConverter.ToUInt32(dataSpan.Slice(dataSpan.Length - 5, 4)));
+                    //    hashValue = Sse42.Crc32((uint)hashValue, dataSpan.Slice(dataSpan.Length - 1, 1)[0]);
+                    //}
+                    //else if (remainingCount == 6)
+                    //{
+                    //    hashValue = Sse42.Crc32((uint)hashValue, BitConverter.ToUInt32(dataSpan.Slice(dataSpan.Length - 6, 4)));
+                    //    hashValue = Sse42.Crc32((uint)hashValue, BitConverter.ToUInt16(dataSpan.Slice(dataSpan.Length - 2, 2)));
+                    //}
+                    //else if (remainingCount == 7)
+                    //{
+                    //    hashValue = Sse42.Crc32((uint)hashValue, BitConverter.ToUInt32(dataSpan.Slice(data.Length - 7, 4)));
+                    //    hashValue = Sse42.Crc32((uint)hashValue, BitConverter.ToUInt16(dataSpan.Slice(data.Length - 3, 2)));
+                    //    hashValue = Sse42.Crc32((uint)hashValue, dataSpan.Slice(dataSpan.Length - 1, 1)[0]);
+                    //}
+
+                    hashValue ^= 0xFFFFFFFF;
+                }
+                else if (Sse42.IsSupported)
+                {
+                    //hashValue ^= 0xFFFFFFFF;
+
+                    Span<byte> dataSpan = new Span<byte>(data);
+                    int remainingCount = dataSpan.Length % 4;
+
+                    for (int i = 0; i < dataSpan.Length - (data.Length % 4); i += 4)
+                        hashValue = Sse42.Crc32((uint)hashValue, BitConverter.ToUInt32(dataSpan.Slice(i, 4)));
+
+                    if (remainingCount % 2 == 0)
+                        for (int i = 0; i < remainingCount; i += 2)
+                            hashValue = Sse42.Crc32((uint)hashValue,
+                                BitConverter.ToUInt16(dataSpan.Slice(dataSpan.Length - remainingCount + i, 2)));
+                    else
+                        for (int i = 0; i < remainingCount; ++i)
+                            hashValue = Sse42.Crc32((uint)hashValue,
+                                dataSpan.Slice(dataSpan.Length - remainingCount + i, 1)[0]);
+
+                    //if (remainingCount == 1)
+                    //{
+                    //    hashValue = Sse42.Crc32((uint)hashValue, dataSpan.Slice(dataSpan.Length - 1, 1)[0]);
+                    //}
+                    //else if (remainingCount == 2)
+                    //{
+                    //    hashValue = Sse42.Crc32((uint)hashValue, BitConverter.ToUInt16(dataSpan.Slice(dataSpan.Length - 2, 2)));
+                    //}
+                    //else if (remainingCount == 3)
+                    //{
+                    //    hashValue = Sse42.Crc32((uint)hashValue, BitConverter.ToUInt16(dataSpan.Slice(dataSpan.Length - 3, 2)));
+                    //    hashValue = Sse42.Crc32((uint)hashValue, dataSpan.Slice(dataSpan.Length - 1, 1)[0]);
+                    //}
+
+                    hashValue ^= 0xFFFFFFFF;
+                }
+                else
+                {
+                    hashValue = BitConverter.ToUInt32(CRCService.ComputeHash(data), 0);
+                }
+
+                return hashValue.ToString("x2", CultureInfo.InvariantCulture);
+
+#elif NETFRAMEWORK
+
+                byte[] data = TextEncoding.GetBytes(plainText);
+                uint hashValue = BitConverter.ToUInt32(CRCService.ComputeHash(data), 0);
+                
+                return hashValue.ToString("x2", CultureInfo.InvariantCulture);
+
+#endif
+
+            }
+            public bool VerifyHash(string plainText, string hashText)
+            {
+                var plainTextHash = GetHash(plainText);
+                
+                return Utils.SecureEquals(plainTextHash, hashText, true, true);
+            }
+        }
+
+        public sealed class CRC32Q : IHashMethod
+        {
+            private Algorithms.CRC32Q CRCService { get; }
+
+            public bool Initialized { get; }
+
+            public CRC32Q()
+            {
+                CRCService = new Algorithms.CRC32Q();
+                CRCService.Initialize();
+
+                Initialized = true;
+            }
+
+            public string GetHash(string plainText)
+            {
+                byte[] data = TextEncoding.GetBytes(plainText);
+                uint hashValue = BitConverter.ToUInt32(CRCService.ComputeHash(data), 0);
+
+                return hashValue.ToString("x2", CultureInfo.InvariantCulture);
+            }
+            public bool VerifyHash(string plainText, string hashText)
+            {
+                var plainTextHash = GetHash(plainText);
+
+                return Utils.SecureEquals(plainTextHash, hashText, true, true);
+            }
+        }
+
+        public sealed class CRC32D : IHashMethod
+        {
+            private Algorithms.CRC32D CRCService { get; }
+
+            public bool Initialized { get; }
+
+            public CRC32D()
+            {
+                CRCService = new Algorithms.CRC32D();
+                CRCService.Initialize();
+
+                Initialized = true;
+            }
+
+            public string GetHash(string plainText)
+            {
+                byte[] data = TextEncoding.GetBytes(plainText);
+                uint hashValue = BitConverter.ToUInt32(CRCService.ComputeHash(data), 0);
+
+                return hashValue.ToString("x2", CultureInfo.InvariantCulture);
+            }
+            public bool VerifyHash(string plainText, string hashText)
+            {
+                var plainTextHash = GetHash(plainText);
+
+                return Utils.SecureEquals(plainTextHash, hashText, true, true);
             }
         }
 
@@ -799,9 +1030,8 @@ namespace RIS.Cryptography.Hash
             public bool VerifyHash(string plainText, string hashText)
             {
                 var plainTextHash = GetHash(plainText);
-                StringComparer comparer = StringComparer.OrdinalIgnoreCase;
 
-                return comparer.Compare(plainTextHash, hashText) == 0;
+                return Utils.SecureEquals(plainTextHash, hashText, true, true);
             }
         }
 
@@ -1012,9 +1242,8 @@ namespace RIS.Cryptography.Hash
             public bool VerifyHash(string plainText, string hashText)
             {
                 var plainTextHash = GetHash(plainText);
-                StringComparer comparer = StringComparer.OrdinalIgnoreCase;
 
-                return comparer.Compare(plainTextHash, hashText) == 0;
+                return Utils.SecureEquals(plainTextHash, hashText, true, true);
             }
         }
 
@@ -1225,9 +1454,8 @@ namespace RIS.Cryptography.Hash
             public bool VerifyHash(string plainText, string hashText)
             {
                 var plainTextHash = GetHash(plainText);
-                StringComparer comparer = StringComparer.OrdinalIgnoreCase;
 
-                return comparer.Compare(plainTextHash, hashText) == 0;
+                return Utils.SecureEquals(plainTextHash, hashText, true, true);
             }
         }
 
@@ -1465,9 +1693,8 @@ namespace RIS.Cryptography.Hash
                     hashSalt += "=";
 
                 var plainTextHash = GetHash(plainText, hashSalt);
-                StringComparer comparer = StringComparer.OrdinalIgnoreCase;
 
-                return comparer.Compare(plainTextHash, hashText) == 0;
+                return Utils.SecureEquals(plainTextHash, hashText, true, true);
             }
         }
 
@@ -1705,9 +1932,8 @@ namespace RIS.Cryptography.Hash
                     hashSalt += "=";
 
                 var plainTextHash = GetHash(plainText, hashSalt);
-                StringComparer comparer = StringComparer.OrdinalIgnoreCase;
 
-                return comparer.Compare(plainTextHash, hashText) == 0;
+                return Utils.SecureEquals(plainTextHash, hashText, true, true);
             }
         }
 
@@ -1945,9 +2171,8 @@ namespace RIS.Cryptography.Hash
                     hashSalt += "=";
 
                 var plainTextHash = GetHash(plainText, hashSalt);
-                StringComparer comparer = StringComparer.OrdinalIgnoreCase;
 
-                return comparer.Compare(plainTextHash, hashText) == 0;
+                return Utils.SecureEquals(plainTextHash, hashText, true, true);
             }
         }
 
@@ -2321,9 +2546,8 @@ namespace RIS.Cryptography.Hash
 
                 var plainTextHash = GetHash(plainText, metadata.Salt, metadata.MemorySize, metadata.Iterations,
                     metadata.DegreeOfParallelism, associatedData, knownSecret);
-                StringComparer comparer = StringComparer.OrdinalIgnoreCase;
 
-                return comparer.Compare(plainTextHash, hashText) == 0;
+                return Utils.SecureEquals(plainTextHash, hashText, true, true);
             }
 
             public bool VerifyAndUpdateHash(string plainText, string hashText, out bool isUpdated, out string newHashText)
@@ -2752,9 +2976,8 @@ namespace RIS.Cryptography.Hash
 
                 var plainTextHash = GetHash(plainText, metadata.Salt, metadata.MemorySize, metadata.Iterations,
                     metadata.DegreeOfParallelism, associatedData, knownSecret);
-                StringComparer comparer = StringComparer.OrdinalIgnoreCase;
 
-                return comparer.Compare(plainTextHash, hashText) == 0;
+                return Utils.SecureEquals(plainTextHash, hashText, true, true);
             }
 
             public bool VerifyAndUpdateHash(string plainText, string hashText, out bool isUpdated, out string newHashText)
@@ -3183,9 +3406,8 @@ namespace RIS.Cryptography.Hash
 
                 var plainTextHash = GetHash(plainText, metadata.Salt, metadata.MemorySize, metadata.Iterations,
                     metadata.DegreeOfParallelism, associatedData, knownSecret);
-                StringComparer comparer = StringComparer.OrdinalIgnoreCase;
 
-                return comparer.Compare(plainTextHash, hashText) == 0;
+                return Utils.SecureEquals(plainTextHash, hashText, true, true);
             }
 
             public bool VerifyAndUpdateHash(string plainText, string hashText, out bool isUpdated, out string newHashText)

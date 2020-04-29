@@ -98,123 +98,6 @@ namespace RIS.Connection.MySQL
         }
 
         /// <summary>
-        ///     Открывает соединения в количестве <paramref name="numberConnections"/> c MySQL базой данных с использованием строки подключения <paramref name="connectionString"/>
-        /// </summary>
-        /// <param name="numberConnections">
-        ///     Количество SQL-соединений <see cref="MySql.Data.MySqlClient.MySqlConnection"/>
-        /// </param>
-        /// <param name="connectionString">
-        ///     Строка подключения для создания соединения с базой данных.
-        /// </param>
-        /// <returns>
-        ///     Значение типа <see cref="bool"/>. Если <see langword="true"/>, то соединение открыто успешно, иначе <see langword="false"/>.
-        /// </returns>
-        public bool OpenConnection(byte numberConnections, string connectionString)
-        {
-            try
-            {
-                if (numberConnections < 1)
-                {
-                    numberConnections = 1;
-                }
-
-                Task.Factory.StartNew(() => CreateConnections(numberConnections, connectionString)).Wait();
-
-                if (ConnectionComplete)
-                {
-                    Requests = new Requests(this, Connections);
-                }
-
-                return ConnectionComplete;
-            }
-            catch (Exception ex)
-            {
-                Events.DShowError?.Invoke(this, new RErrorEventArgs(ex.Message, ex.StackTrace));
-                PShowError?.Invoke(this, new RErrorEventArgs(ex.Message, ex.StackTrace));
-                throw;
-            }
-        }
-        /// <summary>
-        ///     Открывает соединения в количестве <paramref name="numberConnections"/> c MySQL базой данных с использованием строки подключения <paramref name="connectionString"/> и стандартного времени ожидания SQL-команд <paramref name="millisecondsCommandTimeout"/>
-        /// </summary>
-        /// <param name="numberConnections">
-        ///     Количество SQL-соединений <see cref="MySql.Data.MySqlClient.MySqlConnection"/>
-        /// </param>
-        /// <param name="millisecondsCommandTimeout">
-        ///     Стандартное время ожидания SQL-команд.
-        /// </param>
-        /// <param name="connectionString">
-        ///     Строка подключения для создания соединения с базой данных.
-        /// </param>
-        /// <returns>
-        ///     Значение типа <see cref="bool"/>. Если <see langword="true"/>, то соединение открыто успешно, иначе <see langword="false"/>.
-        /// </returns>
-        public bool OpenConnection(byte numberConnections, ushort millisecondsCommandTimeout, string connectionString)
-        {
-            try
-            {
-                if (numberConnections < 1)
-                {
-                    numberConnections = 1;
-                }
-
-                Task.Factory.StartNew(() => CreateConnections(numberConnections, connectionString)).Wait();
-
-                if (ConnectionComplete)
-                {
-                    Requests = new Requests(this, Connections, millisecondsCommandTimeout);
-                }
-
-                return ConnectionComplete;
-            }
-            catch (Exception ex)
-            {
-                Events.DShowError?.Invoke(this, new RErrorEventArgs(ex.Message, ex.StackTrace));
-                PShowError?.Invoke(this, new RErrorEventArgs(ex.Message, ex.StackTrace));
-                throw;
-            }
-        }
-        /// <summary>
-        ///     Открывает соединения в количестве <paramref name="numberConnections"/> c MySQL базой данных с использованием строки подключения <paramref name="connectionString"/> и стандартного времени ожидания SQL-команд <paramref name="timeSpanTimeout"/>
-        /// </summary>
-        /// <param name="numberConnections">
-        ///     Количество SQL-соединений <see cref="MySql.Data.MySqlClient.MySqlConnection"/>
-        /// </param>
-        /// <param name="timeSpanTimeout">
-        ///     Стандартное время ожидания SQL-команд.
-        /// </param>
-        /// <param name="connectionString">
-        ///     Строка подключения для создания соединения с базой данных.
-        /// </param>
-        /// <returns>
-        ///     Значение типа <see cref="bool"/>. Если <see langword="true"/>, то соединение открыто успешно, иначе <see langword="false"/>.
-        /// </returns>
-        public bool OpenConnection(byte numberConnections, TimeSpan timeSpanTimeout, string connectionString)
-        {
-            try
-            {
-                if (numberConnections < 1)
-                {
-                    numberConnections = 1;
-                }
-
-                Task.Factory.StartNew(() => CreateConnections(numberConnections, connectionString)).Wait();
-
-                if (ConnectionComplete)
-                {
-                    Requests = new Requests(this, Connections, timeSpanTimeout);
-                }
-
-                return ConnectionComplete;
-            }
-            catch (Exception ex)
-            {
-                Events.DShowError?.Invoke(this, new RErrorEventArgs(ex.Message, ex.StackTrace));
-                PShowError?.Invoke(this, new RErrorEventArgs(ex.Message, ex.StackTrace));
-                throw;
-            }
-        }
-        /// <summary>
         ///     Открывает соединения в количестве <paramref name="numberConnections"/> c MySQL базой данных <paramref name="database"/>, расположенной по адресу хоста <paramref name="ipAddress"/>, используя кодировку <paramref name="charset"/> и аутентификацию по имени пользователя (логину) <paramref name="login"/> и паролю <paramref name="password"/>
         /// </summary>
         /// <param name="numberConnections">
@@ -240,36 +123,16 @@ namespace RIS.Connection.MySQL
         /// </returns>
         public bool OpenConnection(byte numberConnections, string ipAddress, string database, string login, string password, string charset = "utf8")
         {
-            try
-            {
-                if (numberConnections < 1)
-                {
-                    numberConnections = 1;
-                }
-
-                Task.Factory.StartNew(() => CreateConnections(numberConnections, ipAddress, database, login, password, charset)).Wait();
-
-                if (ConnectionComplete)
-                {
-                    Requests = new Requests(this, Connections);
-                }
-
-                return ConnectionComplete;
-            }
-            catch (Exception ex)
-            {
-                Events.DShowError?.Invoke(this, new RErrorEventArgs(ex.Message, ex.StackTrace));
-                PShowError?.Invoke(this, new RErrorEventArgs(ex.Message, ex.StackTrace));
-                throw;
-            }
+            return OpenConnection(numberConnections, TimeSpan.FromMilliseconds(20000),
+                ipAddress, database, login, password, charset);
         }
         /// <summary>
-        ///     Открывает соединения в количестве <paramref name="numberConnections"/> c MySQL базой данных <paramref name="database"/>, расположенной по адресу хоста <paramref name="ipAddress"/>, используя кодировку <paramref name="charset"/>, стандартное время ожидания SQL-команд <paramref name="millisecondsCommandTimeout"/> и аутентификацию по имени пользователя (логину) <paramref name="login"/> и паролю <paramref name="password"/>
+        ///     Открывает соединения в количестве <paramref name="numberConnections"/> c MySQL базой данных <paramref name="database"/>, расположенной по адресу хоста <paramref name="ipAddress"/>, используя кодировку <paramref name="charset"/>, стандартное время ожидания SQL-команд <paramref name="millisecondsTimeout"/> и аутентификацию по имени пользователя (логину) <paramref name="login"/> и паролю <paramref name="password"/>
         /// </summary>
         /// <param name="numberConnections">
         ///     Количество SQL-соединений <see cref="MySql.Data.MySqlClient.MySqlConnection"/>
         /// </param>
-        /// <param name="millisecondsCommandTimeout">
+        /// <param name="millisecondsTimeout">
         ///     Стандартное время ожидания SQL-команд.
         /// </param>
         /// <param name="ipAddress">
@@ -290,38 +153,18 @@ namespace RIS.Connection.MySQL
         /// <returns>
         ///     Значение типа <see cref="bool"/>. Если <see langword="true"/>, то соединение открыто успешно, иначе <see langword="false"/>.
         /// </returns>
-        public bool OpenConnection(byte numberConnections, ushort millisecondsCommandTimeout, string ipAddress, string database, string login, string password, string charset = "utf8")
+        public bool OpenConnection(byte numberConnections, uint millisecondsTimeout, string ipAddress, string database, string login, string password, string charset = "utf8")
         {
-            try
-            {
-                if (numberConnections < 1)
-                {
-                    numberConnections = 1;
-                }
-
-                Task.Factory.StartNew(() => CreateConnections(numberConnections, ipAddress, database, login, password, charset)).Wait();
-
-                if (ConnectionComplete)
-                {
-                    Requests = new Requests(this, Connections, millisecondsCommandTimeout);
-                }
-
-                return ConnectionComplete;
-            }
-            catch (Exception ex)
-            {
-                Events.DShowError?.Invoke(this, new RErrorEventArgs(ex.Message, ex.StackTrace));
-                PShowError?.Invoke(this, new RErrorEventArgs(ex.Message, ex.StackTrace));
-                throw;
-            }
+            return OpenConnection(numberConnections, TimeSpan.FromMilliseconds(millisecondsTimeout), 
+                ipAddress, database, login, password, charset);
         }
         /// <summary>
-        ///     Открывает соединения в количестве <paramref name="numberConnections"/> c MySQL базой данных <paramref name="database"/>, расположенной по адресу хоста <paramref name="ipAddress"/>, используя кодировку <paramref name="charset"/>, стандартное время ожидания SQL-команд <paramref name="timeSpanTimeout"/> и аутентификацию по имени пользователя (логину) <paramref name="login"/> и паролю <paramref name="password"/>
+        ///     Открывает соединения в количестве <paramref name="numberConnections"/> c MySQL базой данных <paramref name="database"/>, расположенной по адресу хоста <paramref name="ipAddress"/>, используя кодировку <paramref name="charset"/>, стандартное время ожидания SQL-команд <paramref name="timeout"/> и аутентификацию по имени пользователя (логину) <paramref name="login"/> и паролю <paramref name="password"/>
         /// </summary>
         /// <param name="numberConnections">
         ///     Количество SQL-соединений <see cref="MySql.Data.MySqlClient.MySqlConnection"/>
         /// </param>
-        /// <param name="timeSpanTimeout">
+        /// <param name="timeout">
         ///     Стандартное время ожидания SQL-команд.
         /// </param>
         /// <param name="ipAddress">
@@ -342,7 +185,71 @@ namespace RIS.Connection.MySQL
         /// <returns>
         ///     Значение типа <see cref="bool"/>. Если <see langword="true"/>, то соединение открыто успешно, иначе <see langword="false"/>.
         /// </returns>
-        public bool OpenConnection(byte numberConnections, TimeSpan timeSpanTimeout, string ipAddress, string database, string login, string password, string charset = "utf8")
+        public bool OpenConnection(byte numberConnections, TimeSpan timeout, string ipAddress, string database, string login, string password, string charset = "utf8")
+        {
+            MySqlConnectionStringBuilder connectionStringBuilder = new MySqlConnectionStringBuilder(string.Empty);
+            connectionStringBuilder.DefaultCommandTimeout = (uint)timeout.TotalSeconds;
+            connectionStringBuilder.Server = ipAddress;
+            connectionStringBuilder.Database = database;
+            connectionStringBuilder.UserID = login;
+            connectionStringBuilder.Password = password;
+            connectionStringBuilder.CharacterSet = charset;
+
+            return OpenConnection(numberConnections, connectionStringBuilder.ConnectionString);
+        }
+        /// <summary>
+        ///     Открывает соединения в количестве <paramref name="numberConnections"/> c MySQL базой данных с использованием строки подключения <paramref name="connectionString"/>
+        /// </summary>
+        /// <param name="numberConnections">
+        ///     Количество SQL-соединений <see cref="MySql.Data.MySqlClient.MySqlConnection"/>
+        /// </param>
+        /// <param name="connectionString">
+        ///     Строка подключения для создания соединения с базой данных.
+        /// </param>
+        /// <returns>
+        ///     Значение типа <see cref="bool"/>. Если <see langword="true"/>, то соединение открыто успешно, иначе <see langword="false"/>.
+        /// </returns>
+        public bool OpenConnection(byte numberConnections, string connectionString)
+        {
+            return OpenConnection(numberConnections, TimeSpan.FromMilliseconds(20000),
+                connectionString);
+        }
+        /// <summary>
+        ///     Открывает соединения в количестве <paramref name="numberConnections"/> c MySQL базой данных с использованием строки подключения <paramref name="connectionString"/> и стандартного времени ожидания SQL-команд <paramref name="millisecondsTimeout"/>
+        /// </summary>
+        /// <param name="numberConnections">
+        ///     Количество SQL-соединений <see cref="MySql.Data.MySqlClient.MySqlConnection"/>
+        /// </param>
+        /// <param name="millisecondsTimeout">
+        ///     Стандартное время ожидания SQL-команд.
+        /// </param>
+        /// <param name="connectionString">
+        ///     Строка подключения для создания соединения с базой данных.
+        /// </param>
+        /// <returns>
+        ///     Значение типа <see cref="bool"/>. Если <see langword="true"/>, то соединение открыто успешно, иначе <see langword="false"/>.
+        /// </returns>
+        public bool OpenConnection(byte numberConnections, uint millisecondsTimeout, string connectionString)
+        {
+            return OpenConnection(numberConnections, TimeSpan.FromMilliseconds(millisecondsTimeout),
+                connectionString);
+        }
+        /// <summary>
+        ///     Открывает соединения в количестве <paramref name="numberConnections"/> c MySQL базой данных с использованием строки подключения <paramref name="connectionString"/> и стандартного времени ожидания SQL-команд <paramref name="timeout"/>
+        /// </summary>
+        /// <param name="numberConnections">
+        ///     Количество SQL-соединений <see cref="MySql.Data.MySqlClient.MySqlConnection"/>
+        /// </param>
+        /// <param name="timeout">
+        ///     Стандартное время ожидания SQL-команд.
+        /// </param>
+        /// <param name="connectionString">
+        ///     Строка подключения для создания соединения с базой данных.
+        /// </param>
+        /// <returns>
+        ///     Значение типа <see cref="bool"/>. Если <see langword="true"/>, то соединение открыто успешно, иначе <see langword="false"/>.
+        /// </returns>
+        public bool OpenConnection(byte numberConnections, TimeSpan timeout, string connectionString)
         {
             try
             {
@@ -351,11 +258,11 @@ namespace RIS.Connection.MySQL
                     numberConnections = 1;
                 }
 
-                Task.Factory.StartNew(() => CreateConnections(numberConnections, ipAddress, database, login, password, charset)).Wait();
+                Task.Factory.StartNew(() => CreateConnections(numberConnections, connectionString)).Wait();
 
                 if (ConnectionComplete)
                 {
-                    Requests = new Requests(this, Connections, timeSpanTimeout);
+                    Requests = new Requests(this, Connections, timeout);
                 }
 
                 return ConnectionComplete;
@@ -399,70 +306,6 @@ namespace RIS.Connection.MySQL
                 try
                 {
                     Connections[i] = new MySqlConnection(connectionString);
-                    Connections[i].Open();
-
-                    while (Connections[i] != null)
-                    {
-                        if (Connections[i].State == ConnectionState.Connecting)
-                        {
-                            Thread.Sleep(100);
-                            continue;
-                        }
-
-                        if (Connections[i].State == ConnectionState.Broken)
-                        {
-                            ConnectionComplete = false;
-                            break;
-                        }
-
-                        if (Connections[i].State == ConnectionState.Closed)
-                        {
-                            ConnectionComplete = false;
-                            break;
-                        }
-
-                        if (Connections[i].State == ConnectionState.Open)
-                        {
-                            ConnectionComplete = true;
-                            Connections[i].StateChange += Connection_StateChange;
-                            break;
-                        }
-                    }
-
-                    if (!ConnectionComplete)
-                    {
-                        break;
-                    }
-                }
-                catch (MySqlException ex)
-                {
-                    ConnectionComplete = false;
-
-                    Events.DShowError?.Invoke(this, new RErrorEventArgs(ex.Message, ex.StackTrace));
-                    PShowError?.Invoke(this, new RErrorEventArgs(ex.Message, ex.StackTrace));
-                    throw;
-                }
-                catch (InvalidOperationException ex)
-                {
-                    ConnectionComplete = false;
-
-                    Events.DShowError?.Invoke(this, new RErrorEventArgs(ex.Message, ex.StackTrace));
-                    PShowError?.Invoke(this, new RErrorEventArgs(ex.Message, ex.StackTrace));
-                    throw;
-                }
-            }
-        }
-        private void CreateConnections(byte numberConnections, string ipAddress, string database, string login, string password, string charset)
-        {
-            Connections = new MySqlConnection[numberConnections];
-
-            for (byte i = 0; i < numberConnections; i++)
-            {
-                try
-                {
-                    string connectionData =
-                        $"server={ipAddress};user={login};password={password};database={database};charset={charset};";
-                    Connections[i] = new MySqlConnection(connectionData);
                     Connections[i].Open();
 
                     while (Connections[i] != null)

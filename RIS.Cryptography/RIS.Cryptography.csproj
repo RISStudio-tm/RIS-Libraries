@@ -4,13 +4,17 @@
     <TargetFrameworks>netcoreapp3.1;net48</TargetFrameworks>
     <RootNamespace>RIS.Cryptography</RootNamespace>
     <AssemblyName>RIS.Cryptography</AssemblyName>
-    <AssemblyVersion>2.0.156.20105</AssemblyVersion>
-    <FileVersion>2.0.156.20105</FileVersion>
+    <AssemblyVersion>2.1.304.20120</AssemblyVersion>
+    <FileVersion>2.1.304.20120</FileVersion>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
 
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <NoWarn>CS0067</NoWarn>
+  </PropertyGroup>
+
   <ItemGroup>
-    <PackageReference Include="BCrypt.Net-Next" Version="3.3.3" />
+    <PackageReference Include="BCrypt.Net-Next" Version="4.0.0" />
     <PackageReference Include="Konscious.Security.Cryptography.Argon2" Version="1.2.1" />
     <PackageReference Include="System.Security.Cryptography.Algorithms" Version="4.3.1" />
     <PackageReference Include="System.Security.Cryptography.Cng" Version="4.7.0" />

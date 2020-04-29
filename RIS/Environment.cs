@@ -276,5 +276,74 @@ namespace RIS
 
             return (uint)size;
         }
+
+        public static byte ReflectBits(byte value)
+        {
+            byte valueReflected = 0;
+
+            for (int i = 0; i < 8; ++i)
+            {
+                if ((value & (1 << i)) != 0)
+                    valueReflected |= (byte)(1 << (7 - i));
+            }
+
+            return valueReflected;
+        }
+        public static ushort ReflectBits(ushort value)
+        {
+            ushort valueReflected = 0;
+
+            for (int i = 0; i < 16; ++i)
+            {
+                if ((value & (1 << i)) != 0)
+                    valueReflected |= (ushort)(1 << (15 - i));
+            }
+
+            return valueReflected;
+        }
+        public static uint ReflectBits(uint value)
+        {
+            uint valueReflected = 0;
+
+            for (int i = 0; i < 32; ++i)
+            {
+                if ((value & (1 << i)) != 0)
+                    valueReflected |= (uint)(1 << (31 - i));
+            }
+
+            return valueReflected;
+        }
+        public static ulong ReflectBits(ulong value)
+        {
+            ulong valueReflected = 0;
+
+            for (int i = 0; i < 64; ++i)
+            {
+                if ((value & ((ulong) 1 << i)) != 0)
+                    valueReflected |= ((ulong) 1 << (63 - i));
+            }
+
+            return valueReflected;
+        }
+        public static byte[] ReflectBits(byte[] value)
+        {
+            for (int i = 0; i < value.Length; ++i)
+            {
+                ref byte valueByte = ref value[i];
+                valueByte = ReflectBits(valueByte);
+            }
+
+            return value;
+        }
+        public static Span<byte> ReflectBits(Span<byte> value)
+        {
+            for (int i = 0; i < value.Length; ++i)
+            {
+                ref byte valueByte = ref value[i];
+                valueByte = ReflectBits(valueByte);
+            }
+
+            return value;
+        }
     }
 }

@@ -4,8 +4,12 @@
     <TargetFrameworks>netcoreapp3.1;net48</TargetFrameworks>
     <RootNamespace>RIS.Text.Encoding</RootNamespace>
     <AssemblyName>RIS.Text.Encoding</AssemblyName>
-    <AssemblyVersion>1.0.160.20105</AssemblyVersion>
-    <FileVersion>1.0.160.20105</FileVersion>
+    <AssemblyVersion>2.1.310.20120</AssemblyVersion>
+    <FileVersion>2.1.310.20120</FileVersion>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <NoWarn>CS0067</NoWarn>
   </PropertyGroup>
 
   <ItemGroup>

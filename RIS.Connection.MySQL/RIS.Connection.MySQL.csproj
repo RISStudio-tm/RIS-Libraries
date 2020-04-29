@@ -4,12 +4,13 @@
     <TargetFrameworks>netcoreapp3.1;net48</TargetFrameworks>
     <RootNamespace>RIS.Connection.MySQL</RootNamespace>
     <AssemblyName>RIS.Connection.MySQL</AssemblyName>
-    <AssemblyVersion>2.0.156.20105</AssemblyVersion>
-    <FileVersion>2.0.156.20105</FileVersion>
+    <AssemblyVersion>2.2.38.20120</AssemblyVersion>
+    <FileVersion>2.2.38.20120</FileVersion>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
     <DocumentationFile>D:\Visual Studio 2019 Projects\RIS-Libraries\RIS.Connection.MySQL\RIS.Connection.MySQL.xml</DocumentationFile>
+    <NoWarn>CS0067</NoWarn>
   </PropertyGroup>
 
   <ItemGroup>

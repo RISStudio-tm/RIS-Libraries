@@ -4,4 +4,7 @@
 // a specific target and scoped to a namespace, type, member, etc.
 
 //[assembly: System.Diagnostics.CodeAnalysis.SuppressMessage("Security", "CA2100:Review SQL queries for security vulnerabilities", Justification = "<Ожидание>", Scope = "type", Target = "~T:RIS.Connection.MySQL.Requests")]
-[assembly: System.Diagnostics.CodeAnalysis.SuppressMessage("Security", "CA2100:Review SQL queries for security vulnerabilities")]
+using System.Diagnostics.CodeAnalysis;
+
+[assembly: SuppressMessage("Security", "CA2100:Review SQL queries for security vulnerabilities")]
+[assembly: SuppressMessage("AsyncUsage", "AsyncFixer02:Long running or blocking operations under an async method")]

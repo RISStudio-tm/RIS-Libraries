@@ -17,12 +17,15 @@ namespace RIS.Cryptography.Cipher
 
         static CipherMethods()
         {
-            TextEncoding = Encoding.UTF8;
+            TextEncoding = Utils.SecureUTF8;
 
             Type cipherMethodsType = typeof(CipherMethods);
             MemberInfo[] cipherMethods =
                 cipherMethodsType.FindMembers(MemberTypes.NestedType, BindingFlags.Public,
-                    (info, criteria) => cipherMethodsType.GetNestedType(info.Name).IsClass && typeof(ICipherMethod).IsAssignableFrom(cipherMethodsType.GetNestedType(info.Name)), "IsClass");
+                    (info, criteria) =>
+                        typeof(CipherMethods).GetNestedType(info.Name).IsClass &&
+                        typeof(ICipherMethod).IsAssignableFrom(typeof(CipherMethods).GetNestedType(info.Name)),
+                    "IsClass && IsAssignableFrom");
 
             CipherMethodsCount = cipherMethods.Length;
 
@@ -132,7 +135,7 @@ namespace RIS.Cryptography.Cipher
 
                     RSAServiceEncryptor = new RSACryptoServiceProvider(publicKeySize);
 
-                    Padding = RSAEncryptionPadding.OaepSHA256;
+                    Padding = RSAEncryptionPadding.OaepSHA384;
                     ReverseBytes = false;
                     Initialized = true;
                 }
@@ -220,7 +223,7 @@ namespace RIS.Cryptography.Cipher
                     RSAServiceDecryptor = new RSACryptoServiceProvider(privateKeySize);
                     RSAServiceDecryptor.FromXmlString(RSAServiceEncryptor.ToXmlString(true));
 
-                    Padding = RSAEncryptionPadding.OaepSHA256;
+                    Padding = RSAEncryptionPadding.OaepSHA384;
                     ReverseBytes = false;
                     Initialized = true;
                 }
@@ -242,7 +245,7 @@ namespace RIS.Cryptography.Cipher
                 {
                     RSAServiceEncryptor = new RSACryptoServiceProvider((int)publicKeySize);
 
-                    Padding = RSAEncryptionPadding.OaepSHA256;
+                    Padding = RSAEncryptionPadding.OaepSHA384;
                     ReverseBytes = false;
                     Initialized = true;
                 }
@@ -266,7 +269,7 @@ namespace RIS.Cryptography.Cipher
                     RSAServiceDecryptor = new RSACryptoServiceProvider((int)privateKeySize);
                     RSAServiceDecryptor.FromXmlString(RSAServiceEncryptor.ToXmlString(true));
 
-                    Padding = RSAEncryptionPadding.OaepSHA256;
+                    Padding = RSAEncryptionPadding.OaepSHA384;
                     ReverseBytes = false;
                     Initialized = true;
                 }
@@ -323,7 +326,7 @@ namespace RIS.Cryptography.Cipher
                         RSAServiceEncryptor = new RSACryptoServiceProvider(publicKeySize);
                         RSAServiceEncryptor.FromXmlString(xmlPublicKey);
 
-                        Padding = RSAEncryptionPadding.OaepSHA256;
+                        Padding = RSAEncryptionPadding.OaepSHA384;
                         ReverseBytes = false;
                         Initialized = true;
                     }
@@ -410,7 +413,7 @@ namespace RIS.Cryptography.Cipher
                         RSAServiceDecryptor = new RSACryptoServiceProvider(privateKeySize);
                         RSAServiceDecryptor.FromXmlString(xmlPrivateKey);
 
-                        Padding = RSAEncryptionPadding.OaepSHA256;
+                        Padding = RSAEncryptionPadding.OaepSHA384;
                         ReverseBytes = false;
                         Initialized = true;
                     }
@@ -436,7 +439,7 @@ namespace RIS.Cryptography.Cipher
                         RSAServiceEncryptor = new RSACryptoServiceProvider((int)publicKeySize);
                         RSAServiceEncryptor.FromXmlString(xmlPublicKey);
 
-                        Padding = RSAEncryptionPadding.OaepSHA256;
+                        Padding = RSAEncryptionPadding.OaepSHA384;
                         ReverseBytes = false;
                         Initialized = true;
                     }
@@ -464,7 +467,7 @@ namespace RIS.Cryptography.Cipher
                         RSAServiceDecryptor = new RSACryptoServiceProvider((int)privateKeySize);
                         RSAServiceDecryptor.FromXmlString(xmlPrivateKey);
 
-                        Padding = RSAEncryptionPadding.OaepSHA256;
+                        Padding = RSAEncryptionPadding.OaepSHA384;
                         ReverseBytes = false;
                         Initialized = true;
                     }
@@ -682,7 +685,7 @@ namespace RIS.Cryptography.Cipher
 
                     RSAServiceEncryptor = new RSACng(publicKeySize);
 
-                    Padding = RSAEncryptionPadding.OaepSHA256;
+                    Padding = RSAEncryptionPadding.OaepSHA384;
                     ReverseBytes = false;
                     Initialized = true;
                 }
@@ -765,7 +768,7 @@ namespace RIS.Cryptography.Cipher
                     RSAServiceDecryptor = new RSACng(privateKeySize);
                     RSAServiceDecryptor.FromXmlString(RSAServiceEncryptor.ToXmlString(true));
 
-                    Padding = RSAEncryptionPadding.OaepSHA256;
+                    Padding = RSAEncryptionPadding.OaepSHA384;
                     ReverseBytes = false;
                     Initialized = true;
                 }
@@ -787,7 +790,7 @@ namespace RIS.Cryptography.Cipher
                 {
                     RSAServiceEncryptor = new RSACng((int)publicKeySize);
 
-                    Padding = RSAEncryptionPadding.OaepSHA256;
+                    Padding = RSAEncryptionPadding.OaepSHA384;
                     ReverseBytes = false;
                     Initialized = true;
                 }
@@ -811,7 +814,7 @@ namespace RIS.Cryptography.Cipher
                     RSAServiceDecryptor = new RSACng((int)privateKeySize);
                     RSAServiceDecryptor.FromXmlString(RSAServiceEncryptor.ToXmlString(true));
 
-                    Padding = RSAEncryptionPadding.OaepSHA256;
+                    Padding = RSAEncryptionPadding.OaepSHA384;
                     ReverseBytes = false;
                     Initialized = true;
                 }
@@ -868,7 +871,7 @@ namespace RIS.Cryptography.Cipher
                         RSAServiceEncryptor = new RSACng(publicKeySize);
                         RSAServiceEncryptor.FromXmlString(xmlPublicKey);
 
-                        Padding = RSAEncryptionPadding.OaepSHA256;
+                        Padding = RSAEncryptionPadding.OaepSHA384;
                         ReverseBytes = false;
                         Initialized = true;
                     }
@@ -955,7 +958,7 @@ namespace RIS.Cryptography.Cipher
                         RSAServiceDecryptor = new RSACng(privateKeySize);
                         RSAServiceDecryptor.FromXmlString(xmlPrivateKey);
 
-                        Padding = RSAEncryptionPadding.OaepSHA256;
+                        Padding = RSAEncryptionPadding.OaepSHA384;
                         ReverseBytes = false;
                         Initialized = true;
                     }
@@ -981,7 +984,7 @@ namespace RIS.Cryptography.Cipher
                         RSAServiceEncryptor = new RSACng((int)publicKeySize);
                         RSAServiceEncryptor.FromXmlString(xmlPublicKey);
 
-                        Padding = RSAEncryptionPadding.OaepSHA256;
+                        Padding = RSAEncryptionPadding.OaepSHA384;
                         ReverseBytes = false;
                         Initialized = true;
                     }
@@ -1009,7 +1012,7 @@ namespace RIS.Cryptography.Cipher
                         RSAServiceDecryptor = new RSACng((int)privateKeySize);
                         RSAServiceDecryptor.FromXmlString(xmlPrivateKey);
 
-                        Padding = RSAEncryptionPadding.OaepSHA256;
+                        Padding = RSAEncryptionPadding.OaepSHA384;
                         ReverseBytes = false;
                         Initialized = true;
                     }

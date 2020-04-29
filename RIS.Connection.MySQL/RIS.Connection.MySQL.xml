@@ -44,54 +44,6 @@
                 Инициализирует новый экземпляр класса <see cref="T:RIS.Connection.MySQL.MySQLConnection"/> и его внутренние переменные.
             </summary>
         </member>
-        <member name="M:RIS.Connection.MySQL.MySQLConnection.OpenConnection(System.Byte,System.String)">
-            <summary>
-                Открывает соединения в количестве <paramref name="numberConnections"/> c MySQL базой данных с использованием строки подключения <paramref name="connectionString"/>
-            </summary>
-            <param name="numberConnections">
-                Количество SQL-соединений <see cref="T:MySql.Data.MySqlClient.MySqlConnection"/>
-            </param>
-            <param name="connectionString">
-                Строка подключения для создания соединения с базой данных.
-            </param>
-            <returns>
-                Значение типа <see cref="T:System.Boolean"/>. Если <see langword="true"/>, то соединение открыто успешно, иначе <see langword="false"/>.
-            </returns>
-        </member>
-        <member name="M:RIS.Connection.MySQL.MySQLConnection.OpenConnection(System.Byte,System.UInt16,System.String)">
-            <summary>
-                Открывает соединения в количестве <paramref name="numberConnections"/> c MySQL базой данных с использованием строки подключения <paramref name="connectionString"/> и стандартного времени ожидания SQL-команд <paramref name="millisecondsCommandTimeout"/>
-            </summary>
-            <param name="numberConnections">
-                Количество SQL-соединений <see cref="T:MySql.Data.MySqlClient.MySqlConnection"/>
-            </param>
-            <param name="millisecondsCommandTimeout">
-                Стандартное время ожидания SQL-команд.
-            </param>
-            <param name="connectionString">
-                Строка подключения для создания соединения с базой данных.
-            </param>
-            <returns>
-                Значение типа <see cref="T:System.Boolean"/>. Если <see langword="true"/>, то соединение открыто успешно, иначе <see langword="false"/>.
-            </returns>
-        </member>
-        <member name="M:RIS.Connection.MySQL.MySQLConnection.OpenConnection(System.Byte,System.TimeSpan,System.String)">
-            <summary>
-                Открывает соединения в количестве <paramref name="numberConnections"/> c MySQL базой данных с использованием строки подключения <paramref name="connectionString"/> и стандартного времени ожидания SQL-команд <paramref name="timeSpanTimeout"/>
-            </summary>
-            <param name="numberConnections">
-                Количество SQL-соединений <see cref="T:MySql.Data.MySqlClient.MySqlConnection"/>
-            </param>
-            <param name="timeSpanTimeout">
-                Стандартное время ожидания SQL-команд.
-            </param>
-            <param name="connectionString">
-                Строка подключения для создания соединения с базой данных.
-            </param>
-            <returns>
-                Значение типа <see cref="T:System.Boolean"/>. Если <see langword="true"/>, то соединение открыто успешно, иначе <see langword="false"/>.
-            </returns>
-        </member>
         <member name="M:RIS.Connection.MySQL.MySQLConnection.OpenConnection(System.Byte,System.String,System.String,System.String,System.String,System.String)">
             <summary>
                 Открывает соединения в количестве <paramref name="numberConnections"/> c MySQL базой данных <paramref name="database"/>, расположенной по адресу хоста <paramref name="ipAddress"/>, используя кодировку <paramref name="charset"/> и аутентификацию по имени пользователя (логину) <paramref name="login"/> и паролю <paramref name="password"/>
@@ -118,14 +70,14 @@
                 Значение типа <see cref="T:System.Boolean"/>. Если <see langword="true"/>, то соединение открыто успешно, иначе <see langword="false"/>.
             </returns>
         </member>
-        <member name="M:RIS.Connection.MySQL.MySQLConnection.OpenConnection(System.Byte,System.UInt16,System.String,System.String,System.String,System.String,System.String)">
+        <member name="M:RIS.Connection.MySQL.MySQLConnection.OpenConnection(System.Byte,System.UInt32,System.String,System.String,System.String,System.String,System.String)">
             <summary>
-                Открывает соединения в количестве <paramref name="numberConnections"/> c MySQL базой данных <paramref name="database"/>, расположенной по адресу хоста <paramref name="ipAddress"/>, используя кодировку <paramref name="charset"/>, стандартное время ожидания SQL-команд <paramref name="millisecondsCommandTimeout"/> и аутентификацию по имени пользователя (логину) <paramref name="login"/> и паролю <paramref name="password"/>
+                Открывает соединения в количестве <paramref name="numberConnections"/> c MySQL базой данных <paramref name="database"/>, расположенной по адресу хоста <paramref name="ipAddress"/>, используя кодировку <paramref name="charset"/>, стандартное время ожидания SQL-команд <paramref name="millisecondsTimeout"/> и аутентификацию по имени пользователя (логину) <paramref name="login"/> и паролю <paramref name="password"/>
             </summary>
             <param name="numberConnections">
                 Количество SQL-соединений <see cref="T:MySql.Data.MySqlClient.MySqlConnection"/>
             </param>
-            <param name="millisecondsCommandTimeout">
+            <param name="millisecondsTimeout">
                 Стандартное время ожидания SQL-команд.
             </param>
             <param name="ipAddress">
@@ -149,12 +101,12 @@
         </member>
         <member name="M:RIS.Connection.MySQL.MySQLConnection.OpenConnection(System.Byte,System.TimeSpan,System.String,System.String,System.String,System.String,System.String)">
             <summary>
-                Открывает соединения в количестве <paramref name="numberConnections"/> c MySQL базой данных <paramref name="database"/>, расположенной по адресу хоста <paramref name="ipAddress"/>, используя кодировку <paramref name="charset"/>, стандартное время ожидания SQL-команд <paramref name="timeSpanTimeout"/> и аутентификацию по имени пользователя (логину) <paramref name="login"/> и паролю <paramref name="password"/>
+                Открывает соединения в количестве <paramref name="numberConnections"/> c MySQL базой данных <paramref name="database"/>, расположенной по адресу хоста <paramref name="ipAddress"/>, используя кодировку <paramref name="charset"/>, стандартное время ожидания SQL-команд <paramref name="timeout"/> и аутентификацию по имени пользователя (логину) <paramref name="login"/> и паролю <paramref name="password"/>
             </summary>
             <param name="numberConnections">
                 Количество SQL-соединений <see cref="T:MySql.Data.MySqlClient.MySqlConnection"/>
             </param>
-            <param name="timeSpanTimeout">
+            <param name="timeout">
                 Стандартное время ожидания SQL-команд.
             </param>
             <param name="ipAddress">
@@ -171,6 +123,54 @@
             </param>
             <param name="charset">
                 Кодировка для передаваемых и принимаемых данных.
+            </param>
+            <returns>
+                Значение типа <see cref="T:System.Boolean"/>. Если <see langword="true"/>, то соединение открыто успешно, иначе <see langword="false"/>.
+            </returns>
+        </member>
+        <member name="M:RIS.Connection.MySQL.MySQLConnection.OpenConnection(System.Byte,System.String)">
+            <summary>
+                Открывает соединения в количестве <paramref name="numberConnections"/> c MySQL базой данных с использованием строки подключения <paramref name="connectionString"/>
+            </summary>
+            <param name="numberConnections">
+                Количество SQL-соединений <see cref="T:MySql.Data.MySqlClient.MySqlConnection"/>
+            </param>
+            <param name="connectionString">
+                Строка подключения для создания соединения с базой данных.
+            </param>
+            <returns>
+                Значение типа <see cref="T:System.Boolean"/>. Если <see langword="true"/>, то соединение открыто успешно, иначе <see langword="false"/>.
+            </returns>
+        </member>
+        <member name="M:RIS.Connection.MySQL.MySQLConnection.OpenConnection(System.Byte,System.UInt32,System.String)">
+            <summary>
+                Открывает соединения в количестве <paramref name="numberConnections"/> c MySQL базой данных с использованием строки подключения <paramref name="connectionString"/> и стандартного времени ожидания SQL-команд <paramref name="millisecondsTimeout"/>
+            </summary>
+            <param name="numberConnections">
+                Количество SQL-соединений <see cref="T:MySql.Data.MySqlClient.MySqlConnection"/>
+            </param>
+            <param name="millisecondsTimeout">
+                Стандартное время ожидания SQL-команд.
+            </param>
+            <param name="connectionString">
+                Строка подключения для создания соединения с базой данных.
+            </param>
+            <returns>
+                Значение типа <see cref="T:System.Boolean"/>. Если <see langword="true"/>, то соединение открыто успешно, иначе <see langword="false"/>.
+            </returns>
+        </member>
+        <member name="M:RIS.Connection.MySQL.MySQLConnection.OpenConnection(System.Byte,System.TimeSpan,System.String)">
+            <summary>
+                Открывает соединения в количестве <paramref name="numberConnections"/> c MySQL базой данных с использованием строки подключения <paramref name="connectionString"/> и стандартного времени ожидания SQL-команд <paramref name="timeout"/>
+            </summary>
+            <param name="numberConnections">
+                Количество SQL-соединений <see cref="T:MySql.Data.MySqlClient.MySqlConnection"/>
+            </param>
+            <param name="timeout">
+                Стандартное время ожидания SQL-команд.
+            </param>
+            <param name="connectionString">
+                Строка подключения для создания соединения с базой данных.
             </param>
             <returns>
                 Значение типа <see cref="T:System.Boolean"/>. Если <see langword="true"/>, то соединение открыто успешно, иначе <see langword="false"/>.
@@ -205,9 +205,9 @@
             </returns>
             <exception cref="T:System.Exception"></exception>
         </member>
-        <member name="M:RIS.Connection.MySQL.Requests.ExecStoredProcedure(System.String,System.ValueTuple{System.String,System.String}[],System.String[],System.String[]@,System.Data.IsolationLevel)">
+        <member name="M:RIS.Connection.MySQL.Requests.ExecStoredProcedure(System.String,System.ValueTuple{System.String,System.String}[],System.String[],System.Data.IsolationLevel)">
             <summary>
-                Вызывает выполнение хранимой процедуры с названием <paramref name="nameProcedure"/>, входными параметрами <paramref name="inParametersProcedure"/> и выходными параметрами <paramref name="outParametersNamesProcedure"/>.
+                (Синхронно) Вызывает выполнение хранимой процедуры с названием <paramref name="nameProcedure"/>, входными параметрами <paramref name="inParametersProcedure"/> и выходными параметрами <paramref name="outParametersNamesProcedure"/>.
             </summary>
             <param name="nameProcedure">
                 Название процедуры.
@@ -219,22 +219,20 @@
             </param>
             <param name="outParametersNamesProcedure">
                 Массив названий выходных параметров процедуры.
-            </param>
-            <param name="outputValues">
-                Массив значений выходных параметров процедуры, доступных после её вызова.
             </param>
             <param name="isolationLevel">
                 Уровень изоляции транзакции.
             </param>
             <returns>
-                Значение типа <see cref="T:System.Int64"/>, возвращённое оператором RETURN.
+                Значение типа <see cref="T:System.Int64"/>, возвращённое оператором RETURN и массив значений типа <see cref="T:System.String"/> выходных параметров процедуры, доступных после её вызова.
             </returns>
             <exception cref="T:MySql.Data.MySqlClient.MySqlException"></exception>
             <exception cref="T:System.TimeoutException"></exception>
+            <exception cref="T:System.AggregateException"></exception>
         </member>
-        <member name="M:RIS.Connection.MySQL.Requests.ExecStoredProcedure(System.String,System.ValueTuple{System.String,System.String}[],System.String[],System.String[]@,System.TimeSpan,System.Data.IsolationLevel)">
+        <member name="M:RIS.Connection.MySQL.Requests.ExecStoredProcedure(System.String,System.ValueTuple{System.String,System.String}[],System.String[],System.TimeSpan,System.Data.IsolationLevel)">
             <summary>
-                Вызывает выполнение хранимой процедуры с названием <paramref name="nameProcedure"/>, входными параметрами <paramref name="inParametersProcedure"/>, выходными параметрами <paramref name="outParametersNamesProcedure"/> и временем ожидания <paramref name="timeout"/>.
+                (Синхронно) Вызывает выполнение хранимой процедуры с названием <paramref name="nameProcedure"/>, входными параметрами <paramref name="inParametersProcedure"/>, выходными параметрами <paramref name="outParametersNamesProcedure"/> и временем ожидания <paramref name="timeout"/>.
             </summary>
             <param name="nameProcedure">
                 Название процедуры.
@@ -246,9 +244,6 @@
             </param>
             <param name="outParametersNamesProcedure">
                 Массив названий выходных параметров процедуры.
-            </param>
-            <param name="outputValues">
-                Массив значений выходных параметров процедуры, доступных после её вызова.
             </param>
             <param name="timeout">
                 Время ожидания ответа от сервера.
@@ -257,14 +252,15 @@
                 Уровень изоляции транзакции.
             </param>
             <returns>
-                Значение типа <see cref="T:System.Int64"/>, возвращённое оператором RETURN.
+                Значение типа <see cref="T:System.Int64"/>, возвращённое оператором RETURN и массив значений типа <see cref="T:System.String"/> выходных параметров процедуры, доступных после её вызова.
             </returns>
             <exception cref="T:MySql.Data.MySqlClient.MySqlException"></exception>
             <exception cref="T:System.TimeoutException"></exception>
+            <exception cref="T:System.AggregateException"></exception>
         </member>
-        <member name="M:RIS.Connection.MySQL.Requests.ExecStoredProcedureNotReturn(System.String,System.ValueTuple{System.String,System.String}[],System.String[],System.String[]@,System.Data.IsolationLevel)">
+        <member name="M:RIS.Connection.MySQL.Requests.ExecStoredProcedureAsync(System.String,System.ValueTuple{System.String,System.String}[],System.String[],System.Data.IsolationLevel)">
             <summary>
-                Вызывает выполнение хранимой процедуры с названием <paramref name="nameProcedure"/> без получения результата, входными параметрами <paramref name="inParametersProcedure"/> и выходными параметрами <paramref name="outParametersNamesProcedure"/>.
+                (Асинхронно) Вызывает выполнение хранимой процедуры с названием <paramref name="nameProcedure"/>, входными параметрами <paramref name="inParametersProcedure"/> и выходными параметрами <paramref name="outParametersNamesProcedure"/>.
             </summary>
             <param name="nameProcedure">
                 Название процедуры.
@@ -276,22 +272,20 @@
             </param>
             <param name="outParametersNamesProcedure">
                 Массив названий выходных параметров процедуры.
-            </param>
-            <param name="outputValues">
-                Массив значений выходных параметров процедуры, доступных после её вызова.
             </param>
             <param name="isolationLevel">
                 Уровень изоляции транзакции.
             </param>
             <returns>
-                Имеет возвращаемый тип <see langword="void"/>.
+                Значение типа <see cref="T:System.Int64"/>, возвращённое оператором RETURN и массив значений типа <see cref="T:System.String"/> выходных параметров процедуры, доступных после её вызова.
             </returns>
             <exception cref="T:MySql.Data.MySqlClient.MySqlException"></exception>
             <exception cref="T:System.TimeoutException"></exception>
+            <exception cref="T:System.AggregateException"></exception>
         </member>
-        <member name="M:RIS.Connection.MySQL.Requests.ExecStoredProcedureNotReturn(System.String,System.ValueTuple{System.String,System.String}[],System.String[],System.String[]@,System.TimeSpan,System.Data.IsolationLevel)">
+        <member name="M:RIS.Connection.MySQL.Requests.ExecStoredProcedureAsync(System.String,System.ValueTuple{System.String,System.String}[],System.String[],System.TimeSpan,System.Data.IsolationLevel)">
             <summary>
-                Вызывает выполнение хранимой процедуры с названием <paramref name="nameProcedure"/> без получения результата, входными параметрами <paramref name="inParametersProcedure"/>, выходными параметрами <paramref name="outParametersNamesProcedure"/> и временем ожидания <paramref name="timeout"/>.
+                (Асинхронно) Вызывает выполнение хранимой процедуры с названием <paramref name="nameProcedure"/>, входными параметрами <paramref name="inParametersProcedure"/>, выходными параметрами <paramref name="outParametersNamesProcedure"/> и временем ожидания <paramref name="timeout"/>.
             </summary>
             <param name="nameProcedure">
                 Название процедуры.
@@ -303,9 +297,6 @@
             </param>
             <param name="outParametersNamesProcedure">
                 Массив названий выходных параметров процедуры.
-            </param>
-            <param name="outputValues">
-                Массив значений выходных параметров процедуры, доступных после её вызова.
             </param>
             <param name="timeout">
                 Время ожидания ответа от сервера.
@@ -314,14 +305,121 @@
                 Уровень изоляции транзакции.
             </param>
             <returns>
-                Имеет возвращаемый тип <see langword="void"/>.
+                Значение типа <see cref="T:System.Int64"/>, возвращённое оператором RETURN и массив значений типа <see cref="T:System.String"/> выходных параметров процедуры, доступных после её вызова.
             </returns>
             <exception cref="T:MySql.Data.MySqlClient.MySqlException"></exception>
             <exception cref="T:System.TimeoutException"></exception>
+            <exception cref="T:System.AggregateException"></exception>
+        </member>
+        <member name="M:RIS.Connection.MySQL.Requests.ExecStoredProcedureNotReturn(System.String,System.ValueTuple{System.String,System.String}[],System.String[],System.Data.IsolationLevel)">
+            <summary>
+                (Синхронно) Вызывает выполнение хранимой процедуры с названием <paramref name="nameProcedure"/> без получения результата, входными параметрами <paramref name="inParametersProcedure"/> и выходными параметрами <paramref name="outParametersNamesProcedure"/>.
+            </summary>
+            <param name="nameProcedure">
+                Название процедуры.
+            </param>
+            <param name="inParametersProcedure">
+                Входные параметры процедуры.
+                Name - название параметра.
+                Value - значение параметра.
+            </param>
+            <param name="outParametersNamesProcedure">
+                Массив названий выходных параметров процедуры.
+            </param>
+            <param name="isolationLevel">
+                Уровень изоляции транзакции.
+            </param>
+            <returns>
+                Массив значений типа <see cref="T:System.String"/> выходных параметров процедуры, доступных после её вызова.
+            </returns>
+            <exception cref="T:MySql.Data.MySqlClient.MySqlException"></exception>
+            <exception cref="T:System.TimeoutException"></exception>
+            <exception cref="T:System.AggregateException"></exception>
+        </member>
+        <member name="M:RIS.Connection.MySQL.Requests.ExecStoredProcedureNotReturn(System.String,System.ValueTuple{System.String,System.String}[],System.String[],System.TimeSpan,System.Data.IsolationLevel)">
+            <summary>
+                (Синхронно) Вызывает выполнение хранимой процедуры с названием <paramref name="nameProcedure"/> без получения результата, входными параметрами <paramref name="inParametersProcedure"/>, выходными параметрами <paramref name="outParametersNamesProcedure"/> и временем ожидания <paramref name="timeout"/>.
+            </summary>
+            <param name="nameProcedure">
+                Название процедуры.
+            </param>
+            <param name="inParametersProcedure">
+                Входные параметры процедуры.
+                Name - название параметра.
+                Value - значение параметра.
+            </param>
+            <param name="outParametersNamesProcedure">
+                Массив названий выходных параметров процедуры.
+            </param>
+            <param name="timeout">
+                Время ожидания ответа от сервера.
+            </param>
+            <param name="isolationLevel">
+                Уровень изоляции транзакции.
+            </param>
+            <returns>
+                Массив значений типа <see cref="T:System.String"/> выходных параметров процедуры, доступных после её вызова.
+            </returns>
+            <exception cref="T:MySql.Data.MySqlClient.MySqlException"></exception>
+            <exception cref="T:System.TimeoutException"></exception>
+            <exception cref="T:System.AggregateException"></exception>
+        </member>
+        <member name="M:RIS.Connection.MySQL.Requests.ExecStoredProcedureNotReturnAsync(System.String,System.ValueTuple{System.String,System.String}[],System.String[],System.Data.IsolationLevel)">
+            <summary>
+                (Асинхронно) Вызывает выполнение хранимой процедуры с названием <paramref name="nameProcedure"/> без получения результата, входными параметрами <paramref name="inParametersProcedure"/> и выходными параметрами <paramref name="outParametersNamesProcedure"/>.
+            </summary>
+            <param name="nameProcedure">
+                Название процедуры.
+            </param>
+            <param name="inParametersProcedure">
+                Входные параметры процедуры.
+                Name - название параметра.
+                Value - значение параметра.
+            </param>
+            <param name="outParametersNamesProcedure">
+                Массив названий выходных параметров процедуры.
+            </param>
+            <param name="isolationLevel">
+                Уровень изоляции транзакции.
+            </param>
+            <returns>
+                Массив значений типа <see cref="T:System.String"/> выходных параметров процедуры, доступных после её вызова.
+            </returns>
+            <exception cref="T:MySql.Data.MySqlClient.MySqlException"></exception>
+            <exception cref="T:System.TimeoutException"></exception>
+            <exception cref="T:System.AggregateException"></exception>
+        </member>
+        <member name="M:RIS.Connection.MySQL.Requests.ExecStoredProcedureNotReturnAsync(System.String,System.ValueTuple{System.String,System.String}[],System.String[],System.TimeSpan,System.Data.IsolationLevel)">
+            <summary>
+                (Асинхронно) Вызывает выполнение хранимой процедуры с названием <paramref name="nameProcedure"/> без получения результата, входными параметрами <paramref name="inParametersProcedure"/>, выходными параметрами <paramref name="outParametersNamesProcedure"/> и временем ожидания <paramref name="timeout"/>.
+            </summary>
+            <param name="nameProcedure">
+                Название процедуры.
+            </param>
+            <param name="inParametersProcedure">
+                Входные параметры процедуры.
+                Name - название параметра.
+                Value - значение параметра.
+            </param>
+            <param name="outParametersNamesProcedure">
+                Массив названий выходных параметров процедуры.
+            </param>
+            <param name="timeout">
+                Время ожидания ответа от сервера.
+            </param>
+            <param name="isolationLevel">
+                Уровень изоляции транзакции.
+            </param>
+            <returns>
+                Массив значений типа <see cref="T:System.String"/> выходных параметров процедуры, доступных после её вызова.
+            </returns>
+            <exception cref="T:MySql.Data.MySqlClient.MySqlException"></exception>
+            <exception cref="T:System.TimeoutException"></exception>
+            <exception cref="T:System.AggregateException"></exception>
         </member>
         <member name="M:RIS.Connection.MySQL.Requests.CustomCommand(System.String,System.Data.IsolationLevel)">
             <summary>
-                Вызывает выполнение команды с текстом <paramref name="commandText"/>.
+                (Синхронно) Вызывает выполнение команды с текстом <paramref name="commandText"/>.
             </summary>
             <param name="commandText">
                 Текст команды.
@@ -334,10 +432,11 @@
             </returns>
             <exception cref="T:MySql.Data.MySqlClient.MySqlException"></exception>
             <exception cref="T:System.TimeoutException"></exception>
+            <exception cref="T:System.AggregateException"></exception>
         </member>
         <member name="M:RIS.Connection.MySQL.Requests.CustomCommand(System.String,System.TimeSpan,System.Data.IsolationLevel)">
             <summary>
-                Вызывает выполнение команды с текстом <paramref name="commandText"/> и временем ожидания <paramref name="timeout"/>.
+                (Синхронно) Вызывает выполнение команды с текстом <paramref name="commandText"/> и временем ожидания <paramref name="timeout"/>.
             </summary>
             <param name="commandText">
                 Текст команды.
@@ -353,10 +452,48 @@
             </returns>
             <exception cref="T:MySql.Data.MySqlClient.MySqlException"></exception>
             <exception cref="T:System.TimeoutException"></exception>
+            <exception cref="T:System.AggregateException"></exception>
+        </member>
+        <member name="M:RIS.Connection.MySQL.Requests.CustomCommandAsync(System.String,System.Data.IsolationLevel)">
+            <summary>
+                (Асинхронно) Вызывает выполнение команды с текстом <paramref name="commandText"/>.
+            </summary>
+            <param name="commandText">
+                Текст команды.
+            </param>
+            <param name="isolationLevel">
+                Уровень изоляции транзакции.
+            </param>
+            <returns>
+                Значение типа <see cref="T:System.Data.DataSet"/>, которое содержит ответ сервера.
+            </returns>
+            <exception cref="T:MySql.Data.MySqlClient.MySqlException"></exception>
+            <exception cref="T:System.TimeoutException"></exception>
+            <exception cref="T:System.AggregateException"></exception>
+        </member>
+        <member name="M:RIS.Connection.MySQL.Requests.CustomCommandAsync(System.String,System.TimeSpan,System.Data.IsolationLevel)">
+            <summary>
+                (Асинхронно) Вызывает выполнение команды с текстом <paramref name="commandText"/> и временем ожидания <paramref name="timeout"/>.
+            </summary>
+            <param name="commandText">
+                Текст команды.
+            </param>
+            <param name="timeout">
+                Время ожидания ответа от сервера.
+            </param>
+            <param name="isolationLevel">
+                Уровень изоляции транзакции.
+            </param>
+            <returns>
+                Значение типа <see cref="T:System.Data.DataSet"/>, которое содержит ответ сервера.
+            </returns>
+            <exception cref="T:MySql.Data.MySqlClient.MySqlException"></exception>
+            <exception cref="T:System.TimeoutException"></exception>
+            <exception cref="T:System.AggregateException"></exception>
         </member>
         <member name="M:RIS.Connection.MySQL.Requests.CustomCommand(System.String,System.ValueTuple{System.String,System.String}[],System.Data.IsolationLevel)">
             <summary>
-                Вызывает выполнение команды с текстом <paramref name="commandText"/> и параметрами <paramref name="parameters"/>.
+                (Синхронно) Вызывает выполнение команды с текстом <paramref name="commandText"/> и параметрами <paramref name="parameters"/>.
             </summary>
             <param name="commandText">
                 Текст команды.
@@ -374,10 +511,11 @@
             </returns>
             <exception cref="T:MySql.Data.MySqlClient.MySqlException"></exception>
             <exception cref="T:System.TimeoutException"></exception>
+            <exception cref="T:System.AggregateException"></exception>
         </member>
         <member name="M:RIS.Connection.MySQL.Requests.CustomCommand(System.String,System.ValueTuple{System.String,System.String}[],System.TimeSpan,System.Data.IsolationLevel)">
             <summary>
-                Вызывает выполнение команды с текстом <paramref name="commandText"/>, параметрами <paramref name="parameters"/> и временем ожидания <paramref name="timeout"/>.
+                (Синхронно) Вызывает выполнение команды с текстом <paramref name="commandText"/>, параметрами <paramref name="parameters"/> и временем ожидания <paramref name="timeout"/>.
             </summary>
             <param name="commandText">
                 Текст команды.
@@ -398,10 +536,58 @@
             </returns>
             <exception cref="T:MySql.Data.MySqlClient.MySqlException"></exception>
             <exception cref="T:System.TimeoutException"></exception>
+            <exception cref="T:System.AggregateException"></exception>
+        </member>
+        <member name="M:RIS.Connection.MySQL.Requests.CustomCommandAsync(System.String,System.ValueTuple{System.String,System.String}[],System.Data.IsolationLevel)">
+            <summary>
+                (Асинхронно) Вызывает выполнение команды с текстом <paramref name="commandText"/> и параметрами <paramref name="parameters"/>.
+            </summary>
+            <param name="commandText">
+                Текст команды.
+            </param>
+            <param name="parameters">
+                Параметры команды.
+                Name - название параметра.
+                Value - значение параметра.
+            </param>
+            <param name="isolationLevel">
+                Уровень изоляции транзакции.
+            </param>
+            <returns>
+                Значение типа <see cref="T:System.Data.DataSet"/>, которое содержит ответ сервера.
+            </returns>
+            <exception cref="T:MySql.Data.MySqlClient.MySqlException"></exception>
+            <exception cref="T:System.TimeoutException"></exception>
+            <exception cref="T:System.AggregateException"></exception>
+        </member>
+        <member name="M:RIS.Connection.MySQL.Requests.CustomCommandAsync(System.String,System.ValueTuple{System.String,System.String}[],System.TimeSpan,System.Data.IsolationLevel)">
+            <summary>
+                (Асинхронно) Вызывает выполнение команды с текстом <paramref name="commandText"/>, параметрами <paramref name="parameters"/> и временем ожидания <paramref name="timeout"/>.
+            </summary>
+            <param name="commandText">
+                Текст команды.
+            </param>
+            <param name="parameters">
+                Параметры команды.
+                Name - название параметра.
+                Value - значение параметра.
+            </param>
+            <param name="timeout">
+                Время ожидания ответа от сервера.
+            </param>
+            <param name="isolationLevel">
+                Уровень изоляции транзакции.
+            </param>
+            <returns>
+                Значение типа <see cref="T:System.Data.DataSet"/>, которое содержит ответ сервера.
+            </returns>
+            <exception cref="T:MySql.Data.MySqlClient.MySqlException"></exception>
+            <exception cref="T:System.TimeoutException"></exception>
+            <exception cref="T:System.AggregateException"></exception>
         </member>
         <member name="M:RIS.Connection.MySQL.Requests.CustomCommandNonQuery(System.String,System.Data.IsolationLevel)">
             <summary>
-                Вызывает выполнение без получения результата команды с текстом <paramref name="commandText"/>.
+                (Синхронно) Вызывает выполнение без получения результата команды с текстом <paramref name="commandText"/>.
             </summary>
             <param name="commandText">
                 Текст команды.
@@ -414,10 +600,11 @@
             </returns>
             <exception cref="T:MySql.Data.MySqlClient.MySqlException"></exception>
             <exception cref="T:System.TimeoutException"></exception>
+            <exception cref="T:System.AggregateException"></exception>
         </member>
         <member name="M:RIS.Connection.MySQL.Requests.CustomCommandNonQuery(System.String,System.TimeSpan,System.Data.IsolationLevel)">
             <summary>
-                Вызывает выполнение без получения результата команды с текстом <paramref name="commandText"/> и временем ожидания <paramref name="timeout"/>.
+                (Синхронно) Вызывает выполнение без получения результата команды с текстом <paramref name="commandText"/> и временем ожидания <paramref name="timeout"/>.
             </summary>
             <param name="commandText">
                 Текст команды.
@@ -433,10 +620,48 @@
             </returns>
             <exception cref="T:MySql.Data.MySqlClient.MySqlException"></exception>
             <exception cref="T:System.TimeoutException"></exception>
+            <exception cref="T:System.AggregateException"></exception>
+        </member>
+        <member name="M:RIS.Connection.MySQL.Requests.CustomCommandNonQueryAsync(System.String,System.Data.IsolationLevel)">
+            <summary>
+                (Асинхронно) Вызывает выполнение без получения результата команды с текстом <paramref name="commandText"/>.
+            </summary>
+            <param name="commandText">
+                Текст команды.
+            </param>
+            <param name="isolationLevel">
+                Уровень изоляции транзакции.
+            </param>
+            <returns>
+                Имеет возвращаемый тип <see langword="void"/>.
+            </returns>
+            <exception cref="T:MySql.Data.MySqlClient.MySqlException"></exception>
+            <exception cref="T:System.TimeoutException"></exception>
+            <exception cref="T:System.AggregateException"></exception>
+        </member>
+        <member name="M:RIS.Connection.MySQL.Requests.CustomCommandNonQueryAsync(System.String,System.TimeSpan,System.Data.IsolationLevel)">
+            <summary>
+                (Асинхронно) Вызывает выполнение без получения результата команды с текстом <paramref name="commandText"/> и временем ожидания <paramref name="timeout"/>.
+            </summary>
+            <param name="commandText">
+                Текст команды.
+            </param>
+            <param name="timeout">
+                Время ожидания ответа от сервера.
+            </param>
+            <param name="isolationLevel">
+                Уровень изоляции транзакции.
+            </param>
+            <returns>
+                Имеет возвращаемый тип <see langword="void"/>.
+            </returns>
+            <exception cref="T:MySql.Data.MySqlClient.MySqlException"></exception>
+            <exception cref="T:System.TimeoutException"></exception>
+            <exception cref="T:System.AggregateException"></exception>
         </member>
         <member name="M:RIS.Connection.MySQL.Requests.CustomCommandNonQuery(System.String,System.ValueTuple{System.String,System.String}[],System.Data.IsolationLevel)">
             <summary>
-                Вызывает выполнение без получения результата команды с текстом <paramref name="commandText"/> и параметрами <paramref name="parameters"/>.
+                (Синхронно) Вызывает выполнение без получения результата команды с текстом <paramref name="commandText"/> и параметрами <paramref name="parameters"/>.
             </summary>
             <param name="commandText">
                 Текст команды.
@@ -454,10 +679,11 @@
             </returns>
             <exception cref="T:MySql.Data.MySqlClient.MySqlException"></exception>
             <exception cref="T:System.TimeoutException"></exception>
+            <exception cref="T:System.AggregateException"></exception>
         </member>
         <member name="M:RIS.Connection.MySQL.Requests.CustomCommandNonQuery(System.String,System.ValueTuple{System.String,System.String}[],System.TimeSpan,System.Data.IsolationLevel)">
             <summary>
-                Вызывает выполнение без получения результата команды с текстом <paramref name="commandText"/>, параметрами <paramref name="parameters"/> и временем ожидания <paramref name="timeout"/>.
+                (Синхронно) Вызывает выполнение без получения результата команды с текстом <paramref name="commandText"/>, параметрами <paramref name="parameters"/> и временем ожидания <paramref name="timeout"/>.
             </summary>
             <param name="commandText">
                 Текст команды.
@@ -478,10 +704,58 @@
             </returns>
             <exception cref="T:MySql.Data.MySqlClient.MySqlException"></exception>
             <exception cref="T:System.TimeoutException"></exception>
+            <exception cref="T:System.AggregateException"></exception>
+        </member>
+        <member name="M:RIS.Connection.MySQL.Requests.CustomCommandNonQueryAsync(System.String,System.ValueTuple{System.String,System.String}[],System.Data.IsolationLevel)">
+            <summary>
+                (Асинхронно) Вызывает выполнение без получения результата команды с текстом <paramref name="commandText"/> и параметрами <paramref name="parameters"/>.
+            </summary>
+            <param name="commandText">
+                Текст команды.
+            </param>
+            <param name="parameters">
+                Параметры команды.
+                Name - название параметра.
+                Value - значение параметра.
+            </param>
+            <param name="isolationLevel">
+                Уровень изоляции транзакции.
+            </param>
+            <returns>
+                Имеет возвращаемый тип <see langword="void"/>.
+            </returns>
+            <exception cref="T:MySql.Data.MySqlClient.MySqlException"></exception>
+            <exception cref="T:System.TimeoutException"></exception>
+            <exception cref="T:System.AggregateException"></exception>
+        </member>
+        <member name="M:RIS.Connection.MySQL.Requests.CustomCommandNonQueryAsync(System.String,System.ValueTuple{System.String,System.String}[],System.TimeSpan,System.Data.IsolationLevel)">
+            <summary>
+                (Асинхронно) Вызывает выполнение без получения результата команды с текстом <paramref name="commandText"/>, параметрами <paramref name="parameters"/> и временем ожидания <paramref name="timeout"/>.
+            </summary>
+            <param name="commandText">
+                Текст команды.
+            </param>
+            <param name="parameters">
+                Параметры команды.
+                Name - название параметра.
+                Value - значение параметра.
+            </param>
+            <param name="timeout">
+                Время ожидания ответа от сервера.
+            </param>
+            <param name="isolationLevel">
+                Уровень изоляции транзакции.
+            </param>
+            <returns>
+                Имеет возвращаемый тип <see langword="void"/>.
+            </returns>
+            <exception cref="T:MySql.Data.MySqlClient.MySqlException"></exception>
+            <exception cref="T:System.TimeoutException"></exception>
+            <exception cref="T:System.AggregateException"></exception>
         </member>
         <member name="M:RIS.Connection.MySQL.Requests.SelectFunction(System.String,System.String[],System.Data.IsolationLevel)">
             <summary>
-                Вызывает SELECT для получения результата функции.
+                (Синхронно) Вызывает SELECT для получения результата функции.
             </summary>
             <param name="nameFunction">
                 Название функции.
@@ -497,10 +771,11 @@
             </returns>
             <exception cref="T:MySql.Data.MySqlClient.MySqlException"></exception>
             <exception cref="T:System.TimeoutException"></exception>
+            <exception cref="T:System.AggregateException"></exception>
         </member>
         <member name="M:RIS.Connection.MySQL.Requests.SelectFunction(System.String,System.String[],System.TimeSpan,System.Data.IsolationLevel)">
             <summary>
-                Вызывает SELECT для получения результата функции с временем ожидания <paramref name="timeout"/>.
+                (Синхронно) Вызывает SELECT для получения результата функции с временем ожидания <paramref name="timeout"/>.
             </summary>
             <param name="nameFunction">
                 Название функции.
@@ -519,10 +794,54 @@
             </returns>
             <exception cref="T:MySql.Data.MySqlClient.MySqlException"></exception>
             <exception cref="T:System.TimeoutException"></exception>
+            <exception cref="T:System.AggregateException"></exception>
+        </member>
+        <member name="M:RIS.Connection.MySQL.Requests.SelectFunctionAsync(System.String,System.String[],System.Data.IsolationLevel)">
+            <summary>
+                (Асинхронно) Вызывает SELECT для получения результата функции.
+            </summary>
+            <param name="nameFunction">
+                Название функции.
+            </param>
+            <param name="parametersValuesFunction">
+                Параметры функции. Передайте пустой массив для вызова функции без параметров.
+            </param>
+            <param name="isolationLevel">
+                Уровень изоляции транзакции.
+            </param>
+            <returns>
+                Значение типа <see cref="T:System.String"/>, которое содержит ответ сервера.
+            </returns>
+            <exception cref="T:MySql.Data.MySqlClient.MySqlException"></exception>
+            <exception cref="T:System.TimeoutException"></exception>
+            <exception cref="T:System.AggregateException"></exception>
+        </member>
+        <member name="M:RIS.Connection.MySQL.Requests.SelectFunctionAsync(System.String,System.String[],System.TimeSpan,System.Data.IsolationLevel)">
+            <summary>
+                (Асинхронно) Вызывает SELECT для получения результата функции с временем ожидания <paramref name="timeout"/>.
+            </summary>
+            <param name="nameFunction">
+                Название функции.
+            </param>
+            <param name="parametersValuesFunction">
+                Параметры функции. Передайте пустой массив для вызова функции без параметров.
+            </param>
+            <param name="timeout">
+                Время ожидания ответа от сервера.
+            </param>
+            <param name="isolationLevel">
+                Уровень изоляции транзакции.
+            </param>
+            <returns>
+                Значение типа <see cref="T:System.String"/>, которое содержит ответ сервера.
+            </returns>
+            <exception cref="T:MySql.Data.MySqlClient.MySqlException"></exception>
+            <exception cref="T:System.TimeoutException"></exception>
+            <exception cref="T:System.AggregateException"></exception>
         </member>
         <member name="M:RIS.Connection.MySQL.Requests.SelectFunction(System.String,System.String[],System.String,System.Data.IsolationLevel)">
             <summary>
-                Вызывает SELECT в таблице <paramref name="tableFunction"/> для получения результата функции.
+                (Синхронно) Вызывает SELECT в таблице <paramref name="tableFunction"/> для получения результата функции.
             </summary>
             <param name="nameFunction">
                 Название функции.
@@ -541,10 +860,11 @@
             </returns>
             <exception cref="T:MySql.Data.MySqlClient.MySqlException"></exception>
             <exception cref="T:System.TimeoutException"></exception>
+            <exception cref="T:System.AggregateException"></exception>
         </member>
         <member name="M:RIS.Connection.MySQL.Requests.SelectFunction(System.String,System.String[],System.String,System.TimeSpan,System.Data.IsolationLevel)">
             <summary>
-                Вызывает SELECT в таблице <paramref name="tableFunction"/> для получения результата функции с временем ожидания <paramref name="timeout"/>.
+                (Синхронно) Вызывает SELECT в таблице <paramref name="tableFunction"/> для получения результата функции с временем ожидания <paramref name="timeout"/>.
             </summary>
             <param name="nameFunction">
                 Название функции.
@@ -566,10 +886,60 @@
             </returns>
             <exception cref="T:MySql.Data.MySqlClient.MySqlException"></exception>
             <exception cref="T:System.TimeoutException"></exception>
+            <exception cref="T:System.AggregateException"></exception>
+        </member>
+        <member name="M:RIS.Connection.MySQL.Requests.SelectFunctionAsync(System.String,System.String[],System.String,System.Data.IsolationLevel)">
+            <summary>
+                (Асинхронно) Вызывает SELECT в таблице <paramref name="tableFunction"/> для получения результата функции.
+            </summary>
+            <param name="nameFunction">
+                Название функции.
+            </param>
+            <param name="parametersValuesFunction">
+                Параметры функции. Передайте пустой массив для вызова функции без параметров.
+            </param>
+            <param name="tableFunction">
+                Таблица, для которой будет вызван SELECT.
+            </param>
+            <param name="isolationLevel">
+                Уровень изоляции транзакции.
+            </param>
+            <returns>
+                Значение типа <see cref="T:System.String"/>, которое содержит ответ сервера.
+            </returns>
+            <exception cref="T:MySql.Data.MySqlClient.MySqlException"></exception>
+            <exception cref="T:System.TimeoutException"></exception>
+            <exception cref="T:System.AggregateException"></exception>
+        </member>
+        <member name="M:RIS.Connection.MySQL.Requests.SelectFunctionAsync(System.String,System.String[],System.String,System.TimeSpan,System.Data.IsolationLevel)">
+            <summary>
+                (Асинхронно) Вызывает SELECT в таблице <paramref name="tableFunction"/> для получения результата функции с временем ожидания <paramref name="timeout"/>.
+            </summary>
+            <param name="nameFunction">
+                Название функции.
+            </param>
+            <param name="parametersValuesFunction">
+                Параметры функции. Передайте пустой массив для вызова функции без параметров.
+            </param>
+            <param name="tableFunction">
+                Таблица, для которой будет вызван SELECT.
+            </param>
+            <param name="timeout">
+                Время ожидания ответа от сервера.
+            </param>
+            <param name="isolationLevel">
+                Уровень изоляции транзакции.
+            </param>
+            <returns>
+                Значение типа <see cref="T:System.String"/>, которое содержит ответ сервера.
+            </returns>
+            <exception cref="T:MySql.Data.MySqlClient.MySqlException"></exception>
+            <exception cref="T:System.TimeoutException"></exception>
+            <exception cref="T:System.AggregateException"></exception>
         </member>
         <member name="M:RIS.Connection.MySQL.Requests.SelectColumn(System.String,System.String,System.UInt64,System.UInt64,System.Data.IsolationLevel)">
             <summary>
-                Вызывает SELECT в таблице <paramref name="table"/> для получения значений столбца <paramref name="column"/> во всех строках.
+                (Синхронно) Вызывает SELECT в таблице <paramref name="table"/> для получения значений столбца <paramref name="column"/> во всех строках.
             </summary>
             <param name="column">
                 Название столбца, значения которого надо получить.
@@ -591,10 +961,11 @@
             </returns>
             <exception cref="T:MySql.Data.MySqlClient.MySqlException"></exception>
             <exception cref="T:System.TimeoutException"></exception>
+            <exception cref="T:System.AggregateException"></exception>
         </member>
         <member name="M:RIS.Connection.MySQL.Requests.SelectColumn(System.String,System.String,System.UInt64,System.UInt64,System.TimeSpan,System.Data.IsolationLevel)">
             <summary>
-                Вызывает SELECT в таблице <paramref name="table"/> для получения значений столбца <paramref name="column"/> во всех строках с временем ожидания <paramref name="timeout"/>.
+                (Синхронно) Вызывает SELECT в таблице <paramref name="table"/> для получения значений столбца <paramref name="column"/> во всех строках с временем ожидания <paramref name="timeout"/>.
             </summary>
             <param name="column">
                 Название столбца, значения которого надо получить.
@@ -619,10 +990,66 @@
             </returns>
             <exception cref="T:MySql.Data.MySqlClient.MySqlException"></exception>
             <exception cref="T:System.TimeoutException"></exception>
+            <exception cref="T:System.AggregateException"></exception>
+        </member>
+        <member name="M:RIS.Connection.MySQL.Requests.SelectColumnAsync(System.String,System.String,System.UInt64,System.UInt64,System.Data.IsolationLevel)">
+            <summary>
+                (Асинхронно) Вызывает SELECT в таблице <paramref name="table"/> для получения значений столбца <paramref name="column"/> во всех строках.
+            </summary>
+            <param name="column">
+                Название столбца, значения которого надо получить.
+            </param>
+            <param name="table">
+                Таблица, для которой будет вызван SELECT.
+            </param>
+            <param name="numberStartRow">
+                Номер строки, с которой начинается считывание (все строки до этой будут пропущены). Укажите 0 или 1, чтобы начать с первой строки.
+            </param>
+            <param name="countRows">
+                Количество строк, которые будут считаны. Укажите 0, чтобы считать все строки, начиная с начальной строки <paramref name="numberStartRow"/>.
+            </param>
+            <param name="isolationLevel">
+                Уровень изоляции транзакции.
+            </param>
+            <returns>
+                Массив типа <see cref="T:System.String"/>, который содержит ответ сервера.
+            </returns>
+            <exception cref="T:MySql.Data.MySqlClient.MySqlException"></exception>
+            <exception cref="T:System.TimeoutException"></exception>
+            <exception cref="T:System.AggregateException"></exception>
+        </member>
+        <member name="M:RIS.Connection.MySQL.Requests.SelectColumnAsync(System.String,System.String,System.UInt64,System.UInt64,System.TimeSpan,System.Data.IsolationLevel)">
+            <summary>
+                (Асинхронно) Вызывает SELECT в таблице <paramref name="table"/> для получения значений столбца <paramref name="column"/> во всех строках с временем ожидания <paramref name="timeout"/>.
+            </summary>
+            <param name="column">
+                Название столбца, значения которого надо получить.
+            </param>
+            <param name="table">
+                Таблица, для которой будет вызван SELECT.
+            </param>
+            <param name="numberStartRow">
+                Номер строки, с которой начинается считывание (все строки до этой будут пропущены). Укажите 0 или 1, чтобы начать с первой строки.
+            </param>
+            <param name="countRows">
+                Количество строк, которые будут считаны. Укажите 0, чтобы считать все строки, начиная с начальной строки <paramref name="numberStartRow"/>.
+            </param>
+            <param name="timeout">
+                Время ожидания ответа от сервера.
+            </param>
+            <param name="isolationLevel">
+                Уровень изоляции транзакции.
+            </param>
+            <returns>
+                Массив типа <see cref="T:System.String"/>, который содержит ответ сервера.
+            </returns>
+            <exception cref="T:MySql.Data.MySqlClient.MySqlException"></exception>
+            <exception cref="T:System.TimeoutException"></exception>
+            <exception cref="T:System.AggregateException"></exception>
         </member>
         <member name="M:RIS.Connection.MySQL.Requests.SelectColumn(System.String,System.String,System.String,System.String,System.UInt64,System.UInt64,System.Data.IsolationLevel)">
             <summary>
-                Вызывает SELECT в таблице <paramref name="table"/> для получения значений столбца <paramref name="column"/> во всех строках с условием выборки: столбец <paramref name="conditionName"/> = <paramref name="conditionValue"/>.
+                (Синхронно) Вызывает SELECT в таблице <paramref name="table"/> для получения значений столбца <paramref name="column"/> во всех строках с условием выборки: столбец <paramref name="conditionName"/> = <paramref name="conditionValue"/>.
             </summary>
             <param name="column">
                 Название столбца, значения которого надо получить.
@@ -650,10 +1077,11 @@
             </returns>
             <exception cref="T:MySql.Data.MySqlClient.MySqlException"></exception>
             <exception cref="T:System.TimeoutException"></exception>
+            <exception cref="T:System.AggregateException"></exception>
         </member>
         <member name="M:RIS.Connection.MySQL.Requests.SelectColumn(System.String,System.String,System.String,System.String,System.UInt64,System.UInt64,System.TimeSpan,System.Data.IsolationLevel)">
             <summary>
-                Вызывает SELECT в таблице <paramref name="table"/> для получения значений столбца <paramref name="column"/> во всех строках с временем ожидания <paramref name="timeout"/> и условием выборки: столбец <paramref name="conditionName"/> = <paramref name="conditionValue"/>.
+                (Синхронно) Вызывает SELECT в таблице <paramref name="table"/> для получения значений столбца <paramref name="column"/> во всех строках с временем ожидания <paramref name="timeout"/> и условием выборки: столбец <paramref name="conditionName"/> = <paramref name="conditionValue"/>.
             </summary>
             <param name="column">
                 Название столбца, значения которого надо получить.
@@ -684,10 +1112,78 @@
             </returns>
             <exception cref="T:MySql.Data.MySqlClient.MySqlException"></exception>
             <exception cref="T:System.TimeoutException"></exception>
+            <exception cref="T:System.AggregateException"></exception>
+        </member>
+        <member name="M:RIS.Connection.MySQL.Requests.SelectColumnAsync(System.String,System.String,System.String,System.String,System.UInt64,System.UInt64,System.Data.IsolationLevel)">
+            <summary>
+                (Асинхронно) Вызывает SELECT в таблице <paramref name="table"/> для получения значений столбца <paramref name="column"/> во всех строках с условием выборки: столбец <paramref name="conditionName"/> = <paramref name="conditionValue"/>.
+            </summary>
+            <param name="column">
+                Название столбца, значения которого надо получить.
+            </param>
+            <param name="table">
+                Таблица, для которой будет вызван SELECT.
+            </param>
+            <param name="conditionName">
+                Название столбца для условия.
+            </param>
+            <param name="conditionValue">
+                Значение столбца для условия.
+            </param>
+            <param name="numberStartRow">
+                Номер строки, с которой начинается считывание (все строки до этой будут пропущены). Укажите 0 или 1, чтобы начать с первой строки.
+            </param>
+            <param name="countRows">
+                Количество строк, которые будут считаны. Укажите 0, чтобы считать все строки, начиная с начальной строки <paramref name="numberStartRow"/>.
+            </param>
+            <param name="isolationLevel">
+                Уровень изоляции транзакции.
+            </param>
+            <returns>
+                Массив типа <see cref="T:System.String"/>, который содержит ответ сервера.
+            </returns>
+            <exception cref="T:MySql.Data.MySqlClient.MySqlException"></exception>
+            <exception cref="T:System.TimeoutException"></exception>
+            <exception cref="T:System.AggregateException"></exception>
+        </member>
+        <member name="M:RIS.Connection.MySQL.Requests.SelectColumnAsync(System.String,System.String,System.String,System.String,System.UInt64,System.UInt64,System.TimeSpan,System.Data.IsolationLevel)">
+            <summary>
+                (Асинхронно) Вызывает SELECT в таблице <paramref name="table"/> для получения значений столбца <paramref name="column"/> во всех строках с временем ожидания <paramref name="timeout"/> и условием выборки: столбец <paramref name="conditionName"/> = <paramref name="conditionValue"/>.
+            </summary>
+            <param name="column">
+                Название столбца, значения которого надо получить.
+            </param>
+            <param name="table">
+                Таблица, для которой будет вызван SELECT.
+            </param>
+            <param name="conditionName">
+                Название столбца для условия.
+            </param>
+            <param name="conditionValue">
+                Значение столбца для условия.
+            </param>
+            <param name="numberStartRow">
+                Номер строки, с которой начинается считывание (все строки до этой будут пропущены). Укажите 0 или 1, чтобы начать с первой строки.
+            </param>
+            <param name="countRows">
+                Количество строк, которые будут считаны. Укажите 0, чтобы считать все строки, начиная с начальной строки <paramref name="numberStartRow"/>.
+            </param>
+            <param name="timeout">
+                Время ожидания ответа от сервера.
+            </param>
+            <param name="isolationLevel">
+                Уровень изоляции транзакции.
+            </param>
+            <returns>
+                Массив типа <see cref="T:System.String"/>, который содержит ответ сервера.
+            </returns>
+            <exception cref="T:MySql.Data.MySqlClient.MySqlException"></exception>
+            <exception cref="T:System.TimeoutException"></exception>
+            <exception cref="T:System.AggregateException"></exception>
         </member>
         <member name="M:RIS.Connection.MySQL.Requests.SelectColumn(System.String,System.String,System.String,System.String,System.String,System.String,System.UInt64,System.UInt64,System.Data.IsolationLevel)">
             <summary>
-                Вызывает SELECT в таблице <paramref name="table"/> для получения значений столбца <paramref name="column"/> во всех строках с условием выборки: столбец <paramref name="conditionName1"/> = <paramref name="conditionValue1"/> AND столбец <paramref name="conditionName2"/> = <paramref name="conditionValue2"/>.
+                (Синхронно) Вызывает SELECT в таблице <paramref name="table"/> для получения значений столбца <paramref name="column"/> во всех строках с условием выборки: столбец <paramref name="conditionName1"/> = <paramref name="conditionValue1"/> AND столбец <paramref name="conditionName2"/> = <paramref name="conditionValue2"/>.
             </summary>
             <param name="column">
                 Название столбца, значения которого надо получить.
@@ -721,10 +1217,11 @@
             </returns>
             <exception cref="T:MySql.Data.MySqlClient.MySqlException"></exception>
             <exception cref="T:System.TimeoutException"></exception>
+            <exception cref="T:System.AggregateException"></exception>
         </member>
         <member name="M:RIS.Connection.MySQL.Requests.SelectColumn(System.String,System.String,System.String,System.String,System.String,System.String,System.UInt64,System.UInt64,System.TimeSpan,System.Data.IsolationLevel)">
             <summary>
-                Вызывает SELECT в таблице <paramref name="table"/> для получения значений столбца <paramref name="column"/> во всех строках с временем ожидания <paramref name="timeout"/> и условием выборки: столбец <paramref name="conditionName1"/> = <paramref name="conditionValue1"/> AND столбец <paramref name="conditionName2"/> = <paramref name="conditionValue2"/>.
+                (Синхронно) Вызывает SELECT в таблице <paramref name="table"/> для получения значений столбца <paramref name="column"/> во всех строках с временем ожидания <paramref name="timeout"/> и условием выборки: столбец <paramref name="conditionName1"/> = <paramref name="conditionValue1"/> AND столбец <paramref name="conditionName2"/> = <paramref name="conditionValue2"/>.
             </summary>
             <param name="column">
                 Название столбца, значения которого надо получить.
@@ -761,10 +1258,90 @@
             </returns>
             <exception cref="T:MySql.Data.MySqlClient.MySqlException"></exception>
             <exception cref="T:System.TimeoutException"></exception>
+            <exception cref="T:System.AggregateException"></exception>
+        </member>
+        <member name="M:RIS.Connection.MySQL.Requests.SelectColumnAsync(System.String,System.String,System.String,System.String,System.String,System.String,System.UInt64,System.UInt64,System.Data.IsolationLevel)">
+            <summary>
+                (Асинхронно) Вызывает SELECT в таблице <paramref name="table"/> для получения значений столбца <paramref name="column"/> во всех строках с условием выборки: столбец <paramref name="conditionName1"/> = <paramref name="conditionValue1"/> AND столбец <paramref name="conditionName2"/> = <paramref name="conditionValue2"/>.
+            </summary>
+            <param name="column">
+                Название столбца, значения которого надо получить.
+            </param>
+            <param name="table">
+                Таблица, для которой будет вызван SELECT.
+            </param>
+            <param name="conditionName1">
+                Название столбца для условия #1.
+            </param>
+            <param name="conditionValue1">
+                Значение столбца для условия #1.
+            </param>
+            <param name="conditionName2">
+                Название столбца для условия #2.
+            </param>
+            <param name="conditionValue2">
+                Значение столбца для условия #2.
+            </param>
+            <param name="numberStartRow">
+                Номер строки, с которой начинается считывание (все строки до этой будут пропущены). Укажите 0 или 1, чтобы начать с первой строки.
+            </param>
+            <param name="countRows">
+                Количество строк, которые будут считаны. Укажите 0, чтобы считать все строки, начиная с начальной строки <paramref name="numberStartRow"/>.
+            </param>
+            <param name="isolationLevel">
+                Уровень изоляции транзакции.
+            </param>
+            <returns>
+                Массив типа <see cref="T:System.String"/>, который содержит ответ сервера.
+            </returns>
+            <exception cref="T:MySql.Data.MySqlClient.MySqlException"></exception>
+            <exception cref="T:System.TimeoutException"></exception>
+            <exception cref="T:System.AggregateException"></exception>
+        </member>
+        <member name="M:RIS.Connection.MySQL.Requests.SelectColumnAsync(System.String,System.String,System.String,System.String,System.String,System.String,System.UInt64,System.UInt64,System.TimeSpan,System.Data.IsolationLevel)">
+            <summary>
+                (Асинхронно) Вызывает SELECT в таблице <paramref name="table"/> для получения значений столбца <paramref name="column"/> во всех строках с временем ожидания <paramref name="timeout"/> и условием выборки: столбец <paramref name="conditionName1"/> = <paramref name="conditionValue1"/> AND столбец <paramref name="conditionName2"/> = <paramref name="conditionValue2"/>.
+            </summary>
+            <param name="column">
+                Название столбца, значения которого надо получить.
+            </param>
+            <param name="table">
+                Таблица, для которой будет вызван SELECT.
+            </param>
+            <param name="conditionName1">
+                Название столбца для условия #1.
+            </param>
+            <param name="conditionValue1">
+                Значение столбца для условия #1.
+            </param>
+            <param name="conditionName2">
+                Название столбца для условия #2.
+            </param>
+            <param name="conditionValue2">
+                Значение столбца для условия #2.
+            </param>
+            <param name="numberStartRow">
+                Номер строки, с которой начинается считывание (все строки до этой будут пропущены). Укажите 0 или 1, чтобы начать с первой строки.
+            </param>
+            <param name="countRows">
+                Количество строк, которые будут считаны. Укажите 0, чтобы считать все строки, начиная с начальной строки <paramref name="numberStartRow"/>.
+            </param>
+            <param name="timeout">
+                Время ожидания ответа от сервера.
+            </param>
+            <param name="isolationLevel">
+                Уровень изоляции транзакции.
+            </param>
+            <returns>
+                Массив типа <see cref="T:System.String"/>, который содержит ответ сервера.
+            </returns>
+            <exception cref="T:MySql.Data.MySqlClient.MySqlException"></exception>
+            <exception cref="T:System.TimeoutException"></exception>
+            <exception cref="T:System.AggregateException"></exception>
         </member>
         <member name="M:RIS.Connection.MySQL.Requests.SelectColumn(System.String,System.String,System.ValueTuple{System.String,System.String}[],System.UInt64,System.UInt64,System.Data.IsolationLevel)">
             <summary>
-                Вызывает SELECT в таблице <paramref name="table"/> для получения значений столбца <paramref name="column"/> во всех строках, соответствующих условиям из массива <paramref name="conditions"/>: каждый столбец с именем <paramref name="conditions"/>.Name равен соответствующему значению <paramref name="conditions"/>.Value.
+                (Синхронно) Вызывает SELECT в таблице <paramref name="table"/> для получения значений столбца <paramref name="column"/> во всех строках, соответствующих условиям из массива <paramref name="conditions"/>: каждый столбец с именем <paramref name="conditions"/>.Name равен соответствующему значению <paramref name="conditions"/>.Value.
             </summary>
             <param name="column">
                 Название столбца, значения которого надо получить.
@@ -791,10 +1368,11 @@
             </returns>
             <exception cref="T:MySql.Data.MySqlClient.MySqlException"></exception>
             <exception cref="T:System.TimeoutException"></exception>
+            <exception cref="T:System.AggregateException"></exception>
         </member>
         <member name="M:RIS.Connection.MySQL.Requests.SelectColumn(System.String,System.String,System.ValueTuple{System.String,System.String}[],System.UInt64,System.UInt64,System.TimeSpan,System.Data.IsolationLevel)">
             <summary>
-                Вызывает SELECT в таблице <paramref name="table"/> для получения значений столбца <paramref name="column"/> во всех строках с временем ожидания <paramref name="timeout"/>, соответствующих условиям из массива <paramref name="conditions"/>: каждый столбец с именем <paramref name="conditions"/>.Name равен соответствующему значению <paramref name="conditions"/>.Value.
+                (Синхронно) Вызывает SELECT в таблице <paramref name="table"/> для получения значений столбца <paramref name="column"/> во всех строках с временем ожидания <paramref name="timeout"/>, соответствующих условиям из массива <paramref name="conditions"/>: каждый столбец с именем <paramref name="conditions"/>.Name равен соответствующему значению <paramref name="conditions"/>.Value.
             </summary>
             <param name="column">
                 Название столбца, значения которого надо получить.
@@ -824,10 +1402,76 @@
             </returns>
             <exception cref="T:MySql.Data.MySqlClient.MySqlException"></exception>
             <exception cref="T:System.TimeoutException"></exception>
+            <exception cref="T:System.AggregateException"></exception>
+        </member>
+        <member name="M:RIS.Connection.MySQL.Requests.SelectColumnAsync(System.String,System.String,System.ValueTuple{System.String,System.String}[],System.UInt64,System.UInt64,System.Data.IsolationLevel)">
+            <summary>
+                (Асинхронно) Вызывает SELECT в таблице <paramref name="table"/> для получения значений столбца <paramref name="column"/> во всех строках, соответствующих условиям из массива <paramref name="conditions"/>: каждый столбец с именем <paramref name="conditions"/>.Name равен соответствующему значению <paramref name="conditions"/>.Value.
+            </summary>
+            <param name="column">
+                Название столбца, значения которого надо получить.
+            </param>
+            <param name="table">
+                Таблица, для которой будет вызван SELECT.
+            </param>
+            <param name="conditions">
+                Массив условий для запроса.
+                Name - название столбца.
+                Value - значение столбца.
+            </param>
+            <param name="numberStartRow">
+                Номер строки, с которой начинается считывание (все строки до этой будут пропущены). Укажите 0 или 1, чтобы начать с первой строки.
+            </param>
+            <param name="countRows">
+                Количество строк, которые будут считаны. Укажите 0, чтобы считать все строки, начиная с начальной строки <paramref name="numberStartRow"/>.
+            </param>
+            <param name="isolationLevel">
+                Уровень изоляции транзакции.
+            </param>
+            <returns>
+                Массив типа <see cref="T:System.String"/>, который содержит ответ сервера.
+            </returns>
+            <exception cref="T:MySql.Data.MySqlClient.MySqlException"></exception>
+            <exception cref="T:System.TimeoutException"></exception>
+            <exception cref="T:System.AggregateException"></exception>
+        </member>
+        <member name="M:RIS.Connection.MySQL.Requests.SelectColumnAsync(System.String,System.String,System.ValueTuple{System.String,System.String}[],System.UInt64,System.UInt64,System.TimeSpan,System.Data.IsolationLevel)">
+            <summary>
+                (Асинхронно) Вызывает SELECT в таблице <paramref name="table"/> для получения значений столбца <paramref name="column"/> во всех строках с временем ожидания <paramref name="timeout"/>, соответствующих условиям из массива <paramref name="conditions"/>: каждый столбец с именем <paramref name="conditions"/>.Name равен соответствующему значению <paramref name="conditions"/>.Value.
+            </summary>
+            <param name="column">
+                Название столбца, значения которого надо получить.
+            </param>
+            <param name="table">
+                Таблица, для которой будет вызван SELECT.
+            </param>
+            <param name="conditions">
+                Массив условий для запроса.
+                Name - название столбца.
+                Value - значение столбца.
+            </param>
+            <param name="numberStartRow">
+                Номер строки, с которой начинается считывание (все строки до этой будут пропущены). Укажите 0 или 1, чтобы начать с первой строки.
+            </param>
+            <param name="countRows">
+                Количество строк, которые будут считаны. Укажите 0, чтобы считать все строки, начиная с начальной строки <paramref name="numberStartRow"/>.
+            </param>
+            <param name="timeout">
+                Время ожидания ответа от сервера.
+            </param>
+            <param name="isolationLevel">
+                Уровень изоляции транзакции.
+            </param>
+            <returns>
+                Массив типа <see cref="T:System.String"/>, который содержит ответ сервера.
+            </returns>
+            <exception cref="T:MySql.Data.MySqlClient.MySqlException"></exception>
+            <exception cref="T:System.TimeoutException"></exception>
+            <exception cref="T:System.AggregateException"></exception>
         </member>
         <member name="M:RIS.Connection.MySQL.Requests.SelectColumns(System.String[],System.String,System.UInt64,System.UInt64,System.Data.IsolationLevel)">
             <summary>
-                Вызывает SELECT в таблице <paramref name="tableColumns"/> для получения значений столбцов <paramref name="columns"/> во всех строках.
+                (Синхронно) Вызывает SELECT в таблице <paramref name="tableColumns"/> для получения значений столбцов <paramref name="columns"/> во всех строках.
             </summary>
             <param name="columns">
                 Массив названий столбцов, значения которых надо получить.
@@ -849,10 +1493,11 @@
             </returns>
             <exception cref="T:MySql.Data.MySqlClient.MySqlException"></exception>
             <exception cref="T:System.TimeoutException"></exception>
+            <exception cref="T:System.AggregateException"></exception>
         </member>
         <member name="M:RIS.Connection.MySQL.Requests.SelectColumns(System.String[],System.String,System.UInt64,System.UInt64,System.TimeSpan,System.Data.IsolationLevel)">
             <summary>
-                Вызывает SELECT в таблице <paramref name="tableColumns"/> для получения значений столбцов <paramref name="columns"/> во всех строках с временем ожидания <paramref name="timeout"/>.
+                (Синхронно) Вызывает SELECT в таблице <paramref name="tableColumns"/> для получения значений столбцов <paramref name="columns"/> во всех строках с временем ожидания <paramref name="timeout"/>.
             </summary>
             <param name="columns">
                 Массив названий столбцов, значения которых надо получить.
@@ -877,10 +1522,66 @@
             </returns>
             <exception cref="T:MySql.Data.MySqlClient.MySqlException"></exception>
             <exception cref="T:System.TimeoutException"></exception>
+            <exception cref="T:System.AggregateException"></exception>
+        </member>
+        <member name="M:RIS.Connection.MySQL.Requests.SelectColumnsAsync(System.String[],System.String,System.UInt64,System.UInt64,System.Data.IsolationLevel)">
+            <summary>
+                (Асинхронно) Вызывает SELECT в таблице <paramref name="tableColumns"/> для получения значений столбцов <paramref name="columns"/> во всех строках.
+            </summary>
+            <param name="columns">
+                Массив названий столбцов, значения которых надо получить.
+            </param>
+            <param name="tableColumns">
+                Таблица, для которой будет вызван SELECT.
+            </param>
+            <param name="numberStartRow">
+                Номер строки, с которой начинается считывание (все строки до этой будут пропущены). Укажите 0 или 1, чтобы начать с первой строки.
+            </param>
+            <param name="countRows">
+                Количество строк, которые будут считаны. Укажите 0, чтобы считать все строки, начиная с начальной строки <paramref name="numberStartRow"/>.
+            </param>
+            <param name="isolationLevel">
+                Уровень изоляции транзакции.
+            </param>
+            <returns>
+                Массив массивов типа <see cref="T:System.String"/>, которые содержат ответ сервера.
+            </returns>
+            <exception cref="T:MySql.Data.MySqlClient.MySqlException"></exception>
+            <exception cref="T:System.TimeoutException"></exception>
+            <exception cref="T:System.AggregateException"></exception>
+        </member>
+        <member name="M:RIS.Connection.MySQL.Requests.SelectColumnsAsync(System.String[],System.String,System.UInt64,System.UInt64,System.TimeSpan,System.Data.IsolationLevel)">
+            <summary>
+                (Асинхронно) Вызывает SELECT в таблице <paramref name="tableColumns"/> для получения значений столбцов <paramref name="columns"/> во всех строках с временем ожидания <paramref name="timeout"/>.
+            </summary>
+            <param name="columns">
+                Массив названий столбцов, значения которых надо получить.
+            </param>
+            <param name="tableColumns">
+                Таблица, для которой будет вызван SELECT.
+            </param>
+            <param name="numberStartRow">
+                Номер строки, с которой начинается считывание (все строки до этой будут пропущены). Укажите 0 или 1, чтобы начать с первой строки.
+            </param>
+            <param name="countRows">
+                Количество строк, которые будут считаны. Укажите 0, чтобы считать все строки, начиная с начальной строки <paramref name="numberStartRow"/>.
+            </param>
+            <param name="timeout">
+                Время ожидания ответа от сервера.
+            </param>
+            <param name="isolationLevel">
+                Уровень изоляции транзакции.
+            </param>
+            <returns>
+                Массив массивов типа <see cref="T:System.String"/>, которые содержат ответ сервера.
+            </returns>
+            <exception cref="T:MySql.Data.MySqlClient.MySqlException"></exception>
+            <exception cref="T:System.TimeoutException"></exception>
+            <exception cref="T:System.AggregateException"></exception>
         </member>
         <member name="M:RIS.Connection.MySQL.Requests.SelectColumns(System.ValueTuple{System.String,System.String,System.UInt64,System.UInt64}[],System.Data.IsolationLevel)">
             <summary>
-                Вызывает SELECT для получения значений столбцов <paramref name="columns"/> во всех строках.
+                (Синхронно) Вызывает SELECT для получения значений столбцов <paramref name="columns"/> во всех строках.
             </summary>
             <param name="columns">
                 Массив столбцов, значения которых надо получить.
@@ -897,10 +1598,11 @@
             </returns>
             <exception cref="T:MySql.Data.MySqlClient.MySqlException"></exception>
             <exception cref="T:System.TimeoutException"></exception>
+            <exception cref="T:System.AggregateException"></exception>
         </member>
         <member name="M:RIS.Connection.MySQL.Requests.SelectColumns(System.ValueTuple{System.String,System.String,System.UInt64,System.UInt64}[],System.TimeSpan,System.Data.IsolationLevel)">
             <summary>
-                Вызывает SELECT с временем ожидания <paramref name="timeout"/> для получения значений столбцов <paramref name="columns"/> во всех строках.
+                (Синхронно) Вызывает SELECT с временем ожидания <paramref name="timeout"/> для получения значений столбцов <paramref name="columns"/> во всех строках.
             </summary>
             <param name="columns">
                 Массив столбцов, значения которых надо получить.
@@ -920,10 +1622,56 @@
             </returns>
             <exception cref="T:MySql.Data.MySqlClient.MySqlException"></exception>
             <exception cref="T:System.TimeoutException"></exception>
+            <exception cref="T:System.AggregateException"></exception>
+        </member>
+        <member name="M:RIS.Connection.MySQL.Requests.SelectColumnsAsync(System.ValueTuple{System.String,System.String,System.UInt64,System.UInt64}[],System.Data.IsolationLevel)">
+            <summary>
+                (Асинхронно) Вызывает SELECT для получения значений столбцов <paramref name="columns"/> во всех строках.
+            </summary>
+            <param name="columns">
+                Массив столбцов, значения которых надо получить.
+                Name - название столбца.
+                Table - таблица, для которой будет вызван SELECT.
+                NumberStartRow - номер строки, с которой начнётся считывание (все строки до этой будут пропущены). Укажите 0 или 1, чтобы начать с первой строки.
+                CountRows - Количество строк, которые будут считаны. Укажите 0, чтобы считать все строки, начиная с начальной строки <paramref name="columns"/>.NumberStartRow.
+            </param>
+            <param name="isolationLevel">
+                Уровень изоляции транзакции.
+            </param>
+            <returns>
+                Массив массивов типа <see cref="T:System.String"/>, которые содержат ответ сервера.
+            </returns>
+            <exception cref="T:MySql.Data.MySqlClient.MySqlException"></exception>
+            <exception cref="T:System.TimeoutException"></exception>
+            <exception cref="T:System.AggregateException"></exception>
+        </member>
+        <member name="M:RIS.Connection.MySQL.Requests.SelectColumnsAsync(System.ValueTuple{System.String,System.String,System.UInt64,System.UInt64}[],System.TimeSpan,System.Data.IsolationLevel)">
+            <summary>
+                (Асинхронно) Вызывает SELECT с временем ожидания <paramref name="timeout"/> для получения значений столбцов <paramref name="columns"/> во всех строках.
+            </summary>
+            <param name="columns">
+                Массив столбцов, значения которых надо получить.
+                Name - название столбца.
+                Table - таблица, для которой будет вызван SELECT.
+                NumberStartRow - номер строки, с которой начнётся считывание (все строки до этой будут пропущены). Укажите 0 или 1, чтобы начать с первой строки.
+                CountRows - Количество строк, которые будут считаны. Укажите 0, чтобы считать все строки, начиная с начальной строки <paramref name="columns"/>.NumberStartRow.
+            </param>
+            <param name="timeout">
+                Время ожидания ответа от сервера.
+            </param>
+            <param name="isolationLevel">
+                Уровень изоляции транзакции.
+            </param>
+            <returns>
+                Массив массивов типа <see cref="T:System.String"/>, которые содержат ответ сервера.
+            </returns>
+            <exception cref="T:MySql.Data.MySqlClient.MySqlException"></exception>
+            <exception cref="T:System.TimeoutException"></exception>
+            <exception cref="T:System.AggregateException"></exception>
         </member>
         <member name="M:RIS.Connection.MySQL.Requests.Select(System.String,System.String,System.String,System.String,System.Data.IsolationLevel)">
             <summary>
-                Вызывает SELECT в таблице <paramref name="table"/> для получения значения столбца <paramref name="searchField"/> в первой найденной строке, соответствующей условию: столбец <paramref name="conditionName"/> = <paramref name="conditionValue"/>.
+                (Синхронно) Вызывает SELECT в таблице <paramref name="table"/> для получения значения столбца <paramref name="searchField"/> в первой найденной строке, соответствующей условию: столбец <paramref name="conditionName"/> = <paramref name="conditionValue"/>.
             </summary>
             <param name="searchField">
                 Названия столбца, значение которого надо получить.
@@ -945,10 +1693,11 @@
             </returns>
             <exception cref="T:MySql.Data.MySqlClient.MySqlException"></exception>
             <exception cref="T:System.TimeoutException"></exception>
+            <exception cref="T:System.AggregateException"></exception>
         </member>
         <member name="M:RIS.Connection.MySQL.Requests.Select(System.String,System.String,System.String,System.String,System.TimeSpan,System.Data.IsolationLevel)">
             <summary>
-                Вызывает SELECT в таблице <paramref name="table"/> с временем ожидания <paramref name="timeout"/> для получения значения столбца <paramref name="searchField"/> в первой найденной строке, соответствующей условию: столбец <paramref name="conditionName"/> = <paramref name="conditionValue"/>.
+                (Синхронно) Вызывает SELECT в таблице <paramref name="table"/> с временем ожидания <paramref name="timeout"/> для получения значения столбца <paramref name="searchField"/> в первой найденной строке, соответствующей условию: столбец <paramref name="conditionName"/> = <paramref name="conditionValue"/>.
             </summary>
             <param name="searchField">
                 Названия столбца, значение которого надо получить.
@@ -973,10 +1722,66 @@
             </returns>
             <exception cref="T:MySql.Data.MySqlClient.MySqlException"></exception>
             <exception cref="T:System.TimeoutException"></exception>
+            <exception cref="T:System.AggregateException"></exception>
+        </member>
+        <member name="M:RIS.Connection.MySQL.Requests.SelectAsync(System.String,System.String,System.String,System.String,System.Data.IsolationLevel)">
+            <summary>
+                (Асинхронно) Вызывает SELECT в таблице <paramref name="table"/> для получения значения столбца <paramref name="searchField"/> в первой найденной строке, соответствующей условию: столбец <paramref name="conditionName"/> = <paramref name="conditionValue"/>.
+            </summary>
+            <param name="searchField">
+                Названия столбца, значение которого надо получить.
+            </param>
+            <param name="table">
+                Таблица, для которой будет вызван SELECT.
+            </param>
+            <param name="conditionName">
+                Название столбца для условия.
+            </param>
+            <param name="conditionValue">
+                Значение столбца для условия.
+            </param>
+            <param name="isolationLevel">
+                Уровень изоляции транзакции.
+            </param>
+            <returns>
+                Значение типа <see cref="T:System.String"/>, которое содержит ответ сервера.
+            </returns>
+            <exception cref="T:MySql.Data.MySqlClient.MySqlException"></exception>
+            <exception cref="T:System.TimeoutException"></exception>
+            <exception cref="T:System.AggregateException"></exception>
+        </member>
+        <member name="M:RIS.Connection.MySQL.Requests.SelectAsync(System.String,System.String,System.String,System.String,System.TimeSpan,System.Data.IsolationLevel)">
+            <summary>
+                (Асинхронно) Вызывает SELECT в таблице <paramref name="table"/> с временем ожидания <paramref name="timeout"/> для получения значения столбца <paramref name="searchField"/> в первой найденной строке, соответствующей условию: столбец <paramref name="conditionName"/> = <paramref name="conditionValue"/>.
+            </summary>
+            <param name="searchField">
+                Названия столбца, значение которого надо получить.
+            </param>
+            <param name="table">
+                Таблица, для которой будет вызван SELECT.
+            </param>
+            <param name="conditionName">
+                Название столбца для условия.
+            </param>
+            <param name="conditionValue">
+                Значение столбца для условия.
+            </param>
+            <param name="timeout">
+                Время ожидания ответа от сервера.
+            </param>
+            <param name="isolationLevel">
+                Уровень изоляции транзакции.
+            </param>
+            <returns>
+                Значение типа <see cref="T:System.String"/>, которое содержит ответ сервера.
+            </returns>
+            <exception cref="T:MySql.Data.MySqlClient.MySqlException"></exception>
+            <exception cref="T:System.TimeoutException"></exception>
+            <exception cref="T:System.AggregateException"></exception>
         </member>
         <member name="M:RIS.Connection.MySQL.Requests.Select(System.String,System.String,System.String,System.String,System.String,System.String,System.Data.IsolationLevel)">
             <summary>
-                Вызывает SELECT в таблице <paramref name="table"/> для получения значения столбца <paramref name="searchField"/> в первой найденной строке, соответствующей условиям: столбец <paramref name="conditionName1"/> = <paramref name="conditionValue1"/> AND столбец <paramref name="conditionName2"/> = <paramref name="conditionValue2"/>.
+                (Синхронно) Вызывает SELECT в таблице <paramref name="table"/> для получения значения столбца <paramref name="searchField"/> в первой найденной строке, соответствующей условиям: столбец <paramref name="conditionName1"/> = <paramref name="conditionValue1"/> AND столбец <paramref name="conditionName2"/> = <paramref name="conditionValue2"/>.
             </summary>
             <param name="searchField">
                 Названия столбца, значение которого надо получить.
@@ -1004,10 +1809,11 @@
             </returns>
             <exception cref="T:MySql.Data.MySqlClient.MySqlException"></exception>
             <exception cref="T:System.TimeoutException"></exception>
+            <exception cref="T:System.AggregateException"></exception>
         </member>
         <member name="M:RIS.Connection.MySQL.Requests.Select(System.String,System.String,System.String,System.String,System.String,System.String,System.TimeSpan,System.Data.IsolationLevel)">
             <summary>
-                Вызывает SELECT в таблице <paramref name="table"/> с временем ожидания <paramref name="timeout"/> для получения значения столбца <paramref name="searchField"/> в первой найденной строке, соответствующей условиям: столбец <paramref name="conditionName1"/> = <paramref name="conditionValue1"/> AND столбец <paramref name="conditionName2"/> = <paramref name="conditionValue2"/>.
+                (Синхронно) Вызывает SELECT в таблице <paramref name="table"/> с временем ожидания <paramref name="timeout"/> для получения значения столбца <paramref name="searchField"/> в первой найденной строке, соответствующей условиям: столбец <paramref name="conditionName1"/> = <paramref name="conditionValue1"/> AND столбец <paramref name="conditionName2"/> = <paramref name="conditionValue2"/>.
             </summary>
             <param name="searchField">
                 Названия столбца, значение которого надо получить.
@@ -1038,10 +1844,78 @@
             </returns>
             <exception cref="T:MySql.Data.MySqlClient.MySqlException"></exception>
             <exception cref="T:System.TimeoutException"></exception>
+            <exception cref="T:System.AggregateException"></exception>
+        </member>
+        <member name="M:RIS.Connection.MySQL.Requests.SelectAsync(System.String,System.String,System.String,System.String,System.String,System.String,System.Data.IsolationLevel)">
+            <summary>
+                (Асинхронно) Вызывает SELECT в таблице <paramref name="table"/> для получения значения столбца <paramref name="searchField"/> в первой найденной строке, соответствующей условиям: столбец <paramref name="conditionName1"/> = <paramref name="conditionValue1"/> AND столбец <paramref name="conditionName2"/> = <paramref name="conditionValue2"/>.
+            </summary>
+            <param name="searchField">
+                Названия столбца, значение которого надо получить.
+            </param>
+            <param name="table">
+                Таблица, для которой будет вызван SELECT.
+            </param>
+            <param name="conditionName1">
+                Название столбца для условия #1.
+            </param>
+            <param name="conditionValue1">
+                Значение столбца для условия #1.
+            </param>
+            <param name="conditionName2">
+                Название столбца для условия #2.
+            </param>
+            <param name="conditionValue2">
+                Значение столбца для условия #2.
+            </param>
+            <param name="isolationLevel">
+                Уровень изоляции транзакции.
+            </param>
+            <returns>
+                Значение типа <see cref="T:System.String"/>, которое содержит ответ сервера.
+            </returns>
+            <exception cref="T:MySql.Data.MySqlClient.MySqlException"></exception>
+            <exception cref="T:System.TimeoutException"></exception>
+            <exception cref="T:System.AggregateException"></exception>
+        </member>
+        <member name="M:RIS.Connection.MySQL.Requests.SelectAsync(System.String,System.String,System.String,System.String,System.String,System.String,System.TimeSpan,System.Data.IsolationLevel)">
+            <summary>
+                (Асинхронно) Вызывает SELECT в таблице <paramref name="table"/> с временем ожидания <paramref name="timeout"/> для получения значения столбца <paramref name="searchField"/> в первой найденной строке, соответствующей условиям: столбец <paramref name="conditionName1"/> = <paramref name="conditionValue1"/> AND столбец <paramref name="conditionName2"/> = <paramref name="conditionValue2"/>.
+            </summary>
+            <param name="searchField">
+                Названия столбца, значение которого надо получить.
+            </param>
+            <param name="table">
+                Таблица, для которой будет вызван SELECT.
+            </param>
+            <param name="conditionName1">
+                Название столбца для условия #1.
+            </param>
+            <param name="conditionValue1">
+                Значение столбца для условия #1.
+            </param>
+            <param name="conditionName2">
+                Название столбца для условия #2.
+            </param>
+            <param name="conditionValue2">
+                Значение столбца для условия #2.
+            </param>
+            <param name="timeout">
+                Время ожидания ответа от сервера.
+            </param>
+            <param name="isolationLevel">
+                Уровень изоляции транзакции.
+            </param>
+            <returns>
+                Значение типа <see cref="T:System.String"/>, которое содержит ответ сервера.
+            </returns>
+            <exception cref="T:MySql.Data.MySqlClient.MySqlException"></exception>
+            <exception cref="T:System.TimeoutException"></exception>
+            <exception cref="T:System.AggregateException"></exception>
         </member>
         <member name="M:RIS.Connection.MySQL.Requests.Select(System.String,System.String,System.ValueTuple{System.String,System.String}[],System.Data.IsolationLevel)">
             <summary>
-                Вызывает SELECT в таблице <paramref name="table"/> для получения значения столбца <paramref name="searchField"/> в первой найденной строке, соответствующей условиям из массива <paramref name="conditions"/>: каждый столбец с именем <paramref name="conditions"/>.Name равен соответствующему значению <paramref name="conditions"/>.Value.
+                (Синхронно) Вызывает SELECT в таблице <paramref name="table"/> для получения значения столбца <paramref name="searchField"/> в первой найденной строке, соответствующей условиям из массива <paramref name="conditions"/>: каждый столбец с именем <paramref name="conditions"/>.Name равен соответствующему значению <paramref name="conditions"/>.Value.
             </summary>
             <param name="searchField">
                 Название столбца, значение которого надо получить.
@@ -1062,10 +1936,11 @@
             </returns>
             <exception cref="T:MySql.Data.MySqlClient.MySqlException"></exception>
             <exception cref="T:System.TimeoutException"></exception>
+            <exception cref="T:System.AggregateException"></exception>
         </member>
         <member name="M:RIS.Connection.MySQL.Requests.Select(System.String,System.String,System.ValueTuple{System.String,System.String}[],System.TimeSpan,System.Data.IsolationLevel)">
             <summary>
-                Вызывает SELECT в таблице <paramref name="table"/> с временем ожидания <paramref name="timeout"/> для получения значения столбца <paramref name="searchField"/> в первой найденной строке, соответствующей условиям из массива <paramref name="conditions"/>: каждый столбец с именем <paramref name="conditions"/>.Name равен соответствующему значению <paramref name="conditions"/>.Value.
+                (Синхронно) Вызывает SELECT в таблице <paramref name="table"/> с временем ожидания <paramref name="timeout"/> для получения значения столбца <paramref name="searchField"/> в первой найденной строке, соответствующей условиям из массива <paramref name="conditions"/>: каждый столбец с именем <paramref name="conditions"/>.Name равен соответствующему значению <paramref name="conditions"/>.Value.
             </summary>
             <param name="searchField">
                 Название столбца, значение которого надо получить.
@@ -1089,10 +1964,64 @@
             </returns>
             <exception cref="T:MySql.Data.MySqlClient.MySqlException"></exception>
             <exception cref="T:System.TimeoutException"></exception>
+            <exception cref="T:System.AggregateException"></exception>
+        </member>
+        <member name="M:RIS.Connection.MySQL.Requests.SelectAsync(System.String,System.String,System.ValueTuple{System.String,System.String}[],System.Data.IsolationLevel)">
+            <summary>
+                (Асинхронно) Вызывает SELECT в таблице <paramref name="table"/> для получения значения столбца <paramref name="searchField"/> в первой найденной строке, соответствующей условиям из массива <paramref name="conditions"/>: каждый столбец с именем <paramref name="conditions"/>.Name равен соответствующему значению <paramref name="conditions"/>.Value.
+            </summary>
+            <param name="searchField">
+                Название столбца, значение которого надо получить.
+            </param>
+            <param name="table">
+                Таблица, для которой будет вызван SELECT.
+            </param>
+            <param name="conditions">
+                Массив условий для запроса.
+                Name - название столбца.
+                Value - значение столбца.
+            </param>
+            <param name="isolationLevel">
+                Уровень изоляции транзакции.
+            </param>
+            <returns>
+                Значение типа <see cref="T:System.String"/>, которое содержит ответ сервера.
+            </returns>
+            <exception cref="T:MySql.Data.MySqlClient.MySqlException"></exception>
+            <exception cref="T:System.TimeoutException"></exception>
+            <exception cref="T:System.AggregateException"></exception>
+        </member>
+        <member name="M:RIS.Connection.MySQL.Requests.SelectAsync(System.String,System.String,System.ValueTuple{System.String,System.String}[],System.TimeSpan,System.Data.IsolationLevel)">
+            <summary>
+                (Асинхронно) Вызывает SELECT в таблице <paramref name="table"/> с временем ожидания <paramref name="timeout"/> для получения значения столбца <paramref name="searchField"/> в первой найденной строке, соответствующей условиям из массива <paramref name="conditions"/>: каждый столбец с именем <paramref name="conditions"/>.Name равен соответствующему значению <paramref name="conditions"/>.Value.
+            </summary>
+            <param name="searchField">
+                Название столбца, значение которого надо получить.
+            </param>
+            <param name="table">
+                Таблица, для которой будет вызван SELECT.
+            </param>
+            <param name="conditions">
+                Массив условий для запроса.
+                Name - название столбца.
+                Value - значение столбца.
+            </param>
+            <param name="timeout">
+                Время ожидания ответа от сервера.
+            </param>
+            <param name="isolationLevel">
+                Уровень изоляции транзакции.
+            </param>
+            <returns>
+                Значение типа <see cref="T:System.String"/>, которое содержит ответ сервера.
+            </returns>
+            <exception cref="T:MySql.Data.MySqlClient.MySqlException"></exception>
+            <exception cref="T:System.TimeoutException"></exception>
+            <exception cref="T:System.AggregateException"></exception>
         </member>
         <member name="M:RIS.Connection.MySQL.Requests.Select(System.String[],System.String,System.String,System.String,System.Data.IsolationLevel)">
             <summary>
-                Вызывает SELECT в таблице <paramref name="table"/> для получения значений столбцов <paramref name="searchFields"/> в первой найденной строке, соответствующей условию: столбец <paramref name="conditionName"/> = <paramref name="conditionValue"/>.
+                (Синхронно) Вызывает SELECT в таблице <paramref name="table"/> для получения значений столбцов <paramref name="searchFields"/> в первой найденной строке, соответствующей условию: столбец <paramref name="conditionName"/> = <paramref name="conditionValue"/>.
             </summary>
             <param name="searchFields">
                 Названия столбцов, значения которых надо получить.
@@ -1114,10 +2043,11 @@
             </returns>
             <exception cref="T:MySql.Data.MySqlClient.MySqlException"></exception>
             <exception cref="T:System.TimeoutException"></exception>
+            <exception cref="T:System.AggregateException"></exception>
         </member>
         <member name="M:RIS.Connection.MySQL.Requests.Select(System.String[],System.String,System.String,System.String,System.TimeSpan,System.Data.IsolationLevel)">
             <summary>
-                Вызывает SELECT в таблице <paramref name="table"/> с временем ожидания <paramref name="timeout"/> для получения значений столбцов <paramref name="searchFields"/> в первой найденной строке, соответствующей условию: столбец <paramref name="conditionName"/> = <paramref name="conditionValue"/>.
+                (Синхронно) Вызывает SELECT в таблице <paramref name="table"/> с временем ожидания <paramref name="timeout"/> для получения значений столбцов <paramref name="searchFields"/> в первой найденной строке, соответствующей условию: столбец <paramref name="conditionName"/> = <paramref name="conditionValue"/>.
             </summary>
             <param name="searchFields">
                 Названия столбцов, значения которых надо получить.
@@ -1142,10 +2072,66 @@
             </returns>
             <exception cref="T:MySql.Data.MySqlClient.MySqlException"></exception>
             <exception cref="T:System.TimeoutException"></exception>
+            <exception cref="T:System.AggregateException"></exception>
+        </member>
+        <member name="M:RIS.Connection.MySQL.Requests.SelectAsync(System.String[],System.String,System.String,System.String,System.Data.IsolationLevel)">
+            <summary>
+                (Асинхронно) Вызывает SELECT в таблице <paramref name="table"/> для получения значений столбцов <paramref name="searchFields"/> в первой найденной строке, соответствующей условию: столбец <paramref name="conditionName"/> = <paramref name="conditionValue"/>.
+            </summary>
+            <param name="searchFields">
+                Названия столбцов, значения которых надо получить.
+            </param>
+            <param name="table">
+                Таблица, для которой будет вызван SELECT.
+            </param>
+            <param name="conditionName">
+                Название столбца для условия.
+            </param>
+            <param name="conditionValue">
+                Значение столбца для условия.
+            </param>
+            <param name="isolationLevel">
+                Уровень изоляции транзакции.
+            </param>
+            <returns>
+                Массив типа <see cref="T:System.String"/>, который содержит ответ сервера.
+            </returns>
+            <exception cref="T:MySql.Data.MySqlClient.MySqlException"></exception>
+            <exception cref="T:System.TimeoutException"></exception>
+            <exception cref="T:System.AggregateException"></exception>
+        </member>
+        <member name="M:RIS.Connection.MySQL.Requests.SelectAsync(System.String[],System.String,System.String,System.String,System.TimeSpan,System.Data.IsolationLevel)">
+            <summary>
+                (Асинхронно) Вызывает SELECT в таблице <paramref name="table"/> с временем ожидания <paramref name="timeout"/> для получения значений столбцов <paramref name="searchFields"/> в первой найденной строке, соответствующей условию: столбец <paramref name="conditionName"/> = <paramref name="conditionValue"/>.
+            </summary>
+            <param name="searchFields">
+                Названия столбцов, значения которых надо получить.
+            </param>
+            <param name="table">
+                Таблица, для которой будет вызван SELECT.
+            </param>
+            <param name="conditionName">
+                Название столбца для условия.
+            </param>
+            <param name="conditionValue">
+                Значение столбца для условия.
+            </param>
+            <param name="timeout">
+                Время ожидания ответа от сервера.
+            </param>
+            <param name="isolationLevel">
+                Уровень изоляции транзакции.
+            </param>
+            <returns>
+                Массив типа <see cref="T:System.String"/>, который содержит ответ сервера.
+            </returns>
+            <exception cref="T:MySql.Data.MySqlClient.MySqlException"></exception>
+            <exception cref="T:System.TimeoutException"></exception>
+            <exception cref="T:System.AggregateException"></exception>
         </member>
         <member name="M:RIS.Connection.MySQL.Requests.Select(System.String[],System.String,System.String,System.String,System.String,System.String,System.Data.IsolationLevel)">
             <summary>
-                Вызывает SELECT в таблице <paramref name="table"/> для получения значений столбцов <paramref name="searchFields"/> в первой найденной строке, соответствующей условиям: столбец <paramref name="conditionName1"/> = <paramref name="conditionValue1"/> AND столбец <paramref name="conditionName2"/> = <paramref name="conditionValue2"/>.
+                (Синхронно) Вызывает SELECT в таблице <paramref name="table"/> для получения значений столбцов <paramref name="searchFields"/> в первой найденной строке, соответствующей условиям: столбец <paramref name="conditionName1"/> = <paramref name="conditionValue1"/> AND столбец <paramref name="conditionName2"/> = <paramref name="conditionValue2"/>.
             </summary>
             <param name="searchFields">
                 Названия столбцов, значения которых надо получить.
@@ -1173,10 +2159,11 @@
             </returns>
             <exception cref="T:MySql.Data.MySqlClient.MySqlException"></exception>
             <exception cref="T:System.TimeoutException"></exception>
+            <exception cref="T:System.AggregateException"></exception>
         </member>
         <member name="M:RIS.Connection.MySQL.Requests.Select(System.String[],System.String,System.String,System.String,System.String,System.String,System.TimeSpan,System.Data.IsolationLevel)">
             <summary>
-                Вызывает SELECT в таблице <paramref name="table"/> с временем ожидания <paramref name="timeout"/> для получения значений столбцов <paramref name="searchFields"/> в первой найденной строке, соответствующей условиям: столбец <paramref name="conditionName1"/> = <paramref name="conditionValue1"/> AND столбец <paramref name="conditionName2"/> = <paramref name="conditionValue2"/>.
+                (Синхронно) Вызывает SELECT в таблице <paramref name="table"/> с временем ожидания <paramref name="timeout"/> для получения значений столбцов <paramref name="searchFields"/> в первой найденной строке, соответствующей условиям: столбец <paramref name="conditionName1"/> = <paramref name="conditionValue1"/> AND столбец <paramref name="conditionName2"/> = <paramref name="conditionValue2"/>.
             </summary>
             <param name="searchFields">
                 Названия столбцов, значения которых надо получить.
@@ -1207,10 +2194,78 @@
             </returns>
             <exception cref="T:MySql.Data.MySqlClient.MySqlException"></exception>
             <exception cref="T:System.TimeoutException"></exception>
+            <exception cref="T:System.AggregateException"></exception>
+        </member>
+        <member name="M:RIS.Connection.MySQL.Requests.SelectAsync(System.String[],System.String,System.String,System.String,System.String,System.String,System.Data.IsolationLevel)">
+            <summary>
+                (Асинхронно) Вызывает SELECT в таблице <paramref name="table"/> для получения значений столбцов <paramref name="searchFields"/> в первой найденной строке, соответствующей условиям: столбец <paramref name="conditionName1"/> = <paramref name="conditionValue1"/> AND столбец <paramref name="conditionName2"/> = <paramref name="conditionValue2"/>.
+            </summary>
+            <param name="searchFields">
+                Названия столбцов, значения которых надо получить.
+            </param>
+            <param name="table">
+                Таблица, для которой будет вызван SELECT.
+            </param>
+            <param name="conditionName1">
+                Название столбца для условия #1.
+            </param>
+            <param name="conditionValue1">
+                Значение столбца для условия #1.
+            </param>
+            <param name="conditionName2">
+                Название столбца для условия #2.
+            </param>
+            <param name="conditionValue2">
+                Значение столбца для условия #2.
+            </param>
+            <param name="isolationLevel">
+                Уровень изоляции транзакции.
+            </param>
+            <returns>
+                Массив типа <see cref="T:System.String"/>, который содержит ответ сервера.
+            </returns>
+            <exception cref="T:MySql.Data.MySqlClient.MySqlException"></exception>
+            <exception cref="T:System.TimeoutException"></exception>
+            <exception cref="T:System.AggregateException"></exception>
+        </member>
+        <member name="M:RIS.Connection.MySQL.Requests.SelectAsync(System.String[],System.String,System.String,System.String,System.String,System.String,System.TimeSpan,System.Data.IsolationLevel)">
+            <summary>
+                (Асинхронно) Вызывает SELECT в таблице <paramref name="table"/> с временем ожидания <paramref name="timeout"/> для получения значений столбцов <paramref name="searchFields"/> в первой найденной строке, соответствующей условиям: столбец <paramref name="conditionName1"/> = <paramref name="conditionValue1"/> AND столбец <paramref name="conditionName2"/> = <paramref name="conditionValue2"/>.
+            </summary>
+            <param name="searchFields">
+                Названия столбцов, значения которых надо получить.
+            </param>
+            <param name="table">
+                Таблица, для которой будет вызван SELECT.
+            </param>
+            <param name="conditionName1">
+                Название столбца для условия #1.
+            </param>
+            <param name="conditionValue1">
+                Значение столбца для условия #1.
+            </param>
+            <param name="conditionName2">
+                Название столбца для условия #2.
+            </param>
+            <param name="conditionValue2">
+                Значение столбца для условия #2.
+            </param>
+            <param name="timeout">
+                Время ожидания ответа от сервера.
+            </param>
+            <param name="isolationLevel">
+                Уровень изоляции транзакции.
+            </param>
+            <returns>
+                Массив типа <see cref="T:System.String"/>, который содержит ответ сервера.
+            </returns>
+            <exception cref="T:MySql.Data.MySqlClient.MySqlException"></exception>
+            <exception cref="T:System.TimeoutException"></exception>
+            <exception cref="T:System.AggregateException"></exception>
         </member>
         <member name="M:RIS.Connection.MySQL.Requests.Select(System.String[],System.String,System.ValueTuple{System.String,System.String}[],System.Data.IsolationLevel)">
             <summary>
-                Вызывает SELECT в таблице <paramref name="table"/> для получения значений столбцов <paramref name="searchFields"/> в первой найденной строке, соответствующей условиям из массива <paramref name="conditions"/>: каждый столбец с именем <paramref name="conditions"/>.Name равен соответствующему значению <paramref name="conditions"/>.Value.
+                (Синхронно) Вызывает SELECT в таблице <paramref name="table"/> для получения значений столбцов <paramref name="searchFields"/> в первой найденной строке, соответствующей условиям из массива <paramref name="conditions"/>: каждый столбец с именем <paramref name="conditions"/>.Name равен соответствующему значению <paramref name="conditions"/>.Value.
             </summary>
             <param name="searchFields">
                 Названия столбцов, значения которых надо получить.
@@ -1231,10 +2286,11 @@
             </returns>
             <exception cref="T:MySql.Data.MySqlClient.MySqlException"></exception>
             <exception cref="T:System.TimeoutException"></exception>
+            <exception cref="T:System.AggregateException"></exception>
         </member>
         <member name="M:RIS.Connection.MySQL.Requests.Select(System.String[],System.String,System.ValueTuple{System.String,System.String}[],System.TimeSpan,System.Data.IsolationLevel)">
             <summary>
-                Вызывает SELECT в таблице <paramref name="table"/> с временем ожидания <paramref name="timeout"/> для получения значений столбцов <paramref name="searchFields"/> в первой найденной строке, соответствующей условиям из массива <paramref name="conditions"/>: каждый столбец с именем <paramref name="conditions"/>.Name равен соответствующему значению <paramref name="conditions"/>.Value.
+                (Синхронно) Вызывает SELECT в таблице <paramref name="table"/> с временем ожидания <paramref name="timeout"/> для получения значений столбцов <paramref name="searchFields"/> в первой найденной строке, соответствующей условиям из массива <paramref name="conditions"/>: каждый столбец с именем <paramref name="conditions"/>.Name равен соответствующему значению <paramref name="conditions"/>.Value.
             </summary>
             <param name="searchFields">
                 Название столбцов, значения которых надо получить.
@@ -1258,10 +2314,64 @@
             </returns>
             <exception cref="T:MySql.Data.MySqlClient.MySqlException"></exception>
             <exception cref="T:System.TimeoutException"></exception>
+            <exception cref="T:System.AggregateException"></exception>
+        </member>
+        <member name="M:RIS.Connection.MySQL.Requests.SelectAsync(System.String[],System.String,System.ValueTuple{System.String,System.String}[],System.Data.IsolationLevel)">
+            <summary>
+                (Асинхронно) Вызывает SELECT в таблице <paramref name="table"/> для получения значений столбцов <paramref name="searchFields"/> в первой найденной строке, соответствующей условиям из массива <paramref name="conditions"/>: каждый столбец с именем <paramref name="conditions"/>.Name равен соответствующему значению <paramref name="conditions"/>.Value.
+            </summary>
+            <param name="searchFields">
+                Названия столбцов, значения которых надо получить.
+            </param>
+            <param name="table">
+                Таблица, для которой будет вызван SELECT.
+            </param>
+            <param name="conditions">
+                Массив условий для запроса.
+                Name - название столбца.
+                Value - значение столбца.
+            </param>
+            <param name="isolationLevel">
+                Уровень изоляции транзакции.
+            </param>
+            <returns>
+                Массив типа <see cref="T:System.String"/>, который содержит ответ сервера.
+            </returns>
+            <exception cref="T:MySql.Data.MySqlClient.MySqlException"></exception>
+            <exception cref="T:System.TimeoutException"></exception>
+            <exception cref="T:System.AggregateException"></exception>
+        </member>
+        <member name="M:RIS.Connection.MySQL.Requests.SelectAsync(System.String[],System.String,System.ValueTuple{System.String,System.String}[],System.TimeSpan,System.Data.IsolationLevel)">
+            <summary>
+                (Асинхронно) Вызывает SELECT в таблице <paramref name="table"/> с временем ожидания <paramref name="timeout"/> для получения значений столбцов <paramref name="searchFields"/> в первой найденной строке, соответствующей условиям из массива <paramref name="conditions"/>: каждый столбец с именем <paramref name="conditions"/>.Name равен соответствующему значению <paramref name="conditions"/>.Value.
+            </summary>
+            <param name="searchFields">
+                Название столбцов, значения которых надо получить.
+            </param>
+            <param name="table">
+                Таблица, для которой будет вызван SELECT.
+            </param>
+            <param name="conditions">
+                Массив условий для запроса.
+                Name - название столбца.
+                Value - значение столбца.
+            </param>
+            <param name="timeout">
+                Время ожидания ответа от сервера.
+            </param>
+            <param name="isolationLevel">
+                Уровень изоляции транзакции.
+            </param>
+            <returns>
+                Массив типа <see cref="T:System.String"/>, который содержит ответ сервера.
+            </returns>
+            <exception cref="T:MySql.Data.MySqlClient.MySqlException"></exception>
+            <exception cref="T:System.TimeoutException"></exception>
+            <exception cref="T:System.AggregateException"></exception>
         </member>
         <member name="M:RIS.Connection.MySQL.Requests.Delete(System.String,System.Data.IsolationLevel)">
             <summary>
-                Вызывает DELETE в таблице <paramref name="table"/> для удаления всех строк.
+                (Синхронно) Вызывает DELETE в таблице <paramref name="table"/> для удаления всех строк.
             </summary>
             <param name="table">
                 Таблица, для которой будет вызван DELETE.
@@ -1274,10 +2384,11 @@
             </returns>
             <exception cref="T:MySql.Data.MySqlClient.MySqlException"></exception>
             <exception cref="T:System.TimeoutException"></exception>
+            <exception cref="T:System.AggregateException"></exception>
         </member>
         <member name="M:RIS.Connection.MySQL.Requests.Delete(System.String,System.TimeSpan,System.Data.IsolationLevel)">
             <summary>
-                Вызывает DELETE в таблице <paramref name="table"/> с временем ожидания <paramref name="timeout"/> для удаления всех строк.
+                (Синхронно) Вызывает DELETE в таблице <paramref name="table"/> с временем ожидания <paramref name="timeout"/> для удаления всех строк.
             </summary>
             <param name="table">
                 Таблица, для которой будет вызван DELETE.
@@ -1293,10 +2404,48 @@
             </returns>
             <exception cref="T:MySql.Data.MySqlClient.MySqlException"></exception>
             <exception cref="T:System.TimeoutException"></exception>
+            <exception cref="T:System.AggregateException"></exception>
+        </member>
+        <member name="M:RIS.Connection.MySQL.Requests.DeleteAsync(System.String,System.Data.IsolationLevel)">
+            <summary>
+                (Асинхронно) Вызывает DELETE в таблице <paramref name="table"/> для удаления всех строк.
+            </summary>
+            <param name="table">
+                Таблица, для которой будет вызван DELETE.
+            </param>
+            <param name="isolationLevel">
+                Уровень изоляции транзакции.
+            </param>
+            <returns>
+                Имеет возвращаемый тип <see langword="void"/>.
+            </returns>
+            <exception cref="T:MySql.Data.MySqlClient.MySqlException"></exception>
+            <exception cref="T:System.TimeoutException"></exception>
+            <exception cref="T:System.AggregateException"></exception>
+        </member>
+        <member name="M:RIS.Connection.MySQL.Requests.DeleteAsync(System.String,System.TimeSpan,System.Data.IsolationLevel)">
+            <summary>
+                (Асинхронно) Вызывает DELETE в таблице <paramref name="table"/> с временем ожидания <paramref name="timeout"/> для удаления всех строк.
+            </summary>
+            <param name="table">
+                Таблица, для которой будет вызван DELETE.
+            </param>
+            <param name="timeout">
+                Время ожидания ответа от сервера.
+            </param>
+            <param name="isolationLevel">
+                Уровень изоляции транзакции.
+            </param>
+            <returns>
+                Имеет возвращаемый тип <see langword="void"/>.
+            </returns>
+            <exception cref="T:MySql.Data.MySqlClient.MySqlException"></exception>
+            <exception cref="T:System.TimeoutException"></exception>
+            <exception cref="T:System.AggregateException"></exception>
         </member>
         <member name="M:RIS.Connection.MySQL.Requests.Delete(System.String,System.String,System.String,System.Data.IsolationLevel)">
             <summary>
-                Вызывает DELETE в таблице <paramref name="table"/> для удаления всех строк, соответствующих условию: столбец <paramref name="conditionName"/> = <paramref name="conditionValue"/>.
+                (Синхронно) Вызывает DELETE в таблице <paramref name="table"/> для удаления всех строк, соответствующих условию: столбец <paramref name="conditionName"/> = <paramref name="conditionValue"/>.
             </summary>
             <param name="table">
                 Таблица, для которой будет вызван DELETE.
@@ -1315,10 +2464,11 @@
             </returns>
             <exception cref="T:MySql.Data.MySqlClient.MySqlException"></exception>
             <exception cref="T:System.TimeoutException"></exception>
+            <exception cref="T:System.AggregateException"></exception>
         </member>
         <member name="M:RIS.Connection.MySQL.Requests.Delete(System.String,System.String,System.String,System.TimeSpan,System.Data.IsolationLevel)">
             <summary>
-                Вызывает DELETE в таблице <paramref name="table"/> с временем ожидания <paramref name="timeout"/> для удаления всех строк, соответствующих условию: столбец <paramref name="conditionName"/> = <paramref name="conditionValue"/>.
+                (Синхронно) Вызывает DELETE в таблице <paramref name="table"/> с временем ожидания <paramref name="timeout"/> для удаления всех строк, соответствующих условию: столбец <paramref name="conditionName"/> = <paramref name="conditionValue"/>.
             </summary>
             <param name="table">
                 Таблица, для которой будет вызван DELETE.
@@ -1340,10 +2490,60 @@
             </returns>
             <exception cref="T:MySql.Data.MySqlClient.MySqlException"></exception>
             <exception cref="T:System.TimeoutException"></exception>
+            <exception cref="T:System.AggregateException"></exception>
+        </member>
+        <member name="M:RIS.Connection.MySQL.Requests.DeleteAsync(System.String,System.String,System.String,System.Data.IsolationLevel)">
+            <summary>
+                (Асинхронно) Вызывает DELETE в таблице <paramref name="table"/> для удаления всех строк, соответствующих условию: столбец <paramref name="conditionName"/> = <paramref name="conditionValue"/>.
+            </summary>
+            <param name="table">
+                Таблица, для которой будет вызван DELETE.
+            </param>
+            <param name="conditionName">
+                Название столбца для условия.
+            </param>
+            <param name="conditionValue">
+                Значение столбца для условия.
+            </param>
+            <param name="isolationLevel">
+                Уровень изоляции транзакции.
+            </param>
+            <returns>
+                Имеет возвращаемый тип <see langword="void"/>.
+            </returns>
+            <exception cref="T:MySql.Data.MySqlClient.MySqlException"></exception>
+            <exception cref="T:System.TimeoutException"></exception>
+            <exception cref="T:System.AggregateException"></exception>
+        </member>
+        <member name="M:RIS.Connection.MySQL.Requests.DeleteAsync(System.String,System.String,System.String,System.TimeSpan,System.Data.IsolationLevel)">
+            <summary>
+                (Асинхронно) Вызывает DELETE в таблице <paramref name="table"/> с временем ожидания <paramref name="timeout"/> для удаления всех строк, соответствующих условию: столбец <paramref name="conditionName"/> = <paramref name="conditionValue"/>.
+            </summary>
+            <param name="table">
+                Таблица, для которой будет вызван DELETE.
+            </param>
+            <param name="conditionName">
+                Название столбца для условия.
+            </param>
+            <param name="conditionValue">
+                Значение столбца для условия.
+            </param>
+            <param name="timeout">
+                Время ожидания ответа от сервера.
+            </param>
+            <param name="isolationLevel">
+                Уровень изоляции транзакции.
+            </param>
+            <returns>
+                Имеет возвращаемый тип <see langword="void"/>.
+            </returns>
+            <exception cref="T:MySql.Data.MySqlClient.MySqlException"></exception>
+            <exception cref="T:System.TimeoutException"></exception>
+            <exception cref="T:System.AggregateException"></exception>
         </member>
         <member name="M:RIS.Connection.MySQL.Requests.Delete(System.String,System.String,System.String,System.String,System.String,System.Data.IsolationLevel)">
             <summary>
-                Вызывает DELETE в таблице <paramref name="table"/> для удаления всех строк, соответствующих условиям: столбец <paramref name="conditionName1"/> = <paramref name="conditionValue1"/> AND столбец <paramref name="conditionName2"/> = <paramref name="conditionValue2"/>.
+                (Синхронно) Вызывает DELETE в таблице <paramref name="table"/> для удаления всех строк, соответствующих условиям: столбец <paramref name="conditionName1"/> = <paramref name="conditionValue1"/> AND столбец <paramref name="conditionName2"/> = <paramref name="conditionValue2"/>.
             </summary>
             <param name="table">
                 Таблица, для которой будет вызван DELETE.
@@ -1368,10 +2568,11 @@
             </returns>
             <exception cref="T:MySql.Data.MySqlClient.MySqlException"></exception>
             <exception cref="T:System.TimeoutException"></exception>
+            <exception cref="T:System.AggregateException"></exception>
         </member>
         <member name="M:RIS.Connection.MySQL.Requests.Delete(System.String,System.String,System.String,System.String,System.String,System.TimeSpan,System.Data.IsolationLevel)">
             <summary>
-                Вызывает DELETE в таблице <paramref name="table"/> с временем ожидания <paramref name="timeout"/> для удаления всех строк, соответствующих условиям: столбец <paramref name="conditionName1"/> = <paramref name="conditionValue1"/> AND столбец <paramref name="conditionName2"/> = <paramref name="conditionValue2"/>.
+                (Синхронно) Вызывает DELETE в таблице <paramref name="table"/> с временем ожидания <paramref name="timeout"/> для удаления всех строк, соответствующих условиям: столбец <paramref name="conditionName1"/> = <paramref name="conditionValue1"/> AND столбец <paramref name="conditionName2"/> = <paramref name="conditionValue2"/>.
             </summary>
             <param name="table">
                 Таблица, для которой будет вызван DELETE.
@@ -1399,10 +2600,72 @@
             </returns>
             <exception cref="T:MySql.Data.MySqlClient.MySqlException"></exception>
             <exception cref="T:System.TimeoutException"></exception>
+            <exception cref="T:System.AggregateException"></exception>
+        </member>
+        <member name="M:RIS.Connection.MySQL.Requests.DeleteAsync(System.String,System.String,System.String,System.String,System.String,System.Data.IsolationLevel)">
+            <summary>
+                (Асинхронно) Вызывает DELETE в таблице <paramref name="table"/> для удаления всех строк, соответствующих условиям: столбец <paramref name="conditionName1"/> = <paramref name="conditionValue1"/> AND столбец <paramref name="conditionName2"/> = <paramref name="conditionValue2"/>.
+            </summary>
+            <param name="table">
+                Таблица, для которой будет вызван DELETE.
+            </param>
+            <param name="conditionName1">
+                Название столбца для условия #1.
+            </param>
+            <param name="conditionValue1">
+                Значение столбца для условия #1.
+            </param>
+            <param name="conditionName2">
+                Название столбца для условия #2.
+            </param>
+            <param name="conditionValue2">
+                Значение столбца для условия #2.
+            </param>
+            <param name="isolationLevel">
+                Уровень изоляции транзакции.
+            </param>
+            <returns>
+                Имеет возвращаемый тип <see langword="void"/>.
+            </returns>
+            <exception cref="T:MySql.Data.MySqlClient.MySqlException"></exception>
+            <exception cref="T:System.TimeoutException"></exception>
+            <exception cref="T:System.AggregateException"></exception>
+        </member>
+        <member name="M:RIS.Connection.MySQL.Requests.DeleteAsync(System.String,System.String,System.String,System.String,System.String,System.TimeSpan,System.Data.IsolationLevel)">
+            <summary>
+                (Асинхронно) Вызывает DELETE в таблице <paramref name="table"/> с временем ожидания <paramref name="timeout"/> для удаления всех строк, соответствующих условиям: столбец <paramref name="conditionName1"/> = <paramref name="conditionValue1"/> AND столбец <paramref name="conditionName2"/> = <paramref name="conditionValue2"/>.
+            </summary>
+            <param name="table">
+                Таблица, для которой будет вызван DELETE.
+            </param>
+            <param name="conditionName1">
+                Название столбца для условия #1.
+            </param>
+            <param name="conditionValue1">
+                Значение столбца для условия #1.
+            </param>
+            <param name="conditionName2">
+                Название столбца для условия #2.
+            </param>
+            <param name="conditionValue2">
+                Значение столбца для условия #2.
+            </param>
+            <param name="timeout">
+                Время ожидания ответа от сервера.
+            </param>
+            <param name="isolationLevel">
+                Уровень изоляции транзакции.
+            </param>
+            <returns>
+                Имеет возвращаемый тип <see langword="void"/>.
+            </returns>
+            <exception cref="T:MySql.Data.MySqlClient.MySqlException"></exception>
+            <exception cref="T:System.TimeoutException"></exception>
+            <exception cref="T:System.AggregateException"></exception>
         </member>
         <member name="M:RIS.Connection.MySQL.Requests.Delete(System.String,System.ValueTuple{System.String,System.String}[],System.Data.IsolationLevel)">
             <summary>
-                Вызывает DELETE в таблице <paramref name="table"/> для удаления всех строк, соответствующих условиям из массива <paramref name="conditions"/>: каждый столбец с именем <paramref name="conditions"/>.Name равен соответствующему значению <paramref name="conditions"/>.Value.
+                (Синхронно) Вызывает DELETE в таблице <paramref name="table"/> для удаления всех строк, соответствующих условиям из массива <paramref name="conditions"/>: каждый столбец с именем <paramref name="conditions"/>.Name равен соответствующему значению <paramref name="conditions"/>.Value.
             </summary>
             <param name="table">
                 Таблица, для которой будет вызван DELETE.
@@ -1420,10 +2683,11 @@
             </returns>
             <exception cref="T:MySql.Data.MySqlClient.MySqlException"></exception>
             <exception cref="T:System.TimeoutException"></exception>
+            <exception cref="T:System.AggregateException"></exception>
         </member>
         <member name="M:RIS.Connection.MySQL.Requests.Delete(System.String,System.ValueTuple{System.String,System.String}[],System.TimeSpan,System.Data.IsolationLevel)">
             <summary>
-                Вызывает DELETE в таблице <paramref name="table"/> с временем ожидания <paramref name="timeout"/> для удаления всех строк, соответствующих условиям из массива <paramref name="conditions"/>: каждый столбец с именем <paramref name="conditions"/>.Name равен соответствующему значению <paramref name="conditions"/>.Value.
+                (Синхронно) Вызывает DELETE в таблице <paramref name="table"/> с временем ожидания <paramref name="timeout"/> для удаления всех строк, соответствующих условиям из массива <paramref name="conditions"/>: каждый столбец с именем <paramref name="conditions"/>.Name равен соответствующему значению <paramref name="conditions"/>.Value.
             </summary>
             <param name="table">
                 Таблица, для которой будет вызван DELETE.
@@ -1444,10 +2708,58 @@
             </returns>
             <exception cref="T:MySql.Data.MySqlClient.MySqlException"></exception>
             <exception cref="T:System.TimeoutException"></exception>
+            <exception cref="T:System.AggregateException"></exception>
+        </member>
+        <member name="M:RIS.Connection.MySQL.Requests.DeleteAsync(System.String,System.ValueTuple{System.String,System.String}[],System.Data.IsolationLevel)">
+            <summary>
+                (Асинхронно) Вызывает DELETE в таблице <paramref name="table"/> для удаления всех строк, соответствующих условиям из массива <paramref name="conditions"/>: каждый столбец с именем <paramref name="conditions"/>.Name равен соответствующему значению <paramref name="conditions"/>.Value.
+            </summary>
+            <param name="table">
+                Таблица, для которой будет вызван DELETE.
+            </param>
+            <param name="conditions">
+                Массив условий для запроса.
+                Name - название столбца.
+                Value - значение столбца.
+            </param>
+            <param name="isolationLevel">
+                Уровень изоляции транзакции.
+            </param>
+            <returns>
+                Имеет возвращаемый тип <see langword="void"/>.
+            </returns>
+            <exception cref="T:MySql.Data.MySqlClient.MySqlException"></exception>
+            <exception cref="T:System.TimeoutException"></exception>
+            <exception cref="T:System.AggregateException"></exception>
+        </member>
+        <member name="M:RIS.Connection.MySQL.Requests.DeleteAsync(System.String,System.ValueTuple{System.String,System.String}[],System.TimeSpan,System.Data.IsolationLevel)">
+            <summary>
+                (Асинхронно) Вызывает DELETE в таблице <paramref name="table"/> с временем ожидания <paramref name="timeout"/> для удаления всех строк, соответствующих условиям из массива <paramref name="conditions"/>: каждый столбец с именем <paramref name="conditions"/>.Name равен соответствующему значению <paramref name="conditions"/>.Value.
+            </summary>
+            <param name="table">
+                Таблица, для которой будет вызван DELETE.
+            </param>
+            <param name="conditions">
+                Массив условий для запроса.
+                Name - название столбца.
+                Value - значение столбца.
+            </param>
+            <param name="timeout">
+                Время ожидания ответа от сервера.
+            </param>
+            <param name="isolationLevel">
+                Уровень изоляции транзакции.
+            </param>
+            <returns>
+                Имеет возвращаемый тип <see langword="void"/>.
+            </returns>
+            <exception cref="T:MySql.Data.MySqlClient.MySqlException"></exception>
+            <exception cref="T:System.TimeoutException"></exception>
+            <exception cref="T:System.AggregateException"></exception>
         </member>
         <member name="M:RIS.Connection.MySQL.Requests.Update(System.String,System.String,System.String,System.Data.IsolationLevel)">
             <summary>
-                Вызывает UPDATE в таблице <paramref name="table"/> для изменения значения столбца <paramref name="changingField"/> на <paramref name="newFieldValue"/> во всех строках.
+                (Синхронно) Вызывает UPDATE в таблице <paramref name="table"/> для изменения значения столбца <paramref name="changingField"/> на <paramref name="newFieldValue"/> во всех строках.
             </summary>
             <param name="changingField">
                 Названия столбца, значение которого надо изменить.
@@ -1466,10 +2778,11 @@
             </returns>
             <exception cref="T:MySql.Data.MySqlClient.MySqlException"></exception>
             <exception cref="T:System.TimeoutException"></exception>
+            <exception cref="T:System.AggregateException"></exception>
         </member>
         <member name="M:RIS.Connection.MySQL.Requests.Update(System.String,System.String,System.String,System.TimeSpan,System.Data.IsolationLevel)">
             <summary>
-                Вызывает UPDATE в таблице <paramref name="table"/> с временем ожидания <paramref name="timeout"/> для изменения значения столбца <paramref name="changingField"/> на <paramref name="newFieldValue"/> во всех строках.
+                (Синхронно) Вызывает UPDATE в таблице <paramref name="table"/> с временем ожидания <paramref name="timeout"/> для изменения значения столбца <paramref name="changingField"/> на <paramref name="newFieldValue"/> во всех строках.
             </summary>
             <param name="changingField">
                 Названия столбца, значение которого надо изменить.
@@ -1491,10 +2804,60 @@
             </returns>
             <exception cref="T:MySql.Data.MySqlClient.MySqlException"></exception>
             <exception cref="T:System.TimeoutException"></exception>
+            <exception cref="T:System.AggregateException"></exception>
+        </member>
+        <member name="M:RIS.Connection.MySQL.Requests.UpdateAsync(System.String,System.String,System.String,System.Data.IsolationLevel)">
+            <summary>
+                (Асинхронно) Вызывает UPDATE в таблице <paramref name="table"/> для изменения значения столбца <paramref name="changingField"/> на <paramref name="newFieldValue"/> во всех строках.
+            </summary>
+            <param name="changingField">
+                Названия столбца, значение которого надо изменить.
+            </param>
+            <param name="newFieldValue">
+                Новое значение для столбца <paramref name="changingField"/>.
+            </param>
+            <param name="table">
+                Таблица, для которой будет вызван UPDATE.
+            </param>
+            <param name="isolationLevel">
+                Уровень изоляции транзакции.
+            </param>
+            <returns>
+                Имеет возвращаемый тип <see langword="void"/>.
+            </returns>
+            <exception cref="T:MySql.Data.MySqlClient.MySqlException"></exception>
+            <exception cref="T:System.TimeoutException"></exception>
+            <exception cref="T:System.AggregateException"></exception>
+        </member>
+        <member name="M:RIS.Connection.MySQL.Requests.UpdateAsync(System.String,System.String,System.String,System.TimeSpan,System.Data.IsolationLevel)">
+            <summary>
+                (Асинхронно) Вызывает UPDATE в таблице <paramref name="table"/> с временем ожидания <paramref name="timeout"/> для изменения значения столбца <paramref name="changingField"/> на <paramref name="newFieldValue"/> во всех строках.
+            </summary>
+            <param name="changingField">
+                Названия столбца, значение которого надо изменить.
+            </param>
+             <param name="newFieldValue">
+                Новое значение для столбца <paramref name="changingField"/>.
+            </param>
+            <param name="table">
+                Таблица, для которой будет вызван UPDATE.
+            </param>
+            <param name="timeout">
+                Время ожидания ответа от сервера.
+            </param>
+            <param name="isolationLevel">
+                Уровень изоляции транзакции.
+            </param>
+            <returns>
+                Имеет возвращаемый тип <see langword="void"/>.
+            </returns>
+            <exception cref="T:MySql.Data.MySqlClient.MySqlException"></exception>
+            <exception cref="T:System.TimeoutException"></exception>
+            <exception cref="T:System.AggregateException"></exception>
         </member>
         <member name="M:RIS.Connection.MySQL.Requests.Update(System.String,System.String,System.String,System.String,System.String,System.Data.IsolationLevel)">
             <summary>
-                Вызывает UPDATE в таблице <paramref name="table"/> для изменения значения столбца <paramref name="changingField"/> на <paramref name="newFieldValue"/> во всех строках, соответствующих условию: столбец <paramref name="conditionName"/> = <paramref name="conditionValue"/>.
+                (Синхронно) Вызывает UPDATE в таблице <paramref name="table"/> для изменения значения столбца <paramref name="changingField"/> на <paramref name="newFieldValue"/> во всех строках, соответствующих условию: столбец <paramref name="conditionName"/> = <paramref name="conditionValue"/>.
             </summary>
             <param name="changingField">
                 Названия столбца, значение которого надо изменить.
@@ -1519,10 +2882,11 @@
             </returns>
             <exception cref="T:MySql.Data.MySqlClient.MySqlException"></exception>
             <exception cref="T:System.TimeoutException"></exception>
+            <exception cref="T:System.AggregateException"></exception>
         </member>
         <member name="M:RIS.Connection.MySQL.Requests.Update(System.String,System.String,System.String,System.String,System.String,System.TimeSpan,System.Data.IsolationLevel)">
             <summary>
-                Вызывает UPDATE в таблице <paramref name="table"/> с временем ожидания <paramref name="timeout"/> для изменения значения столбца <paramref name="changingField"/> на <paramref name="newFieldValue"/> во всех строках, соответствующих условию: столбец <paramref name="conditionName"/> = <paramref name="conditionValue"/>.
+                (Синхронно) Вызывает UPDATE в таблице <paramref name="table"/> с временем ожидания <paramref name="timeout"/> для изменения значения столбца <paramref name="changingField"/> на <paramref name="newFieldValue"/> во всех строках, соответствующих условию: столбец <paramref name="conditionName"/> = <paramref name="conditionValue"/>.
             </summary>
             <param name="changingField">
                 Названия столбца, значение которого надо изменить.
@@ -1550,10 +2914,72 @@
             </returns>
             <exception cref="T:MySql.Data.MySqlClient.MySqlException"></exception>
             <exception cref="T:System.TimeoutException"></exception>
+            <exception cref="T:System.AggregateException"></exception>
+        </member>
+        <member name="M:RIS.Connection.MySQL.Requests.UpdateAsync(System.String,System.String,System.String,System.String,System.String,System.Data.IsolationLevel)">
+            <summary>
+                (Асинхронно) Вызывает UPDATE в таблице <paramref name="table"/> для изменения значения столбца <paramref name="changingField"/> на <paramref name="newFieldValue"/> во всех строках, соответствующих условию: столбец <paramref name="conditionName"/> = <paramref name="conditionValue"/>.
+            </summary>
+            <param name="changingField">
+                Названия столбца, значение которого надо изменить.
+            </param>
+            <param name="newFieldValue">
+                Новое значение для столбца <paramref name="changingField"/>.
+            </param>
+            <param name="table">
+                Таблица, для которой будет вызван UPDATE.
+            </param>
+            <param name="conditionName">
+                Название столбца для условия.
+            </param>
+            <param name="conditionValue">
+                Значение столбца для условия.
+            </param>
+            <param name="isolationLevel">
+                Уровень изоляции транзакции.
+            </param>
+            <returns>
+                Имеет возвращаемый тип <see langword="void"/>.
+            </returns>
+            <exception cref="T:MySql.Data.MySqlClient.MySqlException"></exception>
+            <exception cref="T:System.TimeoutException"></exception>
+            <exception cref="T:System.AggregateException"></exception>
+        </member>
+        <member name="M:RIS.Connection.MySQL.Requests.UpdateAsync(System.String,System.String,System.String,System.String,System.String,System.TimeSpan,System.Data.IsolationLevel)">
+            <summary>
+                (Асинхронно) Вызывает UPDATE в таблице <paramref name="table"/> с временем ожидания <paramref name="timeout"/> для изменения значения столбца <paramref name="changingField"/> на <paramref name="newFieldValue"/> во всех строках, соответствующих условию: столбец <paramref name="conditionName"/> = <paramref name="conditionValue"/>.
+            </summary>
+            <param name="changingField">
+                Названия столбца, значение которого надо изменить.
+            </param>
+             <param name="newFieldValue">
+                Новое значение для столбца <paramref name="changingField"/>.
+            </param>
+            <param name="table">
+                Таблица, для которой будет вызван UPDATE.
+            </param>
+            <param name="conditionName">
+                Название столбца для условия.
+            </param>
+            <param name="conditionValue">
+                Значение столбца для условия.
+            </param>
+            <param name="timeout">
+                Время ожидания ответа от сервера.
+            </param>
+            <param name="isolationLevel">
+                Уровень изоляции транзакции.
+            </param>
+            <returns>
+                Имеет возвращаемый тип <see langword="void"/>.
+            </returns>
+            <exception cref="T:MySql.Data.MySqlClient.MySqlException"></exception>
+            <exception cref="T:System.TimeoutException"></exception>
+            <exception cref="T:System.AggregateException"></exception>
         </member>
         <member name="M:RIS.Connection.MySQL.Requests.Update(System.String,System.String,System.String,System.String,System.String,System.String,System.String,System.Data.IsolationLevel)">
             <summary>
-                Вызывает UPDATE в таблице <paramref name="table"/> для изменения значения столбца <paramref name="changingField"/> на <paramref name="newFieldValue"/> во всех строках, соответствующих условиям: столбец <paramref name="conditionName1"/> = <paramref name="conditionValue1"/> AND столбец <paramref name="conditionName2"/> = <paramref name="conditionValue2"/>.
+                (Синхронно) Вызывает UPDATE в таблице <paramref name="table"/> для изменения значения столбца <paramref name="changingField"/> на <paramref name="newFieldValue"/> во всех строках, соответствующих условиям: столбец <paramref name="conditionName1"/> = <paramref name="conditionValue1"/> AND столбец <paramref name="conditionName2"/> = <paramref name="conditionValue2"/>.
             </summary>
             <param name="changingField">
                 Названия столбца, значение которого надо изменить.
@@ -1584,10 +3010,11 @@
             </returns>
             <exception cref="T:MySql.Data.MySqlClient.MySqlException"></exception>
             <exception cref="T:System.TimeoutException"></exception>
+            <exception cref="T:System.AggregateException"></exception>
         </member>
         <member name="M:RIS.Connection.MySQL.Requests.Update(System.String,System.String,System.String,System.String,System.String,System.String,System.String,System.TimeSpan,System.Data.IsolationLevel)">
             <summary>
-                Вызывает UPDATE в таблице <paramref name="table"/> для изменения значения столбца <paramref name="changingField"/> на <paramref name="newFieldValue"/> во всех строках, соответствующих условиям: столбец <paramref name="conditionName1"/> = <paramref name="conditionValue1"/> AND столбец <paramref name="conditionName2"/> = <paramref name="conditionValue2"/>.
+                (Синхронно) Вызывает UPDATE в таблице <paramref name="table"/> для изменения значения столбца <paramref name="changingField"/> на <paramref name="newFieldValue"/> во всех строках, соответствующих условиям: столбец <paramref name="conditionName1"/> = <paramref name="conditionValue1"/> AND столбец <paramref name="conditionName2"/> = <paramref name="conditionValue2"/>.
             </summary>
             <param name="changingField">
                 Названия столбца, значение которого надо изменить.
@@ -1621,10 +3048,84 @@
             </returns>
             <exception cref="T:MySql.Data.MySqlClient.MySqlException"></exception>
             <exception cref="T:System.TimeoutException"></exception>
+            <exception cref="T:System.AggregateException"></exception>
+        </member>
+        <member name="M:RIS.Connection.MySQL.Requests.UpdateAsync(System.String,System.String,System.String,System.String,System.String,System.String,System.String,System.Data.IsolationLevel)">
+            <summary>
+                (Асинхронно) Вызывает UPDATE в таблице <paramref name="table"/> для изменения значения столбца <paramref name="changingField"/> на <paramref name="newFieldValue"/> во всех строках, соответствующих условиям: столбец <paramref name="conditionName1"/> = <paramref name="conditionValue1"/> AND столбец <paramref name="conditionName2"/> = <paramref name="conditionValue2"/>.
+            </summary>
+            <param name="changingField">
+                Названия столбца, значение которого надо изменить.
+            </param>
+            <param name="newFieldValue">
+                Новое значение для столбца <paramref name="changingField"/>.
+            </param>
+            <param name="table">
+                Таблица, для которой будет вызван UPDATE.
+            </param>
+            <param name="conditionName1">
+                Название столбца для условия #1.
+            </param>
+            <param name="conditionValue1">
+                Значение столбца для условия #1.
+            </param>
+            <param name="conditionName2">
+                Название столбца для условия #2.
+            </param>
+            <param name="conditionValue2">
+                Значение столбца для условия #2.
+            </param>
+            <param name="isolationLevel">
+                Уровень изоляции транзакции.
+            </param>
+            <returns>
+                Имеет возвращаемый тип <see langword="void"/>.
+            </returns>
+            <exception cref="T:MySql.Data.MySqlClient.MySqlException"></exception>
+            <exception cref="T:System.TimeoutException"></exception>
+            <exception cref="T:System.AggregateException"></exception>
+        </member>
+        <member name="M:RIS.Connection.MySQL.Requests.UpdateAsync(System.String,System.String,System.String,System.String,System.String,System.String,System.String,System.TimeSpan,System.Data.IsolationLevel)">
+            <summary>
+                (Асинхронно) Вызывает UPDATE в таблице <paramref name="table"/> для изменения значения столбца <paramref name="changingField"/> на <paramref name="newFieldValue"/> во всех строках, соответствующих условиям: столбец <paramref name="conditionName1"/> = <paramref name="conditionValue1"/> AND столбец <paramref name="conditionName2"/> = <paramref name="conditionValue2"/>.
+            </summary>
+            <param name="changingField">
+                Названия столбца, значение которого надо изменить.
+            </param>
+            <param name="newFieldValue">
+                Новое значение для столбца <paramref name="changingField"/>.
+            </param>
+            <param name="table">
+                Таблица, для которой будет вызван UPDATE.
+            </param>
+            <param name="conditionName1">
+                Название столбца для условия #1.
+            </param>
+            <param name="conditionValue1">
+                Значение столбца для условия #1.
+            </param>
+            <param name="conditionName2">
+                Название столбца для условия #2.
+            </param>
+            <param name="conditionValue2">
+                Значение столбца для условия #2.
+            </param>
+            <param name="timeout">
+                Время ожидания ответа от сервера.
+            </param>
+            <param name="isolationLevel">
+                Уровень изоляции транзакции.
+            </param>
+            <returns>
+                Имеет возвращаемый тип <see langword="void"/>.
+            </returns>
+            <exception cref="T:MySql.Data.MySqlClient.MySqlException"></exception>
+            <exception cref="T:System.TimeoutException"></exception>
+            <exception cref="T:System.AggregateException"></exception>
         </member>
         <member name="M:RIS.Connection.MySQL.Requests.Update(System.String,System.String,System.String,System.ValueTuple{System.String,System.String}[],System.Data.IsolationLevel)">
             <summary>
-                Вызывает UPDATE в таблице <paramref name="table"/> для изменения значения столбца <paramref name="changingField"/> на <paramref name="newFieldValue"/> во всех строках, соответствующих условиям из массива <paramref name="conditions"/>: каждый столбец с именем <paramref name="conditions"/>.Name равен соответствующему значению <paramref name="conditions"/>.Value.
+                (Синхронно) Вызывает UPDATE в таблице <paramref name="table"/> для изменения значения столбца <paramref name="changingField"/> на <paramref name="newFieldValue"/> во всех строках, соответствующих условиям из массива <paramref name="conditions"/>: каждый столбец с именем <paramref name="conditions"/>.Name равен соответствующему значению <paramref name="conditions"/>.Value.
             </summary>
             <param name="changingField">
                 Названия столбца, значение которого надо изменить.
@@ -1648,10 +3149,11 @@
             </returns>
             <exception cref="T:MySql.Data.MySqlClient.MySqlException"></exception>
             <exception cref="T:System.TimeoutException"></exception>
+            <exception cref="T:System.AggregateException"></exception>
         </member>
         <member name="M:RIS.Connection.MySQL.Requests.Update(System.String,System.String,System.String,System.ValueTuple{System.String,System.String}[],System.TimeSpan,System.Data.IsolationLevel)">
             <summary>
-                Вызывает UPDATE в таблице <paramref name="table"/> для изменения значения столбца <paramref name="changingField"/> на <paramref name="newFieldValue"/> во всех строках, соответствующих условиям из массива <paramref name="conditions"/>: каждый столбец с именем <paramref name="conditions"/>.Name равен соответствующему значению <paramref name="conditions"/>.Value.
+                (Синхронно) Вызывает UPDATE в таблице <paramref name="table"/> для изменения значения столбца <paramref name="changingField"/> на <paramref name="newFieldValue"/> во всех строках, соответствующих условиям из массива <paramref name="conditions"/>: каждый столбец с именем <paramref name="conditions"/>.Name равен соответствующему значению <paramref name="conditions"/>.Value.
             </summary>
             <param name="changingField">
                 Названия столбца, значение которого надо изменить.
@@ -1678,10 +3180,70 @@
             </returns>
             <exception cref="T:MySql.Data.MySqlClient.MySqlException"></exception>
             <exception cref="T:System.TimeoutException"></exception>
+            <exception cref="T:System.AggregateException"></exception>
+        </member>
+        <member name="M:RIS.Connection.MySQL.Requests.UpdateAsync(System.String,System.String,System.String,System.ValueTuple{System.String,System.String}[],System.Data.IsolationLevel)">
+            <summary>
+                (Асинхронно) Вызывает UPDATE в таблице <paramref name="table"/> для изменения значения столбца <paramref name="changingField"/> на <paramref name="newFieldValue"/> во всех строках, соответствующих условиям из массива <paramref name="conditions"/>: каждый столбец с именем <paramref name="conditions"/>.Name равен соответствующему значению <paramref name="conditions"/>.Value.
+            </summary>
+            <param name="changingField">
+                Названия столбца, значение которого надо изменить.
+            </param>
+            <param name="newFieldValue">
+                Новое значение для столбца <paramref name="changingField"/>.
+            </param>
+            <param name="table">
+                Таблица, для которой будет вызван UPDATE.
+            </param>
+            <param name="conditions">
+                Массив условий для запроса.
+                Name - название столбца.
+                Value - значение столбца.
+            </param>
+            <param name="isolationLevel">
+                Уровень изоляции транзакции.
+            </param>
+            <returns>
+                Имеет возвращаемый тип <see langword="void"/>.
+            </returns>
+            <exception cref="T:MySql.Data.MySqlClient.MySqlException"></exception>
+            <exception cref="T:System.TimeoutException"></exception>
+            <exception cref="T:System.AggregateException"></exception>
+        </member>
+        <member name="M:RIS.Connection.MySQL.Requests.UpdateAsync(System.String,System.String,System.String,System.ValueTuple{System.String,System.String}[],System.TimeSpan,System.Data.IsolationLevel)">
+            <summary>
+                (Асинхронно) Вызывает UPDATE в таблице <paramref name="table"/> для изменения значения столбца <paramref name="changingField"/> на <paramref name="newFieldValue"/> во всех строках, соответствующих условиям из массива <paramref name="conditions"/>: каждый столбец с именем <paramref name="conditions"/>.Name равен соответствующему значению <paramref name="conditions"/>.Value.
+            </summary>
+            <param name="changingField">
+                Названия столбца, значение которого надо изменить.
+            </param>
+            <param name="newFieldValue">
+                Новое значение для столбца <paramref name="changingField"/>.
+            </param>
+            <param name="table">
+                Таблица, для которой будет вызван UPDATE.
+            </param>
+            <param name="conditions">
+                Массив условий для запроса.
+                Name - название столбца.
+                Value - значение столбца.
+            </param>
+            <param name="timeout">
+                Время ожидания ответа от сервера.
+            </param>
+            <param name="isolationLevel">
+                Уровень изоляции транзакции.
+            </param>
+            <returns>
+                Имеет возвращаемый тип <see langword="void"/>.
+            </returns>
+            <exception cref="T:MySql.Data.MySqlClient.MySqlException"></exception>
+            <exception cref="T:System.TimeoutException"></exception>
+            <exception cref="T:System.AggregateException"></exception>
         </member>
         <member name="M:RIS.Connection.MySQL.Requests.Insert(System.String[],System.String,System.Data.IsolationLevel)">
             <summary>
-                Вызывает INSERT для вставки новой строки в таблицу <paramref name="table"/>.
+                (Синхронно) Вызывает INSERT для вставки новой строки в таблицу <paramref name="table"/>.
             </summary>
             <param name="values">
                 Значения столбцов по порядку их следования в таблице <paramref name="table"/>.
@@ -1697,10 +3259,11 @@
             </returns>
             <exception cref="T:MySql.Data.MySqlClient.MySqlException"></exception>
             <exception cref="T:System.TimeoutException"></exception>
+            <exception cref="T:System.AggregateException"></exception>
         </member>
         <member name="M:RIS.Connection.MySQL.Requests.Insert(System.String[],System.String,System.TimeSpan,System.Data.IsolationLevel)">
             <summary>
-                Вызывает INSERT с временем ожидания <paramref name="timeout"/> для вставки новой строки в таблицу <paramref name="table"/>.
+                (Синхронно) Вызывает INSERT с временем ожидания <paramref name="timeout"/> для вставки новой строки в таблицу <paramref name="table"/>.
             </summary>
             <param name="values">
                 Значения столбцов по порядку их следования в таблице <paramref name="table"/>.
@@ -1719,10 +3282,54 @@
             </returns>
             <exception cref="T:MySql.Data.MySqlClient.MySqlException"></exception>
             <exception cref="T:System.TimeoutException"></exception>
+            <exception cref="T:System.AggregateException"></exception>
+        </member>
+        <member name="M:RIS.Connection.MySQL.Requests.InsertAsync(System.String[],System.String,System.Data.IsolationLevel)">
+            <summary>
+                (Асинхронно) Вызывает INSERT для вставки новой строки в таблицу <paramref name="table"/>.
+            </summary>
+            <param name="values">
+                Значения столбцов по порядку их следования в таблице <paramref name="table"/>.
+            </param>
+            <param name="table">
+                Таблица, для которой будет вызван INSERT.
+            </param>
+            <param name="isolationLevel">
+                Уровень изоляции транзакции.
+            </param>
+            <returns>
+                Имеет возвращаемый тип <see langword="void"/>.
+            </returns>
+            <exception cref="T:MySql.Data.MySqlClient.MySqlException"></exception>
+            <exception cref="T:System.TimeoutException"></exception>
+            <exception cref="T:System.AggregateException"></exception>
+        </member>
+        <member name="M:RIS.Connection.MySQL.Requests.InsertAsync(System.String[],System.String,System.TimeSpan,System.Data.IsolationLevel)">
+            <summary>
+                (Асинхронно) Вызывает INSERT с временем ожидания <paramref name="timeout"/> для вставки новой строки в таблицу <paramref name="table"/>.
+            </summary>
+            <param name="values">
+                Значения столбцов по порядку их следования в таблице <paramref name="table"/>.
+            </param>
+            <param name="table">
+                Таблица, для которой будет вызван INSERT.
+            </param>
+            <param name="timeout">
+                Время ожидания ответа от сервера.
+            </param>
+            <param name="isolationLevel">
+                Уровень изоляции транзакции.
+            </param>
+            <returns>
+                Имеет возвращаемый тип <see langword="void"/>.
+            </returns>
+            <exception cref="T:MySql.Data.MySqlClient.MySqlException"></exception>
+            <exception cref="T:System.TimeoutException"></exception>
+            <exception cref="T:System.AggregateException"></exception>
         </member>
         <member name="M:RIS.Connection.MySQL.Requests.TruncateTable(System.String,System.Data.IsolationLevel)">
             <summary>
-                Вызывает TRUNCATE для очистки таблицы <paramref name="table"/>.
+                (Синхронно) Вызывает TRUNCATE для очистки таблицы <paramref name="table"/>.
             </summary>
             <param name="table">
                 Таблица, для которой будет вызван TRUNCATE.
@@ -1735,10 +3342,11 @@
             </returns>
             <exception cref="T:MySql.Data.MySqlClient.MySqlException"></exception>
             <exception cref="T:System.TimeoutException"></exception>
+            <exception cref="T:System.AggregateException"></exception>
         </member>
         <member name="M:RIS.Connection.MySQL.Requests.TruncateTable(System.String,System.TimeSpan,System.Data.IsolationLevel)">
             <summary>
-                Вызывает TRUNCATE для очистки таблицы <paramref name="table"/>.
+                (Синхронно) Вызывает TRUNCATE для очистки таблицы <paramref name="table"/>.
             </summary>
             <param name="table">
                 Таблица, для которой будет вызван TRUNCATE.
@@ -1754,10 +3362,48 @@
             </returns>
             <exception cref="T:MySql.Data.MySqlClient.MySqlException"></exception>
             <exception cref="T:System.TimeoutException"></exception>
+            <exception cref="T:System.AggregateException"></exception>
+        </member>
+        <member name="M:RIS.Connection.MySQL.Requests.TruncateTableAsync(System.String,System.Data.IsolationLevel)">
+            <summary>
+                (Асинхронно) Вызывает TRUNCATE для очистки таблицы <paramref name="table"/>.
+            </summary>
+            <param name="table">
+                Таблица, для которой будет вызван TRUNCATE.
+            </param>
+            <param name="isolationLevel">
+                Уровень изоляции транзакции.
+            </param>
+            <returns>
+                Имеет возвращаемый тип <see langword="void"/>.
+            </returns>
+            <exception cref="T:MySql.Data.MySqlClient.MySqlException"></exception>
+            <exception cref="T:System.TimeoutException"></exception>
+            <exception cref="T:System.AggregateException"></exception>
+        </member>
+        <member name="M:RIS.Connection.MySQL.Requests.TruncateTableAsync(System.String,System.TimeSpan,System.Data.IsolationLevel)">
+            <summary>
+                (Асинхронно) Вызывает TRUNCATE для очистки таблицы <paramref name="table"/>.
+            </summary>
+            <param name="table">
+                Таблица, для которой будет вызван TRUNCATE.
+            </param>
+            <param name="timeout">
+                Время ожидания ответа от сервера.
+            </param>
+            <param name="isolationLevel">
+                Уровень изоляции транзакции.
+            </param>
+            <returns>
+                Имеет возвращаемый тип <see langword="void"/>.
+            </returns>
+            <exception cref="T:MySql.Data.MySqlClient.MySqlException"></exception>
+            <exception cref="T:System.TimeoutException"></exception>
+            <exception cref="T:System.AggregateException"></exception>
         </member>
         <member name="M:RIS.Connection.MySQL.Requests.Union_Insert_SelectFunction(System.String[],System.String,System.String,System.String[],System.Data.IsolationLevel)">
             <summary>
-                Объединяет вызов INSERT для вставки новой строки в таблицу <paramref name="tableInsert"/> с последующим вызовом SELECT для получения результата функции. 
+                (Синхронно) Объединяет вызов INSERT для вставки новой строки в таблицу <paramref name="tableInsert"/> с последующим вызовом SELECT для получения результата функции.
             </summary>
             <param name="valuesInsert">
                 Значения столбцов по порядку их следования в таблице <paramref name="tableInsert"/>.
@@ -1779,10 +3425,11 @@
             </returns>
             <exception cref="T:MySql.Data.MySqlClient.MySqlException"></exception>
             <exception cref="T:System.TimeoutException"></exception>
+            <exception cref="T:System.AggregateException"></exception>
         </member>
         <member name="M:RIS.Connection.MySQL.Requests.Union_Insert_SelectFunction(System.String[],System.String,System.String,System.String[],System.TimeSpan,System.Data.IsolationLevel)">
             <summary>
-                Объединяет вызов INSERT для вставки новой строки в таблицу <paramref name="tableInsert"/> с последующим вызовом SELECT для получения результата функции с общим временем ожидания <paramref name="timeout"/>.
+                (Синхронно) Объединяет вызов INSERT для вставки новой строки в таблицу <paramref name="tableInsert"/> с последующим вызовом SELECT для получения результата функции с общим временем ожидания <paramref name="timeout"/>.
             </summary>
             <param name="valuesInsert">
                 Значения столбцов по порядку их следования в таблице <paramref name="tableInsert"/>.
@@ -1807,10 +3454,66 @@
             </returns>
             <exception cref="T:MySql.Data.MySqlClient.MySqlException"></exception>
             <exception cref="T:System.TimeoutException"></exception>
+            <exception cref="T:System.AggregateException"></exception>
+        </member>
+        <member name="M:RIS.Connection.MySQL.Requests.Union_Insert_SelectFunctionAsync(System.String[],System.String,System.String,System.String[],System.Data.IsolationLevel)">
+            <summary>
+                (Асинхронно) Объединяет вызов INSERT для вставки новой строки в таблицу <paramref name="tableInsert"/> с последующим вызовом SELECT для получения результата функции.
+            </summary>
+            <param name="valuesInsert">
+                Значения столбцов по порядку их следования в таблице <paramref name="tableInsert"/>.
+            </param>
+            <param name="tableInsert">
+                Таблица, для которой будет вызван INSERT.
+            </param>
+            <param name="nameFunction">
+                Название функции.
+            </param>
+            <param name="parametersValuesFunction">
+                Параметры функции. Передайте пустой массив для вызова функции без параметров.
+            </param>
+            <param name="isolationLevel">
+                Уровень изоляции транзакции.
+            </param>
+            <returns>
+                Значение типа <see cref="T:System.String"/>, которое содержит ответ сервера.
+            </returns>
+            <exception cref="T:MySql.Data.MySqlClient.MySqlException"></exception>
+            <exception cref="T:System.TimeoutException"></exception>
+            <exception cref="T:System.AggregateException"></exception>
+        </member>
+        <member name="M:RIS.Connection.MySQL.Requests.Union_Insert_SelectFunctionAsync(System.String[],System.String,System.String,System.String[],System.TimeSpan,System.Data.IsolationLevel)">
+            <summary>
+                (Асинхронно) Объединяет вызов INSERT для вставки новой строки в таблицу <paramref name="tableInsert"/> с последующим вызовом SELECT для получения результата функции с общим временем ожидания <paramref name="timeout"/>.
+            </summary>
+            <param name="valuesInsert">
+                Значения столбцов по порядку их следования в таблице <paramref name="tableInsert"/>.
+            </param>
+            <param name="tableInsert">
+                Таблица, для которой будет вызван INSERT.
+            </param>
+            <param name="nameFunction">
+                Название функции.
+            </param>
+            <param name="parametersValuesFunction">
+                Параметры функции. Передайте пустой массив для вызова функции без параметров.
+            </param>
+            <param name="timeout">
+                Время ожидания ответа от сервера.
+            </param>
+            <param name="isolationLevel">
+                Уровень изоляции транзакции.
+            </param>
+            <returns>
+                Значение типа <see cref="T:System.String"/>, которое содержит ответ сервера.
+            </returns>
+            <exception cref="T:MySql.Data.MySqlClient.MySqlException"></exception>
+            <exception cref="T:System.TimeoutException"></exception>
+            <exception cref="T:System.AggregateException"></exception>
         </member>
         <member name="M:RIS.Connection.MySQL.Requests.Union_Insert_SelectFunction(System.String[],System.String,System.String,System.String[],System.String,System.Data.IsolationLevel)">
             <summary>
-                Объединяет вызов INSERT для вставки новой строки в таблицу <paramref name="tableInsert"/> с последующим вызовом SELECT в таблице <paramref name="tableFunction"/> для получения результата функции. 
+                (Синхронно) Объединяет вызов INSERT для вставки новой строки в таблицу <paramref name="tableInsert"/> с последующим вызовом SELECT в таблице <paramref name="tableFunction"/> для получения результата функции.
             </summary>
             <param name="valuesInsert">
                 Значения столбцов по порядку их следования в таблице <paramref name="tableInsert"/>.
@@ -1835,10 +3538,11 @@
             </returns>
             <exception cref="T:MySql.Data.MySqlClient.MySqlException"></exception>
             <exception cref="T:System.TimeoutException"></exception>
+            <exception cref="T:System.AggregateException"></exception>
         </member>
         <member name="M:RIS.Connection.MySQL.Requests.Union_Insert_SelectFunction(System.String[],System.String,System.String,System.String[],System.String,System.TimeSpan,System.Data.IsolationLevel)">
             <summary>
-                Объединяет вызов INSERT для вставки новой строки в таблицу <paramref name="tableInsert"/> с последующим вызовом SELECT в таблице <paramref name="tableFunction"/> для получения результата функции с общим временем ожидания <paramref name="timeout"/>.
+                (Синхронно) Объединяет вызов INSERT для вставки новой строки в таблицу <paramref name="tableInsert"/> с последующим вызовом SELECT в таблице <paramref name="tableFunction"/> для получения результата функции с общим временем ожидания <paramref name="timeout"/>.
             </summary>
             <param name="valuesInsert">
                 Значения столбцов по порядку их следования в таблице <paramref name="tableInsert"/>.
@@ -1866,6 +3570,68 @@
             </returns>
             <exception cref="T:MySql.Data.MySqlClient.MySqlException"></exception>
             <exception cref="T:System.TimeoutException"></exception>
+            <exception cref="T:System.AggregateException"></exception>
+        </member>
+        <member name="M:RIS.Connection.MySQL.Requests.Union_Insert_SelectFunctionAsync(System.String[],System.String,System.String,System.String[],System.String,System.Data.IsolationLevel)">
+            <summary>
+                (Асинхронно) Объединяет вызов INSERT для вставки новой строки в таблицу <paramref name="tableInsert"/> с последующим вызовом SELECT в таблице <paramref name="tableFunction"/> для получения результата функции.
+            </summary>
+            <param name="valuesInsert">
+                Значения столбцов по порядку их следования в таблице <paramref name="tableInsert"/>.
+            </param>
+            <param name="tableInsert">
+                Таблица, для которой будет вызван INSERT.
+            </param>
+            <param name="nameFunction">
+                Название функции.
+            </param>
+            <param name="parametersValuesFunction">
+                Параметры функции. Передайте пустой массив для вызова функции без параметров.
+            </param>
+            <param name="tableFunction">
+                Таблица, для которой будет вызван SELECT.
+            </param>
+            <param name="isolationLevel">
+                Уровень изоляции транзакции.
+            </param>
+            <returns>
+                Значение типа <see cref="T:System.String"/>, которое содержит ответ сервера.
+            </returns>
+            <exception cref="T:MySql.Data.MySqlClient.MySqlException"></exception>
+            <exception cref="T:System.TimeoutException"></exception>
+            <exception cref="T:System.AggregateException"></exception>
+        </member>
+        <member name="M:RIS.Connection.MySQL.Requests.Union_Insert_SelectFunctionAsync(System.String[],System.String,System.String,System.String[],System.String,System.TimeSpan,System.Data.IsolationLevel)">
+            <summary>
+                (Асинхронно) Объединяет вызов INSERT для вставки новой строки в таблицу <paramref name="tableInsert"/> с последующим вызовом SELECT в таблице <paramref name="tableFunction"/> для получения результата функции с общим временем ожидания <paramref name="timeout"/>.
+            </summary>
+            <param name="valuesInsert">
+                Значения столбцов по порядку их следования в таблице <paramref name="tableInsert"/>.
+            </param>
+            <param name="tableInsert">
+                Таблица, для которой будет вызван INSERT.
+            </param>
+            <param name="nameFunction">
+                Название функции.
+            </param>
+            <param name="parametersValuesFunction">
+                Параметры функции. Передайте пустой массив для вызова функции без параметров.
+            </param>
+            <param name="tableFunction">
+                Таблица, для которой будет вызван SELECT.
+            </param>
+            <param name="timeout">
+                Время ожидания ответа от сервера.
+            </param>
+            <param name="isolationLevel">
+                Уровень изоляции транзакции.
+            </param>
+            <returns>
+                Значение типа <see cref="T:System.String"/>, которое содержит ответ сервера.
+            </returns>
+            <exception cref="T:MySql.Data.MySqlClient.MySqlException"></exception>
+            <exception cref="T:System.TimeoutException"></exception>
+            <exception cref="T:System.AggregateException"></exception>
         </member>
     </members>
 </doc>
