@@ -60,18 +60,18 @@ namespace RIS.Synchronization
                     _parent._retry.Wait();
                 }
             }
-            internal async Task ObtainLockAsync()
+            internal async Task ObtainLockAsync(bool continueOnCapturedContext = false)
             {
                 while (!TryEnter())
                 {
-                    await _parent._retry.WaitAsync().ConfigureAwait(false);
+                    await _parent._retry.WaitAsync().ConfigureAwait(continueOnCapturedContext);
                 }
             }
-            internal async Task ObtainLockAsync(CancellationToken cancellationToken)
+            internal async Task ObtainLockAsync(CancellationToken cancellationToken, bool continueOnCapturedContext = false)
             {
                 while (!TryEnter())
                 {
-                    await _parent._retry.WaitAsync(cancellationToken).ConfigureAwait(false);
+                    await _parent._retry.WaitAsync(cancellationToken).ConfigureAwait(continueOnCapturedContext);
                 }
             }
 
@@ -101,17 +101,17 @@ namespace RIS.Synchronization
 
             return internalLock;
         }
-        public async Task<IDisposable> LockAsync()
+        public async Task<IDisposable> LockAsync(bool continueOnCapturedContext = false)
         {
             var internalLock = new InternalLock(this);
-            await internalLock.ObtainLockAsync().ConfigureAwait(false);
+            await internalLock.ObtainLockAsync().ConfigureAwait(continueOnCapturedContext);
 
             return internalLock;
         }
-        public async Task<IDisposable> LockAsync(CancellationToken cancellationToken)
+        public async Task<IDisposable> LockAsync(CancellationToken cancellationToken, bool continueOnCapturedContext = false)
         {
             var internalLock = new InternalLock(this);
-            await internalLock.ObtainLockAsync(cancellationToken).ConfigureAwait(false);
+            await internalLock.ObtainLockAsync(cancellationToken).ConfigureAwait(continueOnCapturedContext);
 
             return internalLock;
         }

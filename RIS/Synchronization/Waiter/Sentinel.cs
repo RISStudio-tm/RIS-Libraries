@@ -1,0 +1,14 @@
+﻿using System;
+
+namespace RIS.Synchronization
+{
+    internal class Sentinel
+    {
+        public static readonly object Value = new Sentinel();
+
+        public override string ToString()
+        {
+            return GetType().Name;
+        }
+    }
+}

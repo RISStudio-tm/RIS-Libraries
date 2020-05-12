@@ -91,14 +91,14 @@ namespace RIS.Connection.MySQL
             catch (Exception)
             {
                 var exception = new Exception("Failed to cancel all requests");
-                Events.DShowError?.Invoke(this, 
+                Events.DShowError?.Invoke(this,
                     new RErrorEventArgs(exception.Message, exception.StackTrace));
                 CurrentMySQLConnection.DShowError?.Invoke(this,
                     new RErrorEventArgs(exception.Message, exception.StackTrace));
                 throw exception;
             }
         }
-        
+
         private MySqlConnection GetNextMySqlConnection(out ushort connectionIndex)
         {
             connectionIndex = NextConnectionIndex;
@@ -359,7 +359,7 @@ namespace RIS.Connection.MySQL
         /// <exception cref="TimeoutException"></exception>
 		/// <exception cref="AggregateException"></exception>
         public async Task<(long result, string[] outputValues)> ExecStoredProcedureAsync(string nameProcedure,
-            (string Name, string Value)[] inParametersProcedure, string[] outParametersNamesProcedure, 
+            (string Name, string Value)[] inParametersProcedure, string[] outParametersNamesProcedure,
             TimeSpan timeout, IsolationLevel isolationLevel = IsolationLevel.ReadCommitted)
         {
             long result = 0;
@@ -642,7 +642,7 @@ namespace RIS.Connection.MySQL
         /// <exception cref="TimeoutException"></exception>
 		/// <exception cref="AggregateException"></exception>
         public async Task<string[]> ExecStoredProcedureNotReturnAsync(string nameProcedure,
-            (string Name, string Value)[] inParametersProcedure, string[] outParametersNamesProcedure, 
+            (string Name, string Value)[] inParametersProcedure, string[] outParametersNamesProcedure,
             TimeSpan timeout, IsolationLevel isolationLevel = IsolationLevel.ReadCommitted)
         {
             string[] outputValuesTemp = Array.Empty<string>();

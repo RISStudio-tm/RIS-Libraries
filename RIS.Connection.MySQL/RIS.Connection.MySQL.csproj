@@ -4,8 +4,8 @@
     <TargetFrameworks>netcoreapp3.1;net48</TargetFrameworks>
     <RootNamespace>RIS.Connection.MySQL</RootNamespace>
     <AssemblyName>RIS.Connection.MySQL</AssemblyName>
-    <AssemblyVersion>2.4.80.20124</AssemblyVersion>
-    <FileVersion>2.4.80.20124</FileVersion>
+    <AssemblyVersion>2.4.109.20133</AssemblyVersion>
+    <FileVersion>2.4.109.20133</FileVersion>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">

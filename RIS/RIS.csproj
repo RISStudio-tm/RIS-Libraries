@@ -4,8 +4,8 @@
     <TargetFrameworks>netcoreapp3.1;net48</TargetFrameworks>
     <RootNamespace>RIS</RootNamespace>
     <AssemblyName>RIS</AssemblyName>
-    <AssemblyVersion>2.25.22.20131</AssemblyVersion>
-    <FileVersion>2.25.22.20131</FileVersion>
+    <AssemblyVersion>2.25.52.20133</AssemblyVersion>
+    <FileVersion>2.25.52.20133</FileVersion>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
 
