@@ -4,8 +4,8 @@ namespace RIS.Cryptography.Cipher
 {
     public class CipherService
     {
-        public event RMessageHandler ShowMessage;
-        public event RErrorHandler ShowError;
+        public event EventHandler<RMessageEventArgs> ShowMessage;
+        public event EventHandler<RErrorEventArgs> ShowError;
 
         public ICipherMethod CipherMethod { get; private set; }
 

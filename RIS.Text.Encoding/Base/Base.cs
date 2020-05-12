@@ -8,8 +8,8 @@ namespace RIS.Text.Encoding.Base
 {
     public abstract class Base
     {
-        public event RMessageHandler ShowMessage;
-        public event RErrorHandler ShowError;
+        public event EventHandler<RMessageEventArgs> ShowMessage;
+        public event EventHandler<RErrorEventArgs> ShowError;
 
         public uint CharsCount { get; }
 
@@ -172,7 +172,7 @@ namespace RIS.Text.Encoding.Base
             int result = 0;
             charsCountInBits = 0;
             int n1 = LogBase2(charsCount);
-            double charsCountLog = Math.Log(2, charsCount);
+            double charsCountLog = System.Math.Log(2, charsCount);
             double maxRatio = 0;
 
             for (int n = n1; n <= maxBitsCount; n++)
@@ -180,7 +180,7 @@ namespace RIS.Text.Encoding.Base
                 if (base2BitsCount && n % 8 != 0)
                     continue;
 
-                uint l1 = (uint)Math.Ceiling(n * charsCountLog);
+                uint l1 = (uint)System.Math.Ceiling(n * charsCountLog);
                 double ratio = (double)n / l1;
                 if (ratio > maxRatio)
                 {
@@ -199,12 +199,12 @@ namespace RIS.Text.Encoding.Base
             int result = 0;
             charsCountInBits = 0;
             int n0 = LogBaseN(charsCount, radix);
-            double charsCountLog = Math.Log(radix, charsCount);
+            double charsCountLog = System.Math.Log(radix, charsCount);
             double maxRatio = 0;
 
             for (int n = n0; n <= maxBitsCount; n++)
             {
-                uint k = (uint)Math.Ceiling(n * charsCountLog);
+                uint k = (uint)System.Math.Ceiling(n * charsCountLog);
                 double ratio = (double)n / k;
                 if (ratio > maxRatio)
                 {

@@ -6,8 +6,8 @@ namespace RIS.Logging
 {
     public sealed class DebugLog
     {
-        public event RMessageHandler ShowMessage;
-        public event RErrorHandler ShowError;
+        public event EventHandler<RMessageEventArgs> ShowMessage;
+        public event EventHandler<RErrorEventArgs> ShowError;
 
         private StreamWriter LogFile { get; set; }
 

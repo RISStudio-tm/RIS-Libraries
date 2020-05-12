@@ -7,8 +7,8 @@ namespace RIS.Collections.NestableCollections
 {
     public class NestableListL<T> : INestableCollection<T>, ICollection, IEnumerable<T>, IEnumerable
     {
-        public event RMessageHandler ShowMessage;
-        public event RErrorHandler ShowError;
+        public event EventHandler<RMessageEventArgs> ShowMessage;
+        public event EventHandler<RErrorEventArgs> ShowError;
 
         public NestedElement<T> this[int index]
         {

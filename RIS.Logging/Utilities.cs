@@ -6,8 +6,8 @@ namespace RIS.Logging
 {
     public static class LogUtilities
     {
-        public static event RMessageHandler ShowMessage;
-        public static event RErrorHandler ShowError;
+        public static event EventHandler<RMessageEventArgs> ShowMessage;
+        public static event EventHandler<RErrorEventArgs> ShowError;
 
         public static void GetTextFromSituation(LogSituation situation, out string situationText)
         {

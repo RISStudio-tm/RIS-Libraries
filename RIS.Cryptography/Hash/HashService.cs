@@ -4,8 +4,8 @@ namespace RIS.Cryptography.Hash
 {
     public class HashService
     {
-        public event RMessageHandler ShowMessage;
-        public event RErrorHandler ShowError;
+        public event EventHandler<RMessageEventArgs> ShowMessage;
+        public event EventHandler<RErrorEventArgs> ShowError;
 
         public IHashMethod HashMethod { get; private set; }
 

@@ -13,8 +13,8 @@ namespace RIS.Cryptography.Hash
 {
     public static class HashMethods
     {
-        public static event RMessageHandler ShowMessage;
-        public static event RErrorHandler ShowError;
+        public static event EventHandler<RMessageEventArgs> ShowMessage;
+        public static event EventHandler<RErrorEventArgs> ShowError;
 
         private static string[] HashMethodsNames { get; }
         private static int HashMethodsCount { get; }

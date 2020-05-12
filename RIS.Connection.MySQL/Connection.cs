@@ -25,11 +25,11 @@ namespace RIS.Connection.MySQL
         public bool ConnectionComplete { get; private set; }
 
         private object LockObjMessageEvent { get; }
-        private event RMessageHandler PShowMessage;
+        private event EventHandler<RMessageEventArgs> PShowMessage;
         /// <summary>
         ///     Используется для вывода информации или предупреждений.
         /// </summary>
-        public event RMessageHandler ShowMessage
+        public event EventHandler<RMessageEventArgs> ShowMessage
         {
             add
             {
@@ -50,14 +50,14 @@ namespace RIS.Connection.MySQL
                 }
             }
         }
-        internal RMessageHandler DShowMessage { get; private set; }
+        internal EventHandler<RMessageEventArgs> DShowMessage { get; private set; }
 
         private object LockObjErrorEvent { get; }
-        private event RErrorHandler PShowError;
+        private event EventHandler<RErrorEventArgs> PShowError;
         /// <summary>
         ///     Используется для вывода ошибок.
         /// </summary>
-        public event RErrorHandler ShowError
+        public event EventHandler<RErrorEventArgs> ShowError
         {
             add
             {
@@ -78,7 +78,7 @@ namespace RIS.Connection.MySQL
                 }
             }
         }
-        internal RErrorHandler DShowError { get; private set; }
+        internal EventHandler<RErrorEventArgs> DShowError { get; private set; }
 
         /// <summary>
         ///     Закрывает соединения и освобождает ресурсы.

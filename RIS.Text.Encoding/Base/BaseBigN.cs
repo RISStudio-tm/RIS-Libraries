@@ -57,7 +57,7 @@ namespace RIS.Text.Encoding.Base
             else
             {
                 blockBitsCount = data.Length * 8;
-                blockCharsCount = (int)Math.Ceiling(blockBitsCount * Math.Log(2, Alphabet.Length));
+                blockCharsCount = (int)System.Math.Ceiling(blockBitsCount * System.Math.Log(2, Alphabet.Length));
                 PreparePowN(blockCharsCount);
             }
 
@@ -74,7 +74,7 @@ namespace RIS.Text.Encoding.Base
                 EncodeBlock(data, result, 0, iterationCount, blockBitsCount, blockCharsCount);
             else
             {
-                int processorCount = Math.Min(iterationCount, System.Environment.ProcessorCount);
+                int processorCount = System.Math.Min(iterationCount, System.Environment.ProcessorCount);
                 System.Threading.Tasks.Parallel.For(0, processorCount, i =>
                 {
                     int beginInd = i * iterationCount / processorCount;
@@ -106,7 +106,7 @@ namespace RIS.Text.Encoding.Base
             else
             {
                 blockCharsCount = data.Length;
-                blockBitsCount = (int)(blockCharsCount / Math.Log(2, Alphabet.Length)) / 8 * 8;
+                blockBitsCount = (int)(blockCharsCount / System.Math.Log(2, Alphabet.Length)) / 8 * 8;
                 PreparePowN(blockCharsCount);
             }
 
@@ -132,7 +132,7 @@ namespace RIS.Text.Encoding.Base
                 DecodeBlock(data, result, 0, iterationCount, blockBitsCount, blockCharsCount);
             else
             {
-                int processorCount = Math.Min(iterationCount, System.Environment.ProcessorCount);
+                int processorCount = System.Math.Min(iterationCount, System.Environment.ProcessorCount);
                 System.Threading.Tasks.Parallel.For(0, processorCount, i =>
                 {
                     int beginInd = i * iterationCount / processorCount;
@@ -178,7 +178,7 @@ namespace RIS.Text.Encoding.Base
 
             int currentBytePos = bitPos / 8;
             int currentBitInBytePos = bitPos % 8;
-            int xLength = Math.Min(bitsCount, 8 - currentBitInBytePos);
+            int xLength = System.Math.Min(bitsCount, 8 - currentBitInBytePos);
             if (xLength != 0)
             {
                 result = (((BigInteger)data[currentBytePos] >> 8 - xLength - currentBitInBytePos) & two_in_power_n[7 - currentBitInBytePos]) << bitsCount - xLength;
@@ -212,7 +212,7 @@ namespace RIS.Text.Encoding.Base
             int currentBytePos = bitPos / 8;
             int currentBitInBytePos = bitPos % 8;
 
-            int xLength = Math.Min(bitsCount, 8 - currentBitInBytePos);
+            int xLength = System.Math.Min(bitsCount, 8 - currentBitInBytePos);
             if (xLength != 0)
             {
                 byte x1 = (byte)((value >> bitsCount + currentBitInBytePos - 8) & two_in_power_n[7 - currentBitInBytePos]);

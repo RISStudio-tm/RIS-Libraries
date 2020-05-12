@@ -4,12 +4,12 @@
     <TargetFrameworks>netcoreapp3.1;net48</TargetFrameworks>
     <RootNamespace>RIS.Reflection.Call</RootNamespace>
     <AssemblyName>RIS.Reflection.Call</AssemblyName>
-    <AssemblyVersion>2.1.310.20120</AssemblyVersion>
-    <FileVersion>2.1.310.20120</FileVersion>
+    <AssemblyVersion>2.3.2.20124</AssemblyVersion>
+    <FileVersion>2.3.2.20124</FileVersion>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
-    <NoWarn>CS0067</NoWarn>
+    <NoWarn>$(NoWarn);CS0067;SS003;SS004;U2U1009</NoWarn>
   </PropertyGroup>
 
   <ItemGroup>

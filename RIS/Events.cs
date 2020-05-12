@@ -4,9 +4,9 @@ namespace RIS
 {
     public static class Events
     {
-        private static object LockObjMessageEvent { get; } = new object();
-        private static event RMessageHandler PShowMessage;
-        public static event RMessageHandler ShowMessage
+        private static object LockObjMessageEvent { get; }
+        private static event EventHandler<RMessageEventArgs> PShowMessage;
+        public static event EventHandler<RMessageEventArgs> ShowMessage
         {
             add
             {
@@ -27,11 +27,11 @@ namespace RIS
                 }
             }
         }
-        public static RMessageHandler DShowMessage { get; private set; }
+        public static EventHandler<RMessageEventArgs> DShowMessage { get; private set; }
 
-        private static object LockObjErrorEvent { get; } = new object();
-        private static event RErrorHandler PShowError;
-        public static event RErrorHandler ShowError
+        private static object LockObjErrorEvent { get; }
+        private static event EventHandler<RErrorEventArgs> PShowError;
+        public static event EventHandler<RErrorEventArgs> ShowError
         {
             add
             {
@@ -52,6 +52,12 @@ namespace RIS
                 }
             }
         }
-        public static RErrorHandler DShowError { get; private set; }
+        public static EventHandler<RErrorEventArgs> DShowError { get; private set; }
+
+        static Events()
+        {
+            LockObjMessageEvent = new object();
+            LockObjErrorEvent = new object();
+        }
     }
 }

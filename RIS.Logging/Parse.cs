@@ -11,8 +11,8 @@ namespace RIS.Logging.Parsing
 {
     public sealed class LogParseInfo
     {
-        public event RMessageHandler ShowMessage;
-        public event RErrorHandler ShowError;
+        public event EventHandler<RMessageEventArgs> ShowMessage;
+        public event EventHandler<RErrorEventArgs> ShowError;
 
         private StreamReader LogFile { get; set; }
 

@@ -6,22 +6,23 @@ namespace RIS.Reflection.Call
 {
     public static class Calls
     {
-        public static event RMessageHandler ShowMessage;
-        public static event RErrorHandler ShowError;
+        public static event EventHandler<RMessageEventArgs> ShowMessage;
+        public static event EventHandler<RErrorEventArgs> ShowError;
 
-        public static bool CallMethod<TInstance>(string nameMethod) where TInstance : class
+        public static void CallVoidMethod<TInstance>(string nameMethod)
+            where TInstance : class, new()
         {
             try
             {
                 var instanceType = typeof(TInstance);
 
-                if (nameMethod == string.Empty)
-                    return false;
+                if (string.IsNullOrEmpty(nameMethod))
+                    throw new ArgumentNullException(nameof(nameMethod));
 
                 var methodInfo = instanceType.GetMethod(nameMethod,
                     BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Static,
                     null,
-                    new Type[0],
+                    Array.Empty<Type>(),
                     null);
 
                 if (methodInfo == null)
@@ -34,15 +35,15 @@ namespace RIS.Reflection.Call
 
                 var instance = Expression.New(instanceType);
                 var methodCall = Expression.Call(instance, methodInfo);
-                var func = Expression.Lambda<Func<bool>>(methodCall).Compile();
+                var func = Expression.Lambda<Action>(methodCall).Compile();
 
-                return func();
+                func();
             }
             catch (ArgumentNullException ex)
             {
                 Events.DShowError?.Invoke(null, new RErrorEventArgs(ex.Message, ex.StackTrace));
                 ShowError?.Invoke(null, new RErrorEventArgs(ex.Message, ex.StackTrace));
-                return false;
+                throw;
             }
             catch (Exception ex)
             {
@@ -51,19 +52,26 @@ namespace RIS.Reflection.Call
                 throw;
             }
         }
-        public static bool CallMethod<TInstance>(string nameMethod, string argsMethod) where TInstance : class
+        public static void CallVoidMethod<TInstance>(string nameMethod, string argsMethod)
+            where TInstance : class, new()
         {
-            return CallMethod<TInstance, string>(nameMethod, argsMethod);
+            CallVoidMethod<TInstance, string>(nameMethod, argsMethod);
         }
-        public static bool CallMethod<TInstance, TParam>(string nameMethod, TParam argsMethod) where TInstance : class
+        public static void CallVoidMethod<TInstance>(string nameMethod, string[] argsMethod)
+            where TInstance : class, new()
+        {
+            CallVoidMethod<TInstance, string[]>(nameMethod, argsMethod);
+        }
+        public static void CallVoidMethod<TInstance, TParam>(string nameMethod, TParam argsMethod)
+            where TInstance : class, new()
         {
             try
             {
                 var instanceType = typeof(TInstance);
                 var argsType = typeof(TParam);
 
-                if (nameMethod == string.Empty)
-                    return false;
+                if (string.IsNullOrEmpty(nameMethod))
+                    throw new ArgumentNullException(nameof(nameMethod));
 
                 var methodInfo = instanceType.GetMethod(nameMethod,
                     BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Instance,
@@ -82,15 +90,15 @@ namespace RIS.Reflection.Call
                 var param = Expression.Parameter(argsType, "args");
                 var instance = Expression.New(instanceType);
                 var methodCall = Expression.Call(instance, methodInfo, param);
-                var func = Expression.Lambda<Func<TParam, bool>>(methodCall, param).Compile();
+                var func = Expression.Lambda<Action<TParam>>(methodCall, param).Compile();
 
-                return func(argsMethod);
+                func(argsMethod);
             }
             catch (ArgumentNullException ex)
             {
                 Events.DShowError?.Invoke(null, new RErrorEventArgs(ex.Message, ex.StackTrace));
                 ShowError?.Invoke(null, new RErrorEventArgs(ex.Message, ex.StackTrace));
-                return false;
+                throw;
             }
             catch (Exception ex)
             {
@@ -100,19 +108,140 @@ namespace RIS.Reflection.Call
             }
         }
 
-        public static bool CallStaticMethod<TInstance>(string nameMethod) where TInstance : class
+        public static bool CallMethod<TInstance>(string nameMethod)
+            where TInstance : class, new()
+        {
+            return CallMethod<TInstance, bool>(nameMethod);
+        }
+        public static TResult CallMethod<TInstance, TResult>(string nameMethod)
+            where TInstance : class, new()
         {
             try
             {
                 var instanceType = typeof(TInstance);
 
-                if (nameMethod == string.Empty)
-                    return false;
+                if (string.IsNullOrEmpty(nameMethod))
+                    throw new ArgumentNullException(nameof(nameMethod));
 
                 var methodInfo = instanceType.GetMethod(nameMethod,
                     BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Static,
                     null,
-                    new Type[0],
+                    Array.Empty<Type>(),
+                    null);
+
+                if (methodInfo == null)
+                {
+                    var exception = new Exception($"Метод с указанным именем и параметрами не найден");
+                    Events.DShowError?.Invoke(null, new RErrorEventArgs(exception.Message, exception.StackTrace));
+                    ShowError?.Invoke(null, new RErrorEventArgs(exception.Message, exception.StackTrace));
+                    throw exception;
+                }
+
+                var instance = Expression.New(instanceType);
+                var methodCall = Expression.Call(instance, methodInfo);
+                var func = Expression.Lambda<Func<TResult>>(methodCall).Compile();
+
+                return func();
+            }
+            catch (ArgumentNullException ex)
+            {
+                Events.DShowError?.Invoke(null, new RErrorEventArgs(ex.Message, ex.StackTrace));
+                ShowError?.Invoke(null, new RErrorEventArgs(ex.Message, ex.StackTrace));
+                throw;
+            }
+            catch (Exception ex)
+            {
+                Events.DShowError?.Invoke(null, new RErrorEventArgs(ex.Message, ex.StackTrace));
+                ShowError?.Invoke(null, new RErrorEventArgs(ex.Message, ex.StackTrace));
+                throw;
+            }
+        }
+        public static bool CallMethod<TInstance>(string nameMethod, string argsMethod)
+            where TInstance : class, new()
+        {
+            return CallMethod<TInstance, string, bool>(nameMethod, argsMethod);
+        }
+        public static bool CallMethod<TInstance>(string nameMethod, string[] argsMethod)
+            where TInstance : class, new()
+        {
+            return CallMethod<TInstance, string[], bool>(nameMethod, argsMethod);
+        }
+        public static TResult CallMethod<TInstance, TResult>(string nameMethod, string argsMethod)
+            where TInstance : class, new()
+        {
+            return CallMethod<TInstance, string, TResult>(nameMethod, argsMethod);
+        }
+        public static TResult CallMethod<TInstance, TResult>(string nameMethod, string[] argsMethod)
+            where TInstance : class, new()
+        {
+            return CallMethod<TInstance, string[], TResult>(nameMethod, argsMethod);
+        }
+        public static bool CallMethod<TInstance, TParam>(string nameMethod, TParam argsMethod)
+            where TInstance : class, new()
+        {
+            return CallMethod<TInstance, TParam, bool>(nameMethod, argsMethod);
+        }
+        public static TResult CallMethod<TInstance, TParam, TResult>(string nameMethod, TParam argsMethod)
+            where TInstance : class, new()
+        {
+            try
+            {
+                var instanceType = typeof(TInstance);
+                var argsType = typeof(TParam);
+
+                if (string.IsNullOrEmpty(nameMethod))
+                    throw new ArgumentNullException(nameof(nameMethod));
+
+                var methodInfo = instanceType.GetMethod(nameMethod,
+                    BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Instance,
+                    null,
+                    new Type[] { argsType },
+                    null);
+
+                if (methodInfo == null)
+                {
+                    var exception = new Exception($"Метод с указанным именем и параметрами не найден");
+                    Events.DShowError?.Invoke(null, new RErrorEventArgs(exception.Message, exception.StackTrace));
+                    ShowError?.Invoke(null, new RErrorEventArgs(exception.Message, exception.StackTrace));
+                    throw exception;
+                }
+
+                var param = Expression.Parameter(argsType, "args");
+                var instance = Expression.New(instanceType);
+                var methodCall = Expression.Call(instance, methodInfo, param);
+                var func = Expression.Lambda<Func<TParam, TResult>>(methodCall, param).Compile();
+
+                return func(argsMethod);
+            }
+            catch (ArgumentNullException ex)
+            {
+                Events.DShowError?.Invoke(null, new RErrorEventArgs(ex.Message, ex.StackTrace));
+                ShowError?.Invoke(null, new RErrorEventArgs(ex.Message, ex.StackTrace));
+                throw;
+            }
+            catch (Exception ex)
+            {
+                Events.DShowError?.Invoke(null, new RErrorEventArgs(ex.Message, ex.StackTrace));
+                ShowError?.Invoke(null, new RErrorEventArgs(ex.Message, ex.StackTrace));
+                throw;
+            }
+        }
+
+
+        public static void CallVoidStaticMethod<TInstance>(string nameMethod)
+            where TInstance : class, new()
+        {
+            try
+            {
+                var instanceType = typeof(TInstance);
+
+                if (string.IsNullOrEmpty(nameMethod))
+                    throw new ArgumentNullException(nameof(nameMethod));
+
+                var methodInfo = instanceType.GetMethod(nameMethod,
+                    BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Static,
+                    null,
+                    Array.Empty<Type>(),
                     null);
 
                 if (methodInfo == null)
@@ -124,15 +253,15 @@ namespace RIS.Reflection.Call
                 }
 
                 var methodCall = Expression.Call(methodInfo);
-                var func = Expression.Lambda<Func<bool>>(methodCall).Compile();
+                var func = Expression.Lambda<Action>(methodCall).Compile();
 
-                return func();
+                func();
             }
             catch (ArgumentNullException ex)
             {
                 Events.DShowError?.Invoke(null, new RErrorEventArgs(ex.Message, ex.StackTrace));
                 ShowError?.Invoke(null, new RErrorEventArgs(ex.Message, ex.StackTrace));
-                return false;
+                throw;
             }
             catch (Exception ex)
             {
@@ -141,19 +270,26 @@ namespace RIS.Reflection.Call
                 throw;
             }
         }
-        public static bool CallStaticMethod<TInstance>(string nameMethod, string argsMethod) where TInstance : class
+        public static void CallVoidStaticMethod<TInstance>(string nameMethod, string argsMethod)
+            where TInstance : class, new()
         {
-            return CallStaticMethod<TInstance, string>(nameMethod, argsMethod);
+            CallVoidStaticMethod<TInstance, string>(nameMethod, argsMethod);
         }
-        public static bool CallStaticMethod<TInstance, TParam>(string nameMethod, TParam argsMethod) where TInstance : class
+        public static void CallVoidStaticMethod<TInstance>(string nameMethod, string[] argsMethod)
+            where TInstance : class, new()
+        {
+            CallVoidStaticMethod<TInstance, string[]>(nameMethod, argsMethod);
+        }
+        public static void CallVoidStaticMethod<TInstance, TParam>(string nameMethod, TParam argsMethod)
+            where TInstance : class, new()
         {
             try
             {
                 var instanceType = typeof(TInstance);
                 var argsType = typeof(TParam);
 
-                if (nameMethod == string.Empty)
-                    return false;
+                if (string.IsNullOrEmpty(nameMethod))
+                    throw new ArgumentNullException(nameof(nameMethod));
 
                 var methodInfo = instanceType.GetMethod(nameMethod,
                     BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Static,
@@ -171,15 +307,15 @@ namespace RIS.Reflection.Call
 
                 var param = Expression.Parameter(argsType, "args");
                 var methodCall = Expression.Call(methodInfo, param);
-                var func = Expression.Lambda<Func<TParam, bool>>(methodCall, param).Compile();
+                var func = Expression.Lambda<Action<TParam>>(methodCall, param).Compile();
 
-                return func(argsMethod);
+                func(argsMethod);
             }
             catch (ArgumentNullException ex)
             {
                 Events.DShowError?.Invoke(null, new RErrorEventArgs(ex.Message, ex.StackTrace));
                 ShowError?.Invoke(null, new RErrorEventArgs(ex.Message, ex.StackTrace));
-                return false;
+                throw;
             }
             catch (Exception ex)
             {
@@ -188,26 +324,26 @@ namespace RIS.Reflection.Call
                 throw;
             }
         }
-    }
 
-    public sealed class Calls<TInstance> where TInstance : class
-    {
-        public event RMessageHandler ShowMessage;
-        public event RErrorHandler ShowError;
-
-        public bool CallMethod(string nameMethod)
+        public static bool CallStaticMethod<TInstance>(string nameMethod)
+            where TInstance : class, new()
+        {
+            return CallStaticMethod<TInstance, bool>(nameMethod);
+        }
+        public static TResult CallStaticMethod<TInstance, TResult>(string nameMethod)
+            where TInstance : class, new()
         {
             try
             {
                 var instanceType = typeof(TInstance);
 
-                if (nameMethod == string.Empty)
-                    return false;
+                if (string.IsNullOrEmpty(nameMethod))
+                    throw new ArgumentNullException(nameof(nameMethod));
 
                 var methodInfo = instanceType.GetMethod(nameMethod,
                     BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Static,
                     null,
-                    new Type[0],
+                    Array.Empty<Type>(),
                     null);
 
                 if (methodInfo == null)
@@ -218,9 +354,8 @@ namespace RIS.Reflection.Call
                     throw exception;
                 }
 
-                var instance = Expression.New(instanceType);
-                var methodCall = Expression.Call(instance, methodInfo);
-                var func = Expression.Lambda<Func<bool>>(methodCall).Compile();
+                var methodCall = Expression.Call(methodInfo);
+                var func = Expression.Lambda<Func<TResult>>(methodCall).Compile();
 
                 return func();
             }
@@ -228,7 +363,7 @@ namespace RIS.Reflection.Call
             {
                 Events.DShowError?.Invoke(null, new RErrorEventArgs(ex.Message, ex.StackTrace));
                 ShowError?.Invoke(null, new RErrorEventArgs(ex.Message, ex.StackTrace));
-                return false;
+                throw;
             }
             catch (Exception ex)
             {
@@ -237,21 +372,150 @@ namespace RIS.Reflection.Call
                 throw;
             }
         }
-        public bool CallMethod(string nameMethod, string argsMethod)
+        public static bool CallStaticMethod<TInstance>(string nameMethod, string argsMethod)
+            where TInstance : class, new()
         {
-            return CallMethod<string>(nameMethod, argsMethod);
+            return CallStaticMethod<TInstance, string, bool>(nameMethod, argsMethod);
         }
-        public bool CallMethod<TParam>(string nameMethod, TParam argsMethod)
+        public static bool CallStaticMethod<TInstance>(string nameMethod, string[] argsMethod)
+            where TInstance : class, new()
+        {
+            return CallStaticMethod<TInstance, string[], bool>(nameMethod, argsMethod);
+        }
+        public static TResult CallStaticMethod<TInstance, TResult>(string nameMethod, string argsMethod)
+            where TInstance : class, new()
+        {
+            return CallStaticMethod<TInstance, string, TResult>(nameMethod, argsMethod);
+        }
+        public static TResult CallStaticMethod<TInstance, TResult>(string nameMethod, string[] argsMethod)
+            where TInstance : class, new()
+        {
+            return CallStaticMethod<TInstance, string[], TResult>(nameMethod, argsMethod);
+        }
+        public static bool CallStaticMethod<TInstance, TParam>(string nameMethod, TParam argsMethod)
+            where TInstance : class, new()
+        {
+            return CallStaticMethod<TInstance, TParam, bool>(nameMethod, argsMethod);
+        }
+        public static TResult CallStaticMethod<TInstance, TParam, TResult>(string nameMethod, TParam argsMethod)
+            where TInstance : class, new()
         {
             try
             {
                 var instanceType = typeof(TInstance);
                 var argsType = typeof(TParam);
 
-                if (nameMethod == string.Empty)
-                    return false;
+                if (string.IsNullOrEmpty(nameMethod))
+                    throw new ArgumentNullException(nameof(nameMethod));
 
                 var methodInfo = instanceType.GetMethod(nameMethod,
+                    BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Static,
+                    null,
+                    new Type[] { argsType },
+                    null);
+
+                if (methodInfo == null)
+                {
+                    var exception = new Exception($"Метод с указанным именем и параметрами не найден");
+                    Events.DShowError?.Invoke(null, new RErrorEventArgs(exception.Message, exception.StackTrace));
+                    ShowError?.Invoke(null, new RErrorEventArgs(exception.Message, exception.StackTrace));
+                    throw exception;
+                }
+
+                var param = Expression.Parameter(argsType, "args");
+                var methodCall = Expression.Call(methodInfo, param);
+                var func = Expression.Lambda<Func<TParam, TResult>>(methodCall, param).Compile();
+
+                return func(argsMethod);
+            }
+            catch (ArgumentNullException ex)
+            {
+                Events.DShowError?.Invoke(null, new RErrorEventArgs(ex.Message, ex.StackTrace));
+                ShowError?.Invoke(null, new RErrorEventArgs(ex.Message, ex.StackTrace));
+                throw;
+            }
+            catch (Exception ex)
+            {
+                Events.DShowError?.Invoke(null, new RErrorEventArgs(ex.Message, ex.StackTrace));
+                ShowError?.Invoke(null, new RErrorEventArgs(ex.Message, ex.StackTrace));
+                throw;
+            }
+        }
+    }
+
+    public sealed class Calls<TInstance>
+        where TInstance : class, new()
+    {
+        public event EventHandler<RMessageEventArgs> ShowMessage;
+        public event EventHandler<RErrorEventArgs> ShowError;
+
+        private readonly Type _instanceType;
+        private readonly NewExpression _instance;
+
+        public Calls()
+        {
+            _instanceType = typeof(TInstance);
+            _instance = Expression.New(_instanceType);
+        }
+
+
+        public void CallVoidMethod(string nameMethod)
+        {
+            try
+            {
+                if (string.IsNullOrEmpty(nameMethod))
+                    throw new ArgumentNullException(nameof(nameMethod));
+
+                var methodInfo = _instanceType.GetMethod(nameMethod,
+                    BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Static,
+                    null,
+                    Array.Empty<Type>(),
+                    null);
+
+                if (methodInfo == null)
+                {
+                    var exception = new Exception($"Метод с указанным именем и параметрами не найден");
+                    Events.DShowError?.Invoke(null, new RErrorEventArgs(exception.Message, exception.StackTrace));
+                    ShowError?.Invoke(null, new RErrorEventArgs(exception.Message, exception.StackTrace));
+                    throw exception;
+                }
+
+                var methodCall = Expression.Call(_instance, methodInfo);
+                var func = Expression.Lambda<Action>(methodCall).Compile();
+
+                func();
+            }
+            catch (ArgumentNullException ex)
+            {
+                Events.DShowError?.Invoke(null, new RErrorEventArgs(ex.Message, ex.StackTrace));
+                ShowError?.Invoke(null, new RErrorEventArgs(ex.Message, ex.StackTrace));
+                throw;
+            }
+            catch (Exception ex)
+            {
+                Events.DShowError?.Invoke(null, new RErrorEventArgs(ex.Message, ex.StackTrace));
+                ShowError?.Invoke(null, new RErrorEventArgs(ex.Message, ex.StackTrace));
+                throw;
+            }
+        }
+        public void CallVoidMethod(string nameMethod, string argsMethod)
+        {
+            CallVoidMethod<string>(nameMethod, argsMethod);
+        }
+        public void CallVoidMethod(string nameMethod, string[] argsMethod)
+        {
+            CallVoidMethod<string[]>(nameMethod, argsMethod);
+        }
+        public void CallVoidMethod<TParam>(string nameMethod, TParam argsMethod)
+        {
+            try
+            {
+                var argsType = typeof(TParam);
+
+                if (string.IsNullOrEmpty(nameMethod))
+                    throw new ArgumentNullException(nameof(nameMethod));
+
+                var methodInfo = _instanceType.GetMethod(nameMethod,
                     BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Instance,
                     null,
                     new Type[] { argsType },
@@ -266,9 +530,114 @@ namespace RIS.Reflection.Call
                 }
 
                 var param = Expression.Parameter(argsType, "args");
-                var instance = Expression.New(instanceType);
-                var methodCall = Expression.Call(instance, methodInfo, param);
-                var func = Expression.Lambda<Func<TParam, bool>>(methodCall, param).Compile();
+                var methodCall = Expression.Call(_instance, methodInfo, param);
+                var func = Expression.Lambda<Action<TParam>>(methodCall, param).Compile();
+
+                func(argsMethod);
+            }
+            catch (ArgumentNullException ex)
+            {
+                Events.DShowError?.Invoke(this, new RErrorEventArgs(ex.Message, ex.StackTrace));
+                ShowError?.Invoke(this, new RErrorEventArgs(ex.Message, ex.StackTrace));
+                throw;
+            }
+            catch (Exception ex)
+            {
+                Events.DShowError?.Invoke(this, new RErrorEventArgs(ex.Message, ex.StackTrace));
+                ShowError?.Invoke(this, new RErrorEventArgs(ex.Message, ex.StackTrace));
+                throw;
+            }
+        }
+
+        public bool CallMethod(string nameMethod)
+        {
+            return CallMethod<bool>(nameMethod);
+        }
+        public TResult CallMethod<TResult>(string nameMethod)
+        {
+            try
+            {
+                if (string.IsNullOrEmpty(nameMethod))
+                    throw new ArgumentNullException(nameof(nameMethod));
+
+                var methodInfo = _instanceType.GetMethod(nameMethod,
+                    BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Static,
+                    null,
+                    Array.Empty<Type>(),
+                    null);
+
+                if (methodInfo == null)
+                {
+                    var exception = new Exception($"Метод с указанным именем и параметрами не найден");
+                    Events.DShowError?.Invoke(null, new RErrorEventArgs(exception.Message, exception.StackTrace));
+                    ShowError?.Invoke(null, new RErrorEventArgs(exception.Message, exception.StackTrace));
+                    throw exception;
+                }
+
+                var methodCall = Expression.Call(_instance, methodInfo);
+                var func = Expression.Lambda<Func<TResult>>(methodCall).Compile();
+
+                return func();
+            }
+            catch (ArgumentNullException ex)
+            {
+                Events.DShowError?.Invoke(null, new RErrorEventArgs(ex.Message, ex.StackTrace));
+                ShowError?.Invoke(null, new RErrorEventArgs(ex.Message, ex.StackTrace));
+                throw;
+            }
+            catch (Exception ex)
+            {
+                Events.DShowError?.Invoke(null, new RErrorEventArgs(ex.Message, ex.StackTrace));
+                ShowError?.Invoke(null, new RErrorEventArgs(ex.Message, ex.StackTrace));
+                throw;
+            }
+        }
+        public bool CallMethod(string nameMethod, string argsMethod)
+        {
+            return CallMethod<string, bool>(nameMethod, argsMethod);
+        }
+        public bool CallMethod(string nameMethod, string[] argsMethod)
+        {
+            return CallMethod<string[], bool>(nameMethod, argsMethod);
+        }
+        public TResult CallMethod<TResult>(string nameMethod, string argsMethod)
+        {
+            return CallMethod<string, TResult>(nameMethod, argsMethod);
+        }
+        public TResult CallMethod<TResult>(string nameMethod, string[] argsMethod)
+        {
+            return CallMethod<string[], TResult>(nameMethod, argsMethod);
+        }
+        public bool CallMethod<TParam>(string nameMethod, TParam argsMethod)
+        {
+            return CallMethod<TParam, bool>(nameMethod, argsMethod);
+        }
+        public TResult CallMethod<TParam, TResult>(string nameMethod, TParam argsMethod)
+        {
+            try
+            {
+                var argsType = typeof(TParam);
+
+                if (string.IsNullOrEmpty(nameMethod))
+                    throw new ArgumentNullException(nameof(nameMethod));
+
+                var methodInfo = _instanceType.GetMethod(nameMethod,
+                    BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Instance,
+                    null,
+                    new Type[] { argsType },
+                    null);
+
+                if (methodInfo == null)
+                {
+                    var exception = new Exception($"Метод с указанным именем и параметрами не найден");
+                    Events.DShowError?.Invoke(this, new RErrorEventArgs(exception.Message, exception.StackTrace));
+                    ShowError?.Invoke(this, new RErrorEventArgs(exception.Message, exception.StackTrace));
+                    throw exception;
+                }
+
+                var param = Expression.Parameter(argsType, "args");
+                var methodCall = Expression.Call(_instance, methodInfo, param);
+                var func = Expression.Lambda<Func<TParam, TResult>>(methodCall, param).Compile();
 
                 return func(argsMethod);
             }
@@ -276,7 +645,98 @@ namespace RIS.Reflection.Call
             {
                 Events.DShowError?.Invoke(this, new RErrorEventArgs(ex.Message, ex.StackTrace));
                 ShowError?.Invoke(this, new RErrorEventArgs(ex.Message, ex.StackTrace));
-                return false;
+                throw;
+            }
+            catch (Exception ex)
+            {
+                Events.DShowError?.Invoke(this, new RErrorEventArgs(ex.Message, ex.StackTrace));
+                ShowError?.Invoke(this, new RErrorEventArgs(ex.Message, ex.StackTrace));
+                throw;
+            }
+        }
+
+
+        public void CallVoidStaticMethod(string nameMethod)
+        {
+            try
+            {
+                if (string.IsNullOrEmpty(nameMethod))
+                    throw new ArgumentNullException(nameof(nameMethod));
+
+                var methodInfo = _instanceType.GetMethod(nameMethod,
+                    BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Static,
+                    null,
+                    Array.Empty<Type>(),
+                    null);
+
+                if (methodInfo == null)
+                {
+                    var exception = new Exception($"Метод с указанным именем и параметрами не найден");
+                    Events.DShowError?.Invoke(null, new RErrorEventArgs(exception.Message, exception.StackTrace));
+                    ShowError?.Invoke(null, new RErrorEventArgs(exception.Message, exception.StackTrace));
+                    throw exception;
+                }
+
+                var methodCall = Expression.Call(methodInfo);
+                var func = Expression.Lambda<Action>(methodCall).Compile();
+
+                func();
+            }
+            catch (ArgumentNullException ex)
+            {
+                Events.DShowError?.Invoke(null, new RErrorEventArgs(ex.Message, ex.StackTrace));
+                ShowError?.Invoke(null, new RErrorEventArgs(ex.Message, ex.StackTrace));
+                throw;
+            }
+            catch (Exception ex)
+            {
+                Events.DShowError?.Invoke(null, new RErrorEventArgs(ex.Message, ex.StackTrace));
+                ShowError?.Invoke(null, new RErrorEventArgs(ex.Message, ex.StackTrace));
+                throw;
+            }
+        }
+        public void CallVoidStaticMethod(string nameMethod, string argsMethod)
+        {
+            CallVoidStaticMethod<string>(nameMethod, argsMethod);
+        }
+        public void CallVoidStaticMethod(string nameMethod, string[] argsMethod)
+        {
+            CallVoidStaticMethod<string[]>(nameMethod, argsMethod);
+        }
+        public void CallVoidStaticMethod<TParam>(string nameMethod, TParam argsMethod)
+        {
+            try
+            {
+                var argsType = typeof(TParam);
+
+                if (string.IsNullOrEmpty(nameMethod))
+                    throw new ArgumentNullException(nameof(nameMethod));
+
+                var methodInfo = _instanceType.GetMethod(nameMethod,
+                    BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Static,
+                    null,
+                    new Type[] { argsType },
+                    null);
+
+                if (methodInfo == null)
+                {
+                    var exception = new Exception($"Метод с указанным именем и параметрами не найден");
+                    Events.DShowError?.Invoke(this, new RErrorEventArgs(exception.Message, exception.StackTrace));
+                    ShowError?.Invoke(this, new RErrorEventArgs(exception.Message, exception.StackTrace));
+                    throw exception;
+                }
+
+                var param = Expression.Parameter(argsType, "args");
+                var methodCall = Expression.Call(methodInfo, param);
+                var func = Expression.Lambda<Action<TParam>>(methodCall, param).Compile();
+
+                func(argsMethod);
+            }
+            catch (ArgumentNullException ex)
+            {
+                Events.DShowError?.Invoke(this, new RErrorEventArgs(ex.Message, ex.StackTrace));
+                ShowError?.Invoke(this, new RErrorEventArgs(ex.Message, ex.StackTrace));
+                throw;
             }
             catch (Exception ex)
             {
@@ -288,17 +748,19 @@ namespace RIS.Reflection.Call
 
         public bool CallStaticMethod(string nameMethod)
         {
+            return CallStaticMethod<bool>(nameMethod);
+        }
+        public TResult CallStaticMethod<TResult>(string nameMethod)
+        {
             try
             {
-                var instanceType = typeof(TInstance);
+                if (string.IsNullOrEmpty(nameMethod))
+                    throw new ArgumentNullException(nameof(nameMethod));
 
-                if (nameMethod == string.Empty)
-                    return false;
-
-                var methodInfo = instanceType.GetMethod(nameMethod,
+                var methodInfo = _instanceType.GetMethod(nameMethod,
                     BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Static,
                     null,
-                    new Type[0],
+                    Array.Empty<Type>(),
                     null);
 
                 if (methodInfo == null)
@@ -310,7 +772,7 @@ namespace RIS.Reflection.Call
                 }
 
                 var methodCall = Expression.Call(methodInfo);
-                var func = Expression.Lambda<Func<bool>>(methodCall).Compile();
+                var func = Expression.Lambda<Func<TResult>>(methodCall).Compile();
 
                 return func();
             }
@@ -318,7 +780,7 @@ namespace RIS.Reflection.Call
             {
                 Events.DShowError?.Invoke(null, new RErrorEventArgs(ex.Message, ex.StackTrace));
                 ShowError?.Invoke(null, new RErrorEventArgs(ex.Message, ex.StackTrace));
-                return false;
+                throw;
             }
             catch (Exception ex)
             {
@@ -329,19 +791,34 @@ namespace RIS.Reflection.Call
         }
         public bool CallStaticMethod(string nameMethod, string argsMethod)
         {
-            return CallStaticMethod<string>(nameMethod, argsMethod);
+            return CallStaticMethod<string, bool>(nameMethod, argsMethod);
+        }
+        public bool CallStaticMethod(string nameMethod, string[] argsMethod)
+        {
+            return CallStaticMethod<string[], bool>(nameMethod, argsMethod);
+        }
+        public TResult CallStaticMethod<TResult>(string nameMethod, string argsMethod)
+        {
+            return CallStaticMethod<string, TResult>(nameMethod, argsMethod);
+        }
+        public TResult CallStaticMethod<TResult>(string nameMethod, string[] argsMethod)
+        {
+            return CallStaticMethod<string[], TResult>(nameMethod, argsMethod);
         }
         public bool CallStaticMethod<TParam>(string nameMethod, TParam argsMethod)
         {
+            return CallStaticMethod<TParam, bool>(nameMethod, argsMethod);
+        }
+        public TResult CallStaticMethod<TParam, TResult>(string nameMethod, TParam argsMethod)
+        {
             try
             {
-                var instanceType = typeof(TInstance);
                 var argsType = typeof(TParam);
 
-                if (nameMethod == string.Empty)
-                    return false;
+                if (string.IsNullOrEmpty(nameMethod))
+                    throw new ArgumentNullException(nameof(nameMethod));
 
-                var methodInfo = instanceType.GetMethod(nameMethod,
+                var methodInfo = _instanceType.GetMethod(nameMethod,
                     BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Static,
                     null,
                     new Type[] { argsType },
@@ -357,7 +834,7 @@ namespace RIS.Reflection.Call
 
                 var param = Expression.Parameter(argsType, "args");
                 var methodCall = Expression.Call(methodInfo, param);
-                var func = Expression.Lambda<Func<TParam, bool>>(methodCall, param).Compile();
+                var func = Expression.Lambda<Func<TParam, TResult>>(methodCall, param).Compile();
 
                 return func(argsMethod);
             }
@@ -365,7 +842,7 @@ namespace RIS.Reflection.Call
             {
                 Events.DShowError?.Invoke(this, new RErrorEventArgs(ex.Message, ex.StackTrace));
                 ShowError?.Invoke(this, new RErrorEventArgs(ex.Message, ex.StackTrace));
-                return false;
+                throw;
             }
             catch (Exception ex)
             {

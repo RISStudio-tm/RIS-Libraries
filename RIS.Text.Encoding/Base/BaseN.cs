@@ -49,7 +49,7 @@ namespace RIS.Text.Encoding.Base
                 EncodeBlock(data, result, 0, iterationCount);
             else
             {
-                int processorCount = Math.Min(iterationCount, System.Environment.ProcessorCount);
+                int processorCount = System.Math.Min(iterationCount, System.Environment.ProcessorCount);
                 System.Threading.Tasks.Parallel.For(0, processorCount, i =>
                 {
                     int beginInd = i * iterationCount / processorCount;
@@ -96,7 +96,7 @@ namespace RIS.Text.Encoding.Base
             }
             else
             {
-                int processorCount = Math.Min(iterationCount, System.Environment.ProcessorCount);
+                int processorCount = System.Math.Min(iterationCount, System.Environment.ProcessorCount);
                 System.Threading.Tasks.Parallel.For(0, processorCount, i =>
                 {
                     int beginInd = i * iterationCount / processorCount;
@@ -142,7 +142,7 @@ namespace RIS.Text.Encoding.Base
 
             int currentBytePos = bitPos / 8;
             int currentBitInBytePos = bitPos % 8;
-            int xLength = Math.Min(bitsCount, 8 - currentBitInBytePos);
+            int xLength = System.Math.Min(bitsCount, 8 - currentBitInBytePos);
             if (xLength != 0)
             {
                 result = ((ulong)data[currentBytePos] << 56 + currentBitInBytePos) >> 64 - xLength << bitsCount - xLength;
@@ -178,7 +178,7 @@ namespace RIS.Text.Encoding.Base
                 int currentBytePos = bitPos / 8;
                 int currentBitInBytePos = bitPos % 8;
 
-                int xLength = Math.Min(bitsCount, 8 - currentBitInBytePos);
+                int xLength = System.Math.Min(bitsCount, 8 - currentBitInBytePos);
                 if (xLength != 0)
                 {
                     byte x1 = (byte)(value << 64 - bitsCount >> 56 + currentBitInBytePos);

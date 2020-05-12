@@ -1,8 +1,9 @@
 ﻿using System;
 using System.Configuration;
+using System.Diagnostics;
 using System.IO;
-using System.Reflection;
 using System.Runtime.InteropServices;
+using System.Threading.Tasks;
 using System.Xml;
 using Newtonsoft.Json.Linq;
 using RIS.Configuration;
@@ -11,13 +12,14 @@ namespace RIS
 {
     public static class Environment
     {
-        public static event RMessageHandler ShowMessage;
-        public static event RErrorHandler ShowError;
+        public static event EventHandler<RMessageEventArgs> ShowMessage;
+        public static event EventHandler<RErrorEventArgs> ShowError;
 
-        public static string ExecAppDirectoryName { get; private set; }
-        public static string ExecAppFileName { get; private set; }
-        public static string ExecAppFileNameWithoutExtension { get; private set; }
-        
+        public static string ExecAppDirectoryName { get; }
+        public static string ExecAppFileName { get; }
+        public static string ExecAppFileNameWithoutExtension { get; }
+        public static int PlatformWordSize { get; }
+        public static int PlatformWordSizeBits { get; }
 
         private static uint _originalGCLOHThresholdSize;
         private static uint _modifiedGCLOHThresholdSize;
@@ -47,6 +49,9 @@ namespace RIS
             ExecAppDirectoryName = Path.GetDirectoryName(configuration.FilePath);
             ExecAppFileName = Path.GetFileNameWithoutExtension(Path.GetFileNameWithoutExtension(configuration.FilePath)) + ".exe";
             ExecAppFileNameWithoutExtension = Path.GetFileNameWithoutExtension(ExecAppFileName);
+
+            PlatformWordSize = IntPtr.Size;
+            PlatformWordSizeBits = PlatformWordSize * 8;
 
             GCLOHThresholdSize = 85000;
 
@@ -344,6 +349,23 @@ namespace RIS
             }
 
             return value;
+        }
+
+        public static TimeSpan MeasureActionTime(Action action)
+        {
+            var stopwatch = Stopwatch.StartNew();
+            action();
+            stopwatch.Stop();
+
+            return stopwatch.Elapsed;
+        }
+        public static async Task<TimeSpan> MeasureActionTime(Func<Task> function)
+        {
+            var stopwatch = Stopwatch.StartNew();
+            await function().ConfigureAwait(false);
+            stopwatch.Stop();
+
+            return stopwatch.Elapsed;
         }
     }
 }

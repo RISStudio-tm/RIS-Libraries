@@ -6,8 +6,8 @@ namespace RIS.Collections.ChunkedCollections
 {
     public class ChunkedArrayD<T> : IChunkedCollection<T>, ICollection, IEnumerable<T>, IEnumerable
     {
-        public event RMessageHandler ShowMessage;
-        public event RErrorHandler ShowError;
+        public event EventHandler<RMessageEventArgs> ShowMessage;
+        public event EventHandler<RErrorEventArgs> ShowError;
 
         public T this[long index]
         {

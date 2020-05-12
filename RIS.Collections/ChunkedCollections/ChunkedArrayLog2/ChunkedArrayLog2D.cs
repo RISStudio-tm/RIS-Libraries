@@ -6,8 +6,8 @@ namespace RIS.Collections.ChunkedCollections
 {
     public class ChunkedArrayLog2D<T> : IChunkedCollection<T>, ICollection, IEnumerable<T>, IEnumerable
     {
-        public event RMessageHandler ShowMessage;
-        public event RErrorHandler ShowError;
+        public event EventHandler<RMessageEventArgs> ShowMessage;
+        public event EventHandler<RErrorEventArgs> ShowError;
 
         public T this[long index]
         {
@@ -118,8 +118,8 @@ namespace RIS.Collections.ChunkedCollections
             SyncRoot = new object();
             IsSynchronized = false;
 
-            Offset = (byte)Math.Log(ChunkSize, 2);
-            ChunkSize = (uint)Math.Pow(2, Offset);
+            Offset = (byte)System.Math.Log(ChunkSize, 2);
+            ChunkSize = (uint)System.Math.Pow(2, Offset);
             Length = 0;
             Chunks = new Dictionary<int, T[]>();
         }
@@ -148,8 +148,8 @@ namespace RIS.Collections.ChunkedCollections
             SyncRoot = new object();
             IsSynchronized = false;
 
-            Offset = (byte)Math.Log(ChunkSize, 2);
-            ChunkSize = (uint)Math.Pow(2, Offset);
+            Offset = (byte)System.Math.Log(ChunkSize, 2);
+            ChunkSize = (uint)System.Math.Pow(2, Offset);
             Length = length;
             Chunks = new Dictionary<int, T[]>();
             int chunksCount = (int)(length / ChunkSize);
@@ -183,8 +183,8 @@ namespace RIS.Collections.ChunkedCollections
             SyncRoot = new object();
             IsSynchronized = false;
 
-            Offset = (byte)Math.Log(ChunkSize, 2);
-            ChunkSize = (uint)Math.Pow(2, Offset);
+            Offset = (byte)System.Math.Log(ChunkSize, 2);
+            ChunkSize = (uint)System.Math.Pow(2, Offset);
             Length = length;
             Chunks = new Dictionary<int, T[]>();
             int chunksCount = (int)(length / ChunkSize);

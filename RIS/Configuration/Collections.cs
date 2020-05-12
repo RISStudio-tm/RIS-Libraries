@@ -9,8 +9,8 @@ namespace RIS.Configuration
 
     public sealed class AppConfigElementList : IEnumerable, IDisposable
     {
-        public event RMessageHandler ShowMessage;
-        public event RErrorHandler ShowError;
+        public event EventHandler<RMessageEventArgs> ShowMessage;
+        public event EventHandler<RErrorEventArgs> ShowError;
 
         public AppConfigElement this[string key]
         {
@@ -198,8 +198,8 @@ namespace RIS.Configuration
 
     public sealed class RuntimeConfigElementList : IEnumerable, IDisposable
     {
-        public event RMessageHandler ShowMessage;
-        public event RErrorHandler ShowError;
+        public event EventHandler<RMessageEventArgs> ShowMessage;
+        public event EventHandler<RErrorEventArgs> ShowError;
 
         public RuntimeConfigElement this[string key]
         {

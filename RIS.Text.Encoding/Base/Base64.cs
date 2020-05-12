@@ -32,7 +32,7 @@ namespace RIS.Text.Encoding.Base
             }
             else
             {
-                int processorCount = Math.Min(length3, System.Environment.ProcessorCount);
+                int processorCount = System.Math.Min(length3, System.Environment.ProcessorCount);
                 System.Threading.Tasks.Parallel.For(0, processorCount, i =>
                 {
                     int beginInd = i * length3 / processorCount;
@@ -94,7 +94,7 @@ namespace RIS.Text.Encoding.Base
                 }
                 else
                 {
-                    int processorCount = Math.Min(length4, System.Environment.ProcessorCount);
+                    int processorCount = System.Math.Min(length4, System.Environment.ProcessorCount);
                     System.Threading.Tasks.Parallel.For(0, processorCount, i =>
                     {
                         int beginInd = i * length4 / processorCount;

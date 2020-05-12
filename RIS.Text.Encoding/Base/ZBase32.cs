@@ -20,11 +20,11 @@ namespace RIS.Text.Encoding.Base
         {
             unchecked
             {
-                var encodedResult = new StringBuilder((int)Math.Ceiling(data.Length * 8.0 / 5.0));
+                var encodedResult = new StringBuilder((int)System.Math.Ceiling(data.Length * 8.0 / 5.0));
 
                 for (var i = 0; i < data.Length; i += 5)
                 {
-                    var byteCount = Math.Min(5, data.Length - i);
+                    var byteCount = System.Math.Min(5, data.Length - i);
 
                     ulong buffer = 0;
                     for (var j = 0; j < byteCount; ++j)
@@ -51,7 +51,7 @@ namespace RIS.Text.Encoding.Base
             if (string.IsNullOrEmpty(data))
                 return new byte[0];
 
-            var result = new List<byte>((int)Math.Ceiling(data.Length * 5.0 / 8.0));
+            var result = new List<byte>((int)System.Math.Ceiling(data.Length * 5.0 / 8.0));
 
             var index = new int[8];
             for (var i = 0; i < data.Length; )

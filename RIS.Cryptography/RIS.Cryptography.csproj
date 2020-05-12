@@ -4,13 +4,13 @@
     <TargetFrameworks>netcoreapp3.1;net48</TargetFrameworks>
     <RootNamespace>RIS.Cryptography</RootNamespace>
     <AssemblyName>RIS.Cryptography</AssemblyName>
-    <AssemblyVersion>2.1.304.20120</AssemblyVersion>
-    <FileVersion>2.1.304.20120</FileVersion>
+    <AssemblyVersion>2.7.89.20124</AssemblyVersion>
+    <FileVersion>2.7.89.20124</FileVersion>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
-    <NoWarn>CS0067</NoWarn>
+    <NoWarn>$(NoWarn);CS0067;SS003;SS004;U2U1009</NoWarn>
   </PropertyGroup>
 
   <ItemGroup>

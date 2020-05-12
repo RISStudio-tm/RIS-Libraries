@@ -12,8 +12,8 @@ namespace RIS.Configuration
 
     public static class RuntimeConfig
     {
-        public static event RMessageHandler ShowMessage;
-        public static event RErrorHandler ShowError;
+        public static event EventHandler<RMessageEventArgs> ShowMessage;
+        public static event EventHandler<RErrorEventArgs> ShowError;
 
         private static object ReadWriteLockObj { get; }
         private static object ConfigWatcherLockObj { get; }
