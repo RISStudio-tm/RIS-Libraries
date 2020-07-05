@@ -6,6 +6,7 @@ namespace RIS.Tasks
     internal static class IdManager<TTag>
     {
         private static int _lastId;
+        private static TTag _tag;
 
         public static int GetId(ref int id)
         {

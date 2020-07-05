@@ -5,7 +5,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Threading;
 
-namespace RIS.Collections
+namespace RIS.Collections.Queues
 {
     public sealed class Deque<T> : ICollection<T>, ICollection
     {

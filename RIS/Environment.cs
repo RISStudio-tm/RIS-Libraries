@@ -39,7 +39,7 @@ namespace RIS
                 else if (value > 1)
                     _modifiedGCLOHThresholdSize = value - 1;
                 else
-                    _modifiedGCLOHThresholdSize = 0;
+                    _modifiedGCLOHThresholdSize = 1;
             }
         }
 

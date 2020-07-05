@@ -2,10 +2,10 @@
 
   <PropertyGroup>
     <TargetFrameworks>netcoreapp3.1;net48</TargetFrameworks>
-    <RootNamespace>RIS.Reflection.Call</RootNamespace>
-    <AssemblyName>RIS.Reflection.Call</AssemblyName>
-    <AssemblyVersion>2.3.31.20133</AssemblyVersion>
-    <FileVersion>2.3.31.20133</FileVersion>
+    <RootNamespace>RIS.Reflection</RootNamespace>
+    <AssemblyName>RIS.Reflection</AssemblyName>
+    <AssemblyVersion>3.4.8.20187</AssemblyVersion>
+    <FileVersion>3.4.8.20187</FileVersion>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">

@@ -11,7 +11,6 @@ namespace RIS
             Message = message;
         }
     }
-    //public delegate void RMessageHandler(object sender, RMessageEventArgs eventArgs);
 
     public class RErrorEventArgs : EventArgs
     {
@@ -24,5 +23,4 @@ namespace RIS
             Stacktrace = stacktrace;
         }
     }
-    //public delegate void RErrorHandler(object sender, RErrorEventArgs eventArgs);
 }

@@ -7,7 +7,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ConsoleTest", "ConsoleTest\
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RIS.Logging", "RIS.Logging\RIS.Logging.csproj", "{C69CB646-818D-4A5B-89B3-36A7E0A31DBC}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RIS.Reflection.Call", "RIS.Reflection.Call\RIS.Reflection.Call.csproj", "{B08C78B9-A85A-40E2-9B02-EAEB2B781967}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RIS.Reflection", "RIS.Reflection\RIS.Reflection.csproj", "{B08C78B9-A85A-40E2-9B02-EAEB2B781967}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RIS.Connection.MySQL", "RIS.Connection.MySQL\RIS.Connection.MySQL.csproj", "{78B7F307-A217-4AE4-A72F-BF3D8F65B292}"
 EndProject
