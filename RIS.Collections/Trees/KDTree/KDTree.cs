@@ -15,10 +15,10 @@ namespace RIS.Collections.Trees
         }
         private sealed class PointAndValueComparer : IComparer<KeyValuePair<TPoint, TValue>>
         {
-            private readonly IKDPointComparer<TPoint> _comparer;
+            private readonly IKDPoinTComparer<TPoint> _comparer;
             private readonly int _dimension;
 
-            public PointAndValueComparer(IKDPointComparer<TPoint> comparer, int dimension)
+            public PointAndValueComparer(IKDPoinTComparer<TPoint> comparer, int dimension)
             {
                 _comparer = comparer;
                 _dimension = dimension;
@@ -30,17 +30,17 @@ namespace RIS.Collections.Trees
             }
         }
 
-        private readonly IKDPointComparer<TPoint> _comparer;
+        private readonly IKDPoinTComparer<TPoint> _comparer;
         private PointAndValueComparer[] _singleDimensionComparers;
         private Node _root;
 
         public int Count { get; private set; }
 
-        public KDTree(IKDPointComparer<TPoint> comparer = null)
+        public KDTree(IKDPoinTComparer<TPoint> comparer = null)
         {
             _comparer = comparer;
         }
-        public KDTree(IEnumerable<KeyValuePair<TPoint, TValue>> points, IKDPointComparer<TPoint> comparer)
+        public KDTree(IEnumerable<KeyValuePair<TPoint, TValue>> points, IKDPoinTComparer<TPoint> comparer)
             : this(comparer)
         {
             if (points == null)
@@ -148,7 +148,7 @@ namespace RIS.Collections.Trees
                 }
                 else
                 {
-                    Node replacementNode = FindReplacementChildForRemoval(node, dimension, out int replacementDimension);
+                    Node replacementNode = FindReplacemenTChildForRemoval(node, dimension, out int replacementDimension);
 
                     node.point = replacementNode.point;
                     node.value = replacementNode.value;
@@ -166,7 +166,7 @@ namespace RIS.Collections.Trees
                 || InternalRemove(ref node.right, point, value, nextDimension);
         }
 
-        private Node FindReplacementChildForRemoval(Node toReplace, int toReplaceDimension, out int replacementDimension)
+        private Node FindReplacemenTChildForRemoval(Node toReplace, int toReplaceDimension, out int replacementDimension)
         {
             Node best;
             int bestDimension = NextDimension(toReplaceDimension);
@@ -175,13 +175,13 @@ namespace RIS.Collections.Trees
             {
                 best = toReplace.left;
 
-                LeftFindReplacementChildForRemoval(toReplaceDimension, best, bestDimension, ref best, ref bestDimension);
+                LeftFindReplacemenTChildForRemoval(toReplaceDimension, best, bestDimension, ref best, ref bestDimension);
             }
             else
             {
                 best = toReplace.right;
 
-                RightFindReplacementChildForRemoval(toReplaceDimension, best, bestDimension, ref best, ref bestDimension);
+                RightFindReplacemenTChildForRemoval(toReplaceDimension, best, bestDimension, ref best, ref bestDimension);
             }
 
             replacementDimension = bestDimension;
@@ -189,7 +189,7 @@ namespace RIS.Collections.Trees
             return best;
         }
 
-        private void LeftFindReplacementChildForRemoval(int toReplaceDimension, Node current, int currentDimension,
+        private void LeftFindReplacemenTChildForRemoval(int toReplaceDimension, Node current, int currentDimension,
             ref Node best, ref int bestDimension)
         {
             if (current == null)
@@ -205,13 +205,13 @@ namespace RIS.Collections.Trees
 
             int nextDimension = NextDimension(currentDimension);
 
-            LeftFindReplacementChildForRemoval(toReplaceDimension, current.right, nextDimension, ref best, ref bestDimension);
+            LeftFindReplacemenTChildForRemoval(toReplaceDimension, current.right, nextDimension, ref best, ref bestDimension);
 
             if (currentDimension != toReplaceDimension)
-                LeftFindReplacementChildForRemoval(toReplaceDimension, current.left, nextDimension, ref best, ref bestDimension);
+                LeftFindReplacemenTChildForRemoval(toReplaceDimension, current.left, nextDimension, ref best, ref bestDimension);
         }
 
-        private void RightFindReplacementChildForRemoval(int toReplaceDimension, Node current, int currentDimension,
+        private void RightFindReplacemenTChildForRemoval(int toReplaceDimension, Node current, int currentDimension,
             ref Node best, ref int bestDimension)
         {
             if (current == null)
@@ -227,10 +227,10 @@ namespace RIS.Collections.Trees
 
             int nextDimension = NextDimension(currentDimension);
 
-            RightFindReplacementChildForRemoval(toReplaceDimension, current.left, nextDimension, ref best, ref bestDimension);
+            RightFindReplacemenTChildForRemoval(toReplaceDimension, current.left, nextDimension, ref best, ref bestDimension);
 
             if (currentDimension != toReplaceDimension)
-                RightFindReplacementChildForRemoval(toReplaceDimension, current.right, nextDimension, ref best, ref bestDimension);
+                RightFindReplacemenTChildForRemoval(toReplaceDimension, current.right, nextDimension, ref best, ref bestDimension);
         }
 
         private TAccumulate InternalAggregateRange<TAccumulate>(Node node, TPoint lowerBounds, TPoint upperBounds, TAccumulate seed, Func<TAccumulate, KeyValuePair<TPoint, TValue>, TAccumulate> accumulator, int dimension)
@@ -269,7 +269,7 @@ namespace RIS.Collections.Trees
             if (_singleDimensionComparers != null)
                 return;
 
-            (_comparer as INeedsInitializationKDPointComparer<TPoint>)?.InitializeFrom(point);
+            (_comparer as INeedsInitializationKDPoinTComparer<TPoint>)?.InitializeFrom(point);
             _singleDimensionComparers = Enumerable.Range(0, _comparer.Dimensions)
                 .Select(i => new PointAndValueComparer(_comparer, i))
                 .ToArray();

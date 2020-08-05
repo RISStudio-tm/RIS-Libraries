@@ -4,8 +4,8 @@
     <TargetFrameworks>netcoreapp3.1;net48</TargetFrameworks>
     <RootNamespace>RIS.Reflection</RootNamespace>
     <AssemblyName>RIS.Reflection</AssemblyName>
-    <AssemblyVersion>3.4.8.20187</AssemblyVersion>
-    <FileVersion>3.4.8.20187</FileVersion>
+    <AssemblyVersion>3.4.41.20218</AssemblyVersion>
+    <FileVersion>3.4.41.20218</FileVersion>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">

@@ -86,7 +86,7 @@ namespace RIS.Collections.Queues
             }
         }
 
-        private const int DefaultCapacity = 4;
+        private const int DefaulTCapacity = 4;
         private int _version;
         private object _syncRoot;
         private T[] _buffer;
@@ -358,7 +358,7 @@ namespace RIS.Collections.Queues
         {
             if (Capacity < min)
             {
-                var newCapacity = Capacity == 0 ? DefaultCapacity : Capacity*2;
+                var newCapacity = Capacity == 0 ? DefaulTCapacity : Capacity*2;
                 newCapacity = System.Math.Max(newCapacity, min);
                 Capacity = newCapacity;
             }

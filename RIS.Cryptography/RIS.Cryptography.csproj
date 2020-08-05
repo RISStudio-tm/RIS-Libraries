@@ -4,8 +4,8 @@
     <TargetFrameworks>netcoreapp3.1;net48</TargetFrameworks>
     <RootNamespace>RIS.Cryptography</RootNamespace>
     <AssemblyName>RIS.Cryptography</AssemblyName>
-    <AssemblyVersion>2.7.121.20187</AssemblyVersion>
-    <FileVersion>2.7.121.20187</FileVersion>
+    <AssemblyVersion>2.7.154.20218</AssemblyVersion>
+    <FileVersion>2.7.154.20218</FileVersion>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
 
@@ -21,7 +21,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\RIS.Text.Encoding\RIS.Text.Encoding.csproj" />
+    <ProjectReference Include="..\RIS.Text\RIS.Text.csproj" />
     <ProjectReference Include="..\RIS\RIS.csproj" />
   </ItemGroup>
 

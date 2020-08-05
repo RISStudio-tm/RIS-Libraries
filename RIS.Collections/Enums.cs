@@ -2,10 +2,11 @@
 
 namespace RIS.Collections
 {
-    public enum NestedType : byte
+    public enum CollectionGeneralType : byte
     {
-        Element = 1,
-        Array = 2,
-        NestableCollection = 3
+        Unknown = 0,
+        Array = 1,
+        Dictionary = 2,
+        List = 3
     }
 }

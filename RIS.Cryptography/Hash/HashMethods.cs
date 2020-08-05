@@ -26,7 +26,7 @@ namespace RIS.Cryptography.Hash
         {
             TextEncoding = Utils.SecureUTF8;
             RNGProvider = new RNGCryptoServiceProvider();
-            
+
             Type hashMethodsType = typeof(HashMethods);
             MemberInfo[] hashMethods =
                 hashMethodsType.FindMembers(MemberTypes.NestedType, BindingFlags.Public,

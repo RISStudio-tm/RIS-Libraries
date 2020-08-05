@@ -4,8 +4,9 @@
     <TargetFrameworks>netcoreapp3.1;net48</TargetFrameworks>
     <RootNamespace>RIS.Collections</RootNamespace>
     <AssemblyName>RIS.Collections</AssemblyName>
-    <AssemblyVersion>3.13.13.20187</AssemblyVersion>
-    <FileVersion>3.13.13.20187</FileVersion>
+    <AssemblyVersion>4.5.69.20218</AssemblyVersion>
+    <FileVersion>4.5.69.20218</FileVersion>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
@@ -17,12 +18,11 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="ChunkedCollections\ChunkedArray\" />
-    <Folder Include="ChunkedCollections\ChunkedArrayLog2\" />
-    <Folder Include="ChunkedCollections\SyncChunkedArray\" />
-    <Folder Include="ChunkedCollections\SyncChunkedArrayLog2\" />
-    <Folder Include="NestableCollections\NestableArray\" />
-    <Folder Include="NestableCollections\NestableList\" />
+    <Folder Include="Chunked\SyncArrayLog2\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="AsyncEnumerator" Version="4.0.2" />
   </ItemGroup>
 
 </Project>

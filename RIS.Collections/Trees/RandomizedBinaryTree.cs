@@ -227,19 +227,19 @@ namespace RIS.Collections.Trees
 
             while (true)
             {
-                int leftCount = node?.Left?.Count ?? 0;
+                int lefTCount = node?.Left?.Count ?? 0;
 
-                if (nodeIndex < leftCount)
+                if (nodeIndex < lefTCount)
                 {
                     node = node?.Left;
                 }
-                else if (nodeIndex == leftCount)
+                else if (nodeIndex == lefTCount)
                 {
                     return node;
                 }
                 else
                 {
-                    nodeIndex -= (leftCount + 1);
+                    nodeIndex -= (lefTCount + 1);
                     node = node?.Right;
                 }
             }
@@ -388,9 +388,9 @@ namespace RIS.Collections.Trees
         {
             return _random.NextDouble() < 1.0 / (count + 1);
         }
-        private bool Choose(int leftCount, int rightCount)
+        private bool Choose(int lefTCount, int righTCount)
         {
-            return _random.NextDouble() < leftCount / (double)(leftCount + rightCount);
+            return _random.NextDouble() < lefTCount / (double)(lefTCount + righTCount);
         }
 
         private int InternalMaxDepth(Node node)
@@ -400,7 +400,7 @@ namespace RIS.Collections.Trees
                 : 1 + Math.Max(InternalMaxDepth(node.Left), InternalMaxDepth(node.Right));
         }
 
-        private void InternalCheckInvariants(Node node, Node parent, bool isNodeLeftChild)
+        private void InternalCheckInvariants(Node node, Node parent, bool isNodeLefTChild)
         {
             HashSet<Node> nodes = new HashSet<Node>();
 
@@ -420,7 +420,7 @@ namespace RIS.Collections.Trees
                 }
 
                 if (parent != null
-                    && !isNodeLeftChild
+                    && !isNodeLefTChild
                     && Comparer.Compare(parent.Key, node.Left.Key) > 0)
                 {
                     throw new InvalidOperationException($"left child {node.Left} should be between {parent} and {node}");
@@ -435,7 +435,7 @@ namespace RIS.Collections.Trees
                 }
 
                 if (parent != null
-                    && isNodeLeftChild
+                    && isNodeLefTChild
                     && Comparer.Compare(parent.Key, node.Right.Key) < 0)
                 {
                     throw new InvalidOperationException($"right child {node.Right} should be between {node} and {parent}");

@@ -215,10 +215,10 @@ namespace RIS.Collections.Queues
             {
                 int childIndex = (i << 1) + 1;
                 T childItem = _heap[childIndex];
-                int rightChildIndex = childIndex + 1;
+                int righTChildIndex = childIndex + 1;
 
-                if (rightChildIndex < Count && Comparer.Compare(childItem, _heap[rightChildIndex]) > 0)
-                    childItem = _heap[childIndex = rightChildIndex];
+                if (righTChildIndex < Count && Comparer.Compare(childItem, _heap[righTChildIndex]) > 0)
+                    childItem = _heap[childIndex = righTChildIndex];
 
                 if (Comparer.Compare(item, childItem) <= 0)
                     break;
@@ -321,13 +321,13 @@ namespace RIS.Collections.Queues
                 throw new InvalidOperationException("Queue cannot be further expanded");
             }
 
-            int currentCapacity = _heap.Length;
+            int currenTCapacity = _heap.Length;
             int nextNaturalGrowthCapacity = unchecked((int)(
-                    currentCapacity < InitialCapacity
+                    currenTCapacity < InitialCapacity
                         ? InitialCapacity
-                        : currentCapacity < 64
-                            ? 2 * (currentCapacity + 1)
-                            : 3 * (currentCapacity / 2.0))
+                        : currenTCapacity < 64
+                            ? 2 * (currenTCapacity + 1)
+                            : 3 * (currenTCapacity / 2.0))
             );
 
             int newCapacity = nextNaturalGrowthCapacity < 0
@@ -353,13 +353,13 @@ namespace RIS.Collections.Queues
             else if (cmp < 0)
                 return null;
 
-            int leftChildIndex = (startIndex << 1) + 1;
+            int lefTChildIndex = (startIndex << 1) + 1;
 
-            return leftChildIndex >= Count || leftChildIndex < 0
+            return lefTChildIndex >= Count || lefTChildIndex < 0
                 ? null
-                : (FindHelper(item, leftChildIndex) ?? (leftChildIndex == Count - 1
+                : (FindHelper(item, lefTChildIndex) ?? (lefTChildIndex == Count - 1
                        ? null
-                       : FindHelper(item, leftChildIndex + 1)));
+                       : FindHelper(item, lefTChildIndex + 1)));
         }
 
         public void Clear()

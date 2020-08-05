@@ -2,10 +2,10 @@
 
   <PropertyGroup>
     <TargetFrameworks>netcoreapp3.1;net48</TargetFrameworks>
-    <RootNamespace>RIS.Logging</RootNamespace>
-    <AssemblyName>RIS.Logging</AssemblyName>
-    <AssemblyVersion>2.1.408.20218</AssemblyVersion>
-    <FileVersion>2.1.408.20218</FileVersion>
+    <RootNamespace>RIS.Text</RootNamespace>
+    <AssemblyName>RIS.Text</AssemblyName>
+    <AssemblyVersion>3.0.36.20218</AssemblyVersion>
+    <FileVersion>3.0.36.20218</FileVersion>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
@@ -13,7 +13,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\RIS.Collections\RIS.Collections.csproj" />
     <ProjectReference Include="..\RIS\RIS.csproj" />
   </ItemGroup>
 

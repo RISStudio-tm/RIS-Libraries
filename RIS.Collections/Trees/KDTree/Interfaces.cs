@@ -2,13 +2,13 @@
 
 namespace RIS.Collections.Trees
 {
-    public interface IKDPointComparer<in TPoint>
+    public interface IKDPoinTComparer<in TPoint>
     {
         int Dimensions { get; }
         int Compare(TPoint a, TPoint b, int dimension);
     }
 
-    internal interface INeedsInitializationKDPointComparer<in TPoint> : IKDPointComparer<TPoint>
+    internal interface INeedsInitializationKDPoinTComparer<in TPoint> : IKDPoinTComparer<TPoint>
     {
         void InitializeFrom(TPoint point);
     }
