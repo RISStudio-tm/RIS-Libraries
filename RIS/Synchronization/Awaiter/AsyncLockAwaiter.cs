@@ -3,7 +3,7 @@ using System.Threading;
 
 namespace RIS.Synchronization
 {
-    internal sealed class AsyncLockWaiter : WaiterBase
+    internal sealed class AsyncLockAwaiter : AwaiterBase
     {
         private sealed class ContextAction
         {
@@ -29,7 +29,7 @@ namespace RIS.Synchronization
             }
         }
 
-        public AsyncLockWaiter(LightAsyncLock @lock)
+        public AsyncLockAwaiter(LightAsyncLock @lock)
             : base(@lock)
         {
 

@@ -3,13 +3,13 @@ using System.Globalization;
 
 namespace RIS.Synchronization
 {
-    internal abstract class WaiterBase : IAwaiter<IDisposable>, IDisposable
+    internal abstract class AwaiterBase : IAwaiter<IDisposable>, IDisposable
     {
         protected readonly LightAsyncLock Lock;
 
         public abstract bool IsCompleted { get; }
 
-        protected WaiterBase(LightAsyncLock @lock)
+        protected AwaiterBase(LightAsyncLock @lock)
         {
             Lock = @lock;
         }

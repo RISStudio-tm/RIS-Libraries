@@ -2,7 +2,7 @@ using System;
 
 namespace RIS.Synchronization
 {
-    internal sealed class NonBlockedWaiter : WaiterBase
+    internal sealed class NonBlockedAwaiter : AwaiterBase
     {
         public override bool IsCompleted
         {
@@ -12,7 +12,7 @@ namespace RIS.Synchronization
             }
         }
 
-        public NonBlockedWaiter(LightAsyncLock @lock)
+        public NonBlockedAwaiter(LightAsyncLock @lock)
             : base(@lock)
         {
 
@@ -20,7 +20,7 @@ namespace RIS.Synchronization
 
         public override string ToString()
         {
-            return "NonBlockingWaiter: " + base.ToString();
+            return "NonBlockingAwaiter: " + base.ToString();
         }
 
         protected override void OnCompleted(Action continuation, bool captureExecutionContext)

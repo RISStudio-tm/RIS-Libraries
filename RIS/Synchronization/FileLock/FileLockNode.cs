@@ -5,14 +5,14 @@ using System.Threading.Tasks;
 
 namespace RIS.Synchronization
 {
-    internal sealed class FileLockModel
+    internal sealed class FileLockNode
     {
         public static event EventHandler<RMessageEventArgs> ShowMessage;
         public static event EventHandler<RErrorEventArgs> ShowError;
 
         private readonly string _path;
 
-        public FileLockModel(string path)
+        public FileLockNode(string path)
         {
             _path = path;
         }

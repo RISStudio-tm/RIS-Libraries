@@ -509,7 +509,7 @@ MigrationBackup/
 
 # End of https://www.gitignore.io/api/csharp,visualstudio
 
-#####################################
+##################################### General #####################################
 
 # Files
 
@@ -519,5 +519,15 @@ MigrationBackup/
 
 .git/
 .vs/
+.idea/
+
+##################################### Project #####################################
+
+# Files
+
+
+
+# Directories
+
 ConsoleTest/
 

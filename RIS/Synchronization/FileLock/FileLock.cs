@@ -13,50 +13,50 @@ namespace RIS.Synchronization
         private const string LockFileExtension = "rlock";
 
         private readonly CancellationTokenSource _cancellationTokenSource;
-        private readonly FileLockModel _content;
+        private readonly FileLockNode _node;
         private readonly string _path;
 
         public FileLock(string path)
         {
             _cancellationTokenSource = new CancellationTokenSource();
             _path = GetLockFileName(path);
-            _content = new FileLockModel(_path);
+            _node = new FileLockNode(_path);
         }
         public FileLock(FileInfo fileInfo)
         {
             _cancellationTokenSource = new CancellationTokenSource();
             _path = GetLockFileName(fileInfo);
-            _content = new FileLockModel(_path);
+            _node = new FileLockNode(_path);
         }
 
         public async Task AddTime(TimeSpan lockTime)
         {
-            await _content.TrySetReleaseDate(
-                await _content.GetReleaseDate().ConfigureAwait(false) + lockTime
+            await _node.TrySetReleaseDate(
+                await _node.GetReleaseDate().ConfigureAwait(false) + lockTime
                 ).ConfigureAwait(false);
         }
 
         public async Task<DateTime> GetReleaseDate()
         {
-            return await _content.GetReleaseDate().ConfigureAwait(false);
+            return await _node.GetReleaseDate().ConfigureAwait(false);
         }
 
         public async Task<bool> TryAcquire(DateTime releaseDate)
         {
-            if (File.Exists(_path) && (await _content.GetReleaseDate().ConfigureAwait(false)).ToUniversalTime() > DateTime.UtcNow)
+            if (File.Exists(_path) && (await _node.GetReleaseDate().ConfigureAwait(false)).ToUniversalTime() > DateTime.UtcNow)
                 return false;
 
-            return await _content.TrySetReleaseDate(releaseDate).ConfigureAwait(false);
+            return await _node.TrySetReleaseDate(releaseDate).ConfigureAwait(false);
         }
         public async Task<bool> TryAcquire(TimeSpan lockTime, bool refreshContinuously = false)
         {
             if (!File.Exists(_path))
-                return await _content.TrySetReleaseDate(DateTime.UtcNow + lockTime).ConfigureAwait(false);
+                return await _node.TrySetReleaseDate(DateTime.UtcNow + lockTime).ConfigureAwait(false);
 
-            if (File.Exists(_path) && (await _content.GetReleaseDate().ConfigureAwait(false)).ToUniversalTime() > DateTime.UtcNow)
+            if (File.Exists(_path) && (await _node.GetReleaseDate().ConfigureAwait(false)).ToUniversalTime() > DateTime.UtcNow)
                 return false;
 
-            if (!await _content.TrySetReleaseDate(DateTime.UtcNow + lockTime).ConfigureAwait(false))
+            if (!await _node.TrySetReleaseDate(DateTime.UtcNow + lockTime).ConfigureAwait(false))
                 return false;
 
             if (refreshContinuously)

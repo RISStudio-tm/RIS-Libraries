@@ -6,7 +6,17 @@ namespace RIS.Synchronization
 {
     public class LightAsyncLock : IAwaitable<IDisposable>
     {
-        private readonly ConcurrentQueue<WaiterBase> _waiters;
+        private sealed class Sentinel
+        {
+            public static readonly object Value = new Sentinel();
+
+            public override string ToString()
+            {
+                return GetType().Name;
+            }
+        }
+
+        private readonly ConcurrentQueue<AwaiterBase> _waiters;
         private object _current;
         private int WaitingCount
         {
@@ -26,22 +36,22 @@ namespace RIS.Synchronization
 
         public LightAsyncLock()
         {
-            _waiters = new ConcurrentQueue<WaiterBase>();
+            _waiters = new ConcurrentQueue<AwaiterBase>();
         }
 
         public IAwaiter<IDisposable> GetAwaiter()
         {
-            WaiterBase waiter;
+            AwaiterBase waiter;
 
             if (TryTakeControl())
             {
-                waiter = new NonBlockedWaiter(this);
+                waiter = new NonBlockedAwaiter(this);
 
                 RunWaiter(waiter);
             }
             else
             {
-                waiter = new AsyncLockWaiter(this);
+                waiter = new AsyncLockAwaiter(this);
 
                 _waiters.Enqueue(waiter);
                 TryNext();
@@ -55,7 +65,7 @@ namespace RIS.Synchronization
             return "AsyncLock: " + (HasLock ? "Locked with " + WaitingCount + " queued waiters" : "Unlocked");
         }
 
-        internal void Done(WaiterBase waiter)
+        internal void Done(AwaiterBase waiter)
         {
             Interlocked.Exchange(ref _current, null);
 
@@ -67,7 +77,7 @@ namespace RIS.Synchronization
             Interlocked.Exchange(ref _current, null);
         }
 
-        private void RunWaiter(WaiterBase waiter)
+        private void RunWaiter(AwaiterBase waiter)
         {
             _current = waiter;
 

@@ -23,13 +23,19 @@ namespace RIS
 
         private static uint _originalGCLOHThresholdSize;
         private static uint _modifiedGCLOHThresholdSize;
+        public static uint OriginalGCLOHThresholdSize
+        {
+            get
+            {
+                return _originalGCLOHThresholdSize;
+            }
+        }
         public static uint GCLOHThresholdSize
         {
             get
             {
                 return _modifiedGCLOHThresholdSize;
             }
-
             private set
             {
                 _originalGCLOHThresholdSize = value;

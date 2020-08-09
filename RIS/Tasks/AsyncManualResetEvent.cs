@@ -6,7 +6,31 @@ namespace RIS.Tasks
 {
     public sealed class AsyncManualResetEvent
     {
-        private readonly object _sync;
+        private static class IdManager<T>
+        {
+            private static int _lastId;
+            private static T _type;
+
+            public static int GetId(ref int id)
+            {
+                if (id != 0)
+                    return id;
+
+                int newId;
+
+                do
+                {
+                    newId = Interlocked.Increment(ref _lastId);
+                }
+                while (newId == 0);
+
+                Interlocked.CompareExchange(ref id, newId, 0);
+
+                return id;
+            }
+        }
+
+        private readonly object _lockObj;
         private int _id;
         private TaskCompletionSource _tcs;
 
@@ -25,7 +49,7 @@ namespace RIS.Tasks
         }
         public AsyncManualResetEvent(bool set)
         {
-            _sync = new object();
+            _lockObj = new object();
             _tcs = new TaskCompletionSource();
             if (set) {
                 _tcs.SetResult();
@@ -34,20 +58,25 @@ namespace RIS.Tasks
 
         public void Wait()
         {
-            WaitAsync().Wait();
+            Task task = WaitAsync();
+
+            if (task.IsCompleted)
+                return;
+
+            task.Wait();
         }
         public void Wait(CancellationToken cancellationToken)
         {
-            Task ret = WaitAsync();
+            Task task = WaitAsync();
 
-            if (ret.IsCompleted)
+            if (task.IsCompleted)
                 return;
 
-            ret.Wait(cancellationToken);
+            task.Wait(cancellationToken);
         }
         public Task WaitAsync()
         {
-            lock (_sync)
+            lock (_lockObj)
             {
                 return _tcs.Task;
             }
@@ -55,7 +84,7 @@ namespace RIS.Tasks
 
         public void Set()
         {
-            lock (_sync)
+            lock (_lockObj)
             {
                 _tcs.TrySetResultWithBackgroundContinuations();
             }
@@ -63,7 +92,7 @@ namespace RIS.Tasks
 
         public void Reset()
         {
-            lock (_sync)
+            lock (_lockObj)
             {
                 if (_tcs.Task.IsCompleted)
                     _tcs = new TaskCompletionSource();
