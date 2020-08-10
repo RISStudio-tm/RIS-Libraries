@@ -4,60 +4,35 @@ namespace RIS
 {
     public static class Events
     {
-        private static object LockObjMessageEvent { get; }
-        private static event EventHandler<RMessageEventArgs> PShowMessage;
-        public static event EventHandler<RMessageEventArgs> ShowMessage
-        {
-            add
-            {
-                lock (LockObjMessageEvent)
-                {
-                    PShowMessage += value;
-                    DShowMessage += value;
-                }
-            }
-            remove
-            {
-                lock (LockObjMessageEvent)
-                {
-                    if (PShowMessage != null)
-                        PShowMessage -= value;
-                    if (DShowMessage != null)
-                        DShowMessage -= value;
-                }
-            }
-        }
-        public static EventHandler<RMessageEventArgs> DShowMessage { get; private set; }
+        public static event EventHandler<RInformationEventArgs> Information;
+        public static event EventHandler<RWarningEventArgs> Warning;
+        public static event EventHandler<RErrorEventArgs> Error;
 
-        private static object LockObjErrorEvent { get; }
-        private static event EventHandler<RErrorEventArgs> PShowError;
-        public static event EventHandler<RErrorEventArgs> ShowError
+        public static void OnInformation(RInformationEventArgs e)
         {
-            add
-            {
-                lock (LockObjErrorEvent)
-                {
-                    PShowError += value;
-                    DShowError += value;
-                }
-            }
-            remove
-            {
-                lock (LockObjErrorEvent)
-                {
-                    if (PShowError != null)
-                        PShowError -= value;
-                    if (DShowError != null)
-                        DShowError -= value;
-                }
-            }
+            OnInformation(null, e);
         }
-        public static EventHandler<RErrorEventArgs> DShowError { get; private set; }
-
-        static Events()
+        public static void OnInformation(object sender, RInformationEventArgs e)
         {
-            LockObjMessageEvent = new object();
-            LockObjErrorEvent = new object();
+            Information?.Invoke(sender, e);
+        }
+
+        public static void OnWarning(RWarningEventArgs e)
+        {
+            OnWarning(null, e);
+        }
+        public static void OnWarning(object sender, RWarningEventArgs e)
+        {
+            Warning?.Invoke(sender, e);
+        }
+
+        public static void OnError(RErrorEventArgs e)
+        {
+            OnError(null, e);
+        }
+        public static void OnError(object sender, RErrorEventArgs e)
+        {
+            Error?.Invoke(sender, e);
         }
     }
 }

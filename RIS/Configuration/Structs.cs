@@ -1,5 +1,4 @@
 ﻿using System;
-using Newtonsoft.Json.Linq;
 
 namespace RIS.Configuration
 {
@@ -23,7 +22,7 @@ namespace RIS.Configuration
     {
         public string Name { get; }
         public string JsonPath { get; }
-        
+
         internal RuntimeConfigElement(string name, string jsonPath)
         {
             Name = name;

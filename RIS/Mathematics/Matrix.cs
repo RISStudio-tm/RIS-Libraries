@@ -7,8 +7,13 @@ namespace RIS.Mathematics
 {
     public sealed class Matrix
     {
-        public static event EventHandler<RMessageEventArgs> ShowMessage;
-        public static event EventHandler<RErrorEventArgs> ShowError;
+        public event EventHandler<RInformationEventArgs> Information;
+        public event EventHandler<RWarningEventArgs> Warning;
+        public event EventHandler<RErrorEventArgs> Error;
+
+        public static event EventHandler<RInformationEventArgs> InformationStatic;
+		public static event EventHandler<RWarningEventArgs> WarningStatic;
+		public static event EventHandler<RErrorEventArgs> ErrorStatic;
 
         public double this[int rowIndex, int columnIndex]
         {
@@ -68,6 +73,60 @@ namespace RIS.Mathematics
             }
         }
 
+        public void OnInformation(RInformationEventArgs e)
+        {
+            OnInformation(this, e);
+        }
+        public void OnInformation(object sender, RInformationEventArgs e)
+        {
+            Information?.Invoke(sender, e);
+        }
+
+        public void OnWarning(RWarningEventArgs e)
+        {
+            OnWarning(this, e);
+        }
+        public void OnWarning(object sender, RWarningEventArgs e)
+        {
+            Warning?.Invoke(sender, e);
+        }
+
+        public void OnError(RErrorEventArgs e)
+        {
+            OnError(this, e);
+        }
+        public void OnError(object sender, RErrorEventArgs e)
+        {
+            Error?.Invoke(sender, e);
+        }
+
+        public static void OnInformationStatic(RInformationEventArgs e)
+        {
+            OnInformationStatic(null, e);
+        }
+        public static void OnInformationStatic(object sender, RInformationEventArgs e)
+        {
+            InformationStatic?.Invoke(sender, e);
+        }
+
+        public static void OnWarningStatic(RWarningEventArgs e)
+        {
+            OnWarningStatic(null, e);
+        }
+        public static void OnWarningStatic(object sender, RWarningEventArgs e)
+        {
+            WarningStatic?.Invoke(sender, e);
+        }
+
+        public static void OnErrorStatic(RErrorEventArgs e)
+        {
+            OnErrorStatic(null, e);
+        }
+        public static void OnErrorStatic(object sender, RErrorEventArgs e)
+        {
+            ErrorStatic?.Invoke(sender, e);
+        }
+
         public Matrix GetColumn(int k)
         {
             Matrix m = new Matrix(Rows, 1);
@@ -93,8 +152,8 @@ namespace RIS.Mathematics
             if (!IsSquare)
             {
                 var exception = new Exception("The matrix is not square!");
-                Events.DShowError?.Invoke(this, new RErrorEventArgs(exception.Message, exception.StackTrace));
-                ShowError?.Invoke(this, new RErrorEventArgs(exception.Message, exception.StackTrace));
+                Events.OnError(this, new RErrorEventArgs(exception.Message, exception.StackTrace));
+                OnError(new RErrorEventArgs(exception.Message, exception.StackTrace));
                 throw exception;
             }
 
@@ -128,8 +187,8 @@ namespace RIS.Mathematics
                 if (p == 0)
                 {
                     var exception = new Exception("The matrix is singular!");
-                    Events.DShowError?.Invoke(this, new RErrorEventArgs(exception.Message, exception.StackTrace));
-                    ShowError?.Invoke(this, new RErrorEventArgs(exception.Message, exception.StackTrace));
+                    Events.OnError(this, new RErrorEventArgs(exception.Message, exception.StackTrace));
+                    OnError(new RErrorEventArgs(exception.Message, exception.StackTrace));
                     throw exception;
                 }
 
@@ -173,24 +232,24 @@ namespace RIS.Mathematics
             if (Rows != Columns)
             {
                 var exception = new Exception("The matrix is not square!");
-                Events.DShowError?.Invoke(this, new RErrorEventArgs(exception.Message, exception.StackTrace));
-                ShowError?.Invoke(this, new RErrorEventArgs(exception.Message, exception.StackTrace));
+                Events.OnError(this, new RErrorEventArgs(exception.Message, exception.StackTrace));
+                OnError(new RErrorEventArgs(exception.Message, exception.StackTrace));
                 throw exception;
             }
 
             if (Rows != v.Rows)
             {
                 var exception = new Exception("Wrong number of results in solution vector!");
-                Events.DShowError?.Invoke(this, new RErrorEventArgs(exception.Message, exception.StackTrace));
-                ShowError?.Invoke(this, new RErrorEventArgs(exception.Message, exception.StackTrace));
+                Events.OnError(this, new RErrorEventArgs(exception.Message, exception.StackTrace));
+                OnError(new RErrorEventArgs(exception.Message, exception.StackTrace));
                 throw exception;
             }
 
             if (v.Columns != 1)
             {
                 var exception = new Exception("The solution vector v must be a column vector");
-                Events.DShowError?.Invoke(this, new RErrorEventArgs(exception.Message, exception.StackTrace));
-                ShowError?.Invoke(this, new RErrorEventArgs(exception.Message, exception.StackTrace));
+                Events.OnError(this, new RErrorEventArgs(exception.Message, exception.StackTrace));
+                OnError(new RErrorEventArgs(exception.Message, exception.StackTrace));
                 throw exception;
             }
 
@@ -457,14 +516,14 @@ namespace RIS.Mathematics
             catch (FormatException)
             {
                 var exception = new Exception("Wrong input format!");
-                Events.DShowError?.Invoke(null, new RErrorEventArgs(exception.Message, exception.StackTrace));
-                ShowError?.Invoke(null, new RErrorEventArgs(exception.Message, exception.StackTrace));
+                Events.OnError(new RErrorEventArgs(exception.Message, exception.StackTrace));
+                OnErrorStatic(new RErrorEventArgs(exception.Message, exception.StackTrace));
                 throw exception;
             }
             catch (Exception ex)
             {
-                Events.DShowError?.Invoke(null, new RErrorEventArgs(ex.Message, ex.StackTrace));
-                ShowError?.Invoke(null, new RErrorEventArgs(ex.Message, ex.StackTrace));
+                Events.OnError(new RErrorEventArgs(ex.Message, ex.StackTrace));
+                OnErrorStatic(new RErrorEventArgs(ex.Message, ex.StackTrace));
                 throw;
             }
 
@@ -637,8 +696,8 @@ namespace RIS.Mathematics
             if (A.Columns != B.Rows)
             {
                 var exception = new Exception("Wrong dimension of matrix!");
-                Events.DShowError?.Invoke(null, new RErrorEventArgs(exception.Message, exception.StackTrace));
-                ShowError?.Invoke(null, new RErrorEventArgs(exception.Message, exception.StackTrace));
+                Events.OnError(new RErrorEventArgs(exception.Message, exception.StackTrace));
+                OnErrorStatic(new RErrorEventArgs(exception.Message, exception.StackTrace));
                 throw exception;
             }
 
@@ -818,8 +877,8 @@ namespace RIS.Mathematics
             if (m1.Columns != m2.Rows)
             {
                 var exception = new Exception("Wrong dimensions of matrix!");
-                Events.DShowError?.Invoke(null, new RErrorEventArgs(exception.Message, exception.StackTrace));
-                ShowError?.Invoke(null, new RErrorEventArgs(exception.Message, exception.StackTrace));
+                Events.OnError(new RErrorEventArgs(exception.Message, exception.StackTrace));
+                OnErrorStatic(new RErrorEventArgs(exception.Message, exception.StackTrace));
                 throw exception;
             }
 
@@ -844,8 +903,8 @@ namespace RIS.Mathematics
             if (m1.Columns != m2.Rows)
             {
                 var exception = new Exception("Wrong dimension of matrix!");
-                Events.DShowError?.Invoke(null, new RErrorEventArgs(exception.Message, exception.StackTrace));
-                ShowError?.Invoke(null, new RErrorEventArgs(exception.Message, exception.StackTrace));
+                Events.OnError(new RErrorEventArgs(exception.Message, exception.StackTrace));
+                OnErrorStatic(new RErrorEventArgs(exception.Message, exception.StackTrace));
                 throw exception;
             }
 
@@ -887,8 +946,8 @@ namespace RIS.Mathematics
             if (m1.Rows != m2.Rows || m1.Columns != m2.Columns)
             {
                 var exception = new Exception("Matrices must have the same dimensions!");
-                Events.DShowError?.Invoke(null, new RErrorEventArgs(exception.Message, exception.StackTrace));
-                ShowError?.Invoke(null, new RErrorEventArgs(exception.Message, exception.StackTrace));
+                Events.OnError(new RErrorEventArgs(exception.Message, exception.StackTrace));
+                OnErrorStatic(new RErrorEventArgs(exception.Message, exception.StackTrace));
                 throw exception;
             }
 

@@ -71,7 +71,7 @@ namespace RIS.Collections.Queues
             }
         }
 
-        public static event EventHandler<RMessageEventArgs> ShowMessage;
+        public static event EventHandler<RInformationEventArgs> Information;
         public static event EventHandler<RErrorEventArgs> ShowError;
 
         public T this[int index]

@@ -7,8 +7,9 @@ namespace RIS.Synchronization
 {
     public sealed class FileLock
     {
-        public static event EventHandler<RMessageEventArgs> ShowMessage;
-        public static event EventHandler<RErrorEventArgs> ShowError;
+        public static event EventHandler<RInformationEventArgs> Information;
+		public static event EventHandler<RWarningEventArgs> Warning;
+		public static event EventHandler<RErrorEventArgs> Error;
 
         private const string LockFileExtension = "rlock";
 

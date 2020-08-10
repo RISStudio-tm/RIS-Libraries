@@ -9,9 +9,29 @@
                 Представляет соединение для работы с подключением к MySQL базе данных. Этот класс не может быть унаследован.
             </summary>
         </member>
-        <member name="P:RIS.Connection.MySQL.MySQLConnection.Connections">
+        <member name="E:RIS.Connection.MySQL.MySQLConnection.Information">
+            <summary>
+                Происходит при получении информации.
+            </summary>
+        </member>
+        <member name="E:RIS.Connection.MySQL.MySQLConnection.Warning">
+            <summary>
+                Происходит при возникновении предупреждения.
+            </summary>
+        </member>
+        <member name="E:RIS.Connection.MySQL.MySQLConnection.Error">
+            <summary>
+                Происходит при возникновении ошибки.
+            </summary>
+        </member>
+        <member name="P:RIS.Connection.MySQL.MySQLConnection.ConnectionsArray">
             <summary>
                 Позволяет получать массив типа <see cref="T:MySql.Data.MySqlClient.MySqlConnection"/> SQL-соединений, которые используются в данном экземпляре класса <see cref="T:RIS.Connection.MySQL.MySQLConnection"/>.
+            </summary>
+        </member>
+        <member name="P:RIS.Connection.MySQL.MySQLConnection.Connections">
+            <summary>
+                Позволяет получать <see cref="T:System.Collections.ObjectModel.ReadOnlyCollection`1"/>, где T это <see cref="T:MySql.Data.MySqlClient.MySqlConnection"/>, SQL-соединений, которые используются в данном экземпляре класса <see cref="T:RIS.Connection.MySQL.MySQLConnection"/>.
             </summary>
         </member>
         <member name="P:RIS.Connection.MySQL.MySQLConnection.Requests">
@@ -24,16 +44,6 @@
                 Позволяет получать состояние подключения к MySQL базе данных.
             </summary>
         </member>
-        <member name="E:RIS.Connection.MySQL.MySQLConnection.ShowMessage">
-            <summary>
-                Используется для вывода информации или предупреждений.
-            </summary>
-        </member>
-        <member name="E:RIS.Connection.MySQL.MySQLConnection.ShowError">
-            <summary>
-                Используется для вывода ошибок.
-            </summary>
-        </member>
         <member name="M:RIS.Connection.MySQL.MySQLConnection.Finalize">
             <summary>
                 Закрывает соединения и освобождает ресурсы.
@@ -43,6 +53,63 @@
             <summary>
                 Инициализирует новый экземпляр класса <see cref="T:RIS.Connection.MySQL.MySQLConnection"/> и его внутренние переменные.
             </summary>
+        </member>
+        <member name="M:RIS.Connection.MySQL.MySQLConnection.OnInformation(RIS.RInformationEventArgs)">
+            <summary>
+                Вызывает Invoke у события Information от имени текущего экземпляра с аргументами <paramref name="e"/>
+            </summary>
+            <param name="e">
+                Аргументы для события Information.
+            </param>
+        </member>
+        <member name="M:RIS.Connection.MySQL.MySQLConnection.OnInformation(System.Object,RIS.RInformationEventArgs)">
+            <summary>
+                Вызывает Invoke у события Information от имени объекта <paramref name="sender"/> с аргументами <paramref name="e"/>
+            </summary>
+            <param name="sender">
+                Объект-отправитель (от имени которого вызывается Invoke)
+            </param>
+            <param name="e">
+                Аргументы для события Information.
+            </param>
+        </member>
+        <member name="M:RIS.Connection.MySQL.MySQLConnection.OnWarning(RIS.RWarningEventArgs)">
+            <summary>
+                Вызывает Invoke у события Warning от имени текущего экземпляра с аргументами <paramref name="e"/>
+            </summary>
+            <param name="e">
+                Аргументы для события Warning.
+            </param>
+        </member>
+        <member name="M:RIS.Connection.MySQL.MySQLConnection.OnWarning(System.Object,RIS.RWarningEventArgs)">
+            <summary>
+                Вызывает Invoke у события Warning от имени объекта <paramref name="sender"/> с аргументами <paramref name="e"/>
+            </summary>
+            <param name="sender">
+                Объект-отправитель (от имени которого вызывается Invoke)
+            </param>
+            <param name="e">
+                Аргументы для события Warning.
+            </param>
+        </member>
+        <member name="M:RIS.Connection.MySQL.MySQLConnection.OnError(RIS.RErrorEventArgs)">
+            <summary>
+                Вызывает Invoke у события Error от имени текущего экземпляра с аргументами <paramref name="e"/>
+            </summary>
+            <param name="e">
+                Аргументы для события Error.
+            </param>
+        </member>
+        <member name="M:RIS.Connection.MySQL.MySQLConnection.OnError(System.Object,RIS.RErrorEventArgs)">
+            <summary>
+                Вызывает Invoke у события Error от имени объекта <paramref name="sender"/> с аргументами <paramref name="e"/>
+            </summary>
+            <param name="sender">
+                Объект-отправитель (от имени которого вызывается Invoke)
+            </param>
+            <param name="e">
+                Аргументы для события Error.
+            </param>
         </member>
         <member name="M:RIS.Connection.MySQL.MySQLConnection.OpenConnection(System.Byte,System.String,System.String,System.String,System.String,System.String)">
             <summary>

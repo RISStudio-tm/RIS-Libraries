@@ -10,8 +10,9 @@ namespace RIS.Logging.Parsing
 {
     public sealed class LogParseInfo
     {
-        public event EventHandler<RMessageEventArgs> ShowMessage;
-        public event EventHandler<RErrorEventArgs> ShowError;
+        public event EventHandler<RInformationEventArgs> Information;
+		public event EventHandler<RWarningEventArgs> Warning;
+		public event EventHandler<RErrorEventArgs> Error;
 
         private StreamReader LogFile { get; set; }
 
@@ -58,13 +59,40 @@ namespace RIS.Logging.Parsing
             parse.Wait();
         }
 
+        public void OnInformation(RInformationEventArgs e)
+        {
+            OnInformation(this, e);
+        }
+        public void OnInformation(object sender, RInformationEventArgs e)
+        {
+            Information?.Invoke(sender, e);
+        }
+
+        public void OnWarning(RWarningEventArgs e)
+        {
+            OnWarning(this, e);
+        }
+        public void OnWarning(object sender, RWarningEventArgs e)
+        {
+            Warning?.Invoke(sender, e);
+        }
+
+        public void OnError(RErrorEventArgs e)
+        {
+            OnError(this, e);
+        }
+        public void OnError(object sender, RErrorEventArgs e)
+        {
+            Error?.Invoke(sender, e);
+        }
+
         private void OpenFile(string path, Encoding encoding)
         {
             if (!File.Exists(path))
             {
                 var exception = new DirectoryNotFoundException("Невозможно открыть лог-файл, так как указанный каталог не существует");
-                Events.DShowError?.Invoke(this, new RErrorEventArgs(exception.Message, exception.StackTrace));
-                ShowError?.Invoke(this, new RErrorEventArgs(exception.Message, exception.StackTrace));
+                Events.OnError(this, new RErrorEventArgs(exception.Message, exception.StackTrace));
+                OnError(new RErrorEventArgs(exception.Message, exception.StackTrace));
                 throw exception;
             }
 
@@ -83,8 +111,8 @@ namespace RIS.Logging.Parsing
             }
             catch (Exception ex)
             {
-                Events.DShowError?.Invoke(this, new RErrorEventArgs(ex.Message, ex.StackTrace));
-                ShowError?.Invoke(this, new RErrorEventArgs(ex.Message, ex.StackTrace));
+                Events.OnError(this, new RErrorEventArgs(ex.Message, ex.StackTrace));
+                OnError(new RErrorEventArgs(ex.Message, ex.StackTrace));
                 throw;
             }
         }
@@ -123,8 +151,8 @@ namespace RIS.Logging.Parsing
                 }
                 catch (IOException ex)
                 {
-                    Events.DShowError?.Invoke(this, new RErrorEventArgs(ex.Message, ex.StackTrace));
-                    ShowError?.Invoke(this, new RErrorEventArgs(ex.Message, ex.StackTrace));
+                    Events.OnError(this, new RErrorEventArgs(ex.Message, ex.StackTrace));
+                    OnError(new RErrorEventArgs(ex.Message, ex.StackTrace));
                     continue;
                 }
 
@@ -141,8 +169,8 @@ namespace RIS.Logging.Parsing
                 }
                 catch (IOException ex)
                 {
-                    Events.DShowError?.Invoke(this, new RErrorEventArgs(ex.Message, ex.StackTrace));
-                    ShowError?.Invoke(this, new RErrorEventArgs(ex.Message, ex.StackTrace));
+                    Events.OnError(this, new RErrorEventArgs(ex.Message, ex.StackTrace));
+                    OnError(new RErrorEventArgs(ex.Message, ex.StackTrace));
                     throw;
                 }
             }

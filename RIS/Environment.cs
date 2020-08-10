@@ -4,16 +4,20 @@ using System.Diagnostics;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
+#if NETFRAMEWORK
 using System.Xml;
+#elif NETCOREAPP
 using Newtonsoft.Json.Linq;
+#endif
 using RIS.Configuration;
 
 namespace RIS
 {
     public static class Environment
     {
-        public static event EventHandler<RMessageEventArgs> ShowMessage;
-        public static event EventHandler<RErrorEventArgs> ShowError;
+        public static event EventHandler<RInformationEventArgs> Information;
+		public static event EventHandler<RWarningEventArgs> Warning;
+		public static event EventHandler<RErrorEventArgs> Error;
 
         public static string ExecAppDirectoryName { get; }
         public static string ExecAppFileName { get; }
@@ -100,6 +104,33 @@ namespace RIS
 
         }
 
+        public static void OnInformation(RInformationEventArgs e)
+        {
+            OnInformation(null, e);
+        }
+        public static void OnInformation(object sender, RInformationEventArgs e)
+        {
+            Information?.Invoke(sender, e);
+        }
+
+        public static void OnWarning(RWarningEventArgs e)
+        {
+            OnWarning(null, e);
+        }
+        public static void OnWarning(object sender, RWarningEventArgs e)
+        {
+            Warning?.Invoke(sender, e);
+        }
+
+        public static void OnError(RErrorEventArgs e)
+        {
+            OnError(null, e);
+        }
+        public static void OnError(object sender, RErrorEventArgs e)
+        {
+            Error?.Invoke(sender, e);
+        }
+
         public static void SetGCLOHThresholdSize(uint sizeInBytes)
         {
 #if NETFRAMEWORK
@@ -125,8 +156,8 @@ namespace RIS
                         var exception =
                             new ConfigurationErrorsException(
                                 "Не удалось изменить значение параметра 'GCLOHThreshold' в AppConfig. Ошибка сохранения файла конфигурации");
-                        Events.DShowError?.Invoke(null, new RErrorEventArgs(exception.Message, exception.StackTrace));
-                        ShowError?.Invoke(null, new RErrorEventArgs(exception.Message, exception.StackTrace));
+                        Events.OnError(new RErrorEventArgs(exception.Message, exception.StackTrace));
+                        OnError(new RErrorEventArgs(exception.Message, exception.StackTrace));
                         throw exception;
                     }
                     catch (Exception ex)
@@ -134,8 +165,8 @@ namespace RIS
                         if (node?.Attributes?["enabled"] != null)
                             node.Attributes["enabled"].Value = _originalGCLOHThresholdSize.ToString();
 
-                        Events.DShowError?.Invoke(null, new RErrorEventArgs(ex.Message, ex.StackTrace));
-                        ShowError?.Invoke(null, new RErrorEventArgs(ex.Message, ex.StackTrace));
+                        Events.OnError(new RErrorEventArgs(ex.Message, ex.StackTrace));
+                        OnError(new RErrorEventArgs(ex.Message, ex.StackTrace));
                         throw;
                     }
                 }
@@ -144,8 +175,8 @@ namespace RIS
                     var exception =
                         new ConfigurationErrorsException(
                             "Не удалось изменить значение параметра 'GCLOHThreshold' в AppConfig. Параметр не найден в файле конфигурации");
-                    Events.DShowError?.Invoke(null, new RErrorEventArgs(exception.Message, exception.StackTrace));
-                    ShowError?.Invoke(null, new RErrorEventArgs(exception.Message, exception.StackTrace));
+                    Events.OnError(new RErrorEventArgs(exception.Message, exception.StackTrace));
+                    OnError(new RErrorEventArgs(exception.Message, exception.StackTrace));
                     throw exception;
                 }
             }
@@ -154,8 +185,8 @@ namespace RIS
                 var exception =
                     new ConfigurationErrorsException(
                         "Не удалось изменить значение параметра 'GCLOHThreshold' в AppConfig. Файл конфигурации не загружен");
-                Events.DShowError?.Invoke(null, new RErrorEventArgs(exception.Message, exception.StackTrace));
-                ShowError?.Invoke(null, new RErrorEventArgs(exception.Message, exception.StackTrace));
+                Events.OnError(new RErrorEventArgs(exception.Message, exception.StackTrace));
+                OnError(new RErrorEventArgs(exception.Message, exception.StackTrace));
                 throw exception;
             }
 
@@ -185,8 +216,8 @@ namespace RIS
                         var exception =
                             new ConfigurationErrorsException(
                                 "Не удалось изменить значение параметра 'System.GC.LOHThreshold' в RuntimeConfig. Ошибка сохранения файла конфигурации");
-                        Events.DShowError?.Invoke(null, new RErrorEventArgs(exception.Message, exception.StackTrace));
-                        ShowError?.Invoke(null, new RErrorEventArgs(exception.Message, exception.StackTrace));
+                        Events.OnError(new RErrorEventArgs(exception.Message, exception.StackTrace));
+                        OnError(new RErrorEventArgs(exception.Message, exception.StackTrace));
                         throw exception;
                     }
                     catch (Exception ex)
@@ -194,8 +225,8 @@ namespace RIS
                         JValue value = new JValue(JValue.CreateString(_originalGCLOHThresholdSize.ToString()));
                         token?.Replace(value);
 
-                        Events.DShowError?.Invoke(null, new RErrorEventArgs(ex.Message, ex.StackTrace));
-                        ShowError?.Invoke(null, new RErrorEventArgs(ex.Message, ex.StackTrace));
+                        Events.OnError(new RErrorEventArgs(ex.Message, ex.StackTrace));
+                        OnError(new RErrorEventArgs(ex.Message, ex.StackTrace));
                         throw;
                     }
                 }
@@ -204,8 +235,8 @@ namespace RIS
                     var exception =
                         new ConfigurationErrorsException(
                             "Не удалось изменить значение параметра 'System.GC.LOHThreshold' в RuntimeConfig. Параметр не найден в файле конфигурации");
-                    Events.DShowError?.Invoke(null, new RErrorEventArgs(exception.Message, exception.StackTrace));
-                    ShowError?.Invoke(null, new RErrorEventArgs(exception.Message, exception.StackTrace));
+                    Events.OnError(new RErrorEventArgs(exception.Message, exception.StackTrace));
+                    OnError(new RErrorEventArgs(exception.Message, exception.StackTrace));
                     throw exception;
                 }
             }
@@ -214,8 +245,8 @@ namespace RIS
                 var exception =
                     new ConfigurationErrorsException(
                         "Не удалось изменить значение параметра 'System.GC.LOHThreshold' в RuntimeConfig. Файл конфигурации не загружен");
-                Events.DShowError?.Invoke(null, new RErrorEventArgs(exception.Message, exception.StackTrace));
-                ShowError?.Invoke(null, new RErrorEventArgs(exception.Message, exception.StackTrace));
+                Events.OnError(new RErrorEventArgs(exception.Message, exception.StackTrace));
+                OnError(new RErrorEventArgs(exception.Message, exception.StackTrace));
                 throw exception;
             }
 
@@ -248,8 +279,8 @@ namespace RIS
             }
             catch (Exception ex)
             {
-                Events.DShowError?.Invoke(null, new RErrorEventArgs(ex.Message, ex.StackTrace));
-                ShowError?.Invoke(null, new RErrorEventArgs(ex.Message, ex.StackTrace));
+                Events.OnError(new RErrorEventArgs(ex.Message, ex.StackTrace));
+                OnError(new RErrorEventArgs(ex.Message, ex.StackTrace));
                 throw;
             }
 
@@ -280,8 +311,8 @@ namespace RIS
             }
             catch (Exception ex)
             {
-                Events.DShowError?.Invoke(null, new RErrorEventArgs(ex.Message, ex.StackTrace));
-                ShowError?.Invoke(null, new RErrorEventArgs(ex.Message, ex.StackTrace));
+                Events.OnError(new RErrorEventArgs(ex.Message, ex.StackTrace));
+                OnError(new RErrorEventArgs(ex.Message, ex.StackTrace));
                 throw;
             }
 

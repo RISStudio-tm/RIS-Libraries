@@ -8,8 +8,9 @@ namespace RIS.Cryptography.Hash
     {
         public static Regex HashInfoRegex { get; } = new Regex(@"^\$(?<version>2[a-z]{1}?)\$(?<work_factor>\d\d?)\$(?<hash>[A-Za-z0-9\./]{53})$", RegexOptions.Singleline);
 
-        public event EventHandler<RMessageEventArgs> ShowMessage;
-        public event EventHandler<RErrorEventArgs> ShowError;
+        public event EventHandler<RInformationEventArgs> Information;
+		public event EventHandler<RWarningEventArgs> Warning;
+		public event EventHandler<RErrorEventArgs> Error;
 
         public string Version { get; private set; }
         private int _workFactor;
@@ -42,14 +43,41 @@ namespace RIS.Cryptography.Hash
             catch (global::BCrypt.Net.HashInformationException)
             {
                 var exception = new FormatException($"Invalid hash format in metadata[{ this.GetType().FullName }]");
-                Events.DShowError?.Invoke(this, new RErrorEventArgs(exception.Message, exception.StackTrace));
-                ShowError?.Invoke(this, new RErrorEventArgs(exception.Message, exception.StackTrace));
+                Events.OnError(this, new RErrorEventArgs(exception.Message, exception.StackTrace));
+                OnError(new RErrorEventArgs(exception.Message, exception.StackTrace));
                 throw exception;
             }
 
             Version = hashInfo.Version;
             WorkFactor = Convert.ToInt32(hashInfo.WorkFactor);
             Hash = hashInfo.RawHash;
+        }
+
+        public void OnInformation(RInformationEventArgs e)
+        {
+            OnInformation(this, e);
+        }
+        public void OnInformation(object sender, RInformationEventArgs e)
+        {
+            Information?.Invoke(sender, e);
+        }
+
+        public void OnWarning(RWarningEventArgs e)
+        {
+            OnWarning(this, e);
+        }
+        public void OnWarning(object sender, RWarningEventArgs e)
+        {
+            Warning?.Invoke(sender, e);
+        }
+
+        public void OnError(RErrorEventArgs e)
+        {
+            OnError(this, e);
+        }
+        public void OnError(object sender, RErrorEventArgs e)
+        {
+            Error?.Invoke(sender, e);
         }
 
         public override string ToString()
@@ -62,8 +90,9 @@ namespace RIS.Cryptography.Hash
     {
         public static Regex HashInfoRegex { get; } = new Regex(@"^\$(?<type>argon2[a-z]{0,2}?)\$v=(?<version>\d+?)\$m=(?<memory_size>\d+?),t=(?<iterations>\d+?),p=(?<degree_of_parallelism>\d+?)\$(?<salt>[A-Za-z0-9/+]+)\$(?<hash>[A-Za-z0-9/+]+)$", RegexOptions.Singleline);
 
-        public event EventHandler<RMessageEventArgs> ShowMessage;
-        public event EventHandler<RErrorEventArgs> ShowError;
+        public event EventHandler<RInformationEventArgs> Information;
+		public event EventHandler<RWarningEventArgs> Warning;
+		public event EventHandler<RErrorEventArgs> Error;
 
         public Argon2Type Type { get; private set; }
         public int Version { get; private set; }
@@ -195,11 +224,11 @@ namespace RIS.Cryptography.Hash
             if (!hashInfo.Success)
             {
                 var exception = new FormatException($"Invalid hash format in metadata[{ this.GetType().FullName }]");
-                Events.DShowError?.Invoke(this, new RErrorEventArgs(exception.Message, exception.StackTrace));
-                ShowError?.Invoke(this, new RErrorEventArgs(exception.Message, exception.StackTrace));
+                Events.OnError(this, new RErrorEventArgs(exception.Message, exception.StackTrace));
+                OnError(new RErrorEventArgs(exception.Message, exception.StackTrace));
                 throw exception;
             }
-            
+
             Enum.TryParse(hashInfo.Groups["type"].Value, true, out Argon2Type type);
             Type = type;
             Version = Convert.ToInt32(hashInfo.Groups["version"].Value);
@@ -208,6 +237,33 @@ namespace RIS.Cryptography.Hash
             DegreeOfParallelism = Convert.ToInt32(hashInfo.Groups["degree_of_parallelism"].Value);
             Salt = Base64.RestorePadding(hashInfo.Groups["salt"].Value);
             Hash = Base64.RestorePadding(hashInfo.Groups["hash"].Value);
+        }
+
+        public void OnInformation(RInformationEventArgs e)
+        {
+            OnInformation(this, e);
+        }
+        public void OnInformation(object sender, RInformationEventArgs e)
+        {
+            Information?.Invoke(sender, e);
+        }
+
+        public void OnWarning(RWarningEventArgs e)
+        {
+            OnWarning(this, e);
+        }
+        public void OnWarning(object sender, RWarningEventArgs e)
+        {
+            Warning?.Invoke(sender, e);
+        }
+
+        public void OnError(RErrorEventArgs e)
+        {
+            OnError(this, e);
+        }
+        public void OnError(object sender, RErrorEventArgs e)
+        {
+            Error?.Invoke(sender, e);
         }
 
         public override string ToString()

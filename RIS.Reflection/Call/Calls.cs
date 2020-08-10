@@ -6,8 +6,37 @@ namespace RIS.Reflection.Call
 {
     public static class Calls
     {
-        public static event EventHandler<RMessageEventArgs> ShowMessage;
-        public static event EventHandler<RErrorEventArgs> ShowError;
+        public static event EventHandler<RInformationEventArgs> Information;
+		public static event EventHandler<RWarningEventArgs> Warning;
+		public static event EventHandler<RErrorEventArgs> Error;
+
+        public static void OnInformation(RInformationEventArgs e)
+        {
+            OnInformation(null, e);
+        }
+        public static void OnInformation(object sender, RInformationEventArgs e)
+        {
+            Information?.Invoke(sender, e);
+        }
+
+        public static void OnWarning(RWarningEventArgs e)
+        {
+            OnWarning(null, e);
+        }
+        public static void OnWarning(object sender, RWarningEventArgs e)
+        {
+            Warning?.Invoke(sender, e);
+        }
+
+        public static void OnError(RErrorEventArgs e)
+        {
+            OnError(null, e);
+        }
+        public static void OnError(object sender, RErrorEventArgs e)
+        {
+            Error?.Invoke(sender, e);
+        }
+
 
         public static void CallVoidMethod<TInstance>(string nameMethod)
             where TInstance : class, new()
@@ -28,8 +57,8 @@ namespace RIS.Reflection.Call
                 if (methodInfo == null)
                 {
                     var exception = new Exception($"Метод с указанным именем и параметрами не найден");
-                    Events.DShowError?.Invoke(null, new RErrorEventArgs(exception.Message, exception.StackTrace));
-                    ShowError?.Invoke(null, new RErrorEventArgs(exception.Message, exception.StackTrace));
+                    Events.OnError(new RErrorEventArgs(exception.Message, exception.StackTrace));
+                    OnError(new RErrorEventArgs(exception.Message, exception.StackTrace));
                     throw exception;
                 }
 
@@ -41,14 +70,14 @@ namespace RIS.Reflection.Call
             }
             catch (ArgumentNullException ex)
             {
-                Events.DShowError?.Invoke(null, new RErrorEventArgs(ex.Message, ex.StackTrace));
-                ShowError?.Invoke(null, new RErrorEventArgs(ex.Message, ex.StackTrace));
+                Events.OnError(new RErrorEventArgs(ex.Message, ex.StackTrace));
+                OnError(new RErrorEventArgs(ex.Message, ex.StackTrace));
                 throw;
             }
             catch (Exception ex)
             {
-                Events.DShowError?.Invoke(null, new RErrorEventArgs(ex.Message, ex.StackTrace));
-                ShowError?.Invoke(null, new RErrorEventArgs(ex.Message, ex.StackTrace));
+                Events.OnError(new RErrorEventArgs(ex.Message, ex.StackTrace));
+                OnError(new RErrorEventArgs(ex.Message, ex.StackTrace));
                 throw;
             }
         }
@@ -82,8 +111,8 @@ namespace RIS.Reflection.Call
                 if (methodInfo == null)
                 {
                     var exception = new Exception($"Метод с указанным именем и параметрами не найден");
-                    Events.DShowError?.Invoke(null, new RErrorEventArgs(exception.Message, exception.StackTrace));
-                    ShowError?.Invoke(null, new RErrorEventArgs(exception.Message, exception.StackTrace));
+                    Events.OnError(new RErrorEventArgs(exception.Message, exception.StackTrace));
+                    OnError(new RErrorEventArgs(exception.Message, exception.StackTrace));
                     throw exception;
                 }
 
@@ -96,14 +125,14 @@ namespace RIS.Reflection.Call
             }
             catch (ArgumentNullException ex)
             {
-                Events.DShowError?.Invoke(null, new RErrorEventArgs(ex.Message, ex.StackTrace));
-                ShowError?.Invoke(null, new RErrorEventArgs(ex.Message, ex.StackTrace));
+                Events.OnError(new RErrorEventArgs(ex.Message, ex.StackTrace));
+                OnError(new RErrorEventArgs(ex.Message, ex.StackTrace));
                 throw;
             }
             catch (Exception ex)
             {
-                Events.DShowError?.Invoke(null, new RErrorEventArgs(ex.Message, ex.StackTrace));
-                ShowError?.Invoke(null, new RErrorEventArgs(ex.Message, ex.StackTrace));
+                Events.OnError(new RErrorEventArgs(ex.Message, ex.StackTrace));
+                OnError(new RErrorEventArgs(ex.Message, ex.StackTrace));
                 throw;
             }
         }
@@ -132,8 +161,8 @@ namespace RIS.Reflection.Call
                 if (methodInfo == null)
                 {
                     var exception = new Exception($"Метод с указанным именем и параметрами не найден");
-                    Events.DShowError?.Invoke(null, new RErrorEventArgs(exception.Message, exception.StackTrace));
-                    ShowError?.Invoke(null, new RErrorEventArgs(exception.Message, exception.StackTrace));
+                    Events.OnError(new RErrorEventArgs(exception.Message, exception.StackTrace));
+                    OnError(new RErrorEventArgs(exception.Message, exception.StackTrace));
                     throw exception;
                 }
 
@@ -145,14 +174,14 @@ namespace RIS.Reflection.Call
             }
             catch (ArgumentNullException ex)
             {
-                Events.DShowError?.Invoke(null, new RErrorEventArgs(ex.Message, ex.StackTrace));
-                ShowError?.Invoke(null, new RErrorEventArgs(ex.Message, ex.StackTrace));
+                Events.OnError(new RErrorEventArgs(ex.Message, ex.StackTrace));
+                OnError(new RErrorEventArgs(ex.Message, ex.StackTrace));
                 throw;
             }
             catch (Exception ex)
             {
-                Events.DShowError?.Invoke(null, new RErrorEventArgs(ex.Message, ex.StackTrace));
-                ShowError?.Invoke(null, new RErrorEventArgs(ex.Message, ex.StackTrace));
+                Events.OnError(new RErrorEventArgs(ex.Message, ex.StackTrace));
+                OnError(new RErrorEventArgs(ex.Message, ex.StackTrace));
                 throw;
             }
         }
@@ -201,8 +230,8 @@ namespace RIS.Reflection.Call
                 if (methodInfo == null)
                 {
                     var exception = new Exception($"Метод с указанным именем и параметрами не найден");
-                    Events.DShowError?.Invoke(null, new RErrorEventArgs(exception.Message, exception.StackTrace));
-                    ShowError?.Invoke(null, new RErrorEventArgs(exception.Message, exception.StackTrace));
+                    Events.OnError(new RErrorEventArgs(exception.Message, exception.StackTrace));
+                    OnError(new RErrorEventArgs(exception.Message, exception.StackTrace));
                     throw exception;
                 }
 
@@ -215,14 +244,14 @@ namespace RIS.Reflection.Call
             }
             catch (ArgumentNullException ex)
             {
-                Events.DShowError?.Invoke(null, new RErrorEventArgs(ex.Message, ex.StackTrace));
-                ShowError?.Invoke(null, new RErrorEventArgs(ex.Message, ex.StackTrace));
+                Events.OnError(new RErrorEventArgs(ex.Message, ex.StackTrace));
+                OnError(new RErrorEventArgs(ex.Message, ex.StackTrace));
                 throw;
             }
             catch (Exception ex)
             {
-                Events.DShowError?.Invoke(null, new RErrorEventArgs(ex.Message, ex.StackTrace));
-                ShowError?.Invoke(null, new RErrorEventArgs(ex.Message, ex.StackTrace));
+                Events.OnError(new RErrorEventArgs(ex.Message, ex.StackTrace));
+                OnError(new RErrorEventArgs(ex.Message, ex.StackTrace));
                 throw;
             }
         }
@@ -247,8 +276,8 @@ namespace RIS.Reflection.Call
                 if (methodInfo == null)
                 {
                     var exception = new Exception($"Метод с указанным именем и параметрами не найден");
-                    Events.DShowError?.Invoke(null, new RErrorEventArgs(exception.Message, exception.StackTrace));
-                    ShowError?.Invoke(null, new RErrorEventArgs(exception.Message, exception.StackTrace));
+                    Events.OnError(new RErrorEventArgs(exception.Message, exception.StackTrace));
+                    OnError(new RErrorEventArgs(exception.Message, exception.StackTrace));
                     throw exception;
                 }
 
@@ -259,14 +288,14 @@ namespace RIS.Reflection.Call
             }
             catch (ArgumentNullException ex)
             {
-                Events.DShowError?.Invoke(null, new RErrorEventArgs(ex.Message, ex.StackTrace));
-                ShowError?.Invoke(null, new RErrorEventArgs(ex.Message, ex.StackTrace));
+                Events.OnError(new RErrorEventArgs(ex.Message, ex.StackTrace));
+                OnError(new RErrorEventArgs(ex.Message, ex.StackTrace));
                 throw;
             }
             catch (Exception ex)
             {
-                Events.DShowError?.Invoke(null, new RErrorEventArgs(ex.Message, ex.StackTrace));
-                ShowError?.Invoke(null, new RErrorEventArgs(ex.Message, ex.StackTrace));
+                Events.OnError(new RErrorEventArgs(ex.Message, ex.StackTrace));
+                OnError(new RErrorEventArgs(ex.Message, ex.StackTrace));
                 throw;
             }
         }
@@ -300,8 +329,8 @@ namespace RIS.Reflection.Call
                 if (methodInfo == null)
                 {
                     var exception = new Exception($"Метод с указанным именем и параметрами не найден");
-                    Events.DShowError?.Invoke(null, new RErrorEventArgs(exception.Message, exception.StackTrace));
-                    ShowError?.Invoke(null, new RErrorEventArgs(exception.Message, exception.StackTrace));
+                    Events.OnError(new RErrorEventArgs(exception.Message, exception.StackTrace));
+                    OnError(new RErrorEventArgs(exception.Message, exception.StackTrace));
                     throw exception;
                 }
 
@@ -313,14 +342,14 @@ namespace RIS.Reflection.Call
             }
             catch (ArgumentNullException ex)
             {
-                Events.DShowError?.Invoke(null, new RErrorEventArgs(ex.Message, ex.StackTrace));
-                ShowError?.Invoke(null, new RErrorEventArgs(ex.Message, ex.StackTrace));
+                Events.OnError(new RErrorEventArgs(ex.Message, ex.StackTrace));
+                OnError(new RErrorEventArgs(ex.Message, ex.StackTrace));
                 throw;
             }
             catch (Exception ex)
             {
-                Events.DShowError?.Invoke(null, new RErrorEventArgs(ex.Message, ex.StackTrace));
-                ShowError?.Invoke(null, new RErrorEventArgs(ex.Message, ex.StackTrace));
+                Events.OnError(new RErrorEventArgs(ex.Message, ex.StackTrace));
+                OnError(new RErrorEventArgs(ex.Message, ex.StackTrace));
                 throw;
             }
         }
@@ -349,8 +378,8 @@ namespace RIS.Reflection.Call
                 if (methodInfo == null)
                 {
                     var exception = new Exception($"Метод с указанным именем и параметрами не найден");
-                    Events.DShowError?.Invoke(null, new RErrorEventArgs(exception.Message, exception.StackTrace));
-                    ShowError?.Invoke(null, new RErrorEventArgs(exception.Message, exception.StackTrace));
+                    Events.OnError(new RErrorEventArgs(exception.Message, exception.StackTrace));
+                    OnError(new RErrorEventArgs(exception.Message, exception.StackTrace));
                     throw exception;
                 }
 
@@ -361,14 +390,14 @@ namespace RIS.Reflection.Call
             }
             catch (ArgumentNullException ex)
             {
-                Events.DShowError?.Invoke(null, new RErrorEventArgs(ex.Message, ex.StackTrace));
-                ShowError?.Invoke(null, new RErrorEventArgs(ex.Message, ex.StackTrace));
+                Events.OnError(new RErrorEventArgs(ex.Message, ex.StackTrace));
+                OnError(new RErrorEventArgs(ex.Message, ex.StackTrace));
                 throw;
             }
             catch (Exception ex)
             {
-                Events.DShowError?.Invoke(null, new RErrorEventArgs(ex.Message, ex.StackTrace));
-                ShowError?.Invoke(null, new RErrorEventArgs(ex.Message, ex.StackTrace));
+                Events.OnError(new RErrorEventArgs(ex.Message, ex.StackTrace));
+                OnError(new RErrorEventArgs(ex.Message, ex.StackTrace));
                 throw;
             }
         }
@@ -417,8 +446,8 @@ namespace RIS.Reflection.Call
                 if (methodInfo == null)
                 {
                     var exception = new Exception($"Метод с указанным именем и параметрами не найден");
-                    Events.DShowError?.Invoke(null, new RErrorEventArgs(exception.Message, exception.StackTrace));
-                    ShowError?.Invoke(null, new RErrorEventArgs(exception.Message, exception.StackTrace));
+                    Events.OnError(new RErrorEventArgs(exception.Message, exception.StackTrace));
+                    OnError(new RErrorEventArgs(exception.Message, exception.StackTrace));
                     throw exception;
                 }
 
@@ -430,14 +459,14 @@ namespace RIS.Reflection.Call
             }
             catch (ArgumentNullException ex)
             {
-                Events.DShowError?.Invoke(null, new RErrorEventArgs(ex.Message, ex.StackTrace));
-                ShowError?.Invoke(null, new RErrorEventArgs(ex.Message, ex.StackTrace));
+                Events.OnError(new RErrorEventArgs(ex.Message, ex.StackTrace));
+                OnError(new RErrorEventArgs(ex.Message, ex.StackTrace));
                 throw;
             }
             catch (Exception ex)
             {
-                Events.DShowError?.Invoke(null, new RErrorEventArgs(ex.Message, ex.StackTrace));
-                ShowError?.Invoke(null, new RErrorEventArgs(ex.Message, ex.StackTrace));
+                Events.OnError(new RErrorEventArgs(ex.Message, ex.StackTrace));
+                OnError(new RErrorEventArgs(ex.Message, ex.StackTrace));
                 throw;
             }
         }
@@ -446,8 +475,9 @@ namespace RIS.Reflection.Call
     public sealed class Calls<TInstance>
         where TInstance : class, new()
     {
-        public event EventHandler<RMessageEventArgs> ShowMessage;
-        public event EventHandler<RErrorEventArgs> ShowError;
+        public event EventHandler<RInformationEventArgs> Information;
+		public event EventHandler<RWarningEventArgs> Warning;
+		public event EventHandler<RErrorEventArgs> Error;
 
         private readonly Type _instanceType;
         private readonly NewExpression _instance;
@@ -456,6 +486,33 @@ namespace RIS.Reflection.Call
         {
             _instanceType = typeof(TInstance);
             _instance = Expression.New(_instanceType);
+        }
+
+        public void OnInformation(RInformationEventArgs e)
+        {
+            OnInformation(this, e);
+        }
+        public void OnInformation(object sender, RInformationEventArgs e)
+        {
+            Information?.Invoke(sender, e);
+        }
+
+        public void OnWarning(RWarningEventArgs e)
+        {
+            OnWarning(this, e);
+        }
+        public void OnWarning(object sender, RWarningEventArgs e)
+        {
+            Warning?.Invoke(sender, e);
+        }
+
+        public void OnError(RErrorEventArgs e)
+        {
+            OnError(this, e);
+        }
+        public void OnError(object sender, RErrorEventArgs e)
+        {
+            Error?.Invoke(sender, e);
         }
 
 
@@ -475,8 +532,8 @@ namespace RIS.Reflection.Call
                 if (methodInfo == null)
                 {
                     var exception = new Exception($"Метод с указанным именем и параметрами не найден");
-                    Events.DShowError?.Invoke(null, new RErrorEventArgs(exception.Message, exception.StackTrace));
-                    ShowError?.Invoke(null, new RErrorEventArgs(exception.Message, exception.StackTrace));
+                    Events.OnError(this, new RErrorEventArgs(exception.Message, exception.StackTrace));
+                    OnError(new RErrorEventArgs(exception.Message, exception.StackTrace));
                     throw exception;
                 }
 
@@ -487,14 +544,14 @@ namespace RIS.Reflection.Call
             }
             catch (ArgumentNullException ex)
             {
-                Events.DShowError?.Invoke(null, new RErrorEventArgs(ex.Message, ex.StackTrace));
-                ShowError?.Invoke(null, new RErrorEventArgs(ex.Message, ex.StackTrace));
+                Events.OnError(this, new RErrorEventArgs(ex.Message, ex.StackTrace));
+                OnError(new RErrorEventArgs(ex.Message, ex.StackTrace));
                 throw;
             }
             catch (Exception ex)
             {
-                Events.DShowError?.Invoke(null, new RErrorEventArgs(ex.Message, ex.StackTrace));
-                ShowError?.Invoke(null, new RErrorEventArgs(ex.Message, ex.StackTrace));
+                Events.OnError(this, new RErrorEventArgs(ex.Message, ex.StackTrace));
+                OnError(new RErrorEventArgs(ex.Message, ex.StackTrace));
                 throw;
             }
         }
@@ -524,8 +581,8 @@ namespace RIS.Reflection.Call
                 if (methodInfo == null)
                 {
                     var exception = new Exception($"Метод с указанным именем и параметрами не найден");
-                    Events.DShowError?.Invoke(this, new RErrorEventArgs(exception.Message, exception.StackTrace));
-                    ShowError?.Invoke(this, new RErrorEventArgs(exception.Message, exception.StackTrace));
+                    Events.OnError(this, new RErrorEventArgs(exception.Message, exception.StackTrace));
+                    OnError(new RErrorEventArgs(exception.Message, exception.StackTrace));
                     throw exception;
                 }
 
@@ -537,14 +594,14 @@ namespace RIS.Reflection.Call
             }
             catch (ArgumentNullException ex)
             {
-                Events.DShowError?.Invoke(this, new RErrorEventArgs(ex.Message, ex.StackTrace));
-                ShowError?.Invoke(this, new RErrorEventArgs(ex.Message, ex.StackTrace));
+                Events.OnError(this, new RErrorEventArgs(ex.Message, ex.StackTrace));
+                OnError(new RErrorEventArgs(ex.Message, ex.StackTrace));
                 throw;
             }
             catch (Exception ex)
             {
-                Events.DShowError?.Invoke(this, new RErrorEventArgs(ex.Message, ex.StackTrace));
-                ShowError?.Invoke(this, new RErrorEventArgs(ex.Message, ex.StackTrace));
+                Events.OnError(this, new RErrorEventArgs(ex.Message, ex.StackTrace));
+                OnError(new RErrorEventArgs(ex.Message, ex.StackTrace));
                 throw;
             }
         }
@@ -569,8 +626,8 @@ namespace RIS.Reflection.Call
                 if (methodInfo == null)
                 {
                     var exception = new Exception($"Метод с указанным именем и параметрами не найден");
-                    Events.DShowError?.Invoke(null, new RErrorEventArgs(exception.Message, exception.StackTrace));
-                    ShowError?.Invoke(null, new RErrorEventArgs(exception.Message, exception.StackTrace));
+                    Events.OnError(this, new RErrorEventArgs(exception.Message, exception.StackTrace));
+                    OnError(new RErrorEventArgs(exception.Message, exception.StackTrace));
                     throw exception;
                 }
 
@@ -581,14 +638,14 @@ namespace RIS.Reflection.Call
             }
             catch (ArgumentNullException ex)
             {
-                Events.DShowError?.Invoke(null, new RErrorEventArgs(ex.Message, ex.StackTrace));
-                ShowError?.Invoke(null, new RErrorEventArgs(ex.Message, ex.StackTrace));
+                Events.OnError(this, new RErrorEventArgs(ex.Message, ex.StackTrace));
+                OnError(new RErrorEventArgs(ex.Message, ex.StackTrace));
                 throw;
             }
             catch (Exception ex)
             {
-                Events.DShowError?.Invoke(null, new RErrorEventArgs(ex.Message, ex.StackTrace));
-                ShowError?.Invoke(null, new RErrorEventArgs(ex.Message, ex.StackTrace));
+                Events.OnError(this, new RErrorEventArgs(ex.Message, ex.StackTrace));
+                OnError(new RErrorEventArgs(ex.Message, ex.StackTrace));
                 throw;
             }
         }
@@ -630,8 +687,8 @@ namespace RIS.Reflection.Call
                 if (methodInfo == null)
                 {
                     var exception = new Exception($"Метод с указанным именем и параметрами не найден");
-                    Events.DShowError?.Invoke(this, new RErrorEventArgs(exception.Message, exception.StackTrace));
-                    ShowError?.Invoke(this, new RErrorEventArgs(exception.Message, exception.StackTrace));
+                    Events.OnError(this, new RErrorEventArgs(exception.Message, exception.StackTrace));
+                    OnError(new RErrorEventArgs(exception.Message, exception.StackTrace));
                     throw exception;
                 }
 
@@ -643,14 +700,14 @@ namespace RIS.Reflection.Call
             }
             catch (ArgumentNullException ex)
             {
-                Events.DShowError?.Invoke(this, new RErrorEventArgs(ex.Message, ex.StackTrace));
-                ShowError?.Invoke(this, new RErrorEventArgs(ex.Message, ex.StackTrace));
+                Events.OnError(this, new RErrorEventArgs(ex.Message, ex.StackTrace));
+                OnError(new RErrorEventArgs(ex.Message, ex.StackTrace));
                 throw;
             }
             catch (Exception ex)
             {
-                Events.DShowError?.Invoke(this, new RErrorEventArgs(ex.Message, ex.StackTrace));
-                ShowError?.Invoke(this, new RErrorEventArgs(ex.Message, ex.StackTrace));
+                Events.OnError(this, new RErrorEventArgs(ex.Message, ex.StackTrace));
+                OnError(new RErrorEventArgs(ex.Message, ex.StackTrace));
                 throw;
             }
         }
@@ -672,8 +729,8 @@ namespace RIS.Reflection.Call
                 if (methodInfo == null)
                 {
                     var exception = new Exception($"Метод с указанным именем и параметрами не найден");
-                    Events.DShowError?.Invoke(null, new RErrorEventArgs(exception.Message, exception.StackTrace));
-                    ShowError?.Invoke(null, new RErrorEventArgs(exception.Message, exception.StackTrace));
+                    Events.OnError(this, new RErrorEventArgs(exception.Message, exception.StackTrace));
+                    OnError(new RErrorEventArgs(exception.Message, exception.StackTrace));
                     throw exception;
                 }
 
@@ -684,14 +741,14 @@ namespace RIS.Reflection.Call
             }
             catch (ArgumentNullException ex)
             {
-                Events.DShowError?.Invoke(null, new RErrorEventArgs(ex.Message, ex.StackTrace));
-                ShowError?.Invoke(null, new RErrorEventArgs(ex.Message, ex.StackTrace));
+                Events.OnError(this, new RErrorEventArgs(ex.Message, ex.StackTrace));
+                OnError(new RErrorEventArgs(ex.Message, ex.StackTrace));
                 throw;
             }
             catch (Exception ex)
             {
-                Events.DShowError?.Invoke(null, new RErrorEventArgs(ex.Message, ex.StackTrace));
-                ShowError?.Invoke(null, new RErrorEventArgs(ex.Message, ex.StackTrace));
+                Events.OnError(this, new RErrorEventArgs(ex.Message, ex.StackTrace));
+                OnError(new RErrorEventArgs(ex.Message, ex.StackTrace));
                 throw;
             }
         }
@@ -721,8 +778,8 @@ namespace RIS.Reflection.Call
                 if (methodInfo == null)
                 {
                     var exception = new Exception($"Метод с указанным именем и параметрами не найден");
-                    Events.DShowError?.Invoke(this, new RErrorEventArgs(exception.Message, exception.StackTrace));
-                    ShowError?.Invoke(this, new RErrorEventArgs(exception.Message, exception.StackTrace));
+                    Events.OnError(this, new RErrorEventArgs(exception.Message, exception.StackTrace));
+                    OnError(new RErrorEventArgs(exception.Message, exception.StackTrace));
                     throw exception;
                 }
 
@@ -734,14 +791,14 @@ namespace RIS.Reflection.Call
             }
             catch (ArgumentNullException ex)
             {
-                Events.DShowError?.Invoke(this, new RErrorEventArgs(ex.Message, ex.StackTrace));
-                ShowError?.Invoke(this, new RErrorEventArgs(ex.Message, ex.StackTrace));
+                Events.OnError(this, new RErrorEventArgs(ex.Message, ex.StackTrace));
+                OnError(new RErrorEventArgs(ex.Message, ex.StackTrace));
                 throw;
             }
             catch (Exception ex)
             {
-                Events.DShowError?.Invoke(this, new RErrorEventArgs(ex.Message, ex.StackTrace));
-                ShowError?.Invoke(this, new RErrorEventArgs(ex.Message, ex.StackTrace));
+                Events.OnError(this, new RErrorEventArgs(ex.Message, ex.StackTrace));
+                OnError(new RErrorEventArgs(ex.Message, ex.StackTrace));
                 throw;
             }
         }
@@ -766,8 +823,8 @@ namespace RIS.Reflection.Call
                 if (methodInfo == null)
                 {
                     var exception = new Exception($"Метод с указанным именем и параметрами не найден");
-                    Events.DShowError?.Invoke(null, new RErrorEventArgs(exception.Message, exception.StackTrace));
-                    ShowError?.Invoke(null, new RErrorEventArgs(exception.Message, exception.StackTrace));
+                    Events.OnError(this, new RErrorEventArgs(exception.Message, exception.StackTrace));
+                    OnError(new RErrorEventArgs(exception.Message, exception.StackTrace));
                     throw exception;
                 }
 
@@ -778,14 +835,14 @@ namespace RIS.Reflection.Call
             }
             catch (ArgumentNullException ex)
             {
-                Events.DShowError?.Invoke(null, new RErrorEventArgs(ex.Message, ex.StackTrace));
-                ShowError?.Invoke(null, new RErrorEventArgs(ex.Message, ex.StackTrace));
+                Events.OnError(this, new RErrorEventArgs(ex.Message, ex.StackTrace));
+                OnError(new RErrorEventArgs(ex.Message, ex.StackTrace));
                 throw;
             }
             catch (Exception ex)
             {
-                Events.DShowError?.Invoke(null, new RErrorEventArgs(ex.Message, ex.StackTrace));
-                ShowError?.Invoke(null, new RErrorEventArgs(ex.Message, ex.StackTrace));
+                Events.OnError(this, new RErrorEventArgs(ex.Message, ex.StackTrace));
+                OnError(new RErrorEventArgs(ex.Message, ex.StackTrace));
                 throw;
             }
         }
@@ -827,8 +884,8 @@ namespace RIS.Reflection.Call
                 if (methodInfo == null)
                 {
                     var exception = new Exception($"Метод с указанным именем и параметрами не найден");
-                    Events.DShowError?.Invoke(this, new RErrorEventArgs(exception.Message, exception.StackTrace));
-                    ShowError?.Invoke(this, new RErrorEventArgs(exception.Message, exception.StackTrace));
+                    Events.OnError(this, new RErrorEventArgs(exception.Message, exception.StackTrace));
+                    OnError(new RErrorEventArgs(exception.Message, exception.StackTrace));
                     throw exception;
                 }
 
@@ -840,14 +897,14 @@ namespace RIS.Reflection.Call
             }
             catch (ArgumentNullException ex)
             {
-                Events.DShowError?.Invoke(this, new RErrorEventArgs(ex.Message, ex.StackTrace));
-                ShowError?.Invoke(this, new RErrorEventArgs(ex.Message, ex.StackTrace));
+                Events.OnError(this, new RErrorEventArgs(ex.Message, ex.StackTrace));
+                OnError(new RErrorEventArgs(ex.Message, ex.StackTrace));
                 throw;
             }
             catch (Exception ex)
             {
-                Events.DShowError?.Invoke(this, new RErrorEventArgs(ex.Message, ex.StackTrace));
-                ShowError?.Invoke(this, new RErrorEventArgs(ex.Message, ex.StackTrace));
+                Events.OnError(this, new RErrorEventArgs(ex.Message, ex.StackTrace));
+                OnError(new RErrorEventArgs(ex.Message, ex.StackTrace));
                 throw;
             }
         }

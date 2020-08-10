@@ -1,15 +1,17 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Reflection;
 using System.Text;
 
 namespace RIS.Collections.Nestable
 {
     public static class NestableCollectionHelper
     {
+        public static event EventHandler<RInformationEventArgs> Information;
+        public static event EventHandler<RWarningEventArgs> Warning;
+        public static event EventHandler<RErrorEventArgs> Error;
+
         private static Dictionary<string, NestableCollectionType> CollectionsTypes { get; }
         private static Dictionary<NestableCollectionType, Type> CollectionsInfo { get; }
-        //private static Dictionary<NestableCollectionType, (Type Type, ConstructorInfo CtorEmpty, ConstructorInfo CtorLengthParam)> CollectionsInfo { get; }
 
         static NestableCollectionHelper()
         {
@@ -17,7 +19,6 @@ namespace RIS.Collections.Nestable
 
             CollectionsTypes = new Dictionary<string, NestableCollectionType>(names.Length);
             CollectionsInfo = new Dictionary<NestableCollectionType, Type>(names.Length);
-            //CollectionsInfo = new Dictionary<NestableCollectionType, (Type Type, ConstructorInfo CtorEmpty, ConstructorInfo CtorLengthParam)>(names.Length);
 
             for (int i = 0; i < names.Length; ++i)
             {
@@ -40,16 +41,34 @@ namespace RIS.Collections.Nestable
                     collectionType,
                     type
                     );
-
-                //CollectionsInfo.Add(
-                //    collectionType,
-                //    (
-                //        type,
-                //        type.GetConstructor(Array.Empty<Type>()),
-                //        type.GetConstructor(new Type[] { typeof(int) })
-                //    )
-                //    );
             }
+        }
+
+        public static void OnInformation(RInformationEventArgs e)
+        {
+            OnInformation(null, e);
+        }
+        public static void OnInformation(object sender, RInformationEventArgs e)
+        {
+            Information?.Invoke(sender, e);
+        }
+
+        public static void OnWarning(RWarningEventArgs e)
+        {
+            OnWarning(null, e);
+        }
+        public static void OnWarning(object sender, RWarningEventArgs e)
+        {
+            Warning?.Invoke(sender, e);
+        }
+
+        public static void OnError(RErrorEventArgs e)
+        {
+            OnError(null, e);
+        }
+        public static void OnError(object sender, RErrorEventArgs e)
+        {
+            Error?.Invoke(sender, e);
         }
 
         public static (INestableCollection<TValue> Collection, CollectionGeneralType GeneralType) CreateCollectionByType<TValue>(
@@ -60,11 +79,6 @@ namespace RIS.Collections.Nestable
             if (!CollectionsInfo.ContainsKey(type))
             {
                 return (null, CollectionGeneralType.Unknown);
-
-                //typeCollection = CollectionsInfo[NestableCollectionType.NestableListL].MakeGenericType(typeof(TValue));
-
-                //return ((INestableCollection<TValue>)typeCollection.GetConstructor(Array.Empty<Type>())?.Invoke(Array.Empty<object>()),
-                //    CollectionGeneralType.List);
             }
 
             typeCollection = CollectionsInfo[type].MakeGenericType(typeof(TValue));
@@ -88,11 +102,6 @@ namespace RIS.Collections.Nestable
             if (!CollectionsInfo.ContainsKey(type))
             {
                 return (null, CollectionGeneralType.Unknown);
-
-                //typeCollection = CollectionsInfo[NestableCollectionType.NestableListL].MakeGenericType(typeof(TValue));
-
-                //return ((INestableCollection<TValue>)typeCollection.GetConstructor(new Type[] { typeof(int) })?.Invoke(new object[] { length }),
-                //    CollectionGeneralType.List);
             }
 
             typeCollection = CollectionsInfo[type].MakeGenericType(typeof(TValue));
@@ -137,7 +146,6 @@ namespace RIS.Collections.Nestable
                 return CollectionGeneralType.List;
 
             return CollectionGeneralType.Unknown;
-            //return CollectionGeneralType.List;
         }
         public static CollectionGeneralType GetGeneralType<TValue>(INestableCollection<TValue> collection)
         {
@@ -149,7 +157,6 @@ namespace RIS.Collections.Nestable
                 return CollectionGeneralType.List;
 
             return CollectionGeneralType.Unknown;
-            //return CollectionGeneralType.List;
         }
 
 
@@ -166,7 +173,8 @@ namespace RIS.Collections.Nestable
                 default:
                     var exception =
                         new ArgumentException("Недопустимое значение поля Type в [NestedElement] для создания строкового представления", nameof(value));
-                    Events.DShowError?.Invoke(null, new RErrorEventArgs(exception.Message, exception.StackTrace));
+                    Events.OnError(new RErrorEventArgs(exception.Message, exception.StackTrace));
+                    OnError(new RErrorEventArgs(exception.Message, exception.StackTrace));
                     throw exception;
             }
         }
@@ -222,7 +230,8 @@ namespace RIS.Collections.Nestable
                 default:
                     var exception =
                         new ArgumentException("Недопустимое значение CollectionGeneralType у коллекции", nameof(value));
-                    Events.DShowError?.Invoke(null, new RErrorEventArgs(exception.Message, exception.StackTrace));
+                    Events.OnError(new RErrorEventArgs(exception.Message, exception.StackTrace));
+                    OnError(new RErrorEventArgs(exception.Message, exception.StackTrace));
                     throw exception;
             }
 
@@ -326,7 +335,8 @@ namespace RIS.Collections.Nestable
                 default:
                     var exception =
                         new ArgumentException("Недопустимое значение CollectionGeneralType у коллекции", nameof(value));
-                    Events.DShowError?.Invoke(null, new RErrorEventArgs(exception.Message, exception.StackTrace));
+                    Events.OnError(new RErrorEventArgs(exception.Message, exception.StackTrace));
+                    OnError(new RErrorEventArgs(exception.Message, exception.StackTrace));
                     throw exception;
             }
 
@@ -445,7 +455,8 @@ namespace RIS.Collections.Nestable
             {
                 var exception =
                     new ArgumentException("Неверный формат строки для преобразования в массив" + " " + represent, nameof(represent));
-                Events.DShowError?.Invoke(null, new RErrorEventArgs(exception.Message, exception.StackTrace));
+                Events.OnError(new RErrorEventArgs(exception.Message, exception.StackTrace));
+                OnError(new RErrorEventArgs(exception.Message, exception.StackTrace));
                 throw exception;
             }
 
@@ -472,7 +483,8 @@ namespace RIS.Collections.Nestable
             {
                 var exception =
                     new ArgumentException("Неверный формат строки для преобразования в коллекцию с поддержкой вложенности", nameof(represent));
-                Events.DShowError?.Invoke(null, new RErrorEventArgs(exception.Message, exception.StackTrace));
+                Events.OnError(new RErrorEventArgs(exception.Message, exception.StackTrace));
+                OnError(new RErrorEventArgs(exception.Message, exception.StackTrace));
                 throw exception;
             }
 
@@ -510,7 +522,8 @@ namespace RIS.Collections.Nestable
                 default:
                     var exception =
                         new ArgumentException("Недопустимое значение CollectionGeneralType у коллекции", nameof(value));
-                    Events.DShowError?.Invoke(null, new RErrorEventArgs(exception.Message, exception.StackTrace));
+                    Events.OnError(new RErrorEventArgs(exception.Message, exception.StackTrace));
+                    OnError(new RErrorEventArgs(exception.Message, exception.StackTrace));
                     throw exception;
             }
 
@@ -518,7 +531,8 @@ namespace RIS.Collections.Nestable
             {
                 var exception =
                     new ArgumentException("Неверный формат строки для преобразования в коллекцию с поддержкой вложенности", nameof(represent));
-                Events.DShowError?.Invoke(null, new RErrorEventArgs(exception.Message, exception.StackTrace));
+                Events.OnError(new RErrorEventArgs(exception.Message, exception.StackTrace));
+                OnError(new RErrorEventArgs(exception.Message, exception.StackTrace));
                 throw exception;
             }
 
@@ -541,7 +555,8 @@ namespace RIS.Collections.Nestable
             {
                 var exception =
                     new ArgumentException("Тип переданной коллекции не соответствует типу коллекции из строкового представления", nameof(value));
-                Events.DShowError?.Invoke(null, new RErrorEventArgs(exception.Message, exception.StackTrace));
+                Events.OnError(new RErrorEventArgs(exception.Message, exception.StackTrace));
+                OnError(new RErrorEventArgs(exception.Message, exception.StackTrace));
                 throw exception;
             }
 
@@ -622,7 +637,8 @@ namespace RIS.Collections.Nestable
                         default:
                             var exception =
                                 new ArgumentException("Недопустимое значение CollectionGeneralType у коллекции", nameof(value));
-                            Events.DShowError?.Invoke(null, new RErrorEventArgs(exception.Message, exception.StackTrace));
+                            Events.OnError(new RErrorEventArgs(exception.Message, exception.StackTrace));
+                            OnError(new RErrorEventArgs(exception.Message, exception.StackTrace));
                             throw exception;
                     }
 
@@ -658,7 +674,8 @@ namespace RIS.Collections.Nestable
             {
                 var exception =
                     new ArgumentException("Неверный формат строки для преобразования в коллекцию с поддержкой вложенности", nameof(represent));
-                Events.DShowError?.Invoke(null, new RErrorEventArgs(exception.Message, exception.StackTrace));
+                Events.OnError(new RErrorEventArgs(exception.Message, exception.StackTrace));
+                OnError(new RErrorEventArgs(exception.Message, exception.StackTrace));
                 throw exception;
             }
 
@@ -685,7 +702,8 @@ namespace RIS.Collections.Nestable
             {
                 var exception =
                     new ArgumentException("Тип переданной коллекции не соответствует типу коллекции из строкового представления", nameof(value));
-                Events.DShowError?.Invoke(null, new RErrorEventArgs(exception.Message, exception.StackTrace));
+                Events.OnError(new RErrorEventArgs(exception.Message, exception.StackTrace));
+                OnError(new RErrorEventArgs(exception.Message, exception.StackTrace));
                 throw exception;
             }
 
@@ -808,7 +826,8 @@ namespace RIS.Collections.Nestable
                 default:
                     var exception =
                         new ArgumentException("Недопустимое значение поля Type в [NestedElement] для старта перечисления", nameof(value));
-                    Events.DShowError?.Invoke(null, new RErrorEventArgs(exception.Message, exception.StackTrace));
+                    Events.OnError(new RErrorEventArgs(exception.Message, exception.StackTrace));
+                    OnError(new RErrorEventArgs(exception.Message, exception.StackTrace));
                     throw exception;
             }
         }

@@ -2,17 +2,23 @@ using System.Windows;
 
 namespace RIS.Graphics.WPF.Windows
 {
-    public class CustomMaterialMessageBox : MessageBoxWindow
+    public sealed class CustomMaterialMessageBox : MessageBoxWindow
     {
         public new void Show()
         {
-            ShowDialog();
+            base.Show();
         }
 
-        //public MessageBoxResult ShowWithReturnResult()
-        //{
-        //    ShowDialog();
-        //    return Result;
-        //}
+        public new void ShowDialog()
+        {
+            base.ShowDialog();
+        }
+
+        public MessageBoxResult ShowDialogWithResult()
+        {
+            ShowDialog();
+
+            return Result;
+        }
     }
 }

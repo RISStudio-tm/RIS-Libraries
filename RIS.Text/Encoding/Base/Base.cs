@@ -8,8 +8,9 @@ namespace RIS.Text.Encoding.Base
 {
     public abstract class Base
     {
-        public event EventHandler<RMessageEventArgs> ShowMessage;
-        public event EventHandler<RErrorEventArgs> ShowError;
+        public event EventHandler<RInformationEventArgs> Information;
+		public event EventHandler<RWarningEventArgs> Warning;
+		public event EventHandler<RErrorEventArgs> Error;
 
         public uint CharsCount { get; }
 

@@ -6,8 +6,36 @@ namespace RIS.Logging
 {
     public static class LogUtilities
     {
-        public static event EventHandler<RMessageEventArgs> ShowMessage;
-        public static event EventHandler<RErrorEventArgs> ShowError;
+        public static event EventHandler<RInformationEventArgs> Information;
+		public static event EventHandler<RWarningEventArgs> Warning;
+		public static event EventHandler<RErrorEventArgs> Error;
+
+        public static void OnInformation(RInformationEventArgs e)
+        {
+            OnInformation(null, e);
+        }
+        public static void OnInformation(object sender, RInformationEventArgs e)
+        {
+            Information?.Invoke(sender, e);
+        }
+
+        public static void OnWarning(RWarningEventArgs e)
+        {
+            OnWarning(null, e);
+        }
+        public static void OnWarning(object sender, RWarningEventArgs e)
+        {
+            Warning?.Invoke(sender, e);
+        }
+
+        public static void OnError(RErrorEventArgs e)
+        {
+            OnError(null, e);
+        }
+        public static void OnError(object sender, RErrorEventArgs e)
+        {
+            Error?.Invoke(sender, e);
+        }
 
         public static void GetTextFromSituation(LogSituation situation, out string situationText)
         {
@@ -140,8 +168,8 @@ namespace RIS.Logging
             if (!Directory.Exists(logsPath))
             {
                 var exception = new DirectoryNotFoundException("Невозможно начать удаление лог-файлов, так как указанный каталог не существует");
-                Events.DShowError?.Invoke(null, new RErrorEventArgs(exception.Message, exception.StackTrace));
-                ShowError?.Invoke(null, new RErrorEventArgs(exception.Message, exception.StackTrace));
+                Events.OnError(new RErrorEventArgs(exception.Message, exception.StackTrace));
+                OnError(new RErrorEventArgs(exception.Message, exception.StackTrace));
                 throw exception;
             }
 
@@ -178,8 +206,8 @@ namespace RIS.Logging
                         }
                         catch (Exception ex)
                         {
-                            Events.DShowError?.Invoke(null, new RErrorEventArgs(ex.Message, ex.StackTrace));
-                            ShowError?.Invoke(null, new RErrorEventArgs(ex.Message, ex.StackTrace));
+                            Events.OnError(new RErrorEventArgs(ex.Message, ex.StackTrace));
+                            OnError(new RErrorEventArgs(ex.Message, ex.StackTrace));
                         }
                     }
                 }
@@ -188,8 +216,8 @@ namespace RIS.Logging
             }
             catch (Exception ex)
             {
-                Events.DShowError?.Invoke(null, new RErrorEventArgs(ex.Message, ex.StackTrace));
-                ShowError?.Invoke(null, new RErrorEventArgs(ex.Message, ex.StackTrace));
+                Events.OnError(new RErrorEventArgs(ex.Message, ex.StackTrace));
+                OnError(new RErrorEventArgs(ex.Message, ex.StackTrace));
                 throw;
             }
         }
@@ -199,8 +227,8 @@ namespace RIS.Logging
             if (!Directory.Exists(logsPath))
             {
                 var exception = new DirectoryNotFoundException("Невозможно начать удаление лог-файлов, так как указанный каталог не существует");
-                Events.DShowError?.Invoke(null, new RErrorEventArgs(exception.Message, exception.StackTrace));
-                ShowError?.Invoke(null, new RErrorEventArgs(exception.Message, exception.StackTrace));
+                Events.OnError(new RErrorEventArgs(exception.Message, exception.StackTrace));
+                OnError(new RErrorEventArgs(exception.Message, exception.StackTrace));
                 throw exception;
             }
 
@@ -237,8 +265,8 @@ namespace RIS.Logging
                         }
                         catch (Exception ex)
                         {
-                            Events.DShowError?.Invoke(null, new RErrorEventArgs(ex.Message, ex.StackTrace));
-                            ShowError?.Invoke(null, new RErrorEventArgs(ex.Message, ex.StackTrace));
+                            Events.OnError(new RErrorEventArgs(ex.Message, ex.StackTrace));
+                            OnError(new RErrorEventArgs(ex.Message, ex.StackTrace));
                         }
                     }
                 }
@@ -247,8 +275,8 @@ namespace RIS.Logging
             }
             catch (Exception ex)
             {
-                Events.DShowError?.Invoke(null, new RErrorEventArgs(ex.Message, ex.StackTrace));
-                ShowError?.Invoke(null, new RErrorEventArgs(ex.Message, ex.StackTrace));
+                Events.OnError(new RErrorEventArgs(ex.Message, ex.StackTrace));
+                OnError(new RErrorEventArgs(ex.Message, ex.StackTrace));
                 throw;
             }
         }

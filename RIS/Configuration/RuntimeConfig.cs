@@ -1,4 +1,6 @@
-﻿using System;
+﻿#if NETCOREAPP
+
+using System;
 using System.Configuration;
 using System.IO;
 using System.Threading.Tasks;
@@ -7,13 +9,11 @@ using Newtonsoft.Json.Linq;
 
 namespace RIS.Configuration
 {
-
-#if NETCOREAPP
-
     public static class RuntimeConfig
     {
-        public static event EventHandler<RMessageEventArgs> ShowMessage;
-        public static event EventHandler<RErrorEventArgs> ShowError;
+        public static event EventHandler<RInformationEventArgs> Information;
+		public static event EventHandler<RWarningEventArgs> Warning;
+		public static event EventHandler<RErrorEventArgs> Error;
 
         private static object ReadWriteLockObj { get; }
         private static object ConfigWatcherLockObj { get; }
@@ -57,6 +57,33 @@ namespace RIS.Configuration
             ConfigWatcher.Changed += ConfigWatcher_Changed;
 
             StartConfigWatcher();
+        }
+
+        public static void OnInformation(RInformationEventArgs e)
+        {
+            OnInformation(null, e);
+        }
+        public static void OnInformation(object sender, RInformationEventArgs e)
+        {
+            Information?.Invoke(sender, e);
+        }
+
+        public static void OnWarning(RWarningEventArgs e)
+        {
+            OnWarning(null, e);
+        }
+        public static void OnWarning(object sender, RWarningEventArgs e)
+        {
+            Warning?.Invoke(sender, e);
+        }
+
+        public static void OnError(RErrorEventArgs e)
+        {
+            OnError(null, e);
+        }
+        public static void OnError(object sender, RErrorEventArgs e)
+        {
+            Error?.Invoke(sender, e);
         }
 
         private static void StartConfigWatcher()
@@ -119,8 +146,8 @@ namespace RIS.Configuration
             if (!ConfigIsLoaded)
             {
                 var exception = new ConfigurationErrorsException("Не удалось сохранить файл конфигурации, так как он не загружен");
-                Events.DShowError?.Invoke(null, new RErrorEventArgs(exception.Message, exception.StackTrace));
-                ShowError?.Invoke(null, new RErrorEventArgs(exception.Message, exception.StackTrace));
+                Events.OnError(new RErrorEventArgs(exception.Message, exception.StackTrace));
+                OnError(new RErrorEventArgs(exception.Message, exception.StackTrace));
                 throw exception;
             }
 
@@ -144,8 +171,8 @@ namespace RIS.Configuration
             catch (Exception)
             {
                 var exception = new ConfigurationErrorsException("Не удалось сохранить файл конфигурации");
-                Events.DShowError?.Invoke(null, new RErrorEventArgs(exception.Message, exception.StackTrace));
-                ShowError?.Invoke(null, new RErrorEventArgs(exception.Message, exception.StackTrace));
+                Events.OnError(new RErrorEventArgs(exception.Message, exception.StackTrace));
+                OnError(new RErrorEventArgs(exception.Message, exception.StackTrace));
                 throw exception;
             }
         }
@@ -164,8 +191,8 @@ namespace RIS.Configuration
             catch (Exception)
             {
                 var exception = new JsonException("Не удалось найти указанный json элемент");
-                Events.DShowError?.Invoke(null, new RErrorEventArgs(exception.Message, exception.StackTrace));
-                ShowError?.Invoke(null, new RErrorEventArgs(exception.Message, exception.StackTrace));
+                Events.OnError(new RErrorEventArgs(exception.Message, exception.StackTrace));
+                OnError(new RErrorEventArgs(exception.Message, exception.StackTrace));
                 throw exception;
             }
 
@@ -190,7 +217,6 @@ namespace RIS.Configuration
             });
         }
     }
+}
 
 #endif
-
-}

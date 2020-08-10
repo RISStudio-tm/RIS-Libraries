@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.ObjectModel;
 using System.Data;
 using System.Threading;
 using System.Threading.Tasks;
@@ -12,9 +13,39 @@ namespace RIS.Connection.MySQL
     public sealed class MySQLConnection
     {
         /// <summary>
+        ///     Происходит при получении информации.
+        /// </summary>
+        public event EventHandler<RInformationEventArgs> Information;
+        /// <summary>
+        ///     Происходит при возникновении предупреждения.
+        /// </summary>
+        public event EventHandler<RWarningEventArgs> Warning;
+        /// <summary>
+        ///     Происходит при возникновении ошибки.
+        /// </summary>
+        public event EventHandler<RErrorEventArgs> Error;
+
+        private MySqlConnection[] _connections;
+        /// <summary>
         ///     Позволяет получать массив типа <see cref="MySql.Data.MySqlClient.MySqlConnection"/> SQL-соединений, которые используются в данном экземпляре класса <see cref="RIS.Connection.MySQL.MySQLConnection"/>.
         /// </summary>
-        public MySqlConnection[] Connections { get; private set; }
+        internal MySqlConnection[] ConnectionsArray
+        {
+            get
+            {
+                return _connections;
+            }
+        }
+        /// <summary>
+        ///     Позволяет получать <see cref="System.Collections.ObjectModel.ReadOnlyCollection{T}"/>, где T это <see cref="MySql.Data.MySqlClient.MySqlConnection"/>, SQL-соединений, которые используются в данном экземпляре класса <see cref="RIS.Connection.MySQL.MySQLConnection"/>.
+        /// </summary>
+        public ReadOnlyCollection<MySqlConnection> Connections
+        {
+            get
+            {
+                return new ReadOnlyCollection<MySqlConnection>(_connections);
+            }
+        }
         /// <summary>
         ///     Позволяет получать экзепляр класса <see cref="RIS.Connection.MySQL.Requests"/>, который используется в данном экземпляре класса <see cref="RIS.Connection.MySQL.MySQLConnection"/> для работы с запросами к SQL-соединениям из массива <see cref="Connections"/>.
         /// </summary>
@@ -23,62 +54,6 @@ namespace RIS.Connection.MySQL
         ///     Позволяет получать состояние подключения к MySQL базе данных.
         /// </summary>
         public bool ConnectionComplete { get; private set; }
-
-        private object LockObjMessageEvent { get; }
-        private event EventHandler<RMessageEventArgs> PShowMessage;
-        /// <summary>
-        ///     Используется для вывода информации или предупреждений.
-        /// </summary>
-        public event EventHandler<RMessageEventArgs> ShowMessage
-        {
-            add
-            {
-                lock (LockObjMessageEvent)
-                {
-                    PShowMessage += value;
-                    DShowMessage += value;
-                }
-            }
-            remove
-            {
-                lock (LockObjMessageEvent)
-                {
-                    if (PShowMessage != null)
-                        PShowMessage -= value;
-                    if (DShowMessage != null)
-                        DShowMessage -= value;
-                }
-            }
-        }
-        internal EventHandler<RMessageEventArgs> DShowMessage { get; private set; }
-
-        private object LockObjErrorEvent { get; }
-        private event EventHandler<RErrorEventArgs> PShowError;
-        /// <summary>
-        ///     Используется для вывода ошибок.
-        /// </summary>
-        public event EventHandler<RErrorEventArgs> ShowError
-        {
-            add
-            {
-                lock (LockObjErrorEvent)
-                {
-                    PShowError += value;
-                    DShowError += value;
-                }
-            }
-            remove
-            {
-                lock (LockObjErrorEvent)
-                {
-                    if (PShowError != null)
-                        PShowError -= value;
-                    if (DShowError != null)
-                        DShowError -= value;
-                }
-            }
-        }
-        internal EventHandler<RErrorEventArgs> DShowError { get; private set; }
 
         /// <summary>
         ///     Закрывает соединения и освобождает ресурсы.
@@ -93,8 +68,79 @@ namespace RIS.Connection.MySQL
         /// </summary>
         public MySQLConnection()
         {
-            LockObjMessageEvent = new object();
-            LockObjErrorEvent = new object();
+
+        }
+
+        /// <summary>
+        ///     Вызывает Invoke у события Information от имени текущего экземпляра с аргументами <paramref name="e"/>
+        /// </summary>
+        /// <param name="e">
+        ///     Аргументы для события Information.
+        /// </param>
+        public void OnInformation(RInformationEventArgs e)
+        {
+            OnInformation(this, e);
+        }
+        /// <summary>
+        ///     Вызывает Invoke у события Information от имени объекта <paramref name="sender"/> с аргументами <paramref name="e"/>
+        /// </summary>
+        /// <param name="sender">
+        ///     Объект-отправитель (от имени которого вызывается Invoke)
+        /// </param>
+        /// <param name="e">
+        ///     Аргументы для события Information.
+        /// </param>
+        public void OnInformation(object sender, RInformationEventArgs e)
+        {
+            Information?.Invoke(sender, e);
+        }
+
+        /// <summary>
+        ///     Вызывает Invoke у события Warning от имени текущего экземпляра с аргументами <paramref name="e"/>
+        /// </summary>
+        /// <param name="e">
+        ///     Аргументы для события Warning.
+        /// </param>
+        public void OnWarning(RWarningEventArgs e)
+        {
+            OnWarning(this, e);
+        }
+        /// <summary>
+        ///     Вызывает Invoke у события Warning от имени объекта <paramref name="sender"/> с аргументами <paramref name="e"/>
+        /// </summary>
+        /// <param name="sender">
+        ///     Объект-отправитель (от имени которого вызывается Invoke)
+        /// </param>
+        /// <param name="e">
+        ///     Аргументы для события Warning.
+        /// </param>
+        public void OnWarning(object sender, RWarningEventArgs e)
+        {
+            Warning?.Invoke(sender, e);
+        }
+
+        /// <summary>
+        ///     Вызывает Invoke у события Error от имени текущего экземпляра с аргументами <paramref name="e"/>
+        /// </summary>
+        /// <param name="e">
+        ///     Аргументы для события Error.
+        /// </param>
+        public void OnError(RErrorEventArgs e)
+        {
+            OnError(this, e);
+        }
+        /// <summary>
+        ///     Вызывает Invoke у события Error от имени объекта <paramref name="sender"/> с аргументами <paramref name="e"/>
+        /// </summary>
+        /// <param name="sender">
+        ///     Объект-отправитель (от имени которого вызывается Invoke)
+        /// </param>
+        /// <param name="e">
+        ///     Аргументы для события Error.
+        /// </param>
+        public void OnError(object sender, RErrorEventArgs e)
+        {
+            Error?.Invoke(sender, e);
         }
 
         /// <summary>
@@ -254,23 +300,21 @@ namespace RIS.Connection.MySQL
             try
             {
                 if (numberConnections < 1)
-                {
                     numberConnections = 1;
-                }
 
                 Task.Factory.StartNew(() => CreateConnections(numberConnections, connectionString)).Wait();
 
                 if (ConnectionComplete)
                 {
-                    Requests = new Requests(this, Connections, timeout);
+                    Requests = new Requests(this, timeout);
                 }
 
                 return ConnectionComplete;
             }
             catch (Exception ex)
             {
-                Events.DShowError?.Invoke(this, new RErrorEventArgs(ex.Message, ex.StackTrace));
-                PShowError?.Invoke(this, new RErrorEventArgs(ex.Message, ex.StackTrace));
+                Events.OnError(this, new RErrorEventArgs(ex.Message, ex.StackTrace));
+                OnError(new RErrorEventArgs(ex.Message, ex.StackTrace));
                 throw;
             }
         }
@@ -280,81 +324,79 @@ namespace RIS.Connection.MySQL
         /// </summary>
         public void CloseConnection()
         {
-            if (ConnectionComplete)
+            if (!ConnectionComplete)
+                return;
+
+            ConnectionComplete = false;
+            Requests.CancelAllRequests();
+            Requests = null;
+            foreach (var connection in ConnectionsArray)
             {
-                ConnectionComplete = false;
-                Requests.CancelAllRequests();
-                Requests = null;
-                foreach (var connection in Connections)
+                if (connection?.State != ConnectionState.Closed)
                 {
-                    if (connection?.State != ConnectionState.Closed)
-                    {
-                        connection?.Close();
-                    }
-                    connection?.Dispose();
+                    connection?.Close();
                 }
-                Connections = null;
+                connection?.Dispose();
             }
+            _connections = null;
         }
 
         private void CreateConnections(byte numberConnections, string connectionString)
         {
-            Connections = new MySqlConnection[numberConnections];
+            _connections = new MySqlConnection[numberConnections];
 
-            for (byte i = 0; i < numberConnections; i++)
+            for (int i = 0; i < numberConnections; ++i)
             {
                 try
                 {
-                    Connections[i] = new MySqlConnection(connectionString);
-                    Connections[i].Open();
+                    ConnectionsArray[i] = new MySqlConnection(connectionString);
+                    ConnectionsArray[i].Open();
 
-                    while (Connections[i] != null)
+                    while (ConnectionsArray[i] != null)
                     {
-                        if (Connections[i].State == ConnectionState.Connecting)
+                        if (ConnectionsArray[i].State == ConnectionState.Connecting)
                         {
                             Thread.Sleep(100);
                             continue;
                         }
 
-                        if (Connections[i].State == ConnectionState.Broken)
+                        if (ConnectionsArray[i].State == ConnectionState.Broken)
                         {
                             ConnectionComplete = false;
                             break;
                         }
 
-                        if (Connections[i].State == ConnectionState.Closed)
+                        if (ConnectionsArray[i].State == ConnectionState.Closed)
                         {
                             ConnectionComplete = false;
                             break;
                         }
 
-                        if (Connections[i].State == ConnectionState.Open)
+                        if (ConnectionsArray[i].State == ConnectionState.Open)
                         {
                             ConnectionComplete = true;
-                            Connections[i].StateChange += Connection_StateChange;
+                            ConnectionsArray[i].StateChange += Connection_StateChange;
                             break;
                         }
                     }
 
                     if (!ConnectionComplete)
-                    {
                         break;
-                    }
                 }
                 catch (MySqlException ex)
                 {
                     ConnectionComplete = false;
 
-                    Events.DShowError?.Invoke(this, new RErrorEventArgs(ex.Message, ex.StackTrace));
-                    PShowError?.Invoke(this, new RErrorEventArgs(ex.Message, ex.StackTrace));
+                    Events.OnError(this, new RErrorEventArgs(ex.Message, ex.StackTrace));
+                    OnError(new RErrorEventArgs(ex.Message, ex.StackTrace));
                     throw;
                 }
                 catch (InvalidOperationException ex)
                 {
                     ConnectionComplete = false;
 
-                    Events.DShowError?.Invoke(this, new RErrorEventArgs(ex.Message, ex.StackTrace));
-                    PShowError?.Invoke(this, new RErrorEventArgs(ex.Message, ex.StackTrace));
+                    Events.OnError(this, new RErrorEventArgs(ex.Message, ex.StackTrace));
+                    OnError(new RErrorEventArgs(ex.Message, ex.StackTrace));
                     throw;
                 }
             }
@@ -368,8 +410,7 @@ namespace RIS.Connection.MySQL
 
                 return;
             }
-
-            if (e.CurrentState == ConnectionState.Broken)
+            else if (e.CurrentState == ConnectionState.Broken)
             {
                 CloseConnection();
             }

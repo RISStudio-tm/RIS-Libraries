@@ -2,11 +2,21 @@
 
 namespace RIS
 {
-    public class RMessageEventArgs : EventArgs
+    public class RInformationEventArgs : EventArgs
     {
         public string Message { get; }
 
-        public RMessageEventArgs(string message)
+        public RInformationEventArgs(string message)
+        {
+            Message = message;
+        }
+    }
+
+    public class RWarningEventArgs : EventArgs
+    {
+        public string Message { get; }
+
+        public RWarningEventArgs(string message)
         {
             Message = message;
         }

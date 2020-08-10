@@ -14,8 +14,8 @@ namespace RIS.Connection.MySQL
     /// </summary>
     public sealed class Requests
     {
+        private MySQLConnection CurrentMySQLConnection { get; }
         private AsyncLock[] LockObjExecReaders { get; }
-        private MySqlConnection[] Connections { get; }
         private object LockObjNextConnection { get; }
         private ushort _nextConnectionIndex;
         private ushort NextConnectionIndex
@@ -24,12 +24,13 @@ namespace RIS.Connection.MySQL
             {
                 lock (LockObjNextConnection)
                 {
-                    if (_nextConnectionIndex > Connections.Length - 1)
+                    if (_nextConnectionIndex > CurrentMySQLConnection.ConnectionsArray.Length - 1)
                         _nextConnectionIndex = 0;
                     return _nextConnectionIndex++;
                 }
             }
         }
+
         private TimeSpan _commandTimeout;
         /// <summary>
         ///     Позволяет получать и устанавливать стандартное время ожидания SQL-команд.
@@ -42,7 +43,7 @@ namespace RIS.Connection.MySQL
             }
             set
             {
-                if (value < TimeSpan.FromSeconds(3000))
+                if (value.TotalSeconds < TimeSpan.FromSeconds(3000).TotalSeconds)
                 {
                     _commandTimeout = TimeSpan.FromSeconds(3000);
                 }
@@ -57,15 +58,22 @@ namespace RIS.Connection.MySQL
         /// </summary>
         public CancellationTokenSource GlobalCancellationToken { get; }
 
-        private MySQLConnection CurrentMySQLConnection { get; }
-
-        internal Requests(MySQLConnection sqlConnection, MySqlConnection[] connections, TimeSpan timeout)
+        internal Requests(MySQLConnection sqlConnection, TimeSpan timeout)
         {
+            if (sqlConnection == null)
+            {
+                var exception = new ArgumentException($"{nameof(sqlConnection)} cannot be null", nameof(sqlConnection));
+                Events.OnError(this,
+                    new RErrorEventArgs(exception.Message, exception.StackTrace));
+                CurrentMySQLConnection.OnError(this,
+                    new RErrorEventArgs(exception.Message, exception.StackTrace));
+                throw exception;
+            }
+
             CurrentMySQLConnection = sqlConnection;
-            Connections = connections;
             CommandTimeout = timeout;
 
-            LockObjExecReaders = new AsyncLock[connections.Length];
+            LockObjExecReaders = new AsyncLock[sqlConnection.ConnectionsArray.Length];
             for (byte i = 0; i < LockObjExecReaders.Length; ++i)
             {
                 LockObjExecReaders[i] = new AsyncLock();
@@ -91,18 +99,18 @@ namespace RIS.Connection.MySQL
             catch (Exception)
             {
                 var exception = new Exception("Failed to cancel all requests");
-                Events.DShowError?.Invoke(this,
+                Events.OnError(this,
                     new RErrorEventArgs(exception.Message, exception.StackTrace));
-                CurrentMySQLConnection.DShowError?.Invoke(this,
+                CurrentMySQLConnection.OnError(this,
                     new RErrorEventArgs(exception.Message, exception.StackTrace));
                 throw exception;
             }
         }
 
-        private MySqlConnection GetNextMySqlConnection(out ushort connectionIndex)
+        private (MySqlConnection connection, ushort connectionIndex) GetNextMySqlConnection()
         {
-            connectionIndex = NextConnectionIndex;
-            return Connections[connectionIndex];
+            ushort connectionIndex = NextConnectionIndex;
+            return (CurrentMySQLConnection.ConnectionsArray[connectionIndex], connectionIndex);
         }
 
 
@@ -114,7 +122,7 @@ namespace RIS.Connection.MySQL
             {
                 cancellationToken.ThrowIfCancellationRequested();
 
-                command.Transaction = await Connections[connectionIndex]
+                command.Transaction = await CurrentMySQLConnection.ConnectionsArray[connectionIndex]
                     .BeginTransactionAsync(isolationLevel, cancellationToken).ConfigureAwait(false);
 
                 await command.ExecuteNonQueryAsync(cancellationToken).ConfigureAwait(false);
@@ -132,7 +140,7 @@ namespace RIS.Connection.MySQL
             {
                 cancellationToken.ThrowIfCancellationRequested();
 
-                command.Transaction = await Connections[connectionIndex]
+                command.Transaction = await CurrentMySQLConnection.ConnectionsArray[connectionIndex]
                     .BeginTransactionAsync(isolationLevel, cancellationToken).ConfigureAwait(false);
 
                 using (MySqlDataReader reader =
@@ -162,7 +170,7 @@ namespace RIS.Connection.MySQL
             {
                 cancellationToken.ThrowIfCancellationRequested();
 
-                adapter.SelectCommand.Transaction = await Connections[connectionIndex]
+                adapter.SelectCommand.Transaction = await CurrentMySQLConnection.ConnectionsArray[connectionIndex]
                     .BeginTransactionAsync(isolationLevel, cancellationToken).ConfigureAwait(false);
 
                 await adapter.FillAsync(result, cancellationToken).ConfigureAwait(false);
@@ -175,7 +183,7 @@ namespace RIS.Connection.MySQL
 
 
 
-        private void ReplaceDBNullParameterValue(string value, ref MySqlCommand command, 
+        private void ReplaceDBNullParameterValue(string value, ref MySqlCommand command,
             string parameterName)
         {
             if (value == "NULL" || value == null)
@@ -192,7 +200,7 @@ namespace RIS.Connection.MySQL
                 adapter.SelectCommand.Parameters[parameterName].Value = "NULL";
         }
 
-        private void ReplaceFunctionParameterValue(string value, ref MySqlCommand command, 
+        private void ReplaceFunctionParameterValue(string value, ref MySqlCommand command,
             string parameterName, ref string sql)
         {
             if (value == "CURRENT_TIMESTAMP")
@@ -368,9 +376,9 @@ namespace RIS.Connection.MySQL
             if (!CurrentMySQLConnection.ConnectionComplete)
             {
                 var exception = new Exception("MySQLConnection is not open");
-                Events.DShowError?.Invoke(this,
+                Events.OnError(this,
                     new RErrorEventArgs(exception.Message, exception.StackTrace));
-                CurrentMySQLConnection.DShowError?.Invoke(this,
+                CurrentMySQLConnection.OnError(this,
                     new RErrorEventArgs(exception.Message, exception.StackTrace));
                 throw exception;
             }
@@ -380,7 +388,7 @@ namespace RIS.Connection.MySQL
             Task<Task> read = Task.Run(async () =>
             {
                 MySqlCommand command = null;
-                MySqlConnection connection = GetNextMySqlConnection(out ushort connectionIndex);
+                (MySqlConnection connection, ushort connectionIndex) = GetNextMySqlConnection();
 
                 StringBuilder sqlBuilder = new StringBuilder();
 
@@ -433,9 +441,9 @@ namespace RIS.Connection.MySQL
                 catch (OperationCanceledException)
                 {
                     var exception = new TimeoutException($"MySQLRequest[{sqlBuilder}] waiting timeout[{timeout}] or canceled");
-                    Events.DShowError?.Invoke(this,
+                    Events.OnError(this,
                         new RErrorEventArgs(exception.Message, exception.StackTrace));
-                    CurrentMySQLConnection.DShowError?.Invoke(this,
+                    CurrentMySQLConnection.OnError(this,
                         new RErrorEventArgs(exception.Message, exception.StackTrace));
 
                     command?.Transaction?.Rollback();
@@ -444,9 +452,9 @@ namespace RIS.Connection.MySQL
                 }
                 catch (MySqlException ex)
                 {
-                    Events.DShowError?.Invoke(this,
+                    Events.OnError(this,
                         new RErrorEventArgs($"MySQLRequest[{sqlBuilder}] execute error - " + ex.Message, ex.StackTrace));
-                    CurrentMySQLConnection.DShowError?.Invoke(this,
+                    CurrentMySQLConnection.OnError(this,
                         new RErrorEventArgs(ex.Message, ex.StackTrace));
 
                     command?.Transaction?.Rollback();
@@ -455,9 +463,9 @@ namespace RIS.Connection.MySQL
                 }
                 catch (Exception ex)
                 {
-                    Events.DShowError?.Invoke(this,
+                    Events.OnError(this,
                         new RErrorEventArgs($"MySQLRequest[{sqlBuilder}] execute error - " + ex.Message, ex.StackTrace));
-                    CurrentMySQLConnection.DShowError?.Invoke(this,
+                    CurrentMySQLConnection.OnError(this,
                         new RErrorEventArgs(ex.Message, ex.StackTrace));
 
                     command?.Transaction?.Rollback();
@@ -488,9 +496,9 @@ namespace RIS.Connection.MySQL
                 catch (OperationCanceledException)
                 {
                     var exception = new TimeoutException($"MySQLRequest[unknown] waiting timeout[{timeout}] or canceled");
-                    Events.DShowError?.Invoke(this,
+                    Events.OnError(this,
                         new RErrorEventArgs(exception.Message, exception.StackTrace));
-                    CurrentMySQLConnection.DShowError?.Invoke(this,
+                    CurrentMySQLConnection.OnError(this,
                         new RErrorEventArgs(exception.Message, exception.StackTrace));
 
                     throw exception;
@@ -650,9 +658,9 @@ namespace RIS.Connection.MySQL
             if (!CurrentMySQLConnection.ConnectionComplete)
             {
                 var exception = new Exception("MySQLConnection is not open");
-                Events.DShowError?.Invoke(this,
+                Events.OnError(this,
                     new RErrorEventArgs(exception.Message, exception.StackTrace));
-                CurrentMySQLConnection.DShowError?.Invoke(this,
+                CurrentMySQLConnection.OnError(this,
                     new RErrorEventArgs(exception.Message, exception.StackTrace));
                 throw exception;
             }
@@ -662,7 +670,7 @@ namespace RIS.Connection.MySQL
             Task<Task> read = Task.Run(async () =>
             {
                 MySqlCommand command = null;
-                MySqlConnection connection = GetNextMySqlConnection(out ushort connectionIndex);
+                (MySqlConnection connection, ushort connectionIndex) = GetNextMySqlConnection();
 
                 StringBuilder sqlBuilder = new StringBuilder();
 
@@ -710,9 +718,9 @@ namespace RIS.Connection.MySQL
                 catch (OperationCanceledException)
                 {
                     var exception = new TimeoutException($"MySQLRequest[{sqlBuilder}] waiting timeout[{timeout}] or canceled");
-                    Events.DShowError?.Invoke(this,
+                    Events.OnError(this,
                         new RErrorEventArgs(exception.Message, exception.StackTrace));
-                    CurrentMySQLConnection.DShowError?.Invoke(this,
+                    CurrentMySQLConnection.OnError(this,
                         new RErrorEventArgs(exception.Message, exception.StackTrace));
 
                     command?.Transaction?.Rollback();
@@ -721,9 +729,9 @@ namespace RIS.Connection.MySQL
                 }
                 catch (MySqlException ex)
                 {
-                    Events.DShowError?.Invoke(this,
+                    Events.OnError(this,
                         new RErrorEventArgs($"MySQLRequest[{sqlBuilder}] execute error - " + ex.Message, ex.StackTrace));
-                    CurrentMySQLConnection.DShowError?.Invoke(this,
+                    CurrentMySQLConnection.OnError(this,
                         new RErrorEventArgs(ex.Message, ex.StackTrace));
 
                     command?.Transaction?.Rollback();
@@ -732,9 +740,9 @@ namespace RIS.Connection.MySQL
                 }
                 catch (Exception ex)
                 {
-                    Events.DShowError?.Invoke(this,
+                    Events.OnError(this,
                         new RErrorEventArgs($"MySQLRequest[{sqlBuilder}] execute error - " + ex.Message, ex.StackTrace));
-                    CurrentMySQLConnection.DShowError?.Invoke(this,
+                    CurrentMySQLConnection.OnError(this,
                         new RErrorEventArgs(ex.Message, ex.StackTrace));
 
                     command?.Transaction?.Rollback();
@@ -765,9 +773,9 @@ namespace RIS.Connection.MySQL
                 catch (OperationCanceledException)
                 {
                     var exception = new TimeoutException($"MySQLRequest[unknown] waiting timeout[{timeout}] or canceled");
-                    Events.DShowError?.Invoke(this,
+                    Events.OnError(this,
                         new RErrorEventArgs(exception.Message, exception.StackTrace));
-                    CurrentMySQLConnection.DShowError?.Invoke(this,
+                    CurrentMySQLConnection.OnError(this,
                         new RErrorEventArgs(exception.Message, exception.StackTrace));
 
                     throw exception;
@@ -889,9 +897,9 @@ namespace RIS.Connection.MySQL
             if (!CurrentMySQLConnection.ConnectionComplete)
             {
                 var exception = new Exception("MySQLConnection is not open");
-                Events.DShowError?.Invoke(this,
+                Events.OnError(this,
                     new RErrorEventArgs(exception.Message, exception.StackTrace));
-                CurrentMySQLConnection.DShowError?.Invoke(this,
+                CurrentMySQLConnection.OnError(this,
                     new RErrorEventArgs(exception.Message, exception.StackTrace));
                 throw exception;
             }
@@ -902,7 +910,7 @@ namespace RIS.Connection.MySQL
             {
                 string sql = string.Empty;
                 MySqlDataAdapter adapter = null;
-                MySqlConnection connection = GetNextMySqlConnection(out ushort connectionIndex);
+                (MySqlConnection connection, ushort connectionIndex) = GetNextMySqlConnection();
                 
                 try
                 {
@@ -918,9 +926,9 @@ namespace RIS.Connection.MySQL
                 catch (OperationCanceledException)
                 {
                     var exception = new TimeoutException($"MySQLRequest[{sql}] waiting timeout[{timeout}] or canceled");
-                    Events.DShowError?.Invoke(this,
+                    Events.OnError(this,
                         new RErrorEventArgs(exception.Message, exception.StackTrace));
-                    CurrentMySQLConnection.DShowError?.Invoke(this,
+                    CurrentMySQLConnection.OnError(this,
                         new RErrorEventArgs(exception.Message, exception.StackTrace));
 
                     adapter?.SelectCommand.Transaction?.Rollback();
@@ -929,9 +937,9 @@ namespace RIS.Connection.MySQL
                 }
                 catch (MySqlException ex)
                 {
-                    Events.DShowError?.Invoke(this,
+                    Events.OnError(this,
                         new RErrorEventArgs($"MySQLRequest[{sql}] execute error - " + ex.Message, ex.StackTrace));
-                    CurrentMySQLConnection.DShowError?.Invoke(this,
+                    CurrentMySQLConnection.OnError(this,
                         new RErrorEventArgs(ex.Message, ex.StackTrace));
 
                     adapter?.SelectCommand.Transaction?.Rollback();
@@ -940,9 +948,9 @@ namespace RIS.Connection.MySQL
                 }
                 catch (Exception ex)
                 {
-                    Events.DShowError?.Invoke(this,
+                    Events.OnError(this,
                         new RErrorEventArgs($"MySQLRequest[{sql}] execute error - " + ex.Message, ex.StackTrace));
-                    CurrentMySQLConnection.DShowError?.Invoke(this,
+                    CurrentMySQLConnection.OnError(this,
                         new RErrorEventArgs(ex.Message, ex.StackTrace));
 
                     adapter?.SelectCommand.Transaction?.Rollback();
@@ -973,9 +981,9 @@ namespace RIS.Connection.MySQL
                 catch (OperationCanceledException)
                 {
                     var exception = new TimeoutException($"MySQLRequest[unknown] waiting timeout[{timeout}] or canceled");
-                    Events.DShowError?.Invoke(this,
+                    Events.OnError(this,
                         new RErrorEventArgs(exception.Message, exception.StackTrace));
-                    CurrentMySQLConnection.DShowError?.Invoke(this,
+                    CurrentMySQLConnection.OnError(this,
                         new RErrorEventArgs(exception.Message, exception.StackTrace));
 
                     throw exception;
@@ -1115,9 +1123,9 @@ namespace RIS.Connection.MySQL
             if (!CurrentMySQLConnection.ConnectionComplete)
             {
                 var exception = new Exception("MySQLConnection is not open");
-                Events.DShowError?.Invoke(this,
+                Events.OnError(this,
                     new RErrorEventArgs(exception.Message, exception.StackTrace));
-                CurrentMySQLConnection.DShowError?.Invoke(this,
+                CurrentMySQLConnection.OnError(this,
                     new RErrorEventArgs(exception.Message, exception.StackTrace));
                 throw exception;
             }
@@ -1128,7 +1136,7 @@ namespace RIS.Connection.MySQL
             {
                 string sql = string.Empty;
                 MySqlDataAdapter adapter = null;
-                MySqlConnection connection = GetNextMySqlConnection(out ushort connectionIndex);
+                (MySqlConnection connection, ushort connectionIndex) = GetNextMySqlConnection();
 
                 try
                 {
@@ -1154,9 +1162,9 @@ namespace RIS.Connection.MySQL
                 catch (OperationCanceledException)
                 {
                     var exception = new TimeoutException($"MySQLRequest[{sql}] waiting timeout[{timeout}] or canceled");
-                    Events.DShowError?.Invoke(this,
+                    Events.OnError(this,
                         new RErrorEventArgs(exception.Message, exception.StackTrace));
-                    CurrentMySQLConnection.DShowError?.Invoke(this,
+                    CurrentMySQLConnection.OnError(this,
                         new RErrorEventArgs(exception.Message, exception.StackTrace));
 
                     adapter?.SelectCommand.Transaction?.Rollback();
@@ -1165,9 +1173,9 @@ namespace RIS.Connection.MySQL
                 }
                 catch (MySqlException ex)
                 {
-                    Events.DShowError?.Invoke(this,
+                    Events.OnError(this,
                         new RErrorEventArgs($"MySQLRequest[{sql}] execute error - " + ex.Message, ex.StackTrace));
-                    CurrentMySQLConnection.DShowError?.Invoke(this,
+                    CurrentMySQLConnection.OnError(this,
                         new RErrorEventArgs(ex.Message, ex.StackTrace));
 
                     adapter?.SelectCommand.Transaction?.Rollback();
@@ -1176,9 +1184,9 @@ namespace RIS.Connection.MySQL
                 }
                 catch (Exception ex)
                 {
-                    Events.DShowError?.Invoke(this,
+                    Events.OnError(this,
                         new RErrorEventArgs($"MySQLRequest[{sql}] execute error - " + ex.Message, ex.StackTrace));
-                    CurrentMySQLConnection.DShowError?.Invoke(this,
+                    CurrentMySQLConnection.OnError(this,
                         new RErrorEventArgs(ex.Message, ex.StackTrace));
 
                     adapter?.SelectCommand.Transaction?.Rollback();
@@ -1209,9 +1217,9 @@ namespace RIS.Connection.MySQL
                 catch (OperationCanceledException)
                 {
                     var exception = new TimeoutException($"MySQLRequest[unknown] waiting timeout[{timeout}] or canceled");
-                    Events.DShowError?.Invoke(this,
+                    Events.OnError(this,
                         new RErrorEventArgs(exception.Message, exception.StackTrace));
-                    CurrentMySQLConnection.DShowError?.Invoke(this,
+                    CurrentMySQLConnection.OnError(this,
                         new RErrorEventArgs(exception.Message, exception.StackTrace));
 
                     throw exception;
@@ -1329,9 +1337,9 @@ namespace RIS.Connection.MySQL
             if (!CurrentMySQLConnection.ConnectionComplete)
             {
                 var exception = new Exception("MySQLConnection is not open");
-                Events.DShowError?.Invoke(this,
+                Events.OnError(this,
                     new RErrorEventArgs(exception.Message, exception.StackTrace));
-                CurrentMySQLConnection.DShowError?.Invoke(this,
+                CurrentMySQLConnection.OnError(this,
                     new RErrorEventArgs(exception.Message, exception.StackTrace));
                 throw exception;
             }
@@ -1342,7 +1350,7 @@ namespace RIS.Connection.MySQL
             {
                 string sql = string.Empty;
                 MySqlCommand command = null;
-                MySqlConnection connection = GetNextMySqlConnection(out ushort connectionIndex);
+                (MySqlConnection connection, ushort connectionIndex) = GetNextMySqlConnection();
 
                 try
                 {
@@ -1358,9 +1366,9 @@ namespace RIS.Connection.MySQL
                 catch (OperationCanceledException)
                 {
                     var exception = new TimeoutException($"MySQLRequest[{sql}] waiting timeout[{timeout}] or canceled");
-                    Events.DShowError?.Invoke(this,
+                    Events.OnError(this,
                         new RErrorEventArgs(exception.Message, exception.StackTrace));
-                    CurrentMySQLConnection.DShowError?.Invoke(this,
+                    CurrentMySQLConnection.OnError(this,
                         new RErrorEventArgs(exception.Message, exception.StackTrace));
 
                     command?.Transaction?.Rollback();
@@ -1369,9 +1377,9 @@ namespace RIS.Connection.MySQL
                 }
                 catch (MySqlException ex)
                 {
-                    Events.DShowError?.Invoke(this,
+                    Events.OnError(this,
                         new RErrorEventArgs($"MySQLRequest[{sql}] execute error - " + ex.Message, ex.StackTrace));
-                    CurrentMySQLConnection.DShowError?.Invoke(this,
+                    CurrentMySQLConnection.OnError(this,
                         new RErrorEventArgs(ex.Message, ex.StackTrace));
 
                     command?.Transaction?.Rollback();
@@ -1380,9 +1388,9 @@ namespace RIS.Connection.MySQL
                 }
                 catch (Exception ex)
                 {
-                    Events.DShowError?.Invoke(this,
+                    Events.OnError(this,
                         new RErrorEventArgs($"MySQLRequest[{sql}] execute error - " + ex.Message, ex.StackTrace));
-                    CurrentMySQLConnection.DShowError?.Invoke(this,
+                    CurrentMySQLConnection.OnError(this,
                         new RErrorEventArgs(ex.Message, ex.StackTrace));
 
                     command?.Transaction?.Rollback();
@@ -1413,9 +1421,9 @@ namespace RIS.Connection.MySQL
                 catch (OperationCanceledException)
                 {
                     var exception = new TimeoutException($"MySQLRequest[unknown] waiting timeout[{timeout}] or canceled");
-                    Events.DShowError?.Invoke(this,
+                    Events.OnError(this,
                         new RErrorEventArgs(exception.Message, exception.StackTrace));
-                    CurrentMySQLConnection.DShowError?.Invoke(this,
+                    CurrentMySQLConnection.OnError(this,
                         new RErrorEventArgs(exception.Message, exception.StackTrace));
 
                     throw exception;
@@ -1550,9 +1558,9 @@ namespace RIS.Connection.MySQL
             if (!CurrentMySQLConnection.ConnectionComplete)
             {
                 var exception = new Exception("MySQLConnection is not open");
-                Events.DShowError?.Invoke(this,
+                Events.OnError(this,
                     new RErrorEventArgs(exception.Message, exception.StackTrace));
-                CurrentMySQLConnection.DShowError?.Invoke(this,
+                CurrentMySQLConnection.OnError(this,
                     new RErrorEventArgs(exception.Message, exception.StackTrace));
                 throw exception;
             }
@@ -1563,7 +1571,7 @@ namespace RIS.Connection.MySQL
             {
                 string sql = string.Empty;
                 MySqlCommand command = null;
-                MySqlConnection connection = GetNextMySqlConnection(out ushort connectionIndex);
+                (MySqlConnection connection, ushort connectionIndex) = GetNextMySqlConnection();
 
                 try
                 {
@@ -1589,9 +1597,9 @@ namespace RIS.Connection.MySQL
                 catch (OperationCanceledException)
                 {
                     var exception = new TimeoutException($"MySQLRequest[{sql}] waiting timeout[{timeout}] or canceled");
-                    Events.DShowError?.Invoke(this,
+                    Events.OnError(this,
                         new RErrorEventArgs(exception.Message, exception.StackTrace));
-                    CurrentMySQLConnection.DShowError?.Invoke(this,
+                    CurrentMySQLConnection.OnError(this,
                         new RErrorEventArgs(exception.Message, exception.StackTrace));
 
                     command?.Transaction?.Rollback();
@@ -1600,9 +1608,9 @@ namespace RIS.Connection.MySQL
                 }
                 catch (MySqlException ex)
                 {
-                    Events.DShowError?.Invoke(this,
+                    Events.OnError(this,
                         new RErrorEventArgs($"MySQLRequest[{sql}] execute error - " + ex.Message, ex.StackTrace));
-                    CurrentMySQLConnection.DShowError?.Invoke(this,
+                    CurrentMySQLConnection.OnError(this,
                         new RErrorEventArgs(ex.Message, ex.StackTrace));
 
                     command?.Transaction?.Rollback();
@@ -1611,9 +1619,9 @@ namespace RIS.Connection.MySQL
                 }
                 catch (Exception ex)
                 {
-                    Events.DShowError?.Invoke(this,
+                    Events.OnError(this,
                         new RErrorEventArgs($"MySQLRequest[{sql}] execute error - " + ex.Message, ex.StackTrace));
-                    CurrentMySQLConnection.DShowError?.Invoke(this,
+                    CurrentMySQLConnection.OnError(this,
                         new RErrorEventArgs(ex.Message, ex.StackTrace));
 
                     command?.Transaction?.Rollback();
@@ -1644,9 +1652,9 @@ namespace RIS.Connection.MySQL
                 catch (OperationCanceledException)
                 {
                     var exception = new TimeoutException($"MySQLRequest[unknown] waiting timeout[{timeout}] or canceled");
-                    Events.DShowError?.Invoke(this,
+                    Events.OnError(this,
                         new RErrorEventArgs(exception.Message, exception.StackTrace));
-                    CurrentMySQLConnection.DShowError?.Invoke(this,
+                    CurrentMySQLConnection.OnError(this,
                         new RErrorEventArgs(exception.Message, exception.StackTrace));
 
                     throw exception;
@@ -1778,9 +1786,9 @@ namespace RIS.Connection.MySQL
             if (!CurrentMySQLConnection.ConnectionComplete)
             {
                 var exception = new Exception("MySQLConnection is not open");
-                Events.DShowError?.Invoke(this,
+                Events.OnError(this,
                     new RErrorEventArgs(exception.Message, exception.StackTrace));
-                CurrentMySQLConnection.DShowError?.Invoke(this,
+                CurrentMySQLConnection.OnError(this,
                     new RErrorEventArgs(exception.Message, exception.StackTrace));
                 throw exception;
             }
@@ -1790,7 +1798,7 @@ namespace RIS.Connection.MySQL
             Task<Task> read = Task.Run(async () =>
             {
                 MySqlCommand command = null;
-                MySqlConnection connection = GetNextMySqlConnection(out ushort connectionIndex);
+                (MySqlConnection connection, ushort connectionIndex) = GetNextMySqlConnection();
 
                 StringBuilder sqlBuilder = new StringBuilder();
 
@@ -1835,9 +1843,9 @@ namespace RIS.Connection.MySQL
                 catch (OperationCanceledException)
                 {
                     var exception = new TimeoutException($"MySQLRequest[{sqlBuilder}] waiting timeout[{timeout}] or canceled");
-                    Events.DShowError?.Invoke(this, 
+                    Events.OnError(this,
                         new RErrorEventArgs(exception.Message, exception.StackTrace));
-                    CurrentMySQLConnection.DShowError?.Invoke(this, 
+                    CurrentMySQLConnection.OnError(this,
                         new RErrorEventArgs(exception.Message, exception.StackTrace));
 
                     command?.Transaction?.Rollback();
@@ -1846,9 +1854,9 @@ namespace RIS.Connection.MySQL
                 }
                 catch (MySqlException ex)
                 {
-                    Events.DShowError?.Invoke(this, 
+                    Events.OnError(this,
                         new RErrorEventArgs($"MySQLRequest[{sqlBuilder}] execute error - " + ex.Message, ex.StackTrace));
-                    CurrentMySQLConnection.DShowError?.Invoke(this, 
+                    CurrentMySQLConnection.OnError(this,
                         new RErrorEventArgs(ex.Message, ex.StackTrace));
 
                     command?.Transaction?.Rollback();
@@ -1857,9 +1865,9 @@ namespace RIS.Connection.MySQL
                 }
                 catch (Exception ex)
                 {
-                    Events.DShowError?.Invoke(this, 
+                    Events.OnError(this,
                         new RErrorEventArgs($"MySQLRequest[{sqlBuilder}] execute error - " + ex.Message, ex.StackTrace));
-                    CurrentMySQLConnection.DShowError?.Invoke(this, 
+                    CurrentMySQLConnection.OnError(this,
                         new RErrorEventArgs(ex.Message, ex.StackTrace));
 
                     command?.Transaction?.Rollback();
@@ -1890,9 +1898,9 @@ namespace RIS.Connection.MySQL
                 catch (OperationCanceledException)
                 {
                     var exception = new TimeoutException($"MySQLRequest[unknown] waiting timeout[{timeout}] or canceled");
-                    Events.DShowError?.Invoke(this,
+                    Events.OnError(this,
                         new RErrorEventArgs(exception.Message, exception.StackTrace));
-                    CurrentMySQLConnection.DShowError?.Invoke(this,
+                    CurrentMySQLConnection.OnError(this,
                         new RErrorEventArgs(exception.Message, exception.StackTrace));
 
                     throw exception;
@@ -2039,9 +2047,9 @@ namespace RIS.Connection.MySQL
             if (!CurrentMySQLConnection.ConnectionComplete)
             {
                 var exception = new Exception("MySQLConnection is not open");
-                Events.DShowError?.Invoke(this,
+                Events.OnError(this,
                     new RErrorEventArgs(exception.Message, exception.StackTrace));
-                CurrentMySQLConnection.DShowError?.Invoke(this,
+                CurrentMySQLConnection.OnError(this,
                     new RErrorEventArgs(exception.Message, exception.StackTrace));
                 throw exception;
             }
@@ -2051,7 +2059,7 @@ namespace RIS.Connection.MySQL
             Task<Task> read = Task.Run(async () =>
             {
                 MySqlCommand command = null;
-                MySqlConnection connection = GetNextMySqlConnection(out ushort connectionIndex);
+                (MySqlConnection connection, ushort connectionIndex) = GetNextMySqlConnection();
 
                 StringBuilder sqlBuilder = new StringBuilder();
 
@@ -2096,9 +2104,9 @@ namespace RIS.Connection.MySQL
                 catch (OperationCanceledException)
                 {
                     var exception = new TimeoutException($"MySQLRequest[{sqlBuilder}] waiting timeout[{timeout}] or canceled");
-                    Events.DShowError?.Invoke(this, 
+                    Events.OnError(this,
                         new RErrorEventArgs(exception.Message, exception.StackTrace));
-                    CurrentMySQLConnection.DShowError?.Invoke(this, 
+                    CurrentMySQLConnection.OnError(this,
                         new RErrorEventArgs(exception.Message, exception.StackTrace));
 
                     command?.Transaction?.Rollback();
@@ -2107,9 +2115,9 @@ namespace RIS.Connection.MySQL
                 }
                 catch (MySqlException ex)
                 {
-                    Events.DShowError?.Invoke(this, 
+                    Events.OnError(this,
                         new RErrorEventArgs($"MySQLRequest[{sqlBuilder}] execute error - " + ex.Message, ex.StackTrace));
-                    CurrentMySQLConnection.DShowError?.Invoke(this, 
+                    CurrentMySQLConnection.OnError(this,
                         new RErrorEventArgs(ex.Message, ex.StackTrace));
 
                     command?.Transaction?.Rollback();
@@ -2118,9 +2126,9 @@ namespace RIS.Connection.MySQL
                 }
                 catch (Exception ex)
                 {
-                    Events.DShowError?.Invoke(this, 
+                    Events.OnError(this,
                         new RErrorEventArgs($"MySQLRequest[{sqlBuilder}] execute error - " + ex.Message, ex.StackTrace));
-                    CurrentMySQLConnection.DShowError?.Invoke(this, 
+                    CurrentMySQLConnection.OnError(this,
                         new RErrorEventArgs(ex.Message, ex.StackTrace));
 
                     command?.Transaction?.Rollback();
@@ -2151,9 +2159,9 @@ namespace RIS.Connection.MySQL
                 catch (OperationCanceledException)
                 {
                     var exception = new TimeoutException($"MySQLRequest[unknown] waiting timeout[{timeout}] or canceled");
-                    Events.DShowError?.Invoke(this,
+                    Events.OnError(this,
                         new RErrorEventArgs(exception.Message, exception.StackTrace));
-                    CurrentMySQLConnection.DShowError?.Invoke(this,
+                    CurrentMySQLConnection.OnError(this,
                         new RErrorEventArgs(exception.Message, exception.StackTrace));
 
                     throw exception;
@@ -2311,9 +2319,9 @@ namespace RIS.Connection.MySQL
             if (!CurrentMySQLConnection.ConnectionComplete)
             {
                 var exception = new Exception("MySQLConnection is not open");
-                Events.DShowError?.Invoke(this,
+                Events.OnError(this,
                     new RErrorEventArgs(exception.Message, exception.StackTrace));
-                CurrentMySQLConnection.DShowError?.Invoke(this,
+                CurrentMySQLConnection.OnError(this,
                     new RErrorEventArgs(exception.Message, exception.StackTrace));
                 throw exception;
             }
@@ -2324,7 +2332,7 @@ namespace RIS.Connection.MySQL
             {
                 string sql = string.Empty;
                 MySqlDataAdapter adapter = null;
-                MySqlConnection connection = GetNextMySqlConnection(out ushort connectionIndex);
+                (MySqlConnection connection, ushort connectionIndex) = GetNextMySqlConnection();
                 
                 try
                 {
@@ -2356,9 +2364,9 @@ namespace RIS.Connection.MySQL
                 catch (OperationCanceledException)
                 {
                     var exception = new TimeoutException($"MySQLRequest[{sql}] waiting timeout[{timeout}] or canceled");
-                    Events.DShowError?.Invoke(this, 
+                    Events.OnError(this,
                         new RErrorEventArgs(exception.Message, exception.StackTrace));
-                    CurrentMySQLConnection.DShowError?.Invoke(this,
+                    CurrentMySQLConnection.OnError(this,
                         new RErrorEventArgs(exception.Message, exception.StackTrace));
 
                     adapter?.SelectCommand.Transaction?.Rollback();
@@ -2367,9 +2375,9 @@ namespace RIS.Connection.MySQL
                 }
                 catch (MySqlException ex)
                 {
-                    Events.DShowError?.Invoke(this,
+                    Events.OnError(this,
                         new RErrorEventArgs($"MySQLRequest[{sql}] execute error - " + ex.Message, ex.StackTrace));
-                    CurrentMySQLConnection.DShowError?.Invoke(this, 
+                    CurrentMySQLConnection.OnError(this,
                         new RErrorEventArgs(ex.Message, ex.StackTrace));
 
                     adapter?.SelectCommand.Transaction?.Rollback();
@@ -2378,9 +2386,9 @@ namespace RIS.Connection.MySQL
                 }
                 catch (Exception ex)
                 {
-                    Events.DShowError?.Invoke(this,
+                    Events.OnError(this,
                         new RErrorEventArgs($"MySQLRequest[{sql}] execute error - " + ex.Message, ex.StackTrace));
-                    CurrentMySQLConnection.DShowError?.Invoke(this, 
+                    CurrentMySQLConnection.OnError(this,
                         new RErrorEventArgs(ex.Message, ex.StackTrace));
 
                     adapter?.SelectCommand.Transaction?.Rollback();
@@ -2411,9 +2419,9 @@ namespace RIS.Connection.MySQL
                 catch (OperationCanceledException)
                 {
                     var exception = new TimeoutException($"MySQLRequest[unknown] waiting timeout[{timeout}] or canceled");
-                    Events.DShowError?.Invoke(this,
+                    Events.OnError(this,
                         new RErrorEventArgs(exception.Message, exception.StackTrace));
-                    CurrentMySQLConnection.DShowError?.Invoke(this,
+                    CurrentMySQLConnection.OnError(this,
                         new RErrorEventArgs(exception.Message, exception.StackTrace));
 
                     throw exception;
@@ -2596,9 +2604,9 @@ namespace RIS.Connection.MySQL
             if (!CurrentMySQLConnection.ConnectionComplete)
             {
                 var exception = new Exception("MySQLConnection is not open");
-                Events.DShowError?.Invoke(this,
+                Events.OnError(this,
                     new RErrorEventArgs(exception.Message, exception.StackTrace));
-                CurrentMySQLConnection.DShowError?.Invoke(this,
+                CurrentMySQLConnection.OnError(this,
                     new RErrorEventArgs(exception.Message, exception.StackTrace));
                 throw exception;
             }
@@ -2609,7 +2617,7 @@ namespace RIS.Connection.MySQL
             {
                 string sql = string.Empty;
                 MySqlDataAdapter adapter = null;
-                MySqlConnection connection = GetNextMySqlConnection(out ushort connectionIndex);
+                (MySqlConnection connection, ushort connectionIndex) = GetNextMySqlConnection();
 
                 try
                 {
@@ -2646,9 +2654,9 @@ namespace RIS.Connection.MySQL
                 catch (OperationCanceledException)
                 {
                     var exception = new TimeoutException($"MySQLRequest[{sql}] waiting timeout[{timeout}] or canceled");
-                    Events.DShowError?.Invoke(this, 
+                    Events.OnError(this,
                         new RErrorEventArgs(exception.Message, exception.StackTrace));
-                    CurrentMySQLConnection.DShowError?.Invoke(this,
+                    CurrentMySQLConnection.OnError(this,
                         new RErrorEventArgs(exception.Message, exception.StackTrace));
 
                     adapter?.SelectCommand.Transaction?.Rollback();
@@ -2657,9 +2665,9 @@ namespace RIS.Connection.MySQL
                 }
                 catch (MySqlException ex)
                 {
-                    Events.DShowError?.Invoke(this,
+                    Events.OnError(this,
                         new RErrorEventArgs($"MySQLRequest[{sql}] execute error - " + ex.Message, ex.StackTrace));
-                    CurrentMySQLConnection.DShowError?.Invoke(this, 
+                    CurrentMySQLConnection.OnError(this,
                         new RErrorEventArgs(ex.Message, ex.StackTrace));
 
                     adapter?.SelectCommand.Transaction?.Rollback();
@@ -2668,9 +2676,9 @@ namespace RIS.Connection.MySQL
                 }
                 catch (Exception ex)
                 {
-                    Events.DShowError?.Invoke(this,
+                    Events.OnError(this,
                         new RErrorEventArgs($"MySQLRequest[{sql}] execute error - " + ex.Message, ex.StackTrace));
-                    CurrentMySQLConnection.DShowError?.Invoke(this, 
+                    CurrentMySQLConnection.OnError(this,
                         new RErrorEventArgs(ex.Message, ex.StackTrace));
 
                     adapter?.SelectCommand.Transaction?.Rollback();
@@ -2701,9 +2709,9 @@ namespace RIS.Connection.MySQL
                 catch (OperationCanceledException)
                 {
                     var exception = new TimeoutException($"MySQLRequest[unknown] waiting timeout[{timeout}] or canceled");
-                    Events.DShowError?.Invoke(this,
+                    Events.OnError(this,
                         new RErrorEventArgs(exception.Message, exception.StackTrace));
-                    CurrentMySQLConnection.DShowError?.Invoke(this,
+                    CurrentMySQLConnection.OnError(this,
                         new RErrorEventArgs(exception.Message, exception.StackTrace));
 
                     throw exception;
@@ -2914,9 +2922,9 @@ namespace RIS.Connection.MySQL
             if (!CurrentMySQLConnection.ConnectionComplete)
             {
                 var exception = new Exception("MySQLConnection is not open");
-                Events.DShowError?.Invoke(this,
+                Events.OnError(this,
                     new RErrorEventArgs(exception.Message, exception.StackTrace));
-                CurrentMySQLConnection.DShowError?.Invoke(this,
+                CurrentMySQLConnection.OnError(this,
                     new RErrorEventArgs(exception.Message, exception.StackTrace));
                 throw exception;
             }
@@ -2927,7 +2935,7 @@ namespace RIS.Connection.MySQL
             {
                 string sql = string.Empty;
                 MySqlDataAdapter adapter = null;
-                MySqlConnection connection = GetNextMySqlConnection(out ushort connectionIndex);
+                (MySqlConnection connection, ushort connectionIndex) = GetNextMySqlConnection();
 
                 try
                 {
@@ -2969,9 +2977,9 @@ namespace RIS.Connection.MySQL
                 catch (OperationCanceledException)
                 {
                     var exception = new TimeoutException($"MySQLRequest[{sql}] waiting timeout[{timeout}] or canceled");
-                    Events.DShowError?.Invoke(this, 
+                    Events.OnError(this,
                         new RErrorEventArgs(exception.Message, exception.StackTrace));
-                    CurrentMySQLConnection.DShowError?.Invoke(this,
+                    CurrentMySQLConnection.OnError(this,
                         new RErrorEventArgs(exception.Message, exception.StackTrace));
 
                     adapter?.SelectCommand.Transaction?.Rollback();
@@ -2980,9 +2988,9 @@ namespace RIS.Connection.MySQL
                 }
                 catch (MySqlException ex)
                 {
-                    Events.DShowError?.Invoke(this,
+                    Events.OnError(this,
                         new RErrorEventArgs($"MySQLRequest[{sql}] execute error - " + ex.Message, ex.StackTrace));
-                    CurrentMySQLConnection.DShowError?.Invoke(this, 
+                    CurrentMySQLConnection.OnError(this,
                         new RErrorEventArgs(ex.Message, ex.StackTrace));
 
                     adapter?.SelectCommand.Transaction?.Rollback();
@@ -2991,9 +2999,9 @@ namespace RIS.Connection.MySQL
                 }
                 catch (Exception ex)
                 {
-                    Events.DShowError?.Invoke(this,
+                    Events.OnError(this,
                         new RErrorEventArgs($"MySQLRequest[{sql}] execute error - " + ex.Message, ex.StackTrace));
-                    CurrentMySQLConnection.DShowError?.Invoke(this, 
+                    CurrentMySQLConnection.OnError(this,
                         new RErrorEventArgs(ex.Message, ex.StackTrace));
 
                     adapter?.SelectCommand.Transaction?.Rollback();
@@ -3024,9 +3032,9 @@ namespace RIS.Connection.MySQL
                 catch (OperationCanceledException)
                 {
                     var exception = new TimeoutException($"MySQLRequest[unknown] waiting timeout[{timeout}] or canceled");
-                    Events.DShowError?.Invoke(this,
+                    Events.OnError(this,
                         new RErrorEventArgs(exception.Message, exception.StackTrace));
-                    CurrentMySQLConnection.DShowError?.Invoke(this,
+                    CurrentMySQLConnection.OnError(this,
                         new RErrorEventArgs(exception.Message, exception.StackTrace));
 
                     throw exception;
@@ -3203,9 +3211,9 @@ namespace RIS.Connection.MySQL
             if (!CurrentMySQLConnection.ConnectionComplete)
             {
                 var exception = new Exception("MySQLConnection is not open");
-                Events.DShowError?.Invoke(this,
+                Events.OnError(this,
                     new RErrorEventArgs(exception.Message, exception.StackTrace));
-                CurrentMySQLConnection.DShowError?.Invoke(this,
+                CurrentMySQLConnection.OnError(this,
                     new RErrorEventArgs(exception.Message, exception.StackTrace));
                 throw exception;
             }
@@ -3213,9 +3221,9 @@ namespace RIS.Connection.MySQL
             if (conditions.Length == 0)
             {
                 var exception = new ArgumentException("Count of conditions is 0");
-                Events.DShowError?.Invoke(this,
+                Events.OnError(this,
                     new RErrorEventArgs(exception.Message, exception.StackTrace));
-                CurrentMySQLConnection.DShowError?.Invoke(this,
+                CurrentMySQLConnection.OnError(this,
                     new RErrorEventArgs(exception.Message, exception.StackTrace));
                 throw exception;
             }
@@ -3225,7 +3233,7 @@ namespace RIS.Connection.MySQL
             Task<Task> read = Task.Run(async () =>
             {
                 MySqlDataAdapter adapter = null;
-                MySqlConnection connection = GetNextMySqlConnection(out ushort connectionIndex);
+                (MySqlConnection connection, ushort connectionIndex) = GetNextMySqlConnection();
 
                 StringBuilder sqlBuilder = new StringBuilder();
 
@@ -3276,9 +3284,9 @@ namespace RIS.Connection.MySQL
                 catch (OperationCanceledException)
                 {
                     var exception = new TimeoutException($"MySQLRequest[{sqlBuilder}] waiting timeout[{timeout}] or canceled");
-                    Events.DShowError?.Invoke(this, 
+                    Events.OnError(this,
                         new RErrorEventArgs(exception.Message, exception.StackTrace));
-                    CurrentMySQLConnection.DShowError?.Invoke(this,
+                    CurrentMySQLConnection.OnError(this,
                         new RErrorEventArgs(exception.Message, exception.StackTrace));
 
                     adapter?.SelectCommand.Transaction?.Rollback();
@@ -3287,9 +3295,9 @@ namespace RIS.Connection.MySQL
                 }
                 catch (MySqlException ex)
                 {
-                    Events.DShowError?.Invoke(this,
+                    Events.OnError(this,
                         new RErrorEventArgs($"MySQLRequest[{sqlBuilder}] execute error - " + ex.Message, ex.StackTrace));
-                    CurrentMySQLConnection.DShowError?.Invoke(this, 
+                    CurrentMySQLConnection.OnError(this,
                         new RErrorEventArgs(ex.Message, ex.StackTrace));
 
                     adapter?.SelectCommand.Transaction?.Rollback();
@@ -3298,9 +3306,9 @@ namespace RIS.Connection.MySQL
                 }
                 catch (Exception ex)
                 {
-                    Events.DShowError?.Invoke(this,
+                    Events.OnError(this,
                         new RErrorEventArgs($"MySQLRequest[{sqlBuilder}] execute error - " + ex.Message, ex.StackTrace));
-                    CurrentMySQLConnection.DShowError?.Invoke(this, 
+                    CurrentMySQLConnection.OnError(this,
                         new RErrorEventArgs(ex.Message, ex.StackTrace));
 
                     adapter?.SelectCommand.Transaction?.Rollback();
@@ -3331,9 +3339,9 @@ namespace RIS.Connection.MySQL
                 catch (OperationCanceledException)
                 {
                     var exception = new TimeoutException($"MySQLRequest[unknown] waiting timeout[{timeout}] or canceled");
-                    Events.DShowError?.Invoke(this,
+                    Events.OnError(this,
                         new RErrorEventArgs(exception.Message, exception.StackTrace));
-                    CurrentMySQLConnection.DShowError?.Invoke(this,
+                    CurrentMySQLConnection.OnError(this,
                         new RErrorEventArgs(exception.Message, exception.StackTrace));
 
                     throw exception;
@@ -3492,9 +3500,9 @@ namespace RIS.Connection.MySQL
             if (!CurrentMySQLConnection.ConnectionComplete)
             {
                 var exception = new Exception("MySQLConnection is not open");
-                Events.DShowError?.Invoke(this,
+                Events.OnError(this,
                     new RErrorEventArgs(exception.Message, exception.StackTrace));
-                CurrentMySQLConnection.DShowError?.Invoke(this,
+                CurrentMySQLConnection.OnError(this,
                     new RErrorEventArgs(exception.Message, exception.StackTrace));
                 throw exception;
             }
@@ -3505,7 +3513,7 @@ namespace RIS.Connection.MySQL
             {
                 string sql = string.Empty;
                 MySqlDataAdapter adapter = null;
-                MySqlConnection connection = GetNextMySqlConnection(out ushort connectionIndex);
+                (MySqlConnection connection, ushort connectionIndex) = GetNextMySqlConnection();
 
                 try
                 {
@@ -3541,9 +3549,9 @@ namespace RIS.Connection.MySQL
                 catch (OperationCanceledException)
                 {
                     var exception = new TimeoutException($"MySQLRequest[{sql}] waiting timeout[{timeout}] or canceled");
-                    Events.DShowError?.Invoke(this, 
+                    Events.OnError(this,
                         new RErrorEventArgs(exception.Message, exception.StackTrace));
-                    CurrentMySQLConnection.DShowError?.Invoke(this,
+                    CurrentMySQLConnection.OnError(this,
                         new RErrorEventArgs(exception.Message, exception.StackTrace));
 
                     adapter?.SelectCommand.Transaction?.Rollback();
@@ -3552,9 +3560,9 @@ namespace RIS.Connection.MySQL
                 }
                 catch (MySqlException ex)
                 {
-                    Events.DShowError?.Invoke(this,
+                    Events.OnError(this,
                         new RErrorEventArgs($"MySQLRequest[{sql}] execute error - " + ex.Message, ex.StackTrace));
-                    CurrentMySQLConnection.DShowError?.Invoke(this, 
+                    CurrentMySQLConnection.OnError(this,
                         new RErrorEventArgs(ex.Message, ex.StackTrace));
 
                     adapter?.SelectCommand.Transaction?.Rollback();
@@ -3563,9 +3571,9 @@ namespace RIS.Connection.MySQL
                 }
                 catch (Exception ex)
                 {
-                    Events.DShowError?.Invoke(this,
+                    Events.OnError(this,
                         new RErrorEventArgs($"MySQLRequest[{sql}] execute error - " + ex.Message, ex.StackTrace));
-                    CurrentMySQLConnection.DShowError?.Invoke(this, 
+                    CurrentMySQLConnection.OnError(this,
                         new RErrorEventArgs(ex.Message, ex.StackTrace));
 
                     adapter?.SelectCommand.Transaction?.Rollback();
@@ -3596,9 +3604,9 @@ namespace RIS.Connection.MySQL
                 catch (OperationCanceledException)
                 {
                     var exception = new TimeoutException($"MySQLRequest[unknown] waiting timeout[{timeout}] or canceled");
-                    Events.DShowError?.Invoke(this,
+                    Events.OnError(this,
                         new RErrorEventArgs(exception.Message, exception.StackTrace));
-                    CurrentMySQLConnection.DShowError?.Invoke(this,
+                    CurrentMySQLConnection.OnError(this,
                         new RErrorEventArgs(exception.Message, exception.StackTrace));
 
                     throw exception;
@@ -3734,9 +3742,9 @@ namespace RIS.Connection.MySQL
             if (!CurrentMySQLConnection.ConnectionComplete)
             {
                 var exception = new Exception("MySQLConnection is not open");
-                Events.DShowError?.Invoke(this,
+                Events.OnError(this,
                     new RErrorEventArgs(exception.Message, exception.StackTrace));
-                CurrentMySQLConnection.DShowError?.Invoke(this,
+                CurrentMySQLConnection.OnError(this,
                     new RErrorEventArgs(exception.Message, exception.StackTrace));
                 throw exception;
             }
@@ -3744,9 +3752,9 @@ namespace RIS.Connection.MySQL
             if (columns.Length == 0)
             {
                 var exception = new ArgumentException("Count of columns is 0");
-                Events.DShowError?.Invoke(this,
+                Events.OnError(this,
                     new RErrorEventArgs(exception.Message, exception.StackTrace));
-                CurrentMySQLConnection.DShowError?.Invoke(this,
+                CurrentMySQLConnection.OnError(this,
                     new RErrorEventArgs(exception.Message, exception.StackTrace));
                 throw exception;
             }
@@ -3756,7 +3764,7 @@ namespace RIS.Connection.MySQL
             Task<Task> read = Task.Run(async () =>
             {
                 MySqlDataAdapter adapter = null;
-                MySqlConnection connection = GetNextMySqlConnection(out ushort connectionIndex);
+                (MySqlConnection connection, ushort connectionIndex) = GetNextMySqlConnection();
 
                 StringBuilder sqlBuilder = new StringBuilder();
 
@@ -3801,9 +3809,9 @@ namespace RIS.Connection.MySQL
                 catch (OperationCanceledException)
                 {
                     var exception = new TimeoutException($"MySQLRequest[{sqlBuilder}] waiting timeout[{timeout}] or canceled");
-                    Events.DShowError?.Invoke(this, 
+                    Events.OnError(this,
                         new RErrorEventArgs(exception.Message, exception.StackTrace));
-                    CurrentMySQLConnection.DShowError?.Invoke(this,
+                    CurrentMySQLConnection.OnError(this,
                         new RErrorEventArgs(exception.Message, exception.StackTrace));
 
                     adapter?.SelectCommand.Transaction?.Rollback();
@@ -3812,9 +3820,9 @@ namespace RIS.Connection.MySQL
                 }
                 catch (MySqlException ex)
                 {
-                    Events.DShowError?.Invoke(this,
+                    Events.OnError(this,
                         new RErrorEventArgs($"MySQLRequest[{sqlBuilder}] execute error - " + ex.Message, ex.StackTrace));
-                    CurrentMySQLConnection.DShowError?.Invoke(this, 
+                    CurrentMySQLConnection.OnError(this,
                         new RErrorEventArgs(ex.Message, ex.StackTrace));
 
                     adapter?.SelectCommand.Transaction?.Rollback();
@@ -3823,9 +3831,9 @@ namespace RIS.Connection.MySQL
                 }
                 catch (Exception ex)
                 {
-                    Events.DShowError?.Invoke(this,
+                    Events.OnError(this,
                         new RErrorEventArgs($"MySQLRequest[{sqlBuilder}] execute error - " + ex.Message, ex.StackTrace));
-                    CurrentMySQLConnection.DShowError?.Invoke(this, 
+                    CurrentMySQLConnection.OnError(this,
                         new RErrorEventArgs(ex.Message, ex.StackTrace));
 
                     adapter?.SelectCommand.Transaction?.Rollback();
@@ -3856,9 +3864,9 @@ namespace RIS.Connection.MySQL
                 catch (OperationCanceledException)
                 {
                     var exception = new TimeoutException($"MySQLRequest[unknown] waiting timeout[{timeout}] or canceled");
-                    Events.DShowError?.Invoke(this,
+                    Events.OnError(this,
                         new RErrorEventArgs(exception.Message, exception.StackTrace));
-                    CurrentMySQLConnection.DShowError?.Invoke(this,
+                    CurrentMySQLConnection.OnError(this,
                         new RErrorEventArgs(exception.Message, exception.StackTrace));
 
                     throw exception;
@@ -4016,9 +4024,9 @@ namespace RIS.Connection.MySQL
             if (!CurrentMySQLConnection.ConnectionComplete)
             {
                 var exception = new Exception("MySQLConnection is not open");
-                Events.DShowError?.Invoke(this,
+                Events.OnError(this,
                     new RErrorEventArgs(exception.Message, exception.StackTrace));
-                CurrentMySQLConnection.DShowError?.Invoke(this,
+                CurrentMySQLConnection.OnError(this,
                     new RErrorEventArgs(exception.Message, exception.StackTrace));
                 throw exception;
             }
@@ -4029,7 +4037,7 @@ namespace RIS.Connection.MySQL
             {
                 string sql = string.Empty;
                 MySqlCommand command = null;
-                MySqlConnection connection = GetNextMySqlConnection(out ushort connectionIndex);
+                (MySqlConnection connection, ushort connectionIndex) = GetNextMySqlConnection();
 
                 try
                 {
@@ -4051,9 +4059,9 @@ namespace RIS.Connection.MySQL
                 catch (OperationCanceledException)
                 {
                     var exception = new TimeoutException($"MySQLRequest[{sql}] waiting timeout[{timeout}] or canceled");
-                    Events.DShowError?.Invoke(this,
+                    Events.OnError(this,
                         new RErrorEventArgs(exception.Message, exception.StackTrace));
-                    CurrentMySQLConnection.DShowError?.Invoke(this,
+                    CurrentMySQLConnection.OnError(this,
                         new RErrorEventArgs(exception.Message, exception.StackTrace));
 
                     command?.Transaction?.Rollback();
@@ -4062,9 +4070,9 @@ namespace RIS.Connection.MySQL
                 }
                 catch (MySqlException ex)
                 {
-                    Events.DShowError?.Invoke(this,
+                    Events.OnError(this,
                         new RErrorEventArgs($"MySQLRequest[{sql}] execute error - " + ex.Message, ex.StackTrace));
-                    CurrentMySQLConnection.DShowError?.Invoke(this,
+                    CurrentMySQLConnection.OnError(this,
                         new RErrorEventArgs(ex.Message, ex.StackTrace));
 
                     command?.Transaction?.Rollback();
@@ -4073,9 +4081,9 @@ namespace RIS.Connection.MySQL
                 }
                 catch (Exception ex)
                 {
-                    Events.DShowError?.Invoke(this,
+                    Events.OnError(this,
                         new RErrorEventArgs($"MySQLRequest[{sql}] execute error - " + ex.Message, ex.StackTrace));
-                    CurrentMySQLConnection.DShowError?.Invoke(this,
+                    CurrentMySQLConnection.OnError(this,
                         new RErrorEventArgs(ex.Message, ex.StackTrace));
 
                     command?.Transaction?.Rollback();
@@ -4106,9 +4114,9 @@ namespace RIS.Connection.MySQL
                 catch (OperationCanceledException)
                 {
                     var exception = new TimeoutException($"MySQLRequest[unknown] waiting timeout[{timeout}] or canceled");
-                    Events.DShowError?.Invoke(this,
+                    Events.OnError(this,
                         new RErrorEventArgs(exception.Message, exception.StackTrace));
-                    CurrentMySQLConnection.DShowError?.Invoke(this,
+                    CurrentMySQLConnection.OnError(this,
                         new RErrorEventArgs(exception.Message, exception.StackTrace));
 
                     throw exception;
@@ -4295,9 +4303,9 @@ namespace RIS.Connection.MySQL
             if (!CurrentMySQLConnection.ConnectionComplete)
             {
                 var exception = new Exception("MySQLConnection is not open");
-                Events.DShowError?.Invoke(this,
+                Events.OnError(this,
                     new RErrorEventArgs(exception.Message, exception.StackTrace));
-                CurrentMySQLConnection.DShowError?.Invoke(this,
+                CurrentMySQLConnection.OnError(this,
                     new RErrorEventArgs(exception.Message, exception.StackTrace));
                 throw exception;
             }
@@ -4308,7 +4316,7 @@ namespace RIS.Connection.MySQL
             {
                 string sql = string.Empty;
                 MySqlCommand command = null;
-                MySqlConnection connection = GetNextMySqlConnection(out ushort connectionIndex);
+                (MySqlConnection connection, ushort connectionIndex) = GetNextMySqlConnection();
 
                 try
                 {
@@ -4335,9 +4343,9 @@ namespace RIS.Connection.MySQL
                 catch (OperationCanceledException)
                 {
                     var exception = new TimeoutException($"MySQLRequest[{sql}] waiting timeout[{timeout}] or canceled");
-                    Events.DShowError?.Invoke(this,
+                    Events.OnError(this,
                         new RErrorEventArgs(exception.Message, exception.StackTrace));
-                    CurrentMySQLConnection.DShowError?.Invoke(this,
+                    CurrentMySQLConnection.OnError(this,
                         new RErrorEventArgs(exception.Message, exception.StackTrace));
 
                     command?.Transaction?.Rollback();
@@ -4346,9 +4354,9 @@ namespace RIS.Connection.MySQL
                 }
                 catch (MySqlException ex)
                 {
-                    Events.DShowError?.Invoke(this,
+                    Events.OnError(this,
                         new RErrorEventArgs($"MySQLRequest[{sql}] execute error - " + ex.Message, ex.StackTrace));
-                    CurrentMySQLConnection.DShowError?.Invoke(this,
+                    CurrentMySQLConnection.OnError(this,
                         new RErrorEventArgs(ex.Message, ex.StackTrace));
 
                     command?.Transaction?.Rollback();
@@ -4357,9 +4365,9 @@ namespace RIS.Connection.MySQL
                 }
                 catch (Exception ex)
                 {
-                    Events.DShowError?.Invoke(this,
+                    Events.OnError(this,
                         new RErrorEventArgs($"MySQLRequest[{sql}] execute error - " + ex.Message, ex.StackTrace));
-                    CurrentMySQLConnection.DShowError?.Invoke(this,
+                    CurrentMySQLConnection.OnError(this,
                         new RErrorEventArgs(ex.Message, ex.StackTrace));
 
                     command?.Transaction?.Rollback();
@@ -4390,9 +4398,9 @@ namespace RIS.Connection.MySQL
                 catch (OperationCanceledException)
                 {
                     var exception = new TimeoutException($"MySQLRequest[unknown] waiting timeout[{timeout}] or canceled");
-                    Events.DShowError?.Invoke(this,
+                    Events.OnError(this,
                         new RErrorEventArgs(exception.Message, exception.StackTrace));
-                    CurrentMySQLConnection.DShowError?.Invoke(this,
+                    CurrentMySQLConnection.OnError(this,
                         new RErrorEventArgs(exception.Message, exception.StackTrace));
 
                     throw exception;
@@ -4544,9 +4552,9 @@ namespace RIS.Connection.MySQL
             if (!CurrentMySQLConnection.ConnectionComplete)
             {
                 var exception = new Exception("MySQLConnection is not open");
-                Events.DShowError?.Invoke(this,
+                Events.OnError(this,
                     new RErrorEventArgs(exception.Message, exception.StackTrace));
-                CurrentMySQLConnection.DShowError?.Invoke(this,
+                CurrentMySQLConnection.OnError(this,
                     new RErrorEventArgs(exception.Message, exception.StackTrace));
                 throw exception;
             }
@@ -4554,9 +4562,9 @@ namespace RIS.Connection.MySQL
             if (conditions.Length == 0)
             {
                 var exception = new ArgumentException("Count of conditions is 0");
-                Events.DShowError?.Invoke(this,
+                Events.OnError(this,
                     new RErrorEventArgs(exception.Message, exception.StackTrace));
-                CurrentMySQLConnection.DShowError?.Invoke(this,
+                CurrentMySQLConnection.OnError(this,
                     new RErrorEventArgs(exception.Message, exception.StackTrace));
                 throw exception;
             }
@@ -4567,7 +4575,7 @@ namespace RIS.Connection.MySQL
             {
                 string sql = string.Empty;
                 MySqlCommand command = null;
-                MySqlConnection connection = GetNextMySqlConnection(out ushort connectionIndex);
+                (MySqlConnection connection, ushort connectionIndex) = GetNextMySqlConnection();
 
                 StringBuilder sqlBuilder = new StringBuilder();
 
@@ -4603,9 +4611,9 @@ namespace RIS.Connection.MySQL
                 catch (OperationCanceledException)
                 {
                     var exception = new TimeoutException($"MySQLRequest[{sql}] waiting timeout[{timeout}] or canceled");
-                    Events.DShowError?.Invoke(this,
+                    Events.OnError(this,
                         new RErrorEventArgs(exception.Message, exception.StackTrace));
-                    CurrentMySQLConnection.DShowError?.Invoke(this,
+                    CurrentMySQLConnection.OnError(this,
                         new RErrorEventArgs(exception.Message, exception.StackTrace));
 
                     command?.Transaction?.Rollback();
@@ -4614,9 +4622,9 @@ namespace RIS.Connection.MySQL
                 }
                 catch (MySqlException ex)
                 {
-                    Events.DShowError?.Invoke(this,
+                    Events.OnError(this,
                         new RErrorEventArgs($"MySQLRequest[{sql}] execute error - " + ex.Message, ex.StackTrace));
-                    CurrentMySQLConnection.DShowError?.Invoke(this,
+                    CurrentMySQLConnection.OnError(this,
                         new RErrorEventArgs(ex.Message, ex.StackTrace));
 
                     command?.Transaction?.Rollback();
@@ -4625,9 +4633,9 @@ namespace RIS.Connection.MySQL
                 }
                 catch (Exception ex)
                 {
-                    Events.DShowError?.Invoke(this,
+                    Events.OnError(this,
                         new RErrorEventArgs($"MySQLRequest[{sql}] execute error - " + ex.Message, ex.StackTrace));
-                    CurrentMySQLConnection.DShowError?.Invoke(this,
+                    CurrentMySQLConnection.OnError(this,
                         new RErrorEventArgs(ex.Message, ex.StackTrace));
 
                     command?.Transaction?.Rollback();
@@ -4658,9 +4666,9 @@ namespace RIS.Connection.MySQL
                 catch (OperationCanceledException)
                 {
                     var exception = new TimeoutException($"MySQLRequest[unknown] waiting timeout[{timeout}] or canceled");
-                    Events.DShowError?.Invoke(this,
+                    Events.OnError(this,
                         new RErrorEventArgs(exception.Message, exception.StackTrace));
-                    CurrentMySQLConnection.DShowError?.Invoke(this,
+                    CurrentMySQLConnection.OnError(this,
                         new RErrorEventArgs(exception.Message, exception.StackTrace));
 
                     throw exception;
@@ -4817,9 +4825,9 @@ namespace RIS.Connection.MySQL
             if (!CurrentMySQLConnection.ConnectionComplete)
             {
                 var exception = new Exception("MySQLConnection is not open");
-                Events.DShowError?.Invoke(this,
+                Events.OnError(this,
                     new RErrorEventArgs(exception.Message, exception.StackTrace));
-                CurrentMySQLConnection.DShowError?.Invoke(this,
+                CurrentMySQLConnection.OnError(this,
                     new RErrorEventArgs(exception.Message, exception.StackTrace));
                 throw exception;
             }
@@ -4830,7 +4838,7 @@ namespace RIS.Connection.MySQL
             {
                 string sql = string.Empty;
                 MySqlCommand command = null;
-                MySqlConnection connection = GetNextMySqlConnection(out ushort connectionIndex);
+                (MySqlConnection connection, ushort connectionIndex) = GetNextMySqlConnection();
                 
                 try
                 {
@@ -4852,9 +4860,9 @@ namespace RIS.Connection.MySQL
                 catch (OperationCanceledException)
                 {
                     var exception = new TimeoutException($"MySQLRequest[{sql}] waiting timeout[{timeout}] or canceled");
-                    Events.DShowError?.Invoke(this,
+                    Events.OnError(this,
                         new RErrorEventArgs(exception.Message, exception.StackTrace));
-                    CurrentMySQLConnection.DShowError?.Invoke(this,
+                    CurrentMySQLConnection.OnError(this,
                         new RErrorEventArgs(exception.Message, exception.StackTrace));
 
                     command?.Transaction?.Rollback();
@@ -4863,9 +4871,9 @@ namespace RIS.Connection.MySQL
                 }
                 catch (MySqlException ex)
                 {
-                    Events.DShowError?.Invoke(this,
+                    Events.OnError(this,
                         new RErrorEventArgs($"MySQLRequest[{sql}] execute error - " + ex.Message, ex.StackTrace));
-                    CurrentMySQLConnection.DShowError?.Invoke(this,
+                    CurrentMySQLConnection.OnError(this,
                         new RErrorEventArgs(ex.Message, ex.StackTrace));
 
                     command?.Transaction?.Rollback();
@@ -4874,9 +4882,9 @@ namespace RIS.Connection.MySQL
                 }
                 catch (Exception ex)
                 {
-                    Events.DShowError?.Invoke(this,
+                    Events.OnError(this,
                         new RErrorEventArgs($"MySQLRequest[{sql}] execute error - " + ex.Message, ex.StackTrace));
-                    CurrentMySQLConnection.DShowError?.Invoke(this,
+                    CurrentMySQLConnection.OnError(this,
                         new RErrorEventArgs(ex.Message, ex.StackTrace));
 
                     command?.Transaction?.Rollback();
@@ -4907,9 +4915,9 @@ namespace RIS.Connection.MySQL
                 catch (OperationCanceledException)
                 {
                     var exception = new TimeoutException($"MySQLRequest[unknown] waiting timeout[{timeout}] or canceled");
-                    Events.DShowError?.Invoke(this,
+                    Events.OnError(this,
                         new RErrorEventArgs(exception.Message, exception.StackTrace));
-                    CurrentMySQLConnection.DShowError?.Invoke(this,
+                    CurrentMySQLConnection.OnError(this,
                         new RErrorEventArgs(exception.Message, exception.StackTrace));
 
                     throw exception;
@@ -5096,9 +5104,9 @@ namespace RIS.Connection.MySQL
             if (!CurrentMySQLConnection.ConnectionComplete)
             {
                 var exception = new Exception("MySQLConnection is not open");
-                Events.DShowError?.Invoke(this,
+                Events.OnError(this,
                     new RErrorEventArgs(exception.Message, exception.StackTrace));
-                CurrentMySQLConnection.DShowError?.Invoke(this,
+                CurrentMySQLConnection.OnError(this,
                     new RErrorEventArgs(exception.Message, exception.StackTrace));
                 throw exception;
             }
@@ -5109,7 +5117,7 @@ namespace RIS.Connection.MySQL
             {
                 string sql = string.Empty;
                 MySqlCommand command = null;
-                MySqlConnection connection = GetNextMySqlConnection(out ushort connectionIndex);
+                (MySqlConnection connection, ushort connectionIndex) = GetNextMySqlConnection();
 
                 try
                 {
@@ -5136,9 +5144,9 @@ namespace RIS.Connection.MySQL
                 catch (OperationCanceledException)
                 {
                     var exception = new TimeoutException($"MySQLRequest[{sql}] waiting timeout[{timeout}] or canceled");
-                    Events.DShowError?.Invoke(this,
+                    Events.OnError(this,
                         new RErrorEventArgs(exception.Message, exception.StackTrace));
-                    CurrentMySQLConnection.DShowError?.Invoke(this,
+                    CurrentMySQLConnection.OnError(this,
                         new RErrorEventArgs(exception.Message, exception.StackTrace));
 
                     command?.Transaction?.Rollback();
@@ -5147,9 +5155,9 @@ namespace RIS.Connection.MySQL
                 }
                 catch (MySqlException ex)
                 {
-                    Events.DShowError?.Invoke(this,
+                    Events.OnError(this,
                         new RErrorEventArgs($"MySQLRequest[{sql}] execute error - " + ex.Message, ex.StackTrace));
-                    CurrentMySQLConnection.DShowError?.Invoke(this,
+                    CurrentMySQLConnection.OnError(this,
                         new RErrorEventArgs(ex.Message, ex.StackTrace));
 
                     command?.Transaction?.Rollback();
@@ -5158,9 +5166,9 @@ namespace RIS.Connection.MySQL
                 }
                 catch (Exception ex)
                 {
-                    Events.DShowError?.Invoke(this,
+                    Events.OnError(this,
                         new RErrorEventArgs($"MySQLRequest[{sql}] execute error - " + ex.Message, ex.StackTrace));
-                    CurrentMySQLConnection.DShowError?.Invoke(this,
+                    CurrentMySQLConnection.OnError(this,
                         new RErrorEventArgs(ex.Message, ex.StackTrace));
 
                     command?.Transaction?.Rollback();
@@ -5191,9 +5199,9 @@ namespace RIS.Connection.MySQL
                 catch (OperationCanceledException)
                 {
                     var exception = new TimeoutException($"MySQLRequest[unknown] waiting timeout[{timeout}] or canceled");
-                    Events.DShowError?.Invoke(this,
+                    Events.OnError(this,
                         new RErrorEventArgs(exception.Message, exception.StackTrace));
-                    CurrentMySQLConnection.DShowError?.Invoke(this,
+                    CurrentMySQLConnection.OnError(this,
                         new RErrorEventArgs(exception.Message, exception.StackTrace));
 
                     throw exception;
@@ -5345,9 +5353,9 @@ namespace RIS.Connection.MySQL
             if (!CurrentMySQLConnection.ConnectionComplete)
             {
                 var exception = new Exception("MySQLConnection is not open");
-                Events.DShowError?.Invoke(this,
+                Events.OnError(this,
                     new RErrorEventArgs(exception.Message, exception.StackTrace));
-                CurrentMySQLConnection.DShowError?.Invoke(this,
+                CurrentMySQLConnection.OnError(this,
                     new RErrorEventArgs(exception.Message, exception.StackTrace));
                 throw exception;
             }
@@ -5355,9 +5363,9 @@ namespace RIS.Connection.MySQL
             if (conditions.Length == 0)
             {
                 var exception = new ArgumentException("Count of conditions is 0");
-                Events.DShowError?.Invoke(this,
+                Events.OnError(this,
                     new RErrorEventArgs(exception.Message, exception.StackTrace));
-                CurrentMySQLConnection.DShowError?.Invoke(this,
+                CurrentMySQLConnection.OnError(this,
                     new RErrorEventArgs(exception.Message, exception.StackTrace));
                 throw exception;
             }
@@ -5368,7 +5376,7 @@ namespace RIS.Connection.MySQL
             {
                 string sql = string.Empty;
                 MySqlCommand command = null;
-                MySqlConnection connection = GetNextMySqlConnection(out ushort connectionIndex);
+                (MySqlConnection connection, ushort connectionIndex) = GetNextMySqlConnection();
                 
                 StringBuilder sqlBuilder = new StringBuilder();
 
@@ -5404,9 +5412,9 @@ namespace RIS.Connection.MySQL
                 catch (OperationCanceledException)
                 {
                     var exception = new TimeoutException($"MySQLRequest[{sql}] waiting timeout[{timeout}] or canceled");
-                    Events.DShowError?.Invoke(this,
+                    Events.OnError(this,
                         new RErrorEventArgs(exception.Message, exception.StackTrace));
-                    CurrentMySQLConnection.DShowError?.Invoke(this,
+                    CurrentMySQLConnection.OnError(this,
                         new RErrorEventArgs(exception.Message, exception.StackTrace));
 
                     command?.Transaction?.Rollback();
@@ -5415,9 +5423,9 @@ namespace RIS.Connection.MySQL
                 }
                 catch (MySqlException ex)
                 {
-                    Events.DShowError?.Invoke(this,
+                    Events.OnError(this,
                         new RErrorEventArgs($"MySQLRequest[{sql}] execute error - " + ex.Message, ex.StackTrace));
-                    CurrentMySQLConnection.DShowError?.Invoke(this,
+                    CurrentMySQLConnection.OnError(this,
                         new RErrorEventArgs(ex.Message, ex.StackTrace));
 
                     command?.Transaction?.Rollback();
@@ -5426,9 +5434,9 @@ namespace RIS.Connection.MySQL
                 }
                 catch (Exception ex)
                 {
-                    Events.DShowError?.Invoke(this,
+                    Events.OnError(this,
                         new RErrorEventArgs($"MySQLRequest[{sql}] execute error - " + ex.Message, ex.StackTrace));
-                    CurrentMySQLConnection.DShowError?.Invoke(this,
+                    CurrentMySQLConnection.OnError(this,
                         new RErrorEventArgs(ex.Message, ex.StackTrace));
 
                     command?.Transaction?.Rollback();
@@ -5459,9 +5467,9 @@ namespace RIS.Connection.MySQL
                 catch (OperationCanceledException)
                 {
                     var exception = new TimeoutException($"MySQLRequest[unknown] waiting timeout[{timeout}] or canceled");
-                    Events.DShowError?.Invoke(this,
+                    Events.OnError(this,
                         new RErrorEventArgs(exception.Message, exception.StackTrace));
-                    CurrentMySQLConnection.DShowError?.Invoke(this,
+                    CurrentMySQLConnection.OnError(this,
                         new RErrorEventArgs(exception.Message, exception.StackTrace));
 
                     throw exception;
@@ -5580,9 +5588,9 @@ namespace RIS.Connection.MySQL
             if (!CurrentMySQLConnection.ConnectionComplete)
             {
                 var exception = new Exception("MySQLConnection is not open");
-                Events.DShowError?.Invoke(this,
+                Events.OnError(this,
                     new RErrorEventArgs(exception.Message, exception.StackTrace));
-                CurrentMySQLConnection.DShowError?.Invoke(this,
+                CurrentMySQLConnection.OnError(this,
                     new RErrorEventArgs(exception.Message, exception.StackTrace));
                 throw exception;
             }
@@ -5593,7 +5601,7 @@ namespace RIS.Connection.MySQL
             {
                 string sql = string.Empty;
                 MySqlCommand command = null;
-                MySqlConnection connection = GetNextMySqlConnection(out ushort connectionIndex);
+                (MySqlConnection connection, ushort connectionIndex) = GetNextMySqlConnection();
 
                 try
                 {
@@ -5609,9 +5617,9 @@ namespace RIS.Connection.MySQL
                 catch (OperationCanceledException)
                 {
                     var exception = new TimeoutException($"MySQLRequest[{sql}] waiting timeout[{timeout}] or canceled");
-                    Events.DShowError?.Invoke(this,
+                    Events.OnError(this,
                         new RErrorEventArgs(exception.Message, exception.StackTrace));
-                    CurrentMySQLConnection.DShowError?.Invoke(this,
+                    CurrentMySQLConnection.OnError(this,
                         new RErrorEventArgs(exception.Message, exception.StackTrace));
 
                     command?.Transaction?.Rollback();
@@ -5620,9 +5628,9 @@ namespace RIS.Connection.MySQL
                 }
                 catch (MySqlException ex)
                 {
-                    Events.DShowError?.Invoke(this,
+                    Events.OnError(this,
                         new RErrorEventArgs($"MySQLRequest[{sql}] execute error - " + ex.Message, ex.StackTrace));
-                    CurrentMySQLConnection.DShowError?.Invoke(this,
+                    CurrentMySQLConnection.OnError(this,
                         new RErrorEventArgs(ex.Message, ex.StackTrace));
 
                     command?.Transaction?.Rollback();
@@ -5631,9 +5639,9 @@ namespace RIS.Connection.MySQL
                 }
                 catch (Exception ex)
                 {
-                    Events.DShowError?.Invoke(this,
+                    Events.OnError(this,
                         new RErrorEventArgs($"MySQLRequest[{sql}] execute error - " + ex.Message, ex.StackTrace));
-                    CurrentMySQLConnection.DShowError?.Invoke(this,
+                    CurrentMySQLConnection.OnError(this,
                         new RErrorEventArgs(ex.Message, ex.StackTrace));
 
                     command?.Transaction?.Rollback();
@@ -5664,9 +5672,9 @@ namespace RIS.Connection.MySQL
                 catch (OperationCanceledException)
                 {
                     var exception = new TimeoutException($"MySQLRequest[unknown] waiting timeout[{timeout}] or canceled");
-                    Events.DShowError?.Invoke(this,
+                    Events.OnError(this,
                         new RErrorEventArgs(exception.Message, exception.StackTrace));
-                    CurrentMySQLConnection.DShowError?.Invoke(this,
+                    CurrentMySQLConnection.OnError(this,
                         new RErrorEventArgs(exception.Message, exception.StackTrace));
 
                     throw exception;
@@ -5805,9 +5813,9 @@ namespace RIS.Connection.MySQL
             if (!CurrentMySQLConnection.ConnectionComplete)
             {
                 var exception = new Exception("MySQLConnection is not open");
-                Events.DShowError?.Invoke(this,
+                Events.OnError(this,
                     new RErrorEventArgs(exception.Message, exception.StackTrace));
-                CurrentMySQLConnection.DShowError?.Invoke(this,
+                CurrentMySQLConnection.OnError(this,
                     new RErrorEventArgs(exception.Message, exception.StackTrace));
                 throw exception;
             }
@@ -5818,7 +5826,7 @@ namespace RIS.Connection.MySQL
             {
                 string sql = string.Empty;
                 MySqlCommand command = null;
-                MySqlConnection connection = GetNextMySqlConnection(out ushort connectionIndex);
+                (MySqlConnection connection, ushort connectionIndex) = GetNextMySqlConnection();
                 
                 try
                 {
@@ -5839,9 +5847,9 @@ namespace RIS.Connection.MySQL
                 catch (OperationCanceledException)
                 {
                     var exception = new TimeoutException($"MySQLRequest[{sql}] waiting timeout[{timeout}] or canceled");
-                    Events.DShowError?.Invoke(this,
+                    Events.OnError(this,
                         new RErrorEventArgs(exception.Message, exception.StackTrace));
-                    CurrentMySQLConnection.DShowError?.Invoke(this,
+                    CurrentMySQLConnection.OnError(this,
                         new RErrorEventArgs(exception.Message, exception.StackTrace));
 
                     command?.Transaction?.Rollback();
@@ -5850,9 +5858,9 @@ namespace RIS.Connection.MySQL
                 }
                 catch (MySqlException ex)
                 {
-                    Events.DShowError?.Invoke(this,
+                    Events.OnError(this,
                         new RErrorEventArgs($"MySQLRequest[{sql}] execute error - " + ex.Message, ex.StackTrace));
-                    CurrentMySQLConnection.DShowError?.Invoke(this,
+                    CurrentMySQLConnection.OnError(this,
                         new RErrorEventArgs(ex.Message, ex.StackTrace));
 
                     command?.Transaction?.Rollback();
@@ -5861,9 +5869,9 @@ namespace RIS.Connection.MySQL
                 }
                 catch (Exception ex)
                 {
-                    Events.DShowError?.Invoke(this,
+                    Events.OnError(this,
                         new RErrorEventArgs($"MySQLRequest[{sql}] execute error - " + ex.Message, ex.StackTrace));
-                    CurrentMySQLConnection.DShowError?.Invoke(this,
+                    CurrentMySQLConnection.OnError(this,
                         new RErrorEventArgs(ex.Message, ex.StackTrace));
 
                     command?.Transaction?.Rollback();
@@ -5894,9 +5902,9 @@ namespace RIS.Connection.MySQL
                 catch (OperationCanceledException)
                 {
                     var exception = new TimeoutException($"MySQLRequest[unknown] waiting timeout[{timeout}] or canceled");
-                    Events.DShowError?.Invoke(this,
+                    Events.OnError(this,
                         new RErrorEventArgs(exception.Message, exception.StackTrace));
-                    CurrentMySQLConnection.DShowError?.Invoke(this,
+                    CurrentMySQLConnection.OnError(this,
                         new RErrorEventArgs(exception.Message, exception.StackTrace));
 
                     throw exception;
@@ -6066,9 +6074,9 @@ namespace RIS.Connection.MySQL
             if (!CurrentMySQLConnection.ConnectionComplete)
             {
                 var exception = new Exception("MySQLConnection is not open");
-                Events.DShowError?.Invoke(this,
+                Events.OnError(this,
                     new RErrorEventArgs(exception.Message, exception.StackTrace));
-                CurrentMySQLConnection.DShowError?.Invoke(this,
+                CurrentMySQLConnection.OnError(this,
                     new RErrorEventArgs(exception.Message, exception.StackTrace));
                 throw exception;
             }
@@ -6079,7 +6087,7 @@ namespace RIS.Connection.MySQL
             {
                 string sql = string.Empty;
                 MySqlCommand command = null;
-                MySqlConnection connection = GetNextMySqlConnection(out ushort connectionIndex);
+                (MySqlConnection connection, ushort connectionIndex) = GetNextMySqlConnection();
 
                 try
                 {
@@ -6105,9 +6113,9 @@ namespace RIS.Connection.MySQL
                 catch (OperationCanceledException)
                 {
                     var exception = new TimeoutException($"MySQLRequest[{sql}] waiting timeout[{timeout}] or canceled");
-                    Events.DShowError?.Invoke(this,
+                    Events.OnError(this,
                         new RErrorEventArgs(exception.Message, exception.StackTrace));
-                    CurrentMySQLConnection.DShowError?.Invoke(this,
+                    CurrentMySQLConnection.OnError(this,
                         new RErrorEventArgs(exception.Message, exception.StackTrace));
 
                     command?.Transaction?.Rollback();
@@ -6116,9 +6124,9 @@ namespace RIS.Connection.MySQL
                 }
                 catch (MySqlException ex)
                 {
-                    Events.DShowError?.Invoke(this,
+                    Events.OnError(this,
                         new RErrorEventArgs($"MySQLRequest[{sql}] execute error - " + ex.Message, ex.StackTrace));
-                    CurrentMySQLConnection.DShowError?.Invoke(this,
+                    CurrentMySQLConnection.OnError(this,
                         new RErrorEventArgs(ex.Message, ex.StackTrace));
 
                     command?.Transaction?.Rollback();
@@ -6127,9 +6135,9 @@ namespace RIS.Connection.MySQL
                 }
                 catch (Exception ex)
                 {
-                    Events.DShowError?.Invoke(this,
+                    Events.OnError(this,
                         new RErrorEventArgs($"MySQLRequest[{sql}] execute error - " + ex.Message, ex.StackTrace));
-                    CurrentMySQLConnection.DShowError?.Invoke(this,
+                    CurrentMySQLConnection.OnError(this,
                         new RErrorEventArgs(ex.Message, ex.StackTrace));
 
                     command?.Transaction?.Rollback();
@@ -6160,9 +6168,9 @@ namespace RIS.Connection.MySQL
                 catch (OperationCanceledException)
                 {
                     var exception = new TimeoutException($"MySQLRequest[unknown] waiting timeout[{timeout}] or canceled");
-                    Events.DShowError?.Invoke(this,
+                    Events.OnError(this,
                         new RErrorEventArgs(exception.Message, exception.StackTrace));
-                    CurrentMySQLConnection.DShowError?.Invoke(this,
+                    CurrentMySQLConnection.OnError(this,
                         new RErrorEventArgs(exception.Message, exception.StackTrace));
 
                     throw exception;
@@ -6297,9 +6305,9 @@ namespace RIS.Connection.MySQL
             if (!CurrentMySQLConnection.ConnectionComplete)
             {
                 var exception = new Exception("MySQLConnection is not open");
-                Events.DShowError?.Invoke(this,
+                Events.OnError(this,
                     new RErrorEventArgs(exception.Message, exception.StackTrace));
-                CurrentMySQLConnection.DShowError?.Invoke(this,
+                CurrentMySQLConnection.OnError(this,
                     new RErrorEventArgs(exception.Message, exception.StackTrace));
                 throw exception;
             }
@@ -6307,9 +6315,9 @@ namespace RIS.Connection.MySQL
             if (conditions.Length == 0)
             {
                 var exception = new ArgumentException("Count of conditions is 0");
-                Events.DShowError?.Invoke(this,
+                Events.OnError(this,
                     new RErrorEventArgs(exception.Message, exception.StackTrace));
-                CurrentMySQLConnection.DShowError?.Invoke(this,
+                CurrentMySQLConnection.OnError(this,
                     new RErrorEventArgs(exception.Message, exception.StackTrace));
                 throw exception;
             }
@@ -6319,7 +6327,7 @@ namespace RIS.Connection.MySQL
             Task<Task> read = Task.Run(async () =>
             {
                 MySqlCommand command = null;
-                MySqlConnection connection = GetNextMySqlConnection(out ushort connectionIndex);
+                (MySqlConnection connection, ushort connectionIndex) = GetNextMySqlConnection();
 
                 StringBuilder sqlBuilder = new StringBuilder();
 
@@ -6355,9 +6363,9 @@ namespace RIS.Connection.MySQL
                 catch (OperationCanceledException)
                 {
                     var exception = new TimeoutException($"MySQLRequest[{sqlBuilder}] waiting timeout[{timeout}] or canceled");
-                    Events.DShowError?.Invoke(this,
+                    Events.OnError(this,
                         new RErrorEventArgs(exception.Message, exception.StackTrace));
-                    CurrentMySQLConnection.DShowError?.Invoke(this,
+                    CurrentMySQLConnection.OnError(this,
                         new RErrorEventArgs(exception.Message, exception.StackTrace));
 
                     command?.Transaction?.Rollback();
@@ -6366,9 +6374,9 @@ namespace RIS.Connection.MySQL
                 }
                 catch (MySqlException ex)
                 {
-                    Events.DShowError?.Invoke(this,
+                    Events.OnError(this,
                         new RErrorEventArgs($"MySQLRequest[{sqlBuilder}] execute error - " + ex.Message, ex.StackTrace));
-                    CurrentMySQLConnection.DShowError?.Invoke(this,
+                    CurrentMySQLConnection.OnError(this,
                         new RErrorEventArgs(ex.Message, ex.StackTrace));
 
                     command?.Transaction?.Rollback();
@@ -6377,9 +6385,9 @@ namespace RIS.Connection.MySQL
                 }
                 catch (Exception ex)
                 {
-                    Events.DShowError?.Invoke(this,
+                    Events.OnError(this,
                         new RErrorEventArgs($"MySQLRequest[{sqlBuilder}] execute error - " + ex.Message, ex.StackTrace));
-                    CurrentMySQLConnection.DShowError?.Invoke(this,
+                    CurrentMySQLConnection.OnError(this,
                         new RErrorEventArgs(ex.Message, ex.StackTrace));
 
                     command?.Transaction?.Rollback();
@@ -6410,9 +6418,9 @@ namespace RIS.Connection.MySQL
                 catch (OperationCanceledException)
                 {
                     var exception = new TimeoutException($"MySQLRequest[unknown] waiting timeout[{timeout}] or canceled");
-                    Events.DShowError?.Invoke(this,
+                    Events.OnError(this,
                         new RErrorEventArgs(exception.Message, exception.StackTrace));
-                    CurrentMySQLConnection.DShowError?.Invoke(this,
+                    CurrentMySQLConnection.OnError(this,
                         new RErrorEventArgs(exception.Message, exception.StackTrace));
 
                     throw exception;
@@ -6553,9 +6561,9 @@ namespace RIS.Connection.MySQL
             if (!CurrentMySQLConnection.ConnectionComplete)
             {
                 var exception = new Exception("MySQLConnection is not open");
-                Events.DShowError?.Invoke(this,
+                Events.OnError(this,
                     new RErrorEventArgs(exception.Message, exception.StackTrace));
-                CurrentMySQLConnection.DShowError?.Invoke(this,
+                CurrentMySQLConnection.OnError(this,
                     new RErrorEventArgs(exception.Message, exception.StackTrace));
                 throw exception;
             }
@@ -6566,7 +6574,7 @@ namespace RIS.Connection.MySQL
             {
                 string sql = string.Empty;
                 MySqlCommand command = null;
-                MySqlConnection connection = GetNextMySqlConnection(out ushort connectionIndex);
+                (MySqlConnection connection, ushort connectionIndex) = GetNextMySqlConnection();
 
                 try
                 {
@@ -6591,9 +6599,9 @@ namespace RIS.Connection.MySQL
                 catch (OperationCanceledException)
                 {
                     var exception = new TimeoutException($"MySQLRequest[{sql}] waiting timeout[{timeout}] or canceled");
-                    Events.DShowError?.Invoke(this,
+                    Events.OnError(this,
                         new RErrorEventArgs(exception.Message, exception.StackTrace));
-                    CurrentMySQLConnection.DShowError?.Invoke(this,
+                    CurrentMySQLConnection.OnError(this,
                         new RErrorEventArgs(exception.Message, exception.StackTrace));
 
                     command?.Transaction?.Rollback();
@@ -6602,9 +6610,9 @@ namespace RIS.Connection.MySQL
                 }
                 catch (MySqlException ex)
                 {
-                    Events.DShowError?.Invoke(this,
+                    Events.OnError(this,
                         new RErrorEventArgs($"MySQLRequest[{sql}] execute error - " + ex.Message, ex.StackTrace));
-                    CurrentMySQLConnection.DShowError?.Invoke(this,
+                    CurrentMySQLConnection.OnError(this,
                         new RErrorEventArgs(ex.Message, ex.StackTrace));
 
                     command?.Transaction?.Rollback();
@@ -6613,9 +6621,9 @@ namespace RIS.Connection.MySQL
                 }
                 catch (Exception ex)
                 {
-                    Events.DShowError?.Invoke(this,
+                    Events.OnError(this,
                         new RErrorEventArgs($"MySQLRequest[{sql}] execute error - " + ex.Message, ex.StackTrace));
-                    CurrentMySQLConnection.DShowError?.Invoke(this,
+                    CurrentMySQLConnection.OnError(this,
                         new RErrorEventArgs(ex.Message, ex.StackTrace));
 
                     command?.Transaction?.Rollback();
@@ -6646,9 +6654,9 @@ namespace RIS.Connection.MySQL
                 catch (OperationCanceledException)
                 {
                     var exception = new TimeoutException($"MySQLRequest[unknown] waiting timeout[{timeout}] or canceled");
-                    Events.DShowError?.Invoke(this,
+                    Events.OnError(this,
                         new RErrorEventArgs(exception.Message, exception.StackTrace));
-                    CurrentMySQLConnection.DShowError?.Invoke(this,
+                    CurrentMySQLConnection.OnError(this,
                         new RErrorEventArgs(exception.Message, exception.StackTrace));
 
                     throw exception;
@@ -6816,9 +6824,9 @@ namespace RIS.Connection.MySQL
             if (!CurrentMySQLConnection.ConnectionComplete)
             {
                 var exception = new Exception("MySQLConnection is not open");
-                Events.DShowError?.Invoke(this,
+                Events.OnError(this,
                     new RErrorEventArgs(exception.Message, exception.StackTrace));
-                CurrentMySQLConnection.DShowError?.Invoke(this,
+                CurrentMySQLConnection.OnError(this,
                     new RErrorEventArgs(exception.Message, exception.StackTrace));
                 throw exception;
             }
@@ -6829,7 +6837,7 @@ namespace RIS.Connection.MySQL
             {
                 string sql = string.Empty;
                 MySqlCommand command = null;
-                MySqlConnection connection = GetNextMySqlConnection(out ushort connectionIndex);
+                (MySqlConnection connection, ushort connectionIndex) = GetNextMySqlConnection();
 
                 try
                 {
@@ -6860,9 +6868,9 @@ namespace RIS.Connection.MySQL
                 catch (OperationCanceledException)
                 {
                     var exception = new TimeoutException($"MySQLRequest[{sql}] waiting timeout[{timeout}] or canceled");
-                    Events.DShowError?.Invoke(this,
+                    Events.OnError(this,
                         new RErrorEventArgs(exception.Message, exception.StackTrace));
-                    CurrentMySQLConnection.DShowError?.Invoke(this,
+                    CurrentMySQLConnection.OnError(this,
                         new RErrorEventArgs(exception.Message, exception.StackTrace));
 
                     command?.Transaction?.Rollback();
@@ -6871,9 +6879,9 @@ namespace RIS.Connection.MySQL
                 }
                 catch (MySqlException ex)
                 {
-                    Events.DShowError?.Invoke(this,
+                    Events.OnError(this,
                         new RErrorEventArgs($"MySQLRequest[{sql}] execute error - " + ex.Message, ex.StackTrace));
-                    CurrentMySQLConnection.DShowError?.Invoke(this,
+                    CurrentMySQLConnection.OnError(this,
                         new RErrorEventArgs(ex.Message, ex.StackTrace));
 
                     command?.Transaction?.Rollback();
@@ -6882,9 +6890,9 @@ namespace RIS.Connection.MySQL
                 }
                 catch (Exception ex)
                 {
-                    Events.DShowError?.Invoke(this,
+                    Events.OnError(this,
                         new RErrorEventArgs($"MySQLRequest[{sql}] execute error - " + ex.Message, ex.StackTrace));
-                    CurrentMySQLConnection.DShowError?.Invoke(this,
+                    CurrentMySQLConnection.OnError(this,
                         new RErrorEventArgs(ex.Message, ex.StackTrace));
 
                     command?.Transaction?.Rollback();
@@ -6915,9 +6923,9 @@ namespace RIS.Connection.MySQL
                 catch (OperationCanceledException)
                 {
                     var exception = new TimeoutException($"MySQLRequest[unknown] waiting timeout[{timeout}] or canceled");
-                    Events.DShowError?.Invoke(this,
+                    Events.OnError(this,
                         new RErrorEventArgs(exception.Message, exception.StackTrace));
-                    CurrentMySQLConnection.DShowError?.Invoke(this,
+                    CurrentMySQLConnection.OnError(this,
                         new RErrorEventArgs(exception.Message, exception.StackTrace));
 
                     throw exception;
@@ -7111,9 +7119,9 @@ namespace RIS.Connection.MySQL
             if (!CurrentMySQLConnection.ConnectionComplete)
             {
                 var exception = new Exception("MySQLConnection is not open");
-                Events.DShowError?.Invoke(this,
+                Events.OnError(this,
                     new RErrorEventArgs(exception.Message, exception.StackTrace));
-                CurrentMySQLConnection.DShowError?.Invoke(this,
+                CurrentMySQLConnection.OnError(this,
                     new RErrorEventArgs(exception.Message, exception.StackTrace));
                 throw exception;
             }
@@ -7124,7 +7132,7 @@ namespace RIS.Connection.MySQL
             {
                 string sql = string.Empty;
                 MySqlCommand command = null;
-                MySqlConnection connection = GetNextMySqlConnection(out ushort connectionIndex);
+                (MySqlConnection connection, ushort connectionIndex) = GetNextMySqlConnection();
                 
                 try
                 {
@@ -7160,9 +7168,9 @@ namespace RIS.Connection.MySQL
                 catch (OperationCanceledException)
                 {
                     var exception = new TimeoutException($"MySQLRequest[{sql}] waiting timeout[{timeout}] or canceled");
-                    Events.DShowError?.Invoke(this,
+                    Events.OnError(this,
                         new RErrorEventArgs(exception.Message, exception.StackTrace));
-                    CurrentMySQLConnection.DShowError?.Invoke(this,
+                    CurrentMySQLConnection.OnError(this,
                         new RErrorEventArgs(exception.Message, exception.StackTrace));
 
                     command?.Transaction?.Rollback();
@@ -7171,9 +7179,9 @@ namespace RIS.Connection.MySQL
                 }
                 catch (MySqlException ex)
                 {
-                    Events.DShowError?.Invoke(this,
+                    Events.OnError(this,
                         new RErrorEventArgs($"MySQLRequest[{sql}] execute error - " + ex.Message, ex.StackTrace));
-                    CurrentMySQLConnection.DShowError?.Invoke(this,
+                    CurrentMySQLConnection.OnError(this,
                         new RErrorEventArgs(ex.Message, ex.StackTrace));
 
                     command?.Transaction?.Rollback();
@@ -7182,9 +7190,9 @@ namespace RIS.Connection.MySQL
                 }
                 catch (Exception ex)
                 {
-                    Events.DShowError?.Invoke(this,
+                    Events.OnError(this,
                         new RErrorEventArgs($"MySQLRequest[{sql}] execute error - " + ex.Message, ex.StackTrace));
-                    CurrentMySQLConnection.DShowError?.Invoke(this,
+                    CurrentMySQLConnection.OnError(this,
                         new RErrorEventArgs(ex.Message, ex.StackTrace));
 
                     command?.Transaction?.Rollback();
@@ -7215,9 +7223,9 @@ namespace RIS.Connection.MySQL
                 catch (OperationCanceledException)
                 {
                     var exception = new TimeoutException($"MySQLRequest[unknown] waiting timeout[{timeout}] or canceled");
-                    Events.DShowError?.Invoke(this,
+                    Events.OnError(this,
                         new RErrorEventArgs(exception.Message, exception.StackTrace));
-                    CurrentMySQLConnection.DShowError?.Invoke(this,
+                    CurrentMySQLConnection.OnError(this,
                         new RErrorEventArgs(exception.Message, exception.StackTrace));
 
                     throw exception;
@@ -7380,9 +7388,9 @@ namespace RIS.Connection.MySQL
             if (!CurrentMySQLConnection.ConnectionComplete)
             {
                 var exception = new Exception("MySQLConnection is not open");
-                Events.DShowError?.Invoke(this,
+                Events.OnError(this,
                     new RErrorEventArgs(exception.Message, exception.StackTrace));
-                CurrentMySQLConnection.DShowError?.Invoke(this,
+                CurrentMySQLConnection.OnError(this,
                     new RErrorEventArgs(exception.Message, exception.StackTrace));
                 throw exception;
             }
@@ -7390,9 +7398,9 @@ namespace RIS.Connection.MySQL
             if (conditions.Length == 0)
             {
                 var exception = new ArgumentException("Count of conditions is 0");
-                Events.DShowError?.Invoke(this,
+                Events.OnError(this,
                     new RErrorEventArgs(exception.Message, exception.StackTrace));
-                CurrentMySQLConnection.DShowError?.Invoke(this,
+                CurrentMySQLConnection.OnError(this,
                     new RErrorEventArgs(exception.Message, exception.StackTrace));
                 throw exception;
             }
@@ -7402,7 +7410,7 @@ namespace RIS.Connection.MySQL
             Task<Task> read = Task.Run(async () =>
             {
                 MySqlCommand command = null;
-                MySqlConnection connection = GetNextMySqlConnection(out ushort connectionIndex);
+                (MySqlConnection connection, ushort connectionIndex) = GetNextMySqlConnection();
 
                 StringBuilder sqlBuilder = new StringBuilder();
 
@@ -7447,9 +7455,9 @@ namespace RIS.Connection.MySQL
                 catch (OperationCanceledException)
                 {
                     var exception = new TimeoutException($"MySQLRequest[{sqlBuilder}] waiting timeout[{timeout}] or canceled");
-                    Events.DShowError?.Invoke(this,
+                    Events.OnError(this,
                         new RErrorEventArgs(exception.Message, exception.StackTrace));
-                    CurrentMySQLConnection.DShowError?.Invoke(this,
+                    CurrentMySQLConnection.OnError(this,
                         new RErrorEventArgs(exception.Message, exception.StackTrace));
 
                     command?.Transaction?.Rollback();
@@ -7458,9 +7466,9 @@ namespace RIS.Connection.MySQL
                 }
                 catch (MySqlException ex)
                 {
-                    Events.DShowError?.Invoke(this,
+                    Events.OnError(this,
                         new RErrorEventArgs($"MySQLRequest[{sqlBuilder}] execute error - " + ex.Message, ex.StackTrace));
-                    CurrentMySQLConnection.DShowError?.Invoke(this,
+                    CurrentMySQLConnection.OnError(this,
                         new RErrorEventArgs(ex.Message, ex.StackTrace));
 
                     command?.Transaction?.Rollback();
@@ -7469,9 +7477,9 @@ namespace RIS.Connection.MySQL
                 }
                 catch (Exception ex)
                 {
-                    Events.DShowError?.Invoke(this,
+                    Events.OnError(this,
                         new RErrorEventArgs($"MySQLRequest[{sqlBuilder}] execute error - " + ex.Message, ex.StackTrace));
-                    CurrentMySQLConnection.DShowError?.Invoke(this,
+                    CurrentMySQLConnection.OnError(this,
                         new RErrorEventArgs(ex.Message, ex.StackTrace));
 
                     command?.Transaction?.Rollback();
@@ -7502,9 +7510,9 @@ namespace RIS.Connection.MySQL
                 catch (OperationCanceledException)
                 {
                     var exception = new TimeoutException($"MySQLRequest[unknown] waiting timeout[{timeout}] or canceled");
-                    Events.DShowError?.Invoke(this,
+                    Events.OnError(this,
                         new RErrorEventArgs(exception.Message, exception.StackTrace));
-                    CurrentMySQLConnection.DShowError?.Invoke(this,
+                    CurrentMySQLConnection.OnError(this,
                         new RErrorEventArgs(exception.Message, exception.StackTrace));
 
                     throw exception;
@@ -7636,9 +7644,9 @@ namespace RIS.Connection.MySQL
             if (!CurrentMySQLConnection.ConnectionComplete)
             {
                 var exception = new Exception("MySQLConnection is not open");
-                Events.DShowError?.Invoke(this,
+                Events.OnError(this,
                     new RErrorEventArgs(exception.Message, exception.StackTrace));
-                CurrentMySQLConnection.DShowError?.Invoke(this,
+                CurrentMySQLConnection.OnError(this,
                     new RErrorEventArgs(exception.Message, exception.StackTrace));
                 throw exception;
             }
@@ -7648,7 +7656,7 @@ namespace RIS.Connection.MySQL
             Task<Task> read = Task.Run(async () =>
             {
                 MySqlCommand command = null;
-                MySqlConnection connection = GetNextMySqlConnection(out ushort connectionIndex);
+                (MySqlConnection connection, ushort connectionIndex) = GetNextMySqlConnection();
 
                 StringBuilder sqlBuilder = new StringBuilder();
 
@@ -7692,9 +7700,9 @@ namespace RIS.Connection.MySQL
                 catch (OperationCanceledException)
                 {
                     var exception = new TimeoutException($"MySQLRequest[{sqlBuilder}] waiting timeout[{timeout}] or canceled");
-                    Events.DShowError?.Invoke(this,
+                    Events.OnError(this,
                         new RErrorEventArgs(exception.Message, exception.StackTrace));
-                    CurrentMySQLConnection.DShowError?.Invoke(this,
+                    CurrentMySQLConnection.OnError(this,
                         new RErrorEventArgs(exception.Message, exception.StackTrace));
 
                     command?.Transaction?.Rollback();
@@ -7703,9 +7711,9 @@ namespace RIS.Connection.MySQL
                 }
                 catch (MySqlException ex)
                 {
-                    Events.DShowError?.Invoke(this,
+                    Events.OnError(this,
                         new RErrorEventArgs($"MySQLRequest[{sqlBuilder}] execute error - " + ex.Message, ex.StackTrace));
-                    CurrentMySQLConnection.DShowError?.Invoke(this,
+                    CurrentMySQLConnection.OnError(this,
                         new RErrorEventArgs(ex.Message, ex.StackTrace));
 
                     command?.Transaction?.Rollback();
@@ -7714,9 +7722,9 @@ namespace RIS.Connection.MySQL
                 }
                 catch (Exception ex)
                 {
-                    Events.DShowError?.Invoke(this,
+                    Events.OnError(this,
                         new RErrorEventArgs($"MySQLRequest[{sqlBuilder}] execute error - " + ex.Message, ex.StackTrace));
-                    CurrentMySQLConnection.DShowError?.Invoke(this,
+                    CurrentMySQLConnection.OnError(this,
                         new RErrorEventArgs(ex.Message, ex.StackTrace));
 
                     command?.Transaction?.Rollback();
@@ -7747,9 +7755,9 @@ namespace RIS.Connection.MySQL
                 catch (OperationCanceledException)
                 {
                     var exception = new TimeoutException($"MySQLRequest[unknown] waiting timeout[{timeout}] or canceled");
-                    Events.DShowError?.Invoke(this,
+                    Events.OnError(this,
                         new RErrorEventArgs(exception.Message, exception.StackTrace));
-                    CurrentMySQLConnection.DShowError?.Invoke(this,
+                    CurrentMySQLConnection.OnError(this,
                         new RErrorEventArgs(exception.Message, exception.StackTrace));
 
                     throw exception;
@@ -7868,9 +7876,9 @@ namespace RIS.Connection.MySQL
             if (!CurrentMySQLConnection.ConnectionComplete)
             {
                 var exception = new Exception("MySQLConnection is not open");
-                Events.DShowError?.Invoke(this,
+                Events.OnError(this,
                     new RErrorEventArgs(exception.Message, exception.StackTrace));
-                CurrentMySQLConnection.DShowError?.Invoke(this,
+                CurrentMySQLConnection.OnError(this,
                     new RErrorEventArgs(exception.Message, exception.StackTrace));
                 throw exception;
             }
@@ -7881,7 +7889,7 @@ namespace RIS.Connection.MySQL
             {
                 string sql = string.Empty;
                 MySqlCommand command = null;
-                MySqlConnection connection = GetNextMySqlConnection(out ushort connectionIndex);
+                (MySqlConnection connection, ushort connectionIndex) = GetNextMySqlConnection();
                 
                 try
                 {
@@ -7897,9 +7905,9 @@ namespace RIS.Connection.MySQL
                 catch (OperationCanceledException)
                 {
                     var exception = new TimeoutException($"MySQLRequest[{sql}] waiting timeout[{timeout}] or canceled");
-                    Events.DShowError?.Invoke(this,
+                    Events.OnError(this,
                         new RErrorEventArgs(exception.Message, exception.StackTrace));
-                    CurrentMySQLConnection.DShowError?.Invoke(this,
+                    CurrentMySQLConnection.OnError(this,
                         new RErrorEventArgs(exception.Message, exception.StackTrace));
 
                     command?.Transaction?.Rollback();
@@ -7908,9 +7916,9 @@ namespace RIS.Connection.MySQL
                 }
                 catch (MySqlException ex)
                 {
-                    Events.DShowError?.Invoke(this,
+                    Events.OnError(this,
                         new RErrorEventArgs($"MySQLRequest[{sql}] execute error - " + ex.Message, ex.StackTrace));
-                    CurrentMySQLConnection.DShowError?.Invoke(this,
+                    CurrentMySQLConnection.OnError(this,
                         new RErrorEventArgs(ex.Message, ex.StackTrace));
 
                     command?.Transaction?.Rollback();
@@ -7919,9 +7927,9 @@ namespace RIS.Connection.MySQL
                 }
                 catch (Exception ex)
                 {
-                    Events.DShowError?.Invoke(this,
+                    Events.OnError(this,
                         new RErrorEventArgs($"MySQLRequest[{sql}] execute error - " + ex.Message, ex.StackTrace));
-                    CurrentMySQLConnection.DShowError?.Invoke(this,
+                    CurrentMySQLConnection.OnError(this,
                         new RErrorEventArgs(ex.Message, ex.StackTrace));
 
                     command?.Transaction?.Rollback();
@@ -7952,9 +7960,9 @@ namespace RIS.Connection.MySQL
                 catch (OperationCanceledException)
                 {
                     var exception = new TimeoutException($"MySQLRequest[unknown] waiting timeout[{timeout}] or canceled");
-                    Events.DShowError?.Invoke(this,
+                    Events.OnError(this,
                         new RErrorEventArgs(exception.Message, exception.StackTrace));
-                    CurrentMySQLConnection.DShowError?.Invoke(this,
+                    CurrentMySQLConnection.OnError(this,
                         new RErrorEventArgs(exception.Message, exception.StackTrace));
 
                     throw exception;
@@ -8117,9 +8125,9 @@ namespace RIS.Connection.MySQL
             if (!CurrentMySQLConnection.ConnectionComplete)
             {
                 var exception = new Exception("MySQLConnection is not open");
-                Events.DShowError?.Invoke(this,
+                Events.OnError(this,
                     new RErrorEventArgs(exception.Message, exception.StackTrace));
-                CurrentMySQLConnection.DShowError?.Invoke(this,
+                CurrentMySQLConnection.OnError(this,
                     new RErrorEventArgs(exception.Message, exception.StackTrace));
                 throw exception;
             }
@@ -8130,7 +8138,7 @@ namespace RIS.Connection.MySQL
             {
                 string sql = string.Empty;
                 MySqlCommand command = null;
-                MySqlConnection connection = GetNextMySqlConnection(out ushort connectionIndex);
+                (MySqlConnection connection, ushort connectionIndex) = GetNextMySqlConnection();
 
                 StringBuilder sqlBuilder = new StringBuilder();
 
@@ -8198,9 +8206,9 @@ namespace RIS.Connection.MySQL
                 catch (OperationCanceledException)
                 {
                     var exception = new TimeoutException($"MySQLRequest[{sqlBuilder}] waiting timeout[{timeout}] or canceled");
-                    Events.DShowError?.Invoke(this,
+                    Events.OnError(this,
                         new RErrorEventArgs(exception.Message, exception.StackTrace));
-                    CurrentMySQLConnection.DShowError?.Invoke(this,
+                    CurrentMySQLConnection.OnError(this,
                         new RErrorEventArgs(exception.Message, exception.StackTrace));
 
                     command?.Transaction?.Rollback();
@@ -8209,9 +8217,9 @@ namespace RIS.Connection.MySQL
                 }
                 catch (MySqlException ex)
                 {
-                    Events.DShowError?.Invoke(this,
+                    Events.OnError(this,
                         new RErrorEventArgs($"MySQLRequest[{sqlBuilder}] execute error - " + ex.Message, ex.StackTrace));
-                    CurrentMySQLConnection.DShowError?.Invoke(this,
+                    CurrentMySQLConnection.OnError(this,
                         new RErrorEventArgs(ex.Message, ex.StackTrace));
 
                     command?.Transaction?.Rollback();
@@ -8220,9 +8228,9 @@ namespace RIS.Connection.MySQL
                 }
                 catch (Exception ex)
                 {
-                    Events.DShowError?.Invoke(this,
+                    Events.OnError(this,
                         new RErrorEventArgs($"MySQLRequest[{sqlBuilder}] execute error - " + ex.Message, ex.StackTrace));
-                    CurrentMySQLConnection.DShowError?.Invoke(this,
+                    CurrentMySQLConnection.OnError(this,
                         new RErrorEventArgs(ex.Message, ex.StackTrace));
 
                     command?.Transaction?.Rollback();
@@ -8253,9 +8261,9 @@ namespace RIS.Connection.MySQL
                 catch (OperationCanceledException)
                 {
                     var exception = new TimeoutException($"MySQLRequest[unknown] waiting timeout[{timeout}] or canceled");
-                    Events.DShowError?.Invoke(this,
+                    Events.OnError(this,
                         new RErrorEventArgs(exception.Message, exception.StackTrace));
-                    CurrentMySQLConnection.DShowError?.Invoke(this,
+                    CurrentMySQLConnection.OnError(this,
                         new RErrorEventArgs(exception.Message, exception.StackTrace));
 
                     throw exception;
@@ -8430,9 +8438,9 @@ namespace RIS.Connection.MySQL
             if (!CurrentMySQLConnection.ConnectionComplete)
             {
                 var exception = new Exception("MySQLConnection is not open");
-                Events.DShowError?.Invoke(this,
+                Events.OnError(this,
                     new RErrorEventArgs(exception.Message, exception.StackTrace));
-                CurrentMySQLConnection.DShowError?.Invoke(this,
+                CurrentMySQLConnection.OnError(this,
                     new RErrorEventArgs(exception.Message, exception.StackTrace));
                 throw exception;
             }
@@ -8443,7 +8451,7 @@ namespace RIS.Connection.MySQL
             {
                 string sql = string.Empty;
                 MySqlCommand command = null;
-                MySqlConnection connection = GetNextMySqlConnection(out ushort connectionIndex);
+                (MySqlConnection connection, ushort connectionIndex) = GetNextMySqlConnection();
 
                 StringBuilder sqlBuilder = new StringBuilder();
 
@@ -8511,9 +8519,9 @@ namespace RIS.Connection.MySQL
                 catch (OperationCanceledException)
                 {
                     var exception = new TimeoutException($"MySQLRequest[{sqlBuilder}] waiting timeout[{timeout}] or canceled");
-                    Events.DShowError?.Invoke(this,
+                    Events.OnError(this,
                         new RErrorEventArgs(exception.Message, exception.StackTrace));
-                    CurrentMySQLConnection.DShowError?.Invoke(this,
+                    CurrentMySQLConnection.OnError(this,
                         new RErrorEventArgs(exception.Message, exception.StackTrace));
 
                     command?.Transaction?.Rollback();
@@ -8522,9 +8530,9 @@ namespace RIS.Connection.MySQL
                 }
                 catch (MySqlException ex)
                 {
-                    Events.DShowError?.Invoke(this,
+                    Events.OnError(this,
                         new RErrorEventArgs($"MySQLRequest[{sqlBuilder}] execute error - " + ex.Message, ex.StackTrace));
-                    CurrentMySQLConnection.DShowError?.Invoke(this,
+                    CurrentMySQLConnection.OnError(this,
                         new RErrorEventArgs(ex.Message, ex.StackTrace));
 
                     command?.Transaction?.Rollback();
@@ -8533,9 +8541,9 @@ namespace RIS.Connection.MySQL
                 }
                 catch (Exception ex)
                 {
-                    Events.DShowError?.Invoke(this,
+                    Events.OnError(this,
                         new RErrorEventArgs($"MySQLRequest[{sqlBuilder}] execute error - " + ex.Message, ex.StackTrace));
-                    CurrentMySQLConnection.DShowError?.Invoke(this,
+                    CurrentMySQLConnection.OnError(this,
                         new RErrorEventArgs(ex.Message, ex.StackTrace));
 
                     command?.Transaction?.Rollback();
@@ -8566,9 +8574,9 @@ namespace RIS.Connection.MySQL
                 catch (OperationCanceledException)
                 {
                     var exception = new TimeoutException($"MySQLRequest[unknown] waiting timeout[{timeout}] or canceled");
-                    Events.DShowError?.Invoke(this,
+                    Events.OnError(this,
                         new RErrorEventArgs(exception.Message, exception.StackTrace));
-                    CurrentMySQLConnection.DShowError?.Invoke(this,
+                    CurrentMySQLConnection.OnError(this,
                         new RErrorEventArgs(exception.Message, exception.StackTrace));
 
                     throw exception;

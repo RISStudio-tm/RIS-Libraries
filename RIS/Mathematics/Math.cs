@@ -5,8 +5,36 @@ namespace RIS.Mathematics
 {
     public static class Math
     {
-        public static event EventHandler<RMessageEventArgs> ShowMessage;
-        public static event EventHandler<RErrorEventArgs> ShowError;
+        public static event EventHandler<RInformationEventArgs> Information;
+		public static event EventHandler<RWarningEventArgs> Warning;
+		public static event EventHandler<RErrorEventArgs> Error;
+
+        public static void OnInformation(RInformationEventArgs e)
+        {
+            OnInformation(null, e);
+        }
+        public static void OnInformation(object sender, RInformationEventArgs e)
+        {
+            Information?.Invoke(sender, e);
+        }
+
+        public static void OnWarning(RWarningEventArgs e)
+        {
+            OnWarning(null, e);
+        }
+        public static void OnWarning(object sender, RWarningEventArgs e)
+        {
+            Warning?.Invoke(sender, e);
+        }
+
+        public static void OnError(RErrorEventArgs e)
+        {
+            OnError(null, e);
+        }
+        public static void OnError(object sender, RErrorEventArgs e)
+        {
+            Error?.Invoke(sender, e);
+        }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool AlmostEquals(double number1, double number2, double precision)
@@ -96,8 +124,8 @@ namespace RIS.Mathematics
             if (number > 64)
             {
                 var exception = new ArgumentException($"Невозможно найти следующую степень двойки для числа {number}", nameof(number));
-                Events.DShowError?.Invoke(null, new RErrorEventArgs(exception.Message, exception.StackTrace));
-                ShowError?.Invoke(null, new RErrorEventArgs(exception.Message, exception.StackTrace));
+                Events.OnError(new RErrorEventArgs(exception.Message, exception.StackTrace));
+                OnError(new RErrorEventArgs(exception.Message, exception.StackTrace));
                 throw exception;
             }
 
@@ -112,8 +140,8 @@ namespace RIS.Mathematics
             if (number > 128)
             {
                 var exception = new ArgumentException($"Невозможно найти следующую степень двойки для числа {number}", nameof(number));
-                Events.DShowError?.Invoke(null, new RErrorEventArgs(exception.Message, exception.StackTrace));
-                ShowError?.Invoke(null, new RErrorEventArgs(exception.Message, exception.StackTrace));
+                Events.OnError(new RErrorEventArgs(exception.Message, exception.StackTrace));
+                OnError(new RErrorEventArgs(exception.Message, exception.StackTrace));
                 throw exception;
             }
 
@@ -141,8 +169,8 @@ namespace RIS.Mathematics
             if (number > 16384)
             {
                 var exception = new ArgumentException($"Невозможно найти следующую степень двойки для числа {number}", nameof(number));
-                Events.DShowError?.Invoke(null, new RErrorEventArgs(exception.Message, exception.StackTrace));
-                ShowError?.Invoke(null, new RErrorEventArgs(exception.Message, exception.StackTrace));
+                Events.OnError(new RErrorEventArgs(exception.Message, exception.StackTrace));
+                OnError(new RErrorEventArgs(exception.Message, exception.StackTrace));
                 throw exception;
             }
 
@@ -157,8 +185,8 @@ namespace RIS.Mathematics
             if (number > 32768)
             {
                 var exception = new ArgumentException($"Невозможно найти следующую степень двойки для числа {number}", nameof(number));
-                Events.DShowError?.Invoke(null, new RErrorEventArgs(exception.Message, exception.StackTrace));
-                ShowError?.Invoke(null, new RErrorEventArgs(exception.Message, exception.StackTrace));
+                Events.OnError(new RErrorEventArgs(exception.Message, exception.StackTrace));
+                OnError(new RErrorEventArgs(exception.Message, exception.StackTrace));
                 throw exception;
             }
 
@@ -187,8 +215,8 @@ namespace RIS.Mathematics
             if (number > 1073741824)
             {
                 var exception = new ArgumentException($"Невозможно найти следующую степень двойки для числа {number}", nameof(number));
-                Events.DShowError?.Invoke(null, new RErrorEventArgs(exception.Message, exception.StackTrace));
-                ShowError?.Invoke(null, new RErrorEventArgs(exception.Message, exception.StackTrace));
+                Events.OnError(new RErrorEventArgs(exception.Message, exception.StackTrace));
+                OnError(new RErrorEventArgs(exception.Message, exception.StackTrace));
                 throw exception;
             }
 
@@ -203,8 +231,8 @@ namespace RIS.Mathematics
             if (number > 2147483648)
             {
                 var exception = new ArgumentException($"Невозможно найти следующую степень двойки для числа {number}", nameof(number));
-                Events.DShowError?.Invoke(null, new RErrorEventArgs(exception.Message, exception.StackTrace));
-                ShowError?.Invoke(null, new RErrorEventArgs(exception.Message, exception.StackTrace));
+                Events.OnError(new RErrorEventArgs(exception.Message, exception.StackTrace));
+                OnError(new RErrorEventArgs(exception.Message, exception.StackTrace));
                 throw exception;
             }
 
@@ -234,8 +262,8 @@ namespace RIS.Mathematics
             if (number > 4611686018427387904)
             {
                 var exception = new ArgumentException($"Невозможно найти следующую степень двойки для числа {number}", nameof(number));
-                Events.DShowError?.Invoke(null, new RErrorEventArgs(exception.Message, exception.StackTrace));
-                ShowError?.Invoke(null, new RErrorEventArgs(exception.Message, exception.StackTrace));
+                Events.OnError(new RErrorEventArgs(exception.Message, exception.StackTrace));
+                OnError(new RErrorEventArgs(exception.Message, exception.StackTrace));
                 throw exception;
             }
 
@@ -250,8 +278,8 @@ namespace RIS.Mathematics
             if (number > 9223372036854775808)
             {
                 var exception = new ArgumentException($"Невозможно найти следующую степень двойки для числа {number}", nameof(number));
-                Events.DShowError?.Invoke(null, new RErrorEventArgs(exception.Message, exception.StackTrace));
-                ShowError?.Invoke(null, new RErrorEventArgs(exception.Message, exception.StackTrace));
+                Events.OnError(new RErrorEventArgs(exception.Message, exception.StackTrace));
+                OnError(new RErrorEventArgs(exception.Message, exception.StackTrace));
                 throw exception;
             }
 
@@ -283,8 +311,8 @@ namespace RIS.Mathematics
             if (number == 0)
             {
                 var exception = new ArgumentException($"Невозможно найти предыдущую степень двойки для числа {number}", nameof(number));
-                Events.DShowError?.Invoke(null, new RErrorEventArgs(exception.Message, exception.StackTrace));
-                ShowError?.Invoke(null, new RErrorEventArgs(exception.Message, exception.StackTrace));
+                Events.OnError(new RErrorEventArgs(exception.Message, exception.StackTrace));
+                OnError(new RErrorEventArgs(exception.Message, exception.StackTrace));
                 throw exception;
             }
 
@@ -307,8 +335,8 @@ namespace RIS.Mathematics
             if (number == 0)
             {
                 var exception = new ArgumentException($"Невозможно найти предыдущую степень двойки для числа {number}", nameof(number));
-                Events.DShowError?.Invoke(null, new RErrorEventArgs(exception.Message, exception.StackTrace));
-                ShowError?.Invoke(null, new RErrorEventArgs(exception.Message, exception.StackTrace));
+                Events.OnError(new RErrorEventArgs(exception.Message, exception.StackTrace));
+                OnError(new RErrorEventArgs(exception.Message, exception.StackTrace));
                 throw exception;
             }
 
@@ -333,8 +361,8 @@ namespace RIS.Mathematics
             if (number == 0)
             {
                 var exception = new ArgumentException($"Невозможно найти предыдущую степень двойки для числа {number}", nameof(number));
-                Events.DShowError?.Invoke(null, new RErrorEventArgs(exception.Message, exception.StackTrace));
-                ShowError?.Invoke(null, new RErrorEventArgs(exception.Message, exception.StackTrace));
+                Events.OnError(new RErrorEventArgs(exception.Message, exception.StackTrace));
+                OnError(new RErrorEventArgs(exception.Message, exception.StackTrace));
                 throw exception;
             }
 
@@ -357,8 +385,8 @@ namespace RIS.Mathematics
             if (number == 0)
             {
                 var exception = new ArgumentException($"Невозможно найти предыдущую степень двойки для числа {number}", nameof(number));
-                Events.DShowError?.Invoke(null, new RErrorEventArgs(exception.Message, exception.StackTrace));
-                ShowError?.Invoke(null, new RErrorEventArgs(exception.Message, exception.StackTrace));
+                Events.OnError(new RErrorEventArgs(exception.Message, exception.StackTrace));
+                OnError(new RErrorEventArgs(exception.Message, exception.StackTrace));
                 throw exception;
             }
 
@@ -383,8 +411,8 @@ namespace RIS.Mathematics
             if (number == 0)
             {
                 var exception = new ArgumentException($"Невозможно найти предыдущую степень двойки для числа {number}", nameof(number));
-                Events.DShowError?.Invoke(null, new RErrorEventArgs(exception.Message, exception.StackTrace));
-                ShowError?.Invoke(null, new RErrorEventArgs(exception.Message, exception.StackTrace));
+                Events.OnError(new RErrorEventArgs(exception.Message, exception.StackTrace));
+                OnError(new RErrorEventArgs(exception.Message, exception.StackTrace));
                 throw exception;
             }
 
@@ -407,8 +435,8 @@ namespace RIS.Mathematics
             if (number == 0)
             {
                 var exception = new ArgumentException($"Невозможно найти предыдущую степень двойки для числа {number}", nameof(number));
-                Events.DShowError?.Invoke(null, new RErrorEventArgs(exception.Message, exception.StackTrace));
-                ShowError?.Invoke(null, new RErrorEventArgs(exception.Message, exception.StackTrace));
+                Events.OnError(new RErrorEventArgs(exception.Message, exception.StackTrace));
+                OnError(new RErrorEventArgs(exception.Message, exception.StackTrace));
                 throw exception;
             }
 
@@ -433,8 +461,8 @@ namespace RIS.Mathematics
             if (number == 0)
             {
                 var exception = new ArgumentException($"Невозможно найти предыдущую степень двойки для числа {number}", nameof(number));
-                Events.DShowError?.Invoke(null, new RErrorEventArgs(exception.Message, exception.StackTrace));
-                ShowError?.Invoke(null, new RErrorEventArgs(exception.Message, exception.StackTrace));
+                Events.OnError(new RErrorEventArgs(exception.Message, exception.StackTrace));
+                OnError(new RErrorEventArgs(exception.Message, exception.StackTrace));
                 throw exception;
             }
 
@@ -457,8 +485,8 @@ namespace RIS.Mathematics
             if (number == 0)
             {
                 var exception = new ArgumentException($"Невозможно найти предыдущую степень двойки для числа {number}", nameof(number));
-                Events.DShowError?.Invoke(null, new RErrorEventArgs(exception.Message, exception.StackTrace));
-                ShowError?.Invoke(null, new RErrorEventArgs(exception.Message, exception.StackTrace));
+                Events.OnError(new RErrorEventArgs(exception.Message, exception.StackTrace));
+                OnError(new RErrorEventArgs(exception.Message, exception.StackTrace));
                 throw exception;
             }
 

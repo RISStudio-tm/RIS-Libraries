@@ -6,15 +6,15 @@ using System.Runtime.Intrinsics.X86;
 #endif
 using System.Security.Cryptography;
 using System.Text;
-using RIS.Cryptography.Hash;
 using RIS.Text.Encoding.Base;
 
 namespace RIS.Cryptography.Hash
 {
     public static class HashMethods
     {
-        public static event EventHandler<RMessageEventArgs> ShowMessage;
-        public static event EventHandler<RErrorEventArgs> ShowError;
+        public static event EventHandler<RInformationEventArgs> Information;
+		public static event EventHandler<RWarningEventArgs> Warning;
+		public static event EventHandler<RErrorEventArgs> Error;
 
         private static string[] HashMethodsNames { get; }
         private static int HashMethodsCount { get; }
@@ -44,6 +44,33 @@ namespace RIS.Cryptography.Hash
             }
         }
 
+        public static void OnInformation(RInformationEventArgs e)
+        {
+            OnInformation(null, e);
+        }
+        public static void OnInformation(object sender, RInformationEventArgs e)
+        {
+            Information?.Invoke(sender, e);
+        }
+
+        public static void OnWarning(RWarningEventArgs e)
+        {
+            OnWarning(null, e);
+        }
+        public static void OnWarning(object sender, RWarningEventArgs e)
+        {
+            Warning?.Invoke(sender, e);
+        }
+
+        public static void OnError(RErrorEventArgs e)
+        {
+            OnError(null, e);
+        }
+        public static void OnError(object sender, RErrorEventArgs e)
+        {
+            Error?.Invoke(sender, e);
+        }
+
         public static string[] GetNamesHashMethods()
         {
             return HashMethodsNames;
@@ -59,8 +86,8 @@ namespace RIS.Cryptography.Hash
             if (length < 1)
             {
                 var exception = new ArgumentOutOfRangeException(nameof(length), "Salt length cannot be less than 1");
-                Events.DShowError?.Invoke(null, new RErrorEventArgs(exception.Message, exception.StackTrace));
-                ShowError?.Invoke(null, new RErrorEventArgs(exception.Message, exception.StackTrace));
+                Events.OnError(new RErrorEventArgs(exception.Message, exception.StackTrace));
+                OnError(new RErrorEventArgs(exception.Message, exception.StackTrace));
                 throw exception;
             }
 

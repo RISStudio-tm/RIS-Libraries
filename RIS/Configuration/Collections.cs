@@ -9,8 +9,9 @@ namespace RIS.Configuration
 
     public sealed class AppConfigElementList : IEnumerable, IDisposable
     {
-        public event EventHandler<RMessageEventArgs> ShowMessage;
-        public event EventHandler<RErrorEventArgs> ShowError;
+        public event EventHandler<RInformationEventArgs> Information;
+		public event EventHandler<RWarningEventArgs> Warning;
+		public event EventHandler<RErrorEventArgs> Error;
 
         public AppConfigElement this[string key]
         {
@@ -26,6 +27,7 @@ namespace RIS.Configuration
         }
 
         private Dictionary<string, AppConfigElement> Elements { get; }
+
         public int Count
         {
             get
@@ -33,11 +35,39 @@ namespace RIS.Configuration
                 return Elements.Count;
             }
         }
-        public bool ThrowExceptions { get; private set; }
+        public bool ThrowExceptions { get; }
 
         internal AppConfigElementList(bool throwExceptions = true)
         {
+            ThrowExceptions = throwExceptions;
             Elements = new Dictionary<string, AppConfigElement>();
+        }
+
+        public void OnInformation(RInformationEventArgs e)
+        {
+            OnInformation(this, e);
+        }
+        public void OnInformation(object sender, RInformationEventArgs e)
+        {
+            Information?.Invoke(sender, e);
+        }
+
+        public void OnWarning(RWarningEventArgs e)
+        {
+            OnWarning(this, e);
+        }
+        public void OnWarning(object sender, RWarningEventArgs e)
+        {
+            Warning?.Invoke(sender, e);
+        }
+
+        public void OnError(RErrorEventArgs e)
+        {
+            OnError(this, e);
+        }
+        public void OnError(object sender, RErrorEventArgs e)
+        {
+            Error?.Invoke(sender, e);
         }
 
         private AppConfigElement Get(string key)
@@ -45,8 +75,8 @@ namespace RIS.Configuration
             if (!ContainsKey(key))
             {
                 var exception = new KeyNotFoundException("Элемент с таким ключом не существует");
-                Events.DShowError?.Invoke(this, new RErrorEventArgs(exception.Message, exception.StackTrace));
-                ShowError?.Invoke(this, new RErrorEventArgs(exception.Message, exception.StackTrace));
+                Events.OnError(this, new RErrorEventArgs(exception.Message, exception.StackTrace));
+                OnError(new RErrorEventArgs(exception.Message, exception.StackTrace));
 
                 if (ThrowExceptions)
                     throw exception;
@@ -62,8 +92,8 @@ namespace RIS.Configuration
             if (!ContainsKey(key))
             {
                 var exception = new KeyNotFoundException("Элемент с таким ключом не существует");
-                Events.DShowError?.Invoke(this, new RErrorEventArgs(exception.Message, exception.StackTrace));
-                ShowError?.Invoke(this, new RErrorEventArgs(exception.Message, exception.StackTrace));
+                Events.OnError(this, new RErrorEventArgs(exception.Message, exception.StackTrace));
+                OnError(new RErrorEventArgs(exception.Message, exception.StackTrace));
 
                 if (ThrowExceptions)
                     throw exception;
@@ -79,8 +109,8 @@ namespace RIS.Configuration
             if (Count == int.MaxValue)
             {
                 var exception = new Exception("Нельзя добавить элемент, так как коллекция уже содержит максимальное их количество");
-                Events.DShowError?.Invoke(this, new RErrorEventArgs(exception.Message, exception.StackTrace));
-                ShowError?.Invoke(this, new RErrorEventArgs(exception.Message, exception.StackTrace));
+                Events.OnError(this, new RErrorEventArgs(exception.Message, exception.StackTrace));
+                OnError(new RErrorEventArgs(exception.Message, exception.StackTrace));
 
                 if (ThrowExceptions)
                     throw exception;
@@ -91,8 +121,8 @@ namespace RIS.Configuration
             if (string.IsNullOrEmpty(key))
             {
                 var exception = new ArgumentException("Ключ равен null или пустой строке");
-                Events.DShowError?.Invoke(this, new RErrorEventArgs(exception.Message, exception.StackTrace));
-                ShowError?.Invoke(this, new RErrorEventArgs(exception.Message, exception.StackTrace));
+                Events.OnError(this, new RErrorEventArgs(exception.Message, exception.StackTrace));
+                OnError(new RErrorEventArgs(exception.Message, exception.StackTrace));
 
                 if (ThrowExceptions)
                     throw exception;
@@ -103,8 +133,8 @@ namespace RIS.Configuration
             if (ContainsKey(key))
             {
                 var exception = new ArgumentException("Элемент с таким ключом уже существует");
-                Events.DShowError?.Invoke(this, new RErrorEventArgs(exception.Message, exception.StackTrace));
-                ShowError?.Invoke(this, new RErrorEventArgs(exception.Message, exception.StackTrace));
+                Events.OnError(this, new RErrorEventArgs(exception.Message, exception.StackTrace));
+                OnError(new RErrorEventArgs(exception.Message, exception.StackTrace));
 
                 if (ThrowExceptions)
                     throw exception;
@@ -122,8 +152,8 @@ namespace RIS.Configuration
             if (Count < 1)
             {
                 var exception = new Exception("Нельзя удалить элемент, так как коллекция уже пустая");
-                Events.DShowError?.Invoke(this, new RErrorEventArgs(exception.Message, exception.StackTrace));
-                ShowError?.Invoke(this, new RErrorEventArgs(exception.Message, exception.StackTrace));
+                Events.OnError(this, new RErrorEventArgs(exception.Message, exception.StackTrace));
+                OnError(new RErrorEventArgs(exception.Message, exception.StackTrace));
 
                 if (ThrowExceptions)
                     throw exception;
@@ -134,8 +164,8 @@ namespace RIS.Configuration
             if (string.IsNullOrEmpty(key))
             {
                 var exception = new ArgumentException("Ключ равен null или пустой строке");
-                Events.DShowError?.Invoke(this, new RErrorEventArgs(exception.Message, exception.StackTrace));
-                ShowError?.Invoke(this, new RErrorEventArgs(exception.Message, exception.StackTrace));
+                Events.OnError(this, new RErrorEventArgs(exception.Message, exception.StackTrace));
+                OnError(new RErrorEventArgs(exception.Message, exception.StackTrace));
 
                 if (ThrowExceptions)
                     throw exception;
@@ -146,8 +176,8 @@ namespace RIS.Configuration
             if (!ContainsKey(key))
             {
                 var exception = new KeyNotFoundException("Элемент с таким ключом не существует");
-                Events.DShowError?.Invoke(this, new RErrorEventArgs(exception.Message, exception.StackTrace));
-                ShowError?.Invoke(this, new RErrorEventArgs(exception.Message, exception.StackTrace));
+                Events.OnError(this, new RErrorEventArgs(exception.Message, exception.StackTrace));
+                OnError(new RErrorEventArgs(exception.Message, exception.StackTrace));
 
                 if (ThrowExceptions)
                     throw exception;
@@ -165,8 +195,8 @@ namespace RIS.Configuration
             if (string.IsNullOrEmpty(key))
             {
                 var exception = new ArgumentException("Ключ равен null или пустой строке");
-                Events.DShowError?.Invoke(this, new RErrorEventArgs(exception.Message, exception.StackTrace));
-                ShowError?.Invoke(this, new RErrorEventArgs(exception.Message, exception.StackTrace));
+                Events.OnError(this, new RErrorEventArgs(exception.Message, exception.StackTrace));
+                OnError(new RErrorEventArgs(exception.Message, exception.StackTrace));
 
                 if (ThrowExceptions)
                     throw exception;
@@ -198,8 +228,9 @@ namespace RIS.Configuration
 
     public sealed class RuntimeConfigElementList : IEnumerable, IDisposable
     {
-        public event EventHandler<RMessageEventArgs> ShowMessage;
-        public event EventHandler<RErrorEventArgs> ShowError;
+        public event EventHandler<RInformationEventArgs> Information;
+		public event EventHandler<RWarningEventArgs> Warning;
+		public event EventHandler<RErrorEventArgs> Error;
 
         public RuntimeConfigElement this[string key]
         {
@@ -222,11 +253,39 @@ namespace RIS.Configuration
                 return Elements.Count;
             }
         }
-        public bool ThrowExceptions { get; private set; }
+        public bool ThrowExceptions { get; }
 
         internal RuntimeConfigElementList(bool throwExceptions = true)
         {
+            ThrowExceptions = throwExceptions;
             Elements = new Dictionary<string, RuntimeConfigElement>();
+        }
+
+        public void OnInformation(RInformationEventArgs e)
+        {
+            OnInformation(this, e);
+        }
+        public void OnInformation(object sender, RInformationEventArgs e)
+        {
+            Information?.Invoke(sender, e);
+        }
+
+        public void OnWarning(RWarningEventArgs e)
+        {
+            OnWarning(this, e);
+        }
+        public void OnWarning(object sender, RWarningEventArgs e)
+        {
+            Warning?.Invoke(sender, e);
+        }
+
+        public void OnError(RErrorEventArgs e)
+        {
+            OnError(this, e);
+        }
+        public void OnError(object sender, RErrorEventArgs e)
+        {
+            Error?.Invoke(sender, e);
         }
 
         private RuntimeConfigElement Get(string key)
@@ -234,8 +293,8 @@ namespace RIS.Configuration
             if (!ContainsKey(key))
             {
                 var exception = new KeyNotFoundException("Элемент с таким ключом не существует");
-                Events.DShowError?.Invoke(this, new RErrorEventArgs(exception.Message, exception.StackTrace));
-                ShowError?.Invoke(this, new RErrorEventArgs(exception.Message, exception.StackTrace));
+                Events.OnError(this, new RErrorEventArgs(exception.Message, exception.StackTrace));
+                OnError(new RErrorEventArgs(exception.Message, exception.StackTrace));
 
                 if (ThrowExceptions)
                     throw exception;
@@ -251,8 +310,8 @@ namespace RIS.Configuration
             if (!ContainsKey(key))
             {
                 var exception = new KeyNotFoundException("Элемент с таким ключом не существует");
-                Events.DShowError?.Invoke(this, new RErrorEventArgs(exception.Message, exception.StackTrace));
-                ShowError?.Invoke(this, new RErrorEventArgs(exception.Message, exception.StackTrace));
+                Events.OnError(this, new RErrorEventArgs(exception.Message, exception.StackTrace));
+                OnError(new RErrorEventArgs(exception.Message, exception.StackTrace));
 
                 if (ThrowExceptions)
                     throw exception;
@@ -268,8 +327,8 @@ namespace RIS.Configuration
             if (Count == int.MaxValue)
             {
                 var exception = new Exception("Нельзя добавить элемент, так как коллекция уже содержит максимальное их количество");
-                Events.DShowError?.Invoke(this, new RErrorEventArgs(exception.Message, exception.StackTrace));
-                ShowError?.Invoke(this, new RErrorEventArgs(exception.Message, exception.StackTrace));
+                Events.OnError(this, new RErrorEventArgs(exception.Message, exception.StackTrace));
+                OnError(new RErrorEventArgs(exception.Message, exception.StackTrace));
 
                 if (ThrowExceptions)
                     throw exception;
@@ -280,8 +339,8 @@ namespace RIS.Configuration
             if (string.IsNullOrEmpty(key))
             {
                 var exception = new ArgumentException("Ключ равен null или пустой строке");
-                Events.DShowError?.Invoke(this, new RErrorEventArgs(exception.Message, exception.StackTrace));
-                ShowError?.Invoke(this, new RErrorEventArgs(exception.Message, exception.StackTrace));
+                Events.OnError(this, new RErrorEventArgs(exception.Message, exception.StackTrace));
+                OnError(new RErrorEventArgs(exception.Message, exception.StackTrace));
 
                 if (ThrowExceptions)
                     throw exception;
@@ -292,8 +351,8 @@ namespace RIS.Configuration
             if (ContainsKey(key))
             {
                 var exception = new ArgumentException("Элемент с таким ключом уже существует");
-                Events.DShowError?.Invoke(this, new RErrorEventArgs(exception.Message, exception.StackTrace));
-                ShowError?.Invoke(this, new RErrorEventArgs(exception.Message, exception.StackTrace));
+                Events.OnError(this, new RErrorEventArgs(exception.Message, exception.StackTrace));
+                OnError(new RErrorEventArgs(exception.Message, exception.StackTrace));
 
                 if (ThrowExceptions)
                     throw exception;
@@ -311,8 +370,8 @@ namespace RIS.Configuration
             if (Count < 1)
             {
                 var exception = new Exception("Нельзя удалить элемент, так как коллекция уже пустая");
-                Events.DShowError?.Invoke(this, new RErrorEventArgs(exception.Message, exception.StackTrace));
-                ShowError?.Invoke(this, new RErrorEventArgs(exception.Message, exception.StackTrace));
+                Events.OnError(this, new RErrorEventArgs(exception.Message, exception.StackTrace));
+                OnError(new RErrorEventArgs(exception.Message, exception.StackTrace));
 
                 if (ThrowExceptions)
                     throw exception;
@@ -323,8 +382,8 @@ namespace RIS.Configuration
             if (string.IsNullOrEmpty(key))
             {
                 var exception = new ArgumentException("Ключ равен null или пустой строке");
-                Events.DShowError?.Invoke(this, new RErrorEventArgs(exception.Message, exception.StackTrace));
-                ShowError?.Invoke(this, new RErrorEventArgs(exception.Message, exception.StackTrace));
+                Events.OnError(this, new RErrorEventArgs(exception.Message, exception.StackTrace));
+                OnError(new RErrorEventArgs(exception.Message, exception.StackTrace));
 
                 if (ThrowExceptions)
                     throw exception;
@@ -335,8 +394,8 @@ namespace RIS.Configuration
             if (!ContainsKey(key))
             {
                 var exception = new KeyNotFoundException("Элемент с таким ключом не существует");
-                Events.DShowError?.Invoke(this, new RErrorEventArgs(exception.Message, exception.StackTrace));
-                ShowError?.Invoke(this, new RErrorEventArgs(exception.Message, exception.StackTrace));
+                Events.OnError(this, new RErrorEventArgs(exception.Message, exception.StackTrace));
+                OnError(new RErrorEventArgs(exception.Message, exception.StackTrace));
 
                 if (ThrowExceptions)
                     throw exception;
@@ -354,8 +413,8 @@ namespace RIS.Configuration
             if (string.IsNullOrEmpty(key))
             {
                 var exception = new ArgumentException("Ключ равен null или пустой строке");
-                Events.DShowError?.Invoke(this, new RErrorEventArgs(exception.Message, exception.StackTrace));
-                ShowError?.Invoke(this, new RErrorEventArgs(exception.Message, exception.StackTrace));
+                Events.OnError(this, new RErrorEventArgs(exception.Message, exception.StackTrace));
+                OnError(new RErrorEventArgs(exception.Message, exception.StackTrace));
 
                 if (ThrowExceptions)
                     throw exception;

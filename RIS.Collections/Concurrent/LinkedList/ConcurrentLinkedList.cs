@@ -7,8 +7,9 @@ namespace RIS.Collections.Concurrent
 {
     public sealed class ConcurrentLinkedList<T> : IEnumerable<T>, IEnumerable where T : class
     {
-        public static event EventHandler<RMessageEventArgs> ShowMessage;
-        public static event EventHandler<RErrorEventArgs> ShowError;
+        public static event EventHandler<RInformationEventArgs> Information;
+		public static event EventHandler<RWarningEventArgs> Warning;
+		public static event EventHandler<RErrorEventArgs> Error;
 
         internal readonly ConcurrentLinkedListNode<T> HeadNode;
         internal readonly ConcurrentLinkedListNode<T> TailNode;

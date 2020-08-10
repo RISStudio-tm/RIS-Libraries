@@ -11,8 +11,9 @@ namespace RIS.Synchronization
             Right = 2
         }
 
-        public static event EventHandler<RMessageEventArgs> ShowMessage;
-        public static event EventHandler<RErrorEventArgs> ShowError;
+        public event EventHandler<RInformationEventArgs> Information;
+		public event EventHandler<RWarningEventArgs> Warning;
+		public event EventHandler<RErrorEventArgs> Error;
 
         private readonly object _writerLock;
         private readonly TInner _leftInner;
@@ -37,16 +38,16 @@ namespace RIS.Synchronization
             if (leftInner == null)
             {
                 var exception = new ArgumentNullException(nameof(leftInner), $"Параметр {nameof(leftInner)} равен null");
-                Events.DShowError?.Invoke(this, new RErrorEventArgs(exception.Message, exception.StackTrace));
-                ShowError?.Invoke(this, new RErrorEventArgs(exception.Message, exception.StackTrace));
+                Events.OnError(this, new RErrorEventArgs(exception.Message, exception.StackTrace));
+                OnError(new RErrorEventArgs(exception.Message, exception.StackTrace));
                 throw exception;
             }
 
             if (rightInner == null)
             {
                 var exception = new ArgumentNullException(nameof(rightInner),$"Параметр {nameof(rightInner)} равен null");
-                Events.DShowError?.Invoke(this, new RErrorEventArgs(exception.Message, exception.StackTrace));
-                ShowError?.Invoke(this, new RErrorEventArgs(exception.Message, exception.StackTrace));
+                Events.OnError(this, new RErrorEventArgs(exception.Message, exception.StackTrace));
+                OnError(new RErrorEventArgs(exception.Message, exception.StackTrace));
                 throw exception;
             }
 
@@ -59,13 +60,40 @@ namespace RIS.Synchronization
             _rightInner = innerFactory();
         }
 
+        public void OnInformation(RInformationEventArgs e)
+        {
+            OnInformation(this, e);
+        }
+        public void OnInformation(object sender, RInformationEventArgs e)
+        {
+            Information?.Invoke(sender, e);
+        }
+
+        public void OnWarning(RWarningEventArgs e)
+        {
+            OnWarning(this, e);
+        }
+        public void OnWarning(object sender, RWarningEventArgs e)
+        {
+            Warning?.Invoke(sender, e);
+        }
+
+        public void OnError(RErrorEventArgs e)
+        {
+            OnError(this, e);
+        }
+        public void OnError(object sender, RErrorEventArgs e)
+        {
+            Error?.Invoke(sender, e);
+        }
+
         public virtual TResult Read<TResult>(Func<TInner, TResult> reader)
         {
             if (reader == null)
             {
                 var exception = new ArgumentNullException(nameof(reader), $"Параметр {nameof(reader)} равен null");
-                Events.DShowError?.Invoke(this, new RErrorEventArgs(exception.Message, exception.StackTrace));
-                ShowError?.Invoke(this, new RErrorEventArgs(exception.Message, exception.StackTrace));
+                Events.OnError(this, new RErrorEventArgs(exception.Message, exception.StackTrace));
+                OnError(new RErrorEventArgs(exception.Message, exception.StackTrace));
                 throw exception;
             }
 
@@ -87,8 +115,8 @@ namespace RIS.Synchronization
             if (writer == null)
             {
                 var exception = new ArgumentNullException(nameof(writer), $"Параметр {nameof(writer)} равен null");
-                Events.DShowError?.Invoke(this, new RErrorEventArgs(exception.Message, exception.StackTrace));
-                ShowError?.Invoke(this, new RErrorEventArgs(exception.Message, exception.StackTrace));
+                Events.OnError(this, new RErrorEventArgs(exception.Message, exception.StackTrace));
+                OnError(new RErrorEventArgs(exception.Message, exception.StackTrace));
                 throw exception;
             }
 
