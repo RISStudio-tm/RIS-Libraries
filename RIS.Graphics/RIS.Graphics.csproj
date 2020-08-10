@@ -4,8 +4,8 @@
     <TargetFrameworks>netcoreapp3.1</TargetFrameworks>
     <RootNamespace>RIS.Graphics</RootNamespace>
     <AssemblyName>RIS.Graphics</AssemblyName>
-    <AssemblyVersion>2.3.6.20223</AssemblyVersion>
-    <FileVersion>2.3.6.20223</FileVersion>
+    <AssemblyVersion>2.3.7.20223</AssemblyVersion>
+    <FileVersion>2.3.7.20223</FileVersion>
     <UseWPF>true</UseWPF>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
