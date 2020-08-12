@@ -4,8 +4,8 @@
     <TargetFrameworks>netcoreapp3.1;net48</TargetFrameworks>
     <RootNamespace>RIS.Cryptography</RootNamespace>
     <AssemblyName>RIS.Cryptography</AssemblyName>
-    <AssemblyVersion>2.7.158.20223</AssemblyVersion>
-    <FileVersion>2.7.158.20223</FileVersion>
+    <AssemblyVersion>2.7.159.20224</AssemblyVersion>
+    <FileVersion>2.7.159.20224</FileVersion>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
 

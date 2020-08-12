@@ -4,8 +4,8 @@
     <TargetFrameworks>netcoreapp3.1;net48</TargetFrameworks>
     <RootNamespace>RIS.Logging</RootNamespace>
     <AssemblyName>RIS.Logging</AssemblyName>
-    <AssemblyVersion>2.1.412.20223</AssemblyVersion>
-    <FileVersion>2.1.412.20223</FileVersion>
+    <AssemblyVersion>2.1.413.20224</AssemblyVersion>
+    <FileVersion>2.1.413.20224</FileVersion>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
