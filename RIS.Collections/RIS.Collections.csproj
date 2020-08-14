@@ -1,28 +1,61 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
-
+<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFrameworks>netcoreapp3.1;net48</TargetFrameworks>
+    <Configurations>Debug;Release;Release Nuget</Configurations>
     <RootNamespace>RIS.Collections</RootNamespace>
     <AssemblyName>RIS.Collections</AssemblyName>
-    <AssemblyVersion>4.5.74.20224</AssemblyVersion>
-    <FileVersion>4.5.74.20224</FileVersion>
+    <AssemblyVersion>4.5.81.20227</AssemblyVersion>
+    <FileVersion>4.5.81.20227</FileVersion>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <PackageId>RIS.Collections</PackageId>
+    <Product>RIS.Collections</Product>
+    <Version>4.5.81</Version>
+    <Description>
+    </Description>
+    <PackageTags>dotnet, dotnetcore, netframework, netcore, library</PackageTags>
+    <Authors>Dmitry Ponomarev</Authors>
+    <Company>RISStudio</Company>
+    <Copyright>Copyright (c) RISStudio, 2020</Copyright>
+    <PackageLicenseFile>LICENSE</PackageLicenseFile>
+    <PackageIcon>RISStudio-icon-1.png</PackageIcon>
+    <PackageProjectUrl>https://github.com/RISStudio-tm/RIS-Libraries</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/RISStudio-tm/RIS-Libraries</RepositoryUrl>
   </PropertyGroup>
-
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+  <PropertyGroup>
     <NoWarn>$(NoWarn);CS0067;SS003;SS004;U2U1009</NoWarn>
   </PropertyGroup>
-
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release Nuget|AnyCPU'">
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+  </PropertyGroup>
+  <Target Name="PreBuild" BeforeTargets="PreBuildEvent" Condition="'$(Configuration)|$(Platform)'=='Release Nuget|AnyCPU'">
+    <Exec Command="..\_tools\ChangePackageVersion.exe &quot;$(ProjectPath)&quot;" />
+  </Target>
   <ItemGroup>
+    <None Include="..\LICENSE">
+      <Pack>True</Pack>
+      <PackagePath>
+      </PackagePath>
+    </None>
+    <None Include="..\_resources\RISStudio-icon-1.png">
+      <Pack>True</Pack>
+      <PackagePath>
+      </PackagePath>
+    </None>
+  </ItemGroup>
+  <ItemGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
     <ProjectReference Include="..\RIS\RIS.csproj" />
   </ItemGroup>
-
+  <ItemGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <ProjectReference Include="..\RIS\RIS.csproj" />
+  </ItemGroup>
+  <ItemGroup Condition="'$(Configuration)|$(Platform)'=='Release Nuget|AnyCPU'">
+    <!--PackageReference for NuGet-->
+    <ProjectReference Include="..\RIS\RIS.csproj" />
+  </ItemGroup>
   <ItemGroup>
     <Folder Include="Chunked\SyncArrayLog2\" />
   </ItemGroup>
-
   <ItemGroup>
     <PackageReference Include="AsyncEnumerator" Version="4.0.2" />
   </ItemGroup>
-
 </Project>

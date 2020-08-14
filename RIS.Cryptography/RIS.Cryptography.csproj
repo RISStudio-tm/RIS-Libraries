@@ -1,28 +1,64 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
-
+<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFrameworks>netcoreapp3.1;net48</TargetFrameworks>
+    <Configurations>Debug;Release;Release Nuget</Configurations>
     <RootNamespace>RIS.Cryptography</RootNamespace>
     <AssemblyName>RIS.Cryptography</AssemblyName>
-    <AssemblyVersion>2.7.159.20224</AssemblyVersion>
-    <FileVersion>2.7.159.20224</FileVersion>
+    <AssemblyVersion>2.7.165.20227</AssemblyVersion>
+    <FileVersion>2.7.165.20227</FileVersion>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <PackageId>RIS.Cryptography</PackageId>
+    <Product>RIS.Cryptography</Product>
+    <Version>2.7.165</Version>
+    <Description>
+    </Description>
+    <PackageTags>dotnet, dotnetcore, netframework, netcore, library</PackageTags>
+    <Authors>Dmitry Ponomarev</Authors>
+    <Company>RISStudio</Company>
+    <Copyright>Copyright (c) RISStudio, 2020</Copyright>
+    <PackageLicenseFile>LICENSE</PackageLicenseFile>
+    <PackageIcon>RISStudio-icon-1.png</PackageIcon>
+    <PackageProjectUrl>https://github.com/RISStudio-tm/RIS-Libraries</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/RISStudio-tm/RIS-Libraries</RepositoryUrl>
   </PropertyGroup>
-
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+  <PropertyGroup>
     <NoWarn>$(NoWarn);CS0067;SS003;SS004;U2U1009</NoWarn>
   </PropertyGroup>
-
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release Nuget|AnyCPU'">
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+  </PropertyGroup>
+  <Target Name="PreBuild" BeforeTargets="PreBuildEvent" Condition="'$(Configuration)|$(Platform)'=='Release Nuget|AnyCPU'">
+    <Exec Command="..\_tools\ChangePackageVersion.exe &quot;$(ProjectPath)&quot;" />
+  </Target>
+  <ItemGroup>
+    <None Include="..\LICENSE">
+      <Pack>True</Pack>
+      <PackagePath>
+      </PackagePath>
+    </None>
+    <None Include="..\_resources\RISStudio-icon-1.png">
+      <Pack>True</Pack>
+      <PackagePath>
+      </PackagePath>
+    </None>
+  </ItemGroup>
+  <ItemGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <ProjectReference Include="..\RIS.Text\RIS.Text.csproj" />
+    <ProjectReference Include="..\RIS\RIS.csproj" />
+  </ItemGroup>
+  <ItemGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <ProjectReference Include="..\RIS.Text\RIS.Text.csproj" />
+    <ProjectReference Include="..\RIS\RIS.csproj" />
+  </ItemGroup>
+  <ItemGroup Condition="'$(Configuration)|$(Platform)'=='Release Nuget|AnyCPU'">
+    <!--PackageReference for NuGet-->
+    <ProjectReference Include="..\RIS.Text\RIS.Text.csproj" />
+    <ProjectReference Include="..\RIS\RIS.csproj" />
+  </ItemGroup>
   <ItemGroup>
     <PackageReference Include="BCrypt.Net-Next" Version="4.0.0" />
     <PackageReference Include="Konscious.Security.Cryptography.Argon2" Version="1.2.1" />
     <PackageReference Include="System.Security.Cryptography.Algorithms" Version="4.3.1" />
     <PackageReference Include="System.Security.Cryptography.Cng" Version="4.7.0" />
   </ItemGroup>
-
-  <ItemGroup>
-    <ProjectReference Include="..\RIS.Text\RIS.Text.csproj" />
-    <ProjectReference Include="..\RIS\RIS.csproj" />
-  </ItemGroup>
-
 </Project>
