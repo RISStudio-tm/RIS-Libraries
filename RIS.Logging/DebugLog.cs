@@ -24,12 +24,9 @@ namespace RIS.Logging
         public Encoding FileEncoding { get; private set; }
 
         public DebugLog(string path)
+            : this(path, Encoding.UTF8)
         {
-            ActivatedLog = false;
-            LogFile = null;
-            FileEncoding = Encoding.UTF8;
 
-            Create(path, Encoding.UTF8);
         }
         public DebugLog(string path, Encoding encoding)
         {
@@ -67,21 +64,18 @@ namespace RIS.Logging
             Error?.Invoke(sender, e);
         }
 
-        public void WriteLine(string text)
-        {
-            WriteLine(text, LogSituation.Unknown);
-        }
-        public void WriteLine(string text, LogSituation situation)
+        public void WriteLine(string text, LogSituation situation = LogSituation.Unknown)
         {
             try
             {
-                if (ActivatedLog)
+                if (!ActivatedLog)
                     return;
 
-                LogUtilities.GetTextFromSituation(situation, out string situationText, out string sortText);
+                (string situationText, string sortText) = LogUtilities.GetTextFromSituation(situation);
 
+                string logTimeUtc = DateTime.UtcNow.ToLongTimeString();
                 string logTime = DateTime.Now.ToLongTimeString();
-                string logLine = sortText + "|" + logTime + "|" + situationText + ":  " + text;
+                string logLine = sortText + "|" + logTimeUtc + "|" + logTime + "|" + situationText + ":  " + LogUtilities.ReplaceEOLChars(text, " > ");
 
                 LogFile.WriteLine(logLine);
                 LogFile.Flush();
@@ -94,24 +88,12 @@ namespace RIS.Logging
             }
         }
 
-        public void WriteDividingLine()
-        {
-            WriteDividingLine(111, '_');
-        }
-        public void WriteDividingLine(ushort charsCount)
-        {
-            WriteDividingLine(charsCount, '_');
-        }
-        public void WriteDividingLine(ushort charsCount, char lineChar)
+        public void WriteDividingLine(ushort charsCount = 111, char lineChar = '_')
         {
             if (lineChar == '\0')
                 lineChar = '_';
 
             string text = string.Empty.PadRight(charsCount, lineChar);
-            //for (ushort i = 1; i <= charsCount; ++i)
-            //{
-            //    text += lineChar;
-            //}
 
             WriteLine(text, LogSituation.LogAction);
         }
@@ -138,12 +120,14 @@ namespace RIS.Logging
                     Directory.CreateDirectory(fileDirectory);
                 }
 
-                string day = DateTime.Now.Day.ToString().PadLeft(2, '0');
-                string month = DateTime.Now.Month.ToString().PadLeft(2, '0');
-                string year = DateTime.Now.Year.ToString().PadLeft(4, '0');
-                string hours = DateTime.Now.Hour.ToString().PadLeft(2, '0');
-                string minutes = DateTime.Now.Minute.ToString().PadLeft(2, '0');
-                string seconds = DateTime.Now.Second.ToString().PadLeft(2, '0');
+                DateTime now = DateTime.Now;
+
+                string day = now.Day.ToString().PadLeft(2, '0');
+                string month = now.Month.ToString().PadLeft(2, '0');
+                string year = now.Year.ToString().PadLeft(4, '0');
+                string hours = now.Hour.ToString().PadLeft(2, '0');
+                string minutes = now.Minute.ToString().PadLeft(2, '0');
+                string seconds = now.Second.ToString().PadLeft(2, '0');
 
                 FileName = day + "-" + month + "-" + year + "_" + hours + "-" + minutes + "-" + seconds;
                 FileExtension = ".rdlog";
@@ -152,6 +136,8 @@ namespace RIS.Logging
                 FileFullPath = Path.Combine(FileDirectory, FileFullName);
 
                 LogFile = new StreamWriter(FileFullPath, true, encoding);
+
+                WriteLine("Start", LogSituation.LogAction);
             }
             catch (Exception ex)
             {
@@ -164,11 +150,15 @@ namespace RIS.Logging
         public void Pause()
         {
             ActivatedLog = false;
+
+            WriteLine("Pause", LogSituation.LogAction);
         }
 
         public void Resume()
         {
             ActivatedLog = true;
+
+            WriteLine("Resume", LogSituation.LogAction);
         }
 
         public void Close()
@@ -186,6 +176,8 @@ namespace RIS.Logging
                 FileName = string.Empty;
                 FileExtension = string.Empty;
                 FileFullName = string.Empty;
+
+                WriteLine("Stop", LogSituation.LogAction);
             }
             catch (Exception ex)
             {

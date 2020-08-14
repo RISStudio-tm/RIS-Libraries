@@ -40,79 +40,37 @@ namespace RIS.Logging
             Error?.Invoke(sender, e);
         }
 
-        public static void GetTextFromSituation(LogSituation situation, out string situationText)
+        public static string ReplaceEOLChars(string text, string replaceChar)
         {
-            switch (situation)
-            {
-                case LogSituation.Information:
-                    situationText = "Information";
-                    break;
-                case LogSituation.Warning:
-                    situationText = "Warning";
-                    break;
-                case LogSituation.Error:
-                    situationText = "Error";
-                    break;
-                case LogSituation.CriticalError:
-                    situationText = "Critical Error";
-                    break;
-                case LogSituation.Unknown:
-                    situationText = "Unknown";
-                    break;
-                case LogSituation.ApplicationAction:
-                    situationText = "Application Action";
-                    break;
-                case LogSituation.UserAction:
-                    situationText = "User Action";
-                    break;
-                case LogSituation.LogAction:
-                    situationText = "Log Action";
-                    break;
-                default:
-                    situationText = "Unknown";
-                    break;
-            }
+            return text
+                .Replace("\u000D\u000A", replaceChar)
+                .Replace("\u000A", replaceChar)
+                .Replace("\u0085", replaceChar)
+                .Replace("\u2028", replaceChar)
+                .Replace("\u2029", replaceChar);
         }
-        public static void GetTextFromSituation(LogSituation situation, out string situationText, out string sortText)
+
+        public static (string SituationText, string SortText) GetTextFromSituation(LogSituation situation)
         {
             switch (situation)
             {
                 case LogSituation.Information:
-                    situationText = "Information";
-                    sortText = "INF";
-                    break;
+                    return ("Information", "INF");
                 case LogSituation.Warning:
-                    situationText = "Warning";
-                    sortText = "WRN";
-                    break;
+                    return ("Warning", "WRN");
                 case LogSituation.Error:
-                    situationText = "Error";
-                    sortText = "ERR";
-                    break;
+                    return ("Error", "ERR");
                 case LogSituation.CriticalError:
-                    situationText = "Critical Error";
-                    sortText = "CER";
-                    break;
-                case LogSituation.Unknown:
-                    situationText = "Unknown";
-                    sortText = "UNW";
-                    break;
+                    return ("Critical Error", "CER");
                 case LogSituation.ApplicationAction:
-                    situationText = "Application Action";
-                    sortText = "APA";
-                    break;
+                    return ("Application Action", "APA");
                 case LogSituation.UserAction:
-                    situationText = "User Action";
-                    sortText = "USA";
-                    break;
+                    return ("User Action", "USA");
                 case LogSituation.LogAction:
-                    situationText = "Log Action";
-                    sortText = "LGA";
-                    break;
+                    return ("Log Action", "LGA");
+                case LogSituation.Unknown:
                 default:
-                    situationText = "Unknown";
-                    sortText = "UNW";
-                    break;
+                    return ("Unknown", "UNW");
             }
         }
 
@@ -128,19 +86,18 @@ namespace RIS.Logging
                     return LogSituation.Error;
                 case "Critical Error":
                     return LogSituation.CriticalError;
-                case "Unknown":
-                    return LogSituation.Unknown;
                 case "Application Action":
                     return LogSituation.ApplicationAction;
                 case "User Action":
                     return LogSituation.UserAction;
                 case "Log Action":
                     return LogSituation.LogAction;
+                case "Unknown":
                 default:
                     return LogSituation.Unknown;
             }
         }
-        
+
         public static LogSituation GetSituationFromSortText(string sortText)
         {
             switch (sortText)
@@ -153,20 +110,28 @@ namespace RIS.Logging
                     return LogSituation.Error;
                 case "CER":
                     return LogSituation.CriticalError;
-                case "UNW":
-                    return LogSituation.Unknown;
                 case "APA":
                     return LogSituation.ApplicationAction;
                 case "USA":
                     return LogSituation.UserAction;
                 case "LGA":
                     return LogSituation.LogAction;
+                case "UNW":
                 default:
                     return LogSituation.Unknown;
             }
         }
 
         public static int DeleteLogs(string logsPath, ushort daysToRemove)
+        {
+            return DeleteLogsInternal(logsPath, daysToRemove, ".rlog");
+        }
+        public static int DeleteDebugLogs(string logsPath, ushort daysToRemove)
+        {
+            return DeleteLogsInternal(logsPath, daysToRemove, ".rdlog");
+        }
+
+        private static int DeleteLogsInternal(string logsPath, ushort daysToRemove, string fileExtension)
         {
             if (!Directory.Exists(logsPath))
             {
@@ -185,85 +150,32 @@ namespace RIS.Logging
 
                 string filesDirectory = Path.Combine(logsPath, "Logs");
 
-                if (!Directory.Exists(filesDirectory))
-                {
-                    Directory.CreateDirectory(filesDirectory);
-                }
+                if (fileExtension == ".rdlog")
+                    filesDirectory = Path.Combine(filesDirectory, "Debug");
 
-                string[] logFilesList = Directory.GetFiles(filesDirectory, "*.rlog");
+                if (!Directory.Exists(filesDirectory))
+                    Directory.CreateDirectory(filesDirectory);
+
+                string[] logFiles = Directory.GetFiles(filesDirectory, fileExtension);
 
                 DateTime dateNow = DateTime.UtcNow;
 
-                for (int i = 0; i < logFilesList.Length; ++i)
+                for (int i = 0; i < logFiles.Length; ++i)
                 {
+                    ref string logFile = ref logFiles[i];
+
+                    if (logFile == null)
+                        continue;
+
                     DateTime dateLogFile = DateTime.ParseExact(
-                        Path.GetFileNameWithoutExtension(logFilesList[i])?.Substring(0, 19),
+                        Path.GetFileNameWithoutExtension(logFile)?.Substring(0, 19),
                         "dd-MM-yyyy_HH-mm-ss", CultureInfo.CurrentCulture).ToUniversalTime();
 
                     if (dateLogFile.AddDays(daysToRemove) <= dateNow)
                     {
                         try
                         {
-                            File.Delete(logFilesList[i]);
-                            ++countDeletedFiles;
-                        }
-                        catch (Exception ex)
-                        {
-                            Events.OnError(new RErrorEventArgs(ex.Message, ex.StackTrace));
-                            OnError(new RErrorEventArgs(ex.Message, ex.StackTrace));
-                        }
-                    }
-                }
-
-                return countDeletedFiles;
-            }
-            catch (Exception ex)
-            {
-                Events.OnError(new RErrorEventArgs(ex.Message, ex.StackTrace));
-                OnError(new RErrorEventArgs(ex.Message, ex.StackTrace));
-                throw;
-            }
-        }
-        
-        public static int DeleteDebugLogs(string logsPath, ushort daysToRemove)
-        {
-            if (!Directory.Exists(logsPath))
-            {
-                var exception = new DirectoryNotFoundException("Невозможно начать удаление лог-файлов, так как указанный каталог не существует");
-                Events.OnError(new RErrorEventArgs(exception.Message, exception.StackTrace));
-                OnError(new RErrorEventArgs(exception.Message, exception.StackTrace));
-                throw exception;
-            }
-
-            try
-            {
-                int countDeletedFiles = 0;
-
-                if (!Path.IsPathRooted(logsPath))
-                    logsPath = Path.GetFullPath(logsPath);
-
-                string filesDirectory = Path.Combine(logsPath, "Logs", "Debug");
-
-                if (!Directory.Exists(filesDirectory))
-                {
-                    Directory.CreateDirectory(filesDirectory);
-                }
-
-                string[] logFilesList = Directory.GetFiles(filesDirectory, "*.rdlog");
-
-                DateTime dateNow = DateTime.UtcNow;
-
-                for (int i = 0; i < logFilesList.Length; ++i)
-                {
-                    DateTime dateLogFile = DateTime.ParseExact(
-                        Path.GetFileNameWithoutExtension(logFilesList[i])?.Substring(0, 19),
-                        "dd-MM-yyyy_HH-mm-ss", CultureInfo.CurrentCulture).ToUniversalTime();
-
-                    if (dateLogFile.AddDays(daysToRemove) <= dateNow)
-                    {
-                        try
-                        {
-                            File.Delete(logFilesList[i]);
+                            File.Delete(logFile);
                             ++countDeletedFiles;
                         }
                         catch (Exception ex)

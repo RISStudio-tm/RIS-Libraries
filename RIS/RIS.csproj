@@ -4,8 +4,8 @@
     <Configurations>Debug;Release;Release Nuget</Configurations>
     <RootNamespace>RIS</RootNamespace>
     <AssemblyName>RIS</AssemblyName>
-    <AssemblyVersion>3.0.23.20227</AssemblyVersion>
-    <FileVersion>3.0.23.20227</FileVersion>
+    <AssemblyVersion>3.0.24.20227</AssemblyVersion>
+    <FileVersion>3.0.24.20227</FileVersion>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <PackageId>RIS</PackageId>
     <Product>RIS</Product>

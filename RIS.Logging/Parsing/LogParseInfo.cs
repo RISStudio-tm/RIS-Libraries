@@ -34,18 +34,9 @@ namespace RIS.Logging.Parsing
         public Encoding FileEncoding { get; private set; }
 
         public LogParseInfo(string path)
+            : this(path, Encoding.UTF8)
         {
-            LogFile = null;
-            FileEncoding = Encoding.UTF8;
 
-            Task parse = Task.Factory.StartNew(() =>
-            {
-                OpenFile(path, Encoding.UTF8);
-                ParseFile();
-                CloseFile();
-            });
-
-            parse.Wait();
         }
         public LogParseInfo(string path, Encoding encoding)
         {
@@ -98,6 +89,13 @@ namespace RIS.Logging.Parsing
                 OnError(new RErrorEventArgs(exception.Message, exception.StackTrace));
                 throw exception;
             }
+            else if (Path.GetExtension(path) != ".rlog" && Path.GetExtension(path) != ".rdlog")
+            {
+                var exception = new Exception("Невозможно открыть лог-файл, так как расширение файла имеет неподдерживаемый формат");
+                Events.OnError(this, new RErrorEventArgs(exception.Message, exception.StackTrace));
+                OnError(new RErrorEventArgs(exception.Message, exception.StackTrace));
+                throw exception;
+            }
 
             try
             {
@@ -138,8 +136,7 @@ namespace RIS.Logging.Parsing
             for (int i = 0; i < Situations.Length; ++i)
             {
                 Situations[i] = (LogSituation) Enum.Parse(typeof(LogSituation), SituationsOriginalNames[i], true);
-                LogUtilities.GetTextFromSituation(Situations[i], out string situationText);
-                SituationsNames[i] = situationText;
+                SituationsNames[i] = LogUtilities.GetTextFromSituation(Situations[i]).SituationText;
 
                 SituationsMeetsLines[i] = new ChunkedArrayD<long>();
             }
@@ -170,7 +167,7 @@ namespace RIS.Logging.Parsing
                     ++SituationsMeetsCounts[(int) situation - 1];
                     SituationsMeetsLines[(int) situation - 1].Add(LinesCount);
                 }
-                catch (IOException ex)
+                catch (Exception ex)
                 {
                     Events.OnError(this, new RErrorEventArgs(ex.Message, ex.StackTrace));
                     OnError(new RErrorEventArgs(ex.Message, ex.StackTrace));
