@@ -6,28 +6,6 @@ using System.Threading;
 
 namespace RIS.Collections.Concurrent
 {
-    internal enum ConcurrentOneLinkedListNodeState : byte
-    {
-        Ins = 0,
-        Rem = 1,
-        Dat = 2,
-        Inv = 3
-    }
-
-    internal readonly struct ThreadState<T>
-    {
-        public readonly int Phase;
-        public readonly bool Pending;
-        public readonly ConcurrentOneLinkedListNode<T> Node;
-
-        public ThreadState(int phase, bool pending, ConcurrentOneLinkedListNode<T> node)
-        {
-            Phase = phase;
-            Pending = pending;
-            Node = node;
-        }
-    }
-
     public sealed class ConcurrentOneLinkedListNode<T>
     {
         private int _state;

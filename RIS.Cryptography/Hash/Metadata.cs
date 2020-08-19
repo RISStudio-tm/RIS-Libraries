@@ -9,7 +9,7 @@ namespace RIS.Cryptography.Hash
 {
     public class BCryptMetadata
     {
-        public static Regex HashInfoRegex { get; } = new Regex(@"^\$(?<version>2[a-z]{1}?)\$(?<work_factor>\d\d?)\$(?<hash>[A-Za-z0-9\./]{53})$", RegexOptions.Singleline);
+        public static readonly Regex HashInfoRegex = new Regex(@"^\$(?<version>2[a-z]{1}?)\$(?<work_factor>\d\d?)\$(?<hash>[A-Za-z0-9\./]{53})$", RegexOptions.Multiline, TimeSpan.FromSeconds(5));
 
         public event EventHandler<RInformationEventArgs> Information;
 		public event EventHandler<RWarningEventArgs> Warning;
@@ -91,7 +91,7 @@ namespace RIS.Cryptography.Hash
 
     public class Argon2Metadata
     {
-        public static Regex HashInfoRegex { get; } = new Regex(@"^\$(?<type>argon2[a-z]{0,2}?)\$v=(?<version>\d+?)\$m=(?<memory_size>\d+?),t=(?<iterations>\d+?),p=(?<degree_of_parallelism>\d+?)\$(?<salt>[A-Za-z0-9/+]+)\$(?<hash>[A-Za-z0-9/+]+)$", RegexOptions.Singleline);
+        public static readonly Regex HashInfoRegex = new Regex(@"^\$(?<type>argon2[a-z]{0,2}?)\$v=(?<version>\d+?)\$m=(?<memory_size>\d+?),t=(?<iterations>\d+?),p=(?<degree_of_parallelism>\d+?)\$(?<salt>[A-Za-z0-9/+]+)\$(?<hash>[A-Za-z0-9/+]+)$", RegexOptions.Multiline, TimeSpan.FromSeconds(5));
 
         public event EventHandler<RInformationEventArgs> Information;
 		public event EventHandler<RWarningEventArgs> Warning;

@@ -39,6 +39,7 @@ namespace RIS.Mathematics
             Error?.Invoke(sender, e);
         }
 
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool AlmostEquals(double number1, double number2, double precision)
         {
@@ -50,32 +51,97 @@ namespace RIS.Mathematics
             return System.Math.Abs(number1 - number2) <= precision;
         }
 
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static sbyte Abs(sbyte number)
         {
-            return (sbyte)((number + (number >> 7)) ^ (number >> 7));
+            return number == sbyte.MinValue ? sbyte.MaxValue : (sbyte)((number + (number >> 7)) ^ (number >> 7));
         }
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static short Abs(short number)
         {
-            return (short)((number + (number >> 15)) ^ (number >> 15));
+            return number == short.MinValue ? short.MaxValue : (short)((number + (number >> 15)) ^ (number >> 15));
         }
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static int Abs(int number)
         {
-            return (number + (number >> 31)) ^ (number >> 31);
+            return number == int.MinValue ? int.MaxValue : (number + (number >> 31)) ^ (number >> 31);
         }
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static long Abs(long number)
         {
-            return (number + (number >> 63)) ^ (number >> 63);
+            return number == long.MinValue ? long.MaxValue : (number + (number >> 63)) ^ (number >> 63);
         }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static float Abs(float number)
+        {
+            return number == float.MinValue ? float.MaxValue : System.Math.Abs(number);
+        }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static double Abs(double number)
+        {
+            return number == double.MinValue ? double.MaxValue : System.Math.Abs(number);
+        }
+
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static sbyte AbsOverflow(sbyte number)
+        {
+            return checked((sbyte)((number + (number >> 7)) ^ (number >> 7)));
+        }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static short AbsOverflow(short number)
+        {
+            return checked((short)((number + (number >> 15)) ^ (number >> 15)));
+        }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static int AbsOverflow(int number)
+        {
+            return checked((number + (number >> 31)) ^ (number >> 31));
+        }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static long AbsOverflow(long number)
+        {
+            return checked((number + (number >> 63)) ^ (number >> 63));
+        }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static float AbsOverflow(float number)
+        {
+            return checked(System.Math.Abs(number));
+        }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static double AbsOverflow(double number)
+        {
+            return checked(System.Math.Abs(number));
+        }
+
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static byte AbsNoOverflow(sbyte number)
+        {
+            return (byte)((number + (number >> 7)) ^ (number >> 7));
+        }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static ushort AbsNoOverflow(short number)
+        {
+            return (ushort)((number + (number >> 15)) ^ (number >> 15));
+        }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static uint AbsNoOverflow(int number)
+        {
+            return (uint)((number + (number >> 31)) ^ (number >> 31));
+        }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static ulong AbsNoOverflow(long number)
+        {
+            return (ulong)((number + (number >> 63)) ^ (number >> 63));
+        }
+
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool IsPowerOfTwo(sbyte number)
         {
-            number = Abs(number);
-            return IsPowerOfTwo((uint)number);
+            return IsPowerOfTwo(Abs(number));
         }
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool IsPowerOfTwo(byte number)
@@ -85,8 +151,7 @@ namespace RIS.Mathematics
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool IsPowerOfTwo(short number)
         {
-            number = Abs(number);
-            return IsPowerOfTwo((uint)number);
+            return IsPowerOfTwo(Abs(number));
         }
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool IsPowerOfTwo(ushort number)
@@ -96,8 +161,7 @@ namespace RIS.Mathematics
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool IsPowerOfTwo(int number)
         {
-            number = Abs(number);
-            return (number != 0) && ((number & (number - 1)) == 0);
+            return IsPowerOfTwo(Abs(number));
         }
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool IsPowerOfTwo(uint number)
@@ -107,8 +171,7 @@ namespace RIS.Mathematics
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool IsPowerOfTwo(long number)
         {
-            number = Abs(number);
-            return (number != 0) && ((number & (number - 1)) == 0);
+            return IsPowerOfTwo(Abs(number));
         }
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool IsPowerOfTwo(ulong number)
@@ -116,15 +179,16 @@ namespace RIS.Mathematics
             return (number != 0) && ((number & (number - 1)) == 0);
         }
 
+
         /// <summary>
         /// Returns 2^x more or equals <paramref name="number"/> (next power of two) (if possible)
         /// </summary>
         /// <exception cref="ArgumentException"></exception>
         public static sbyte NextPowerOfTwo(sbyte number)
         {
-            number = Abs(number);
+            byte numberUnsigned = AbsNoOverflow(number);
 
-            if (number > 64)
+            if (numberUnsigned > 64)
             {
                 var exception = new ArgumentException($"Невозможно найти следующую степень двойки для числа {number}", nameof(number));
                 Events.OnError(new RErrorEventArgs(exception.Message, exception.StackTrace));
@@ -132,7 +196,7 @@ namespace RIS.Mathematics
                 throw exception;
             }
 
-            return (sbyte)NextPowerOfTwo((byte)number);
+            return (sbyte)NextPowerOfTwo(numberUnsigned);
         }
         /// <summary>
         /// Returns 2^x more or equals <paramref name="number"/> (next power of two) (if possible)
@@ -167,9 +231,9 @@ namespace RIS.Mathematics
         /// <exception cref="ArgumentException"></exception>
         public static short NextPowerOfTwo(short number)
         {
-            number = Abs(number);
+            ushort numberUnsigned = AbsNoOverflow(number);
 
-            if (number > 16384)
+            if (numberUnsigned > 16384)
             {
                 var exception = new ArgumentException($"Невозможно найти следующую степень двойки для числа {number}", nameof(number));
                 Events.OnError(new RErrorEventArgs(exception.Message, exception.StackTrace));
@@ -177,7 +241,7 @@ namespace RIS.Mathematics
                 throw exception;
             }
 
-            return (short)NextPowerOfTwo((ushort)number);
+            return (short)NextPowerOfTwo(numberUnsigned);
         }
         /// <summary>
         /// Returns 2^x more or equals <paramref name="number"/> (next power of two) (if possible)
@@ -213,9 +277,9 @@ namespace RIS.Mathematics
         /// <exception cref="ArgumentException"></exception>
         public static int NextPowerOfTwo(int number)
         {
-            number = Abs(number);
+            uint numberUnsigned = AbsNoOverflow(number);
 
-            if (number > 1073741824)
+            if (numberUnsigned > 1073741824)
             {
                 var exception = new ArgumentException($"Невозможно найти следующую степень двойки для числа {number}", nameof(number));
                 Events.OnError(new RErrorEventArgs(exception.Message, exception.StackTrace));
@@ -223,7 +287,7 @@ namespace RIS.Mathematics
                 throw exception;
             }
 
-            return (int)NextPowerOfTwo((uint)number);
+            return (int)NextPowerOfTwo(numberUnsigned);
         }
         /// <summary>
         /// Returns 2^x more or equals <paramref name="number"/> (next power of two) (if possible)
@@ -260,9 +324,9 @@ namespace RIS.Mathematics
         /// <exception cref="ArgumentException"></exception>
         public static long NextPowerOfTwo(long number)
         {
-            number = Abs(number);
+            ulong numberUnsigned = AbsNoOverflow(number);
 
-            if (number > 4611686018427387904)
+            if (numberUnsigned > 4611686018427387904)
             {
                 var exception = new ArgumentException($"Невозможно найти следующую степень двойки для числа {number}", nameof(number));
                 Events.OnError(new RErrorEventArgs(exception.Message, exception.StackTrace));
@@ -270,7 +334,7 @@ namespace RIS.Mathematics
                 throw exception;
             }
 
-            return (long)NextPowerOfTwo((ulong)number);
+            return (long)NextPowerOfTwo(numberUnsigned);
         }
         /// <summary>
         /// Returns 2^x more or equals <paramref name="number"/> (next power of two) (if possible)
@@ -303,15 +367,16 @@ namespace RIS.Mathematics
             return number;
         }
 
+
         /// <summary>
         /// Returns 2^x less or equals <paramref name="number"/> (previous power of two) (if possible)
         /// </summary>
         /// <exception cref="ArgumentException"></exception>
         public static sbyte PrevPowerOfTwo(sbyte number)
         {
-            number = Abs(number);
+            byte numberUnsigned = AbsNoOverflow(number);
 
-            if (number == 0)
+            if (numberUnsigned == 0)
             {
                 var exception = new ArgumentException($"Невозможно найти предыдущую степень двойки для числа {number}", nameof(number));
                 Events.OnError(new RErrorEventArgs(exception.Message, exception.StackTrace));
@@ -319,15 +384,15 @@ namespace RIS.Mathematics
                 throw exception;
             }
 
-            if (number > 64)
+            if (numberUnsigned > 64)
                 return 64;
 
-            if (!IsPowerOfTwo((byte)number))
+            if (!IsPowerOfTwo(numberUnsigned))
             {
-                number = (sbyte)(NextPowerOfTwo((byte)number) >> 1);
+                numberUnsigned = (byte)(NextPowerOfTwo(numberUnsigned) >> 1);
             }
 
-            return number;
+            return (sbyte)numberUnsigned;
         }
         /// <summary>
         /// Returns 2^x less or equals <paramref name="number"/> (previous power of two) (if possible)
@@ -359,9 +424,9 @@ namespace RIS.Mathematics
         /// <exception cref="ArgumentException"></exception>
         public static short PrevPowerOfTwo(short number)
         {
-            number = Abs(number);
+            ushort numberUnsigned = AbsNoOverflow(number);
 
-            if (number == 0)
+            if (numberUnsigned == 0)
             {
                 var exception = new ArgumentException($"Невозможно найти предыдущую степень двойки для числа {number}", nameof(number));
                 Events.OnError(new RErrorEventArgs(exception.Message, exception.StackTrace));
@@ -369,15 +434,15 @@ namespace RIS.Mathematics
                 throw exception;
             }
 
-            if (number > 16384)
+            if (numberUnsigned > 16384)
                 return 16384;
 
-            if (!IsPowerOfTwo((ushort)number))
+            if (!IsPowerOfTwo(numberUnsigned))
             {
-                number = (short)(NextPowerOfTwo((ushort)number) >> 1);
+                numberUnsigned = (ushort)(NextPowerOfTwo(numberUnsigned) >> 1);
             }
 
-            return number;
+            return (short)numberUnsigned;
         }
         /// <summary>
         /// Returns 2^x less or equals <paramref name="number"/> (previous power of two) (if possible)
@@ -409,9 +474,9 @@ namespace RIS.Mathematics
         /// <exception cref="ArgumentException"></exception>
         public static int PrevPowerOfTwo(int number)
         {
-            number = Abs(number);
+            uint numberUnsigned = AbsNoOverflow(number);
 
-            if (number == 0)
+            if (numberUnsigned == 0)
             {
                 var exception = new ArgumentException($"Невозможно найти предыдущую степень двойки для числа {number}", nameof(number));
                 Events.OnError(new RErrorEventArgs(exception.Message, exception.StackTrace));
@@ -419,15 +484,15 @@ namespace RIS.Mathematics
                 throw exception;
             }
 
-            if (number > 1073741824)
+            if (numberUnsigned > 1073741824)
                 return 1073741824;
 
-            if (!IsPowerOfTwo((uint)number))
+            if (!IsPowerOfTwo(numberUnsigned))
             {
-                number = (int)(NextPowerOfTwo((uint)number) >> 1);
+                numberUnsigned = NextPowerOfTwo(numberUnsigned) >> 1;
             }
 
-            return number;
+            return (int)numberUnsigned;
         }
         /// <summary>
         /// Returns 2^x less or equals <paramref name="number"/> (previous power of two) (if possible)
@@ -459,9 +524,9 @@ namespace RIS.Mathematics
         /// <exception cref="ArgumentException"></exception>
         public static long PrevPowerOfTwo(long number)
         {
-            number = Abs(number);
+            ulong numberUnsigned = AbsNoOverflow(number);
 
-            if (number == 0)
+            if (numberUnsigned == 0)
             {
                 var exception = new ArgumentException($"Невозможно найти предыдущую степень двойки для числа {number}", nameof(number));
                 Events.OnError(new RErrorEventArgs(exception.Message, exception.StackTrace));
@@ -469,15 +534,15 @@ namespace RIS.Mathematics
                 throw exception;
             }
 
-            if (number > 4611686018427387904)
+            if (numberUnsigned > 4611686018427387904)
                 return 4611686018427387904;
 
-            if (!IsPowerOfTwo((ulong)number))
+            if (!IsPowerOfTwo(numberUnsigned))
             {
-                number = (long)NextPowerOfTwo((ulong)number) >> 1;
+                numberUnsigned = NextPowerOfTwo(numberUnsigned) >> 1;
             }
 
-            return number;
+            return (long)numberUnsigned;
         }
         /// <summary>
         /// Returns 2^x less or equals <paramref name="number"/> (previous power of two) (if possible)
@@ -502,6 +567,169 @@ namespace RIS.Mathematics
             }
 
             return number;
+        }
+
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static uint DigitsCount(sbyte number)
+        {
+            if (number < 0)
+                number = Abs(number);
+
+            return DigitsCount((byte)number);
+        }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static uint DigitsCount(byte number)
+        {
+            if (number < 10)
+                return 1;
+            if (number < 100)
+                return 2;
+
+            return 3;
+        }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static uint DigitsCount(short number)
+        {
+            if (number < 0)
+                number = Abs(number);
+
+            return DigitsCount((ushort)number);
+        }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static uint DigitsCount(ushort number)
+        {
+            if (number < 10)
+                return 1;
+            if (number < 100)
+                return 2;
+            if (number < 1000)
+                return 3;
+            if (number < 10000)
+                return 4;
+
+            return 5;
+        }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static uint DigitsCount(int number)
+        {
+            if (number < 0)
+                number = Abs(number);
+
+            return DigitsCount((uint)number);
+        }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static uint DigitsCount(uint number)
+        {
+            if (number < 10)
+                return 1;
+            if (number < 100)
+                return 2;
+            if (number < 1000)
+                return 3;
+            if (number < 10000)
+                return 4;
+            if (number < 100000)
+                return 5;
+            if (number < 1000000)
+                return 6;
+            if (number < 10000000)
+                return 7;
+            if (number < 100000000)
+                return 8;
+            if (number < 1000000000)
+                return 9;
+
+            return 10;
+        }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static uint DigitsCount(long number)
+        {
+            if (number < 0)
+                number = Abs(number);
+
+            if (number < 10L)
+                return 1;
+            if (number < 100L)
+                return 2;
+            if (number < 1000L)
+                return 3;
+            if (number < 10000L)
+                return 4;
+            if (number < 100000L)
+                return 5;
+            if (number < 1000000L)
+                return 6;
+            if (number < 10000000L)
+                return 7;
+            if (number < 100000000L)
+                return 8;
+            if (number < 1000000000L)
+                return 9;
+            if (number < 10000000000L)
+                return 10;
+            if (number < 100000000000L)
+                return 11;
+            if (number < 1000000000000L)
+                return 12;
+            if (number < 10000000000000L)
+                return 13;
+            if (number < 100000000000000L)
+                return 14;
+            if (number < 1000000000000000L)
+                return 15;
+            if (number < 10000000000000000L)
+                return 16;
+            if (number < 100000000000000000L)
+                return 17;
+            if (number < 1000000000000000000L)
+                return 18;
+
+            return 19;
+        }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static uint DigitsCount(ulong number)
+        {
+            if (number < 10L)
+                return 1;
+            if (number < 100L)
+                return 2;
+            if (number < 1000L)
+                return 3;
+            if (number < 10000L)
+                return 4;
+            if (number < 100000L)
+                return 5;
+            if (number < 1000000L)
+                return 6;
+            if (number < 10000000L)
+                return 7;
+            if (number < 100000000L)
+                return 8;
+            if (number < 1000000000L)
+                return 9;
+            if (number < 10000000000L)
+                return 10;
+            if (number < 100000000000L)
+                return 11;
+            if (number < 1000000000000L)
+                return 12;
+            if (number < 10000000000000L)
+                return 13;
+            if (number < 100000000000000L)
+                return 14;
+            if (number < 1000000000000000L)
+                return 15;
+            if (number < 10000000000000000L)
+                return 16;
+            if (number < 100000000000000000L)
+                return 17;
+            if (number < 1000000000000000000L)
+                return 18;
+            if (number < 10000000000000000000L)
+                return 19;
+
+            return 20;
         }
     }
 }

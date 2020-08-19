@@ -4,8 +4,8 @@
     <Configurations>Debug;Release;Release Nuget</Configurations>
     <RootNamespace>RIS</RootNamespace>
     <AssemblyName>RIS</AssemblyName>
-    <AssemblyVersion>3.0.24.20227</AssemblyVersion>
-    <FileVersion>3.0.24.20227</FileVersion>
+    <AssemblyVersion>3.0.25.0</AssemblyVersion>
+    <FileVersion>3.0.25.0</FileVersion>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <PackageId>RIS</PackageId>
     <Product>RIS</Product>
@@ -43,7 +43,7 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="AsyncEnumerator" Version="4.0.2" />
+    <PackageReference Include="Microsoft.Bcl.AsyncInterfaces" Version="1.1.1" />
     <PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
     <PackageReference Include="System.Configuration.ConfigurationManager" Version="4.7.0" />
     <PackageReference Include="System.Memory" Version="4.5.4" />

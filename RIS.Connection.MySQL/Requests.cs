@@ -65,7 +65,7 @@ namespace RIS.Connection.MySQL
         {
             if (sqlConnection == null)
             {
-                var exception = new ArgumentException($"{nameof(sqlConnection)} cannot be null", nameof(sqlConnection));
+                var exception = new ArgumentNullException($"{nameof(sqlConnection)} cannot be null", nameof(sqlConnection));
                 Events.OnError(this,
                     new RErrorEventArgs(exception.Message, exception.StackTrace));
                 CurrentMySQLConnection.OnError(this,

@@ -11,7 +11,7 @@ namespace RIS.Collections.Concurrent
     {
         private int _counter;
         private readonly ConcurrentOneLinkedListNode<T> _dummy;
-        private readonly ConcurrentDictionary<int, ThreadState<T>> _threads;
+        private readonly ConcurrentDictionary<int, ConcurrentOneLinkedListNodeThreadState<T>> _threads;
 
         internal ConcurrentOneLinkedListNode<T> HeadNode;
         public ConcurrentOneLinkedListNode<T> Head
@@ -26,7 +26,7 @@ namespace RIS.Collections.Concurrent
         {
             _counter = 0;
             _dummy = new ConcurrentOneLinkedListNode<T>();
-            _threads = new ConcurrentDictionary<int, ThreadState<T>>();
+            _threads = new ConcurrentDictionary<int, ConcurrentOneLinkedListNodeThreadState<T>>();
             HeadNode = new ConcurrentOneLinkedListNode<T>(default(T), ConcurrentOneLinkedListNodeState.Rem, -1);
         }
 
@@ -166,7 +166,7 @@ namespace RIS.Collections.Concurrent
         private void Enlist(ConcurrentOneLinkedListNode<T> node)
         {
             var phase = Interlocked.Increment(ref _counter);
-            var threadState = new ThreadState<T>(phase, true, node);
+            var threadState = new ConcurrentOneLinkedListNodeThreadState<T>(phase, true, node);
             var currentThreadId = Thread.CurrentThread.ManagedThreadId;
 
             _threads.AddOrUpdate(currentThreadId, threadState, (key, value) => threadState);
@@ -222,7 +222,7 @@ namespace RIS.Collections.Concurrent
                 if (current.Equals(HeadNode) && previous.Equals(threadState.Node))
                 {
                     var currentState = _threads[threadId];
-                    var updatedState = new ThreadState<T>(threadState.Phase, false, threadState.Node);
+                    var updatedState = new ConcurrentOneLinkedListNodeThreadState<T>(threadState.Phase, false, threadState.Node);
 
                     _threads.TryUpdate(threadId, updatedState, currentState);
 
