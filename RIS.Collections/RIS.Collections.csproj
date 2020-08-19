@@ -4,8 +4,8 @@
     <Configurations>Debug;Release;Release Nuget</Configurations>
     <RootNamespace>RIS.Collections</RootNamespace>
     <AssemblyName>RIS.Collections</AssemblyName>
-    <AssemblyVersion>4.5.83.0</AssemblyVersion>
-    <FileVersion>4.5.83.0</FileVersion>
+    <AssemblyVersion>4.5.85.0</AssemblyVersion>
+    <FileVersion>4.5.85.0</FileVersion>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <PackageId>RIS.Collections</PackageId>
     <Product>RIS.Collections</Product>

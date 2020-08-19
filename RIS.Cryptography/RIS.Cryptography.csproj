@@ -4,8 +4,8 @@
     <Configurations>Debug;Release;Release Nuget</Configurations>
     <RootNamespace>RIS.Cryptography</RootNamespace>
     <AssemblyName>RIS.Cryptography</AssemblyName>
-    <AssemblyVersion>2.7.167.0</AssemblyVersion>
-    <FileVersion>2.7.167.0</FileVersion>
+    <AssemblyVersion>2.7.168.0</AssemblyVersion>
+    <FileVersion>2.7.168.0</FileVersion>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <PackageId>RIS.Cryptography</PackageId>
     <Product>RIS.Cryptography</Product>

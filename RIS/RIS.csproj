@@ -1,11 +1,11 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFrameworks>netcoreapp3.1;net48</TargetFrameworks>
     <Configurations>Debug;Release;Release Nuget</Configurations>
     <RootNamespace>RIS</RootNamespace>
     <AssemblyName>RIS</AssemblyName>
-    <AssemblyVersion>3.0.25.0</AssemblyVersion>
-    <FileVersion>3.0.25.0</FileVersion>
+    <AssemblyVersion>3.4.2.0</AssemblyVersion>
+    <FileVersion>3.4.2.0</FileVersion>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <PackageId>RIS</PackageId>
     <Product>RIS</Product>
