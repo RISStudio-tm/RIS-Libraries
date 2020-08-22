@@ -6,7 +6,7 @@ using System.Collections.ObjectModel;
 using System.Data;
 using System.Threading;
 using System.Threading.Tasks;
-using MySql.Data.MySqlClient;
+using MySqlConnector;
 
 namespace RIS.Connection.MySQL
 {
@@ -30,7 +30,7 @@ namespace RIS.Connection.MySQL
 
         private MySqlConnection[] _connections;
         /// <summary>
-        ///     Позволяет получать массив типа <see cref="MySql.Data.MySqlClient.MySqlConnection"/> SQL-соединений, которые используются в данном экземпляре класса <see cref="RIS.Connection.MySQL.MySQLConnection"/>.
+        ///     Позволяет получать массив типа <see cref="MySqlConnector.MySqlConnection"/> SQL-соединений, которые используются в данном экземпляре класса <see cref="RIS.Connection.MySQL.MySQLConnection"/>.
         /// </summary>
         internal MySqlConnection[] ConnectionsArray
         {
@@ -40,7 +40,7 @@ namespace RIS.Connection.MySQL
             }
         }
         /// <summary>
-        ///     Позволяет получать <see cref="System.Collections.ObjectModel.ReadOnlyCollection{T}"/>, где T это <see cref="MySql.Data.MySqlClient.MySqlConnection"/>, SQL-соединений, которые используются в данном экземпляре класса <see cref="RIS.Connection.MySQL.MySQLConnection"/>.
+        ///     Позволяет получать <see cref="System.Collections.ObjectModel.ReadOnlyCollection{T}"/>, где T это <see cref="MySqlConnector.MySqlConnection"/>, SQL-соединений, которые используются в данном экземпляре класса <see cref="RIS.Connection.MySQL.MySQLConnection"/>.
         /// </summary>
         public ReadOnlyCollection<MySqlConnection> Connections
         {
@@ -150,7 +150,7 @@ namespace RIS.Connection.MySQL
         ///     Открывает соединения в количестве <paramref name="numberConnections"/> c MySQL базой данных <paramref name="database"/>, расположенной по адресу хоста <paramref name="ipAddress"/>, используя кодировку <paramref name="charset"/> и аутентификацию по имени пользователя (логину) <paramref name="login"/> и паролю <paramref name="password"/>
         /// </summary>
         /// <param name="numberConnections">
-        ///     Количество SQL-соединений <see cref="MySql.Data.MySqlClient.MySqlConnection"/>
+        ///     Количество SQL-соединений <see cref="MySqlConnector.MySqlConnection"/>
         /// </param>
         /// <param name="ipAddress">
         ///     Адрес хоста, на котором расположена база данных.
@@ -179,7 +179,7 @@ namespace RIS.Connection.MySQL
         ///     Открывает соединения в количестве <paramref name="numberConnections"/> c MySQL базой данных <paramref name="database"/>, расположенной по адресу хоста <paramref name="ipAddress"/>, используя кодировку <paramref name="charset"/>, стандартное время ожидания SQL-команд <paramref name="millisecondsTimeout"/> и аутентификацию по имени пользователя (логину) <paramref name="login"/> и паролю <paramref name="password"/>
         /// </summary>
         /// <param name="numberConnections">
-        ///     Количество SQL-соединений <see cref="MySql.Data.MySqlClient.MySqlConnection"/>
+        ///     Количество SQL-соединений <see cref="MySqlConnector.MySqlConnection"/>
         /// </param>
         /// <param name="millisecondsTimeout">
         ///     Стандартное время ожидания SQL-команд.
@@ -211,7 +211,7 @@ namespace RIS.Connection.MySQL
         ///     Открывает соединения в количестве <paramref name="numberConnections"/> c MySQL базой данных <paramref name="database"/>, расположенной по адресу хоста <paramref name="ipAddress"/>, используя кодировку <paramref name="charset"/>, стандартное время ожидания SQL-команд <paramref name="timeout"/> и аутентификацию по имени пользователя (логину) <paramref name="login"/> и паролю <paramref name="password"/>
         /// </summary>
         /// <param name="numberConnections">
-        ///     Количество SQL-соединений <see cref="MySql.Data.MySqlClient.MySqlConnection"/>
+        ///     Количество SQL-соединений <see cref="MySqlConnector.MySqlConnection"/>
         /// </param>
         /// <param name="timeout">
         ///     Стандартное время ожидания SQL-команд.
@@ -250,7 +250,7 @@ namespace RIS.Connection.MySQL
         ///     Открывает соединения в количестве <paramref name="numberConnections"/> c MySQL базой данных с использованием строки подключения <paramref name="connectionString"/>
         /// </summary>
         /// <param name="numberConnections">
-        ///     Количество SQL-соединений <see cref="MySql.Data.MySqlClient.MySqlConnection"/>
+        ///     Количество SQL-соединений <see cref="MySqlConnector.MySqlConnection"/>
         /// </param>
         /// <param name="connectionString">
         ///     Строка подключения для создания соединения с базой данных.
@@ -267,7 +267,7 @@ namespace RIS.Connection.MySQL
         ///     Открывает соединения в количестве <paramref name="numberConnections"/> c MySQL базой данных с использованием строки подключения <paramref name="connectionString"/> и стандартного времени ожидания SQL-команд <paramref name="millisecondsTimeout"/>
         /// </summary>
         /// <param name="numberConnections">
-        ///     Количество SQL-соединений <see cref="MySql.Data.MySqlClient.MySqlConnection"/>
+        ///     Количество SQL-соединений <see cref="MySqlConnector.MySqlConnection"/>
         /// </param>
         /// <param name="millisecondsTimeout">
         ///     Стандартное время ожидания SQL-команд.
@@ -287,7 +287,7 @@ namespace RIS.Connection.MySQL
         ///     Открывает соединения в количестве <paramref name="numberConnections"/> c MySQL базой данных с использованием строки подключения <paramref name="connectionString"/> и стандартного времени ожидания SQL-команд <paramref name="timeout"/>
         /// </summary>
         /// <param name="numberConnections">
-        ///     Количество SQL-соединений <see cref="MySql.Data.MySqlClient.MySqlConnection"/>
+        ///     Количество SQL-соединений <see cref="MySqlConnector.MySqlConnection"/>
         /// </param>
         /// <param name="timeout">
         ///     Стандартное время ожидания SQL-команд.

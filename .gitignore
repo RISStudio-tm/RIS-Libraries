@@ -513,7 +513,8 @@ MigrationBackup/
 
 # Files
 
-
+_tools/PublishPackages/config.ini
+_tools/PublishPackages/lastlog.log
 
 # Directories
 

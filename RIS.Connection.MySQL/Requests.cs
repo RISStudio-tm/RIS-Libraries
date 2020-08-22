@@ -6,7 +6,7 @@ using System.Data;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using MySql.Data.MySqlClient;
+using MySqlConnector;
 using RIS.Synchronization;
 
 namespace RIS.Connection.MySQL
@@ -130,7 +130,7 @@ namespace RIS.Connection.MySQL
 
                 await command.ExecuteNonQueryAsync(cancellationToken).ConfigureAwait(false);
 
-                command.Transaction.Commit();
+                await command.Transaction.CommitAsync(cancellationToken).ConfigureAwait(false);
             }
         }
 
@@ -158,7 +158,7 @@ namespace RIS.Connection.MySQL
                     }
                 }
 
-                command.Transaction.Commit();
+                await command.Transaction.CommitAsync(cancellationToken).ConfigureAwait(false);
             }
 
             return result;
@@ -176,9 +176,9 @@ namespace RIS.Connection.MySQL
                 adapter.SelectCommand.Transaction = await CurrentMySQLConnection.ConnectionsArray[connectionIndex]
                     .BeginTransactionAsync(isolationLevel, cancellationToken).ConfigureAwait(false);
 
-                await adapter.FillAsync(result, cancellationToken).ConfigureAwait(false);
+                adapter.Fill(result);
 
-                adapter.SelectCommand.Transaction?.Commit();
+                await adapter.SelectCommand.Transaction.CommitAsync(cancellationToken).ConfigureAwait(false);
             }
 
             return result;
@@ -186,7 +186,7 @@ namespace RIS.Connection.MySQL
 
 
 
-        private void ReplaceDBNullParameterValue(string value, ref MySqlCommand command,
+        private static void ReplaceDBNullParameterValue(string value, ref MySqlCommand command,
             string parameterName)
         {
             if (value == "NULL" || value == null)
@@ -194,7 +194,7 @@ namespace RIS.Connection.MySQL
             if (value == "'NULL'")
                 command.Parameters[parameterName].Value = "NULL";
         }
-        private void ReplaceDBNullParameterValue(string value, ref MySqlDataAdapter adapter,
+        private static void ReplaceDBNullParameterValue(string value, ref MySqlDataAdapter adapter,
             string parameterName)
         {
             if (value == "NULL" || value == null)
@@ -203,7 +203,7 @@ namespace RIS.Connection.MySQL
                 adapter.SelectCommand.Parameters[parameterName].Value = "NULL";
         }
 
-        private void ReplaceFunctionParameterValue(string value, ref MySqlCommand command,
+        private static void ReplaceFunctionParameterValue(string value, ref MySqlCommand command,
             string parameterName, ref string sql)
         {
             if (value == "CURRENT_TIMESTAMP")
@@ -211,7 +211,7 @@ namespace RIS.Connection.MySQL
             if (value == "'CURRENT_TIMESTAMP'")
                 command.Parameters[parameterName].Value = "CURRENT_TIMESTAMP";
         }
-        private void ReplaceFunctionParameterValue(string value, ref MySqlCommand command,
+        private static void ReplaceFunctionParameterValue(string value, ref MySqlCommand command,
             string parameterName, ref StringBuilder sqlBuilder)
         {
             if (value == "CURRENT_TIMESTAMP")
@@ -219,7 +219,7 @@ namespace RIS.Connection.MySQL
             if (value == "'CURRENT_TIMESTAMP'")
                 command.Parameters[parameterName].Value = "CURRENT_TIMESTAMP";
         }
-        private void ReplaceFunctionParameterValue(string value, ref MySqlDataAdapter adapter,
+        private static void ReplaceFunctionParameterValue(string value, ref MySqlDataAdapter adapter,
             string parameterName, ref string sql)
         {
             if (value == "CURRENT_TIMESTAMP")
@@ -227,7 +227,7 @@ namespace RIS.Connection.MySQL
             if (value == "'CURRENT_TIMESTAMP'")
                 adapter.SelectCommand.Parameters[parameterName].Value = "CURRENT_TIMESTAMP";
         }
-        private void ReplaceFunctionParameterValue(string value, ref MySqlDataAdapter adapter,
+        private static void ReplaceFunctionParameterValue(string value, ref MySqlDataAdapter adapter,
             string parameterName, ref StringBuilder sqlBuilder)
         {
             if (value == "CURRENT_TIMESTAMP")
@@ -258,9 +258,10 @@ namespace RIS.Connection.MySQL
         /// <returns>
         ///     Значение типа <see cref="long"/>, возвращённое оператором RETURN и массив значений типа <see cref="string"/> выходных параметров процедуры, доступных после её вызова.
         /// </returns>
-        /// <exception cref="MySql.Data.MySqlClient.MySqlException"></exception>
-        /// <exception cref="TimeoutException"></exception>
-        /// <exception cref="AggregateException"></exception>
+        /// <exception cref="MySqlConnector.MySqlException"></exception>
+		/// <exception cref="TimeoutException"></exception>
+		/// <exception cref="AggregateException"></exception>
+		/// <exception cref="InvalidOperationException"></exception>
         public (long result, string[] outputValues) ExecStoredProcedure(string nameProcedure,
             (string Name, string Value)[] inParametersProcedure, string[] outParametersNamesProcedure,
             IsolationLevel isolationLevel = IsolationLevel.ReadCommitted)
@@ -291,9 +292,10 @@ namespace RIS.Connection.MySQL
         /// <returns>
         ///     Значение типа <see cref="long"/>, возвращённое оператором RETURN и массив значений типа <see cref="string"/> выходных параметров процедуры, доступных после её вызова.
         /// </returns>
-        /// <exception cref="MySql.Data.MySqlClient.MySqlException"></exception>
-        /// <exception cref="TimeoutException"></exception>
-        /// <exception cref="AggregateException"></exception>
+        /// <exception cref="MySqlConnector.MySqlException"></exception>
+		/// <exception cref="TimeoutException"></exception>
+		/// <exception cref="AggregateException"></exception>
+		/// <exception cref="InvalidOperationException"></exception>
         public (long result, string[] outputValues) ExecStoredProcedure(string nameProcedure,
             (string Name, string Value)[] inParametersProcedure, string[] outParametersNamesProcedure,
             TimeSpan timeout, IsolationLevel isolationLevel = IsolationLevel.ReadCommitted)
@@ -333,9 +335,10 @@ namespace RIS.Connection.MySQL
         /// <returns>
         ///     Значение типа <see cref="long"/>, возвращённое оператором RETURN и массив значений типа <see cref="string"/> выходных параметров процедуры, доступных после её вызова.
         /// </returns>
-        /// <exception cref="MySql.Data.MySqlClient.MySqlException"></exception>
-        /// <exception cref="TimeoutException"></exception>
-        /// <exception cref="AggregateException"></exception>
+        /// <exception cref="MySqlConnector.MySqlException"></exception>
+		/// <exception cref="TimeoutException"></exception>
+		/// <exception cref="AggregateException"></exception>
+		/// <exception cref="InvalidOperationException"></exception>
         public Task<(long result, string[] outputValues)> ExecStoredProcedureAsync(string nameProcedure,
             (string Name, string Value)[] inParametersProcedure, string[] outParametersNamesProcedure,
             IsolationLevel isolationLevel = IsolationLevel.ReadCommitted)
@@ -366,9 +369,10 @@ namespace RIS.Connection.MySQL
         /// <returns>
         ///     Значение типа <see cref="long"/>, возвращённое оператором RETURN и массив значений типа <see cref="string"/> выходных параметров процедуры, доступных после её вызова.
         /// </returns>
-        /// <exception cref="MySql.Data.MySqlClient.MySqlException"></exception>
-        /// <exception cref="TimeoutException"></exception>
+        /// <exception cref="MySqlConnector.MySqlException"></exception>
+		/// <exception cref="TimeoutException"></exception>
 		/// <exception cref="AggregateException"></exception>
+		/// <exception cref="InvalidOperationException"></exception>
         public async Task<(long result, string[] outputValues)> ExecStoredProcedureAsync(string nameProcedure,
             (string Name, string Value)[] inParametersProcedure, string[] outParametersNamesProcedure,
             TimeSpan timeout, IsolationLevel isolationLevel = IsolationLevel.ReadCommitted)
@@ -541,9 +545,10 @@ namespace RIS.Connection.MySQL
         /// <returns>
         ///     Массив значений типа <see cref="string"/> выходных параметров процедуры, доступных после её вызова.
         /// </returns>
-        /// <exception cref="MySql.Data.MySqlClient.MySqlException"></exception>
-        /// <exception cref="TimeoutException"></exception>
-        /// <exception cref="AggregateException"></exception>
+        /// <exception cref="MySqlConnector.MySqlException"></exception>
+		/// <exception cref="TimeoutException"></exception>
+		/// <exception cref="AggregateException"></exception>
+		/// <exception cref="InvalidOperationException"></exception>
         public string[] ExecStoredProcedureNotReturn(string nameProcedure,
             (string Name, string Value)[] inParametersProcedure, string[] outParametersNamesProcedure,
             IsolationLevel isolationLevel = IsolationLevel.ReadCommitted)
@@ -574,9 +579,10 @@ namespace RIS.Connection.MySQL
         /// <returns>
         ///     Массив значений типа <see cref="string"/> выходных параметров процедуры, доступных после её вызова.
         /// </returns>
-        /// <exception cref="MySql.Data.MySqlClient.MySqlException"></exception>
-        /// <exception cref="TimeoutException"></exception>
-        /// <exception cref="AggregateException"></exception>
+        /// <exception cref="MySqlConnector.MySqlException"></exception>
+		/// <exception cref="TimeoutException"></exception>
+		/// <exception cref="AggregateException"></exception>
+		/// <exception cref="InvalidOperationException"></exception>
         public string[] ExecStoredProcedureNotReturn(string nameProcedure,
             (string Name, string Value)[] inParametersProcedure, string[] outParametersNamesProcedure,
             TimeSpan timeout, IsolationLevel isolationLevel = IsolationLevel.ReadCommitted)
@@ -616,9 +622,10 @@ namespace RIS.Connection.MySQL
         /// <returns>
         ///     Массив значений типа <see cref="string"/> выходных параметров процедуры, доступных после её вызова.
         /// </returns>
-        /// <exception cref="MySql.Data.MySqlClient.MySqlException"></exception>
-        /// <exception cref="TimeoutException"></exception>
-        /// <exception cref="AggregateException"></exception>
+        /// <exception cref="MySqlConnector.MySqlException"></exception>
+		/// <exception cref="TimeoutException"></exception>
+		/// <exception cref="AggregateException"></exception>
+		/// <exception cref="InvalidOperationException"></exception>
         public Task<string[]> ExecStoredProcedureNotReturnAsync(string nameProcedure,
             (string Name, string Value)[] inParametersProcedure, string[] outParametersNamesProcedure,
             IsolationLevel isolationLevel = IsolationLevel.ReadCommitted)
@@ -649,9 +656,10 @@ namespace RIS.Connection.MySQL
         /// <returns>
         ///     Массив значений типа <see cref="string"/> выходных параметров процедуры, доступных после её вызова.
         /// </returns>
-        /// <exception cref="MySql.Data.MySqlClient.MySqlException"></exception>
-        /// <exception cref="TimeoutException"></exception>
+        /// <exception cref="MySqlConnector.MySqlException"></exception>
+		/// <exception cref="TimeoutException"></exception>
 		/// <exception cref="AggregateException"></exception>
+		/// <exception cref="InvalidOperationException"></exception>
         public async Task<string[]> ExecStoredProcedureNotReturnAsync(string nameProcedure,
             (string Name, string Value)[] inParametersProcedure, string[] outParametersNamesProcedure,
             TimeSpan timeout, IsolationLevel isolationLevel = IsolationLevel.ReadCommitted)
@@ -811,9 +819,10 @@ namespace RIS.Connection.MySQL
         /// <returns>
         ///     Значение типа <see cref="DataSet"/>, которое содержит ответ сервера.
         /// </returns>
-        /// <exception cref="MySql.Data.MySqlClient.MySqlException"></exception>
-        /// <exception cref="TimeoutException"></exception>
-        /// <exception cref="AggregateException"></exception>
+        /// <exception cref="MySqlConnector.MySqlException"></exception>
+		/// <exception cref="TimeoutException"></exception>
+		/// <exception cref="AggregateException"></exception>
+		/// <exception cref="InvalidOperationException"></exception>
         public DataSet CustomCommand(string commandText,
             IsolationLevel isolationLevel = IsolationLevel.ReadCommitted)
         {
@@ -834,9 +843,10 @@ namespace RIS.Connection.MySQL
         /// <returns>
         ///     Значение типа <see cref="DataSet"/>, которое содержит ответ сервера.
         /// </returns>
-        /// <exception cref="MySql.Data.MySqlClient.MySqlException"></exception>
-        /// <exception cref="TimeoutException"></exception>
-        /// <exception cref="AggregateException"></exception>
+        /// <exception cref="MySqlConnector.MySqlException"></exception>
+		/// <exception cref="TimeoutException"></exception>
+		/// <exception cref="AggregateException"></exception>
+		/// <exception cref="InvalidOperationException"></exception>
         public DataSet CustomCommand(string commandText, TimeSpan timeout,
             IsolationLevel isolationLevel = IsolationLevel.ReadCommitted)
         {
@@ -866,9 +876,10 @@ namespace RIS.Connection.MySQL
         /// <returns>
         ///     Значение типа <see cref="DataSet"/>, которое содержит ответ сервера.
         /// </returns>
-        /// <exception cref="MySql.Data.MySqlClient.MySqlException"></exception>
-        /// <exception cref="TimeoutException"></exception>
-        /// <exception cref="AggregateException"></exception>
+        /// <exception cref="MySqlConnector.MySqlException"></exception>
+		/// <exception cref="TimeoutException"></exception>
+		/// <exception cref="AggregateException"></exception>
+		/// <exception cref="InvalidOperationException"></exception>
         public Task<DataSet> CustomCommandAsync(string commandText,
             IsolationLevel isolationLevel = IsolationLevel.ReadCommitted)
         {
@@ -889,9 +900,10 @@ namespace RIS.Connection.MySQL
         /// <returns>
         ///     Значение типа <see cref="DataSet"/>, которое содержит ответ сервера.
         /// </returns>
-        /// <exception cref="MySql.Data.MySqlClient.MySqlException"></exception>
-        /// <exception cref="TimeoutException"></exception>
+        /// <exception cref="MySqlConnector.MySqlException"></exception>
+		/// <exception cref="TimeoutException"></exception>
 		/// <exception cref="AggregateException"></exception>
+		/// <exception cref="InvalidOperationException"></exception>
         public async Task<DataSet> CustomCommandAsync(string commandText, TimeSpan timeout,
             IsolationLevel isolationLevel = IsolationLevel.ReadCommitted)
         {
@@ -1022,9 +1034,10 @@ namespace RIS.Connection.MySQL
         /// <returns>
         ///     Значение типа <see cref="DataSet"/>, которое содержит ответ сервера.
         /// </returns>
-        /// <exception cref="MySql.Data.MySqlClient.MySqlException"></exception>
-        /// <exception cref="TimeoutException"></exception>
-        /// <exception cref="AggregateException"></exception>
+        /// <exception cref="MySqlConnector.MySqlException"></exception>
+		/// <exception cref="TimeoutException"></exception>
+		/// <exception cref="AggregateException"></exception>
+		/// <exception cref="InvalidOperationException"></exception>
         public DataSet CustomCommand(string commandText, (string Name, string Value)[] parameters,
             IsolationLevel isolationLevel = IsolationLevel.ReadCommitted)
         {
@@ -1050,9 +1063,10 @@ namespace RIS.Connection.MySQL
         /// <returns>
         ///     Значение типа <see cref="DataSet"/>, которое содержит ответ сервера.
         /// </returns>
-        /// <exception cref="MySql.Data.MySqlClient.MySqlException"></exception>
-        /// <exception cref="TimeoutException"></exception>
-        /// <exception cref="AggregateException"></exception>
+        /// <exception cref="MySqlConnector.MySqlException"></exception>
+		/// <exception cref="TimeoutException"></exception>
+		/// <exception cref="AggregateException"></exception>
+		/// <exception cref="InvalidOperationException"></exception>
         public DataSet CustomCommand(string commandText, (string Name, string Value)[] parameters,
             TimeSpan timeout, IsolationLevel isolationLevel = IsolationLevel.ReadCommitted)
         {
@@ -1087,9 +1101,10 @@ namespace RIS.Connection.MySQL
         /// <returns>
         ///     Значение типа <see cref="DataSet"/>, которое содержит ответ сервера.
         /// </returns>
-        /// <exception cref="MySql.Data.MySqlClient.MySqlException"></exception>
-        /// <exception cref="TimeoutException"></exception>
-        /// <exception cref="AggregateException"></exception>
+        /// <exception cref="MySqlConnector.MySqlException"></exception>
+		/// <exception cref="TimeoutException"></exception>
+		/// <exception cref="AggregateException"></exception>
+		/// <exception cref="InvalidOperationException"></exception>
         public Task<DataSet> CustomCommandAsync(string commandText, (string Name, string Value)[] parameters,
             IsolationLevel isolationLevel = IsolationLevel.ReadCommitted)
         {
@@ -1115,9 +1130,10 @@ namespace RIS.Connection.MySQL
         /// <returns>
         ///     Значение типа <see cref="DataSet"/>, которое содержит ответ сервера.
         /// </returns>
-        /// <exception cref="MySql.Data.MySqlClient.MySqlException"></exception>
-        /// <exception cref="TimeoutException"></exception>
+        /// <exception cref="MySqlConnector.MySqlException"></exception>
+		/// <exception cref="TimeoutException"></exception>
 		/// <exception cref="AggregateException"></exception>
+		/// <exception cref="InvalidOperationException"></exception>
         public async Task<DataSet> CustomCommandAsync(string commandText, (string Name, string Value)[] parameters,
             TimeSpan timeout, IsolationLevel isolationLevel = IsolationLevel.ReadCommitted)
         {
@@ -1254,9 +1270,10 @@ namespace RIS.Connection.MySQL
         /// <returns>
         ///     Имеет возвращаемый тип <see langword="void"/>.
         /// </returns>
-        /// <exception cref="MySql.Data.MySqlClient.MySqlException"></exception>
-        /// <exception cref="TimeoutException"></exception>
-        /// <exception cref="AggregateException"></exception>
+        /// <exception cref="MySqlConnector.MySqlException"></exception>
+		/// <exception cref="TimeoutException"></exception>
+		/// <exception cref="AggregateException"></exception>
+		/// <exception cref="InvalidOperationException"></exception>
         public void CustomCommandNonQuery(string commandText,
             IsolationLevel isolationLevel = IsolationLevel.ReadCommitted)
         {
@@ -1277,9 +1294,10 @@ namespace RIS.Connection.MySQL
         /// <returns>
         ///     Имеет возвращаемый тип <see langword="void"/>.
         /// </returns>
-        /// <exception cref="MySql.Data.MySqlClient.MySqlException"></exception>
-        /// <exception cref="TimeoutException"></exception>
-        /// <exception cref="AggregateException"></exception>
+        /// <exception cref="MySqlConnector.MySqlException"></exception>
+		/// <exception cref="TimeoutException"></exception>
+		/// <exception cref="AggregateException"></exception>
+		/// <exception cref="InvalidOperationException"></exception>
         public void CustomCommandNonQuery(string commandText, TimeSpan timeout,
             IsolationLevel isolationLevel = IsolationLevel.ReadCommitted)
         {
@@ -1308,9 +1326,10 @@ namespace RIS.Connection.MySQL
         /// <returns>
         ///     Имеет возвращаемый тип <see langword="void"/>.
         /// </returns>
-        /// <exception cref="MySql.Data.MySqlClient.MySqlException"></exception>
-        /// <exception cref="TimeoutException"></exception>
-        /// <exception cref="AggregateException"></exception>
+        /// <exception cref="MySqlConnector.MySqlException"></exception>
+		/// <exception cref="TimeoutException"></exception>
+		/// <exception cref="AggregateException"></exception>
+		/// <exception cref="InvalidOperationException"></exception>
         public Task CustomCommandNonQueryAsync(string commandText,
             IsolationLevel isolationLevel = IsolationLevel.ReadCommitted)
         {
@@ -1331,9 +1350,10 @@ namespace RIS.Connection.MySQL
         /// <returns>
         ///     Имеет возвращаемый тип <see langword="void"/>.
         /// </returns>
-        /// <exception cref="MySql.Data.MySqlClient.MySqlException"></exception>
-        /// <exception cref="TimeoutException"></exception>
+        /// <exception cref="MySqlConnector.MySqlException"></exception>
+		/// <exception cref="TimeoutException"></exception>
 		/// <exception cref="AggregateException"></exception>
+		/// <exception cref="InvalidOperationException"></exception>
         public async Task CustomCommandNonQueryAsync(string commandText, TimeSpan timeout,
             IsolationLevel isolationLevel = IsolationLevel.ReadCommitted)
         {
@@ -1460,9 +1480,10 @@ namespace RIS.Connection.MySQL
         /// <returns>
         ///     Имеет возвращаемый тип <see langword="void"/>.
         /// </returns>
-        /// <exception cref="MySql.Data.MySqlClient.MySqlException"></exception>
-        /// <exception cref="TimeoutException"></exception>
-        /// <exception cref="AggregateException"></exception>
+        /// <exception cref="MySqlConnector.MySqlException"></exception>
+		/// <exception cref="TimeoutException"></exception>
+		/// <exception cref="AggregateException"></exception>
+		/// <exception cref="InvalidOperationException"></exception>
         public void CustomCommandNonQuery(string commandText, (string Name, string Value)[] parameters,
             IsolationLevel isolationLevel = IsolationLevel.ReadCommitted)
         {
@@ -1488,9 +1509,10 @@ namespace RIS.Connection.MySQL
         /// <returns>
         ///     Имеет возвращаемый тип <see langword="void"/>.
         /// </returns>
-        /// <exception cref="MySql.Data.MySqlClient.MySqlException"></exception>
-        /// <exception cref="TimeoutException"></exception>
-        /// <exception cref="AggregateException"></exception>
+        /// <exception cref="MySqlConnector.MySqlException"></exception>
+		/// <exception cref="TimeoutException"></exception>
+		/// <exception cref="AggregateException"></exception>
+		/// <exception cref="InvalidOperationException"></exception>
         public void CustomCommandNonQuery(string commandText, (string Name, string Value)[] parameters,
             TimeSpan timeout, IsolationLevel isolationLevel = IsolationLevel.ReadCommitted)
         {
@@ -1524,9 +1546,10 @@ namespace RIS.Connection.MySQL
         /// <returns>
         ///     Имеет возвращаемый тип <see langword="void"/>.
         /// </returns>
-        /// <exception cref="MySql.Data.MySqlClient.MySqlException"></exception>
-        /// <exception cref="TimeoutException"></exception>
-        /// <exception cref="AggregateException"></exception>
+        /// <exception cref="MySqlConnector.MySqlException"></exception>
+		/// <exception cref="TimeoutException"></exception>
+		/// <exception cref="AggregateException"></exception>
+		/// <exception cref="InvalidOperationException"></exception>
         public Task CustomCommandNonQueryAsync(string commandText, (string Name, string Value)[] parameters,
             IsolationLevel isolationLevel = IsolationLevel.ReadCommitted)
         {
@@ -1552,9 +1575,10 @@ namespace RIS.Connection.MySQL
         /// <returns>
         ///     Имеет возвращаемый тип <see langword="void"/>.
         /// </returns>
-        /// <exception cref="MySql.Data.MySqlClient.MySqlException"></exception>
-        /// <exception cref="TimeoutException"></exception>
+        /// <exception cref="MySqlConnector.MySqlException"></exception>
+		/// <exception cref="TimeoutException"></exception>
 		/// <exception cref="AggregateException"></exception>
+		/// <exception cref="InvalidOperationException"></exception>
         public async Task CustomCommandNonQueryAsync(string commandText, (string Name, string Value)[] parameters,
             TimeSpan timeout, IsolationLevel isolationLevel = IsolationLevel.ReadCommitted)
         {
@@ -1691,9 +1715,10 @@ namespace RIS.Connection.MySQL
         /// <returns>
         ///     Значение типа <see cref="string"/>, которое содержит ответ сервера.
         /// </returns>
-        /// <exception cref="MySql.Data.MySqlClient.MySqlException"></exception>
-        /// <exception cref="TimeoutException"></exception>
-        /// <exception cref="AggregateException"></exception>
+        /// <exception cref="MySqlConnector.MySqlException"></exception>
+		/// <exception cref="TimeoutException"></exception>
+		/// <exception cref="AggregateException"></exception>
+		/// <exception cref="InvalidOperationException"></exception>
         public string SelectFunction(string nameFunction, string[] parametersValuesFunction,
             IsolationLevel isolationLevel = IsolationLevel.ReadCommitted)
         {
@@ -1717,9 +1742,10 @@ namespace RIS.Connection.MySQL
         /// <returns>
         ///     Значение типа <see cref="string"/>, которое содержит ответ сервера.
         /// </returns>
-        /// <exception cref="MySql.Data.MySqlClient.MySqlException"></exception>
-        /// <exception cref="TimeoutException"></exception>
-        /// <exception cref="AggregateException"></exception>
+        /// <exception cref="MySqlConnector.MySqlException"></exception>
+		/// <exception cref="TimeoutException"></exception>
+		/// <exception cref="AggregateException"></exception>
+		/// <exception cref="InvalidOperationException"></exception>
         public string SelectFunction(string nameFunction, string[] parametersValuesFunction,
             TimeSpan timeout, IsolationLevel isolationLevel = IsolationLevel.ReadCommitted)
         {
@@ -1752,9 +1778,10 @@ namespace RIS.Connection.MySQL
         /// <returns>
         ///     Значение типа <see cref="string"/>, которое содержит ответ сервера.
         /// </returns>
-        /// <exception cref="MySql.Data.MySqlClient.MySqlException"></exception>
-        /// <exception cref="TimeoutException"></exception>
-        /// <exception cref="AggregateException"></exception>
+        /// <exception cref="MySqlConnector.MySqlException"></exception>
+		/// <exception cref="TimeoutException"></exception>
+		/// <exception cref="AggregateException"></exception>
+		/// <exception cref="InvalidOperationException"></exception>
         public Task<string> SelectFunctionAsync(string nameFunction, string[] parametersValuesFunction,
             IsolationLevel isolationLevel = IsolationLevel.ReadCommitted)
         {
@@ -1778,9 +1805,10 @@ namespace RIS.Connection.MySQL
         /// <returns>
         ///     Значение типа <see cref="string"/>, которое содержит ответ сервера.
         /// </returns>
-        /// <exception cref="MySql.Data.MySqlClient.MySqlException"></exception>
-        /// <exception cref="TimeoutException"></exception>
+        /// <exception cref="MySqlConnector.MySqlException"></exception>
+		/// <exception cref="TimeoutException"></exception>
 		/// <exception cref="AggregateException"></exception>
+		/// <exception cref="InvalidOperationException"></exception>
         public async Task<string> SelectFunctionAsync(string nameFunction, string[] parametersValuesFunction,
             TimeSpan timeout, IsolationLevel isolationLevel = IsolationLevel.ReadCommitted)
         {
@@ -1940,9 +1968,10 @@ namespace RIS.Connection.MySQL
         /// <returns>
         ///     Значение типа <see cref="string"/>, которое содержит ответ сервера.
         /// </returns>
-        /// <exception cref="MySql.Data.MySqlClient.MySqlException"></exception>
-        /// <exception cref="TimeoutException"></exception>
-        /// <exception cref="AggregateException"></exception>
+        /// <exception cref="MySqlConnector.MySqlException"></exception>
+		/// <exception cref="TimeoutException"></exception>
+		/// <exception cref="AggregateException"></exception>
+		/// <exception cref="InvalidOperationException"></exception>
         public string SelectFunction(string nameFunction, string[] parametersValuesFunction, string tableFunction,
             IsolationLevel isolationLevel = IsolationLevel.ReadCommitted)
         {
@@ -1970,9 +1999,10 @@ namespace RIS.Connection.MySQL
         /// <returns>
         ///     Значение типа <see cref="string"/>, которое содержит ответ сервера.
         /// </returns>
-        /// <exception cref="MySql.Data.MySqlClient.MySqlException"></exception>
-        /// <exception cref="TimeoutException"></exception>
-        /// <exception cref="AggregateException"></exception>
+        /// <exception cref="MySqlConnector.MySqlException"></exception>
+		/// <exception cref="TimeoutException"></exception>
+		/// <exception cref="AggregateException"></exception>
+		/// <exception cref="InvalidOperationException"></exception>
         public string SelectFunction(string nameFunction, string[] parametersValuesFunction, string tableFunction,
             TimeSpan timeout, IsolationLevel isolationLevel = IsolationLevel.ReadCommitted)
         {
@@ -2009,9 +2039,10 @@ namespace RIS.Connection.MySQL
         /// <returns>
         ///     Значение типа <see cref="string"/>, которое содержит ответ сервера.
         /// </returns>
-        /// <exception cref="MySql.Data.MySqlClient.MySqlException"></exception>
-        /// <exception cref="TimeoutException"></exception>
-        /// <exception cref="AggregateException"></exception>
+        /// <exception cref="MySqlConnector.MySqlException"></exception>
+		/// <exception cref="TimeoutException"></exception>
+		/// <exception cref="AggregateException"></exception>
+		/// <exception cref="InvalidOperationException"></exception>
         public Task<string> SelectFunctionAsync(string nameFunction, string[] parametersValuesFunction, string tableFunction,
             IsolationLevel isolationLevel = IsolationLevel.ReadCommitted)
         {
@@ -2039,9 +2070,10 @@ namespace RIS.Connection.MySQL
         /// <returns>
         ///     Значение типа <see cref="string"/>, которое содержит ответ сервера.
         /// </returns>
-        /// <exception cref="MySql.Data.MySqlClient.MySqlException"></exception>
-        /// <exception cref="TimeoutException"></exception>
+        /// <exception cref="MySqlConnector.MySqlException"></exception>
+		/// <exception cref="TimeoutException"></exception>
 		/// <exception cref="AggregateException"></exception>
+		/// <exception cref="InvalidOperationException"></exception>
         public async Task<string> SelectFunctionAsync(string nameFunction, string[] parametersValuesFunction, string tableFunction,
             TimeSpan timeout, IsolationLevel isolationLevel = IsolationLevel.ReadCommitted)
         {
@@ -2206,9 +2238,10 @@ namespace RIS.Connection.MySQL
         /// <returns>
         ///     Массив типа <see cref="string"/>, который содержит ответ сервера.
         /// </returns>
-        /// <exception cref="MySql.Data.MySqlClient.MySqlException"></exception>
-        /// <exception cref="TimeoutException"></exception>
-        /// <exception cref="AggregateException"></exception>
+        /// <exception cref="MySqlConnector.MySqlException"></exception>
+		/// <exception cref="TimeoutException"></exception>
+		/// <exception cref="AggregateException"></exception>
+		/// <exception cref="InvalidOperationException"></exception>
         public string[] SelectColumn(string column, string table, ulong numberStartRow, ulong countRows,
             IsolationLevel isolationLevel = IsolationLevel.ReadCommitted)
         {
@@ -2238,9 +2271,10 @@ namespace RIS.Connection.MySQL
         /// <returns>
         ///     Массив типа <see cref="string"/>, который содержит ответ сервера.
         /// </returns>
-        /// <exception cref="MySql.Data.MySqlClient.MySqlException"></exception>
-        /// <exception cref="TimeoutException"></exception>
-        /// <exception cref="AggregateException"></exception>
+        /// <exception cref="MySqlConnector.MySqlException"></exception>
+		/// <exception cref="TimeoutException"></exception>
+		/// <exception cref="AggregateException"></exception>
+		/// <exception cref="InvalidOperationException"></exception>
         public string[] SelectColumn(string column, string table, ulong numberStartRow, ulong countRows,
             TimeSpan timeout, IsolationLevel isolationLevel = IsolationLevel.ReadCommitted)
         {
@@ -2279,9 +2313,10 @@ namespace RIS.Connection.MySQL
         /// <returns>
         ///     Массив типа <see cref="string"/>, который содержит ответ сервера.
         /// </returns>
-        /// <exception cref="MySql.Data.MySqlClient.MySqlException"></exception>
-        /// <exception cref="TimeoutException"></exception>
-        /// <exception cref="AggregateException"></exception>
+        /// <exception cref="MySqlConnector.MySqlException"></exception>
+		/// <exception cref="TimeoutException"></exception>
+		/// <exception cref="AggregateException"></exception>
+		/// <exception cref="InvalidOperationException"></exception>
         public Task<string[]> SelectColumnAsync(string column, string table, ulong numberStartRow, ulong countRows,
             IsolationLevel isolationLevel = IsolationLevel.ReadCommitted)
         {
@@ -2311,9 +2346,10 @@ namespace RIS.Connection.MySQL
         /// <returns>
         ///     Массив типа <see cref="string"/>, который содержит ответ сервера.
         /// </returns>
-        /// <exception cref="MySql.Data.MySqlClient.MySqlException"></exception>
-        /// <exception cref="TimeoutException"></exception>
+        /// <exception cref="MySqlConnector.MySqlException"></exception>
+		/// <exception cref="TimeoutException"></exception>
 		/// <exception cref="AggregateException"></exception>
+		/// <exception cref="InvalidOperationException"></exception>
         public async Task<string[]> SelectColumnAsync(string column, string table, ulong numberStartRow, ulong countRows,
             TimeSpan timeout, IsolationLevel isolationLevel = IsolationLevel.ReadCommitted)
         {
@@ -2470,9 +2506,10 @@ namespace RIS.Connection.MySQL
         /// <returns>
         ///     Массив типа <see cref="string"/>, который содержит ответ сервера.
         /// </returns>
-        /// <exception cref="MySql.Data.MySqlClient.MySqlException"></exception>
-        /// <exception cref="TimeoutException"></exception>
-        /// <exception cref="AggregateException"></exception>
+        /// <exception cref="MySqlConnector.MySqlException"></exception>
+		/// <exception cref="TimeoutException"></exception>
+		/// <exception cref="AggregateException"></exception>
+		/// <exception cref="InvalidOperationException"></exception>
         public string[] SelectColumn(string column, string table, string conditionName, string conditionValue,
             ulong numberStartRow, ulong countRows, IsolationLevel isolationLevel = IsolationLevel.ReadCommitted)
         {
@@ -2509,9 +2546,10 @@ namespace RIS.Connection.MySQL
         /// <returns>
         ///     Массив типа <see cref="string"/>, который содержит ответ сервера.
         /// </returns>
-        /// <exception cref="MySql.Data.MySqlClient.MySqlException"></exception>
-        /// <exception cref="TimeoutException"></exception>
-        /// <exception cref="AggregateException"></exception>
+        /// <exception cref="MySqlConnector.MySqlException"></exception>
+		/// <exception cref="TimeoutException"></exception>
+		/// <exception cref="AggregateException"></exception>
+		/// <exception cref="InvalidOperationException"></exception>
         public string[] SelectColumn(string column, string table, string conditionName, string conditionValue,
             ulong numberStartRow, ulong countRows, TimeSpan timeout, IsolationLevel isolationLevel = IsolationLevel.ReadCommitted)
         {
@@ -2557,9 +2595,10 @@ namespace RIS.Connection.MySQL
         /// <returns>
         ///     Массив типа <see cref="string"/>, который содержит ответ сервера.
         /// </returns>
-        /// <exception cref="MySql.Data.MySqlClient.MySqlException"></exception>
-        /// <exception cref="TimeoutException"></exception>
-        /// <exception cref="AggregateException"></exception>
+        /// <exception cref="MySqlConnector.MySqlException"></exception>
+		/// <exception cref="TimeoutException"></exception>
+		/// <exception cref="AggregateException"></exception>
+		/// <exception cref="InvalidOperationException"></exception>
         public Task<string[]> SelectColumnAsync(string column, string table, string conditionName, string conditionValue,
             ulong numberStartRow, ulong countRows, IsolationLevel isolationLevel = IsolationLevel.ReadCommitted)
         {
@@ -2596,9 +2635,10 @@ namespace RIS.Connection.MySQL
         /// <returns>
         ///     Массив типа <see cref="string"/>, который содержит ответ сервера.
         /// </returns>
-        /// <exception cref="MySql.Data.MySqlClient.MySqlException"></exception>
-        /// <exception cref="TimeoutException"></exception>
+        /// <exception cref="MySqlConnector.MySqlException"></exception>
+		/// <exception cref="TimeoutException"></exception>
 		/// <exception cref="AggregateException"></exception>
+		/// <exception cref="InvalidOperationException"></exception>
         public async Task<string[]> SelectColumnAsync(string column, string table, string conditionName, string conditionValue,
             ulong numberStartRow, ulong countRows, TimeSpan timeout, IsolationLevel isolationLevel = IsolationLevel.ReadCommitted)
         {
@@ -2766,9 +2806,10 @@ namespace RIS.Connection.MySQL
         /// <returns>
         ///     Массив типа <see cref="string"/>, который содержит ответ сервера.
         /// </returns>
-        /// <exception cref="MySql.Data.MySqlClient.MySqlException"></exception>
-        /// <exception cref="TimeoutException"></exception>
-        /// <exception cref="AggregateException"></exception>
+        /// <exception cref="MySqlConnector.MySqlException"></exception>
+		/// <exception cref="TimeoutException"></exception>
+		/// <exception cref="AggregateException"></exception>
+		/// <exception cref="InvalidOperationException"></exception>
         public string[] SelectColumn(string column, string table, string conditionName1,
             string conditionValue1, string conditionName2, string conditionValue2, ulong numberStartRow,
             ulong countRows, IsolationLevel isolationLevel = IsolationLevel.ReadCommitted)
@@ -2812,9 +2853,10 @@ namespace RIS.Connection.MySQL
         /// <returns>
         ///     Массив типа <see cref="string"/>, который содержит ответ сервера.
         /// </returns>
-        /// <exception cref="MySql.Data.MySqlClient.MySqlException"></exception>
-        /// <exception cref="TimeoutException"></exception>
+        /// <exception cref="MySqlConnector.MySqlException"></exception>
+		/// <exception cref="TimeoutException"></exception>
 		/// <exception cref="AggregateException"></exception>
+		/// <exception cref="InvalidOperationException"></exception>
         public string[] SelectColumn(string column, string table, string conditionName1,
             string conditionValue1, string conditionName2, string conditionValue2, ulong numberStartRow,
             ulong countRows, TimeSpan timeout, IsolationLevel isolationLevel = IsolationLevel.ReadCommitted)
@@ -2867,9 +2909,10 @@ namespace RIS.Connection.MySQL
         /// <returns>
         ///     Массив типа <see cref="string"/>, который содержит ответ сервера.
         /// </returns>
-        /// <exception cref="MySql.Data.MySqlClient.MySqlException"></exception>
-        /// <exception cref="TimeoutException"></exception>
-        /// <exception cref="AggregateException"></exception>
+        /// <exception cref="MySqlConnector.MySqlException"></exception>
+		/// <exception cref="TimeoutException"></exception>
+		/// <exception cref="AggregateException"></exception>
+		/// <exception cref="InvalidOperationException"></exception>
         public Task<string[]> SelectColumnAsync(string column, string table, string conditionName1,
             string conditionValue1, string conditionName2, string conditionValue2, ulong numberStartRow,
             ulong countRows, IsolationLevel isolationLevel = IsolationLevel.ReadCommitted)
@@ -2913,9 +2956,10 @@ namespace RIS.Connection.MySQL
         /// <returns>
         ///     Массив типа <see cref="string"/>, который содержит ответ сервера.
         /// </returns>
-        /// <exception cref="MySql.Data.MySqlClient.MySqlException"></exception>
-        /// <exception cref="TimeoutException"></exception>
+        /// <exception cref="MySqlConnector.MySqlException"></exception>
+		/// <exception cref="TimeoutException"></exception>
 		/// <exception cref="AggregateException"></exception>
+		/// <exception cref="InvalidOperationException"></exception>
         public async Task<string[]> SelectColumnAsync(string column, string table, string conditionName1,
             string conditionValue1, string conditionName2, string conditionValue2, ulong numberStartRow,
             ulong countRows, TimeSpan timeout, IsolationLevel isolationLevel = IsolationLevel.ReadCommitted)
@@ -3082,9 +3126,10 @@ namespace RIS.Connection.MySQL
         /// <returns>
         ///     Массив типа <see cref="string"/>, который содержит ответ сервера.
         /// </returns>
-        /// <exception cref="MySql.Data.MySqlClient.MySqlException"></exception>
-        /// <exception cref="TimeoutException"></exception>
-        /// <exception cref="AggregateException"></exception>
+        /// <exception cref="MySqlConnector.MySqlException"></exception>
+		/// <exception cref="TimeoutException"></exception>
+		/// <exception cref="AggregateException"></exception>
+		/// <exception cref="InvalidOperationException"></exception>
         public string[] SelectColumn(string column, string table, (string Name, string Value)[] conditions,
             ulong numberStartRow, ulong countRows, IsolationLevel isolationLevel = IsolationLevel.ReadCommitted)
         {
@@ -3119,9 +3164,10 @@ namespace RIS.Connection.MySQL
         /// <returns>
         ///     Массив типа <see cref="string"/>, который содержит ответ сервера.
         /// </returns>
-        /// <exception cref="MySql.Data.MySqlClient.MySqlException"></exception>
-        /// <exception cref="TimeoutException"></exception>
-        /// <exception cref="AggregateException"></exception>
+        /// <exception cref="MySqlConnector.MySqlException"></exception>
+		/// <exception cref="TimeoutException"></exception>
+		/// <exception cref="AggregateException"></exception>
+		/// <exception cref="InvalidOperationException"></exception>
         public string[] SelectColumn(string column, string table, (string Name, string Value)[] conditions,
             ulong numberStartRow, ulong countRows, TimeSpan timeout, IsolationLevel isolationLevel = IsolationLevel.ReadCommitted)
         {
@@ -3166,9 +3212,10 @@ namespace RIS.Connection.MySQL
         /// <returns>
         ///     Массив типа <see cref="string"/>, который содержит ответ сервера.
         /// </returns>
-        /// <exception cref="MySql.Data.MySqlClient.MySqlException"></exception>
-        /// <exception cref="TimeoutException"></exception>
-        /// <exception cref="AggregateException"></exception>
+        /// <exception cref="MySqlConnector.MySqlException"></exception>
+		/// <exception cref="TimeoutException"></exception>
+		/// <exception cref="AggregateException"></exception>
+		/// <exception cref="InvalidOperationException"></exception>
         public Task<string[]> SelectColumnAsync(string column, string table, (string Name, string Value)[] conditions,
             ulong numberStartRow, ulong countRows, IsolationLevel isolationLevel = IsolationLevel.ReadCommitted)
         {
@@ -3203,9 +3250,10 @@ namespace RIS.Connection.MySQL
         /// <returns>
         ///     Массив типа <see cref="string"/>, который содержит ответ сервера.
         /// </returns>
-        /// <exception cref="MySql.Data.MySqlClient.MySqlException"></exception>
-        /// <exception cref="TimeoutException"></exception>
+        /// <exception cref="MySqlConnector.MySqlException"></exception>
+		/// <exception cref="TimeoutException"></exception>
 		/// <exception cref="AggregateException"></exception>
+		/// <exception cref="InvalidOperationException"></exception>
         public async Task<string[]> SelectColumnAsync(string column, string table, (string Name, string Value)[] conditions,
             ulong numberStartRow, ulong countRows, TimeSpan timeout, IsolationLevel isolationLevel = IsolationLevel.ReadCommitted)
         {
@@ -3386,9 +3434,10 @@ namespace RIS.Connection.MySQL
         /// <returns>
         ///     Массив массивов типа <see cref="string"/>, которые содержат ответ сервера.
         /// </returns>
-        /// <exception cref="MySql.Data.MySqlClient.MySqlException"></exception>
-        /// <exception cref="TimeoutException"></exception>
-        /// <exception cref="AggregateException"></exception>
+        /// <exception cref="MySqlConnector.MySqlException"></exception>
+		/// <exception cref="TimeoutException"></exception>
+		/// <exception cref="AggregateException"></exception>
+		/// <exception cref="InvalidOperationException"></exception>
         public string[][] SelectColumns(string[] columns, string tableColumns, ulong numberStartRow,
             ulong countRows, IsolationLevel isolationLevel = IsolationLevel.ReadCommitted)
         {
@@ -3418,9 +3467,10 @@ namespace RIS.Connection.MySQL
         /// <returns>
         ///     Массив массивов типа <see cref="string"/>, которые содержат ответ сервера.
         /// </returns>
-        /// <exception cref="MySql.Data.MySqlClient.MySqlException"></exception>
-        /// <exception cref="TimeoutException"></exception>
-        /// <exception cref="AggregateException"></exception>
+        /// <exception cref="MySqlConnector.MySqlException"></exception>
+		/// <exception cref="TimeoutException"></exception>
+		/// <exception cref="AggregateException"></exception>
+		/// <exception cref="InvalidOperationException"></exception>
         public string[][] SelectColumns(string[] columns, string tableColumns, ulong numberStartRow,
             ulong countRows, TimeSpan timeout, IsolationLevel isolationLevel = IsolationLevel.ReadCommitted)
         {
@@ -3460,9 +3510,10 @@ namespace RIS.Connection.MySQL
         /// <returns>
         ///     Массив массивов типа <see cref="string"/>, которые содержат ответ сервера.
         /// </returns>
-        /// <exception cref="MySql.Data.MySqlClient.MySqlException"></exception>
-        /// <exception cref="TimeoutException"></exception>
+        /// <exception cref="MySqlConnector.MySqlException"></exception>
+		/// <exception cref="TimeoutException"></exception>
 		/// <exception cref="AggregateException"></exception>
+		/// <exception cref="InvalidOperationException"></exception>
         public Task<string[][]> SelectColumnsAsync(string[] columns, string tableColumns, ulong numberStartRow,
             ulong countRows, IsolationLevel isolationLevel = IsolationLevel.ReadCommitted)
         {
@@ -3492,9 +3543,10 @@ namespace RIS.Connection.MySQL
         /// <returns>
         ///     Массив массивов типа <see cref="string"/>, которые содержат ответ сервера.
         /// </returns>
-        /// <exception cref="MySql.Data.MySqlClient.MySqlException"></exception>
-        /// <exception cref="TimeoutException"></exception>
+        /// <exception cref="MySqlConnector.MySqlException"></exception>
+		/// <exception cref="TimeoutException"></exception>
 		/// <exception cref="AggregateException"></exception>
+		/// <exception cref="InvalidOperationException"></exception>
         public async Task<string[][]> SelectColumnsAsync(string[] columns, string tableColumns, ulong numberStartRow,
             ulong countRows, TimeSpan timeout, IsolationLevel isolationLevel = IsolationLevel.ReadCommitted)
         {
@@ -3644,9 +3696,10 @@ namespace RIS.Connection.MySQL
         /// <returns>
         ///     Массив массивов типа <see cref="string"/>, которые содержат ответ сервера.
         /// </returns>
-        /// <exception cref="MySql.Data.MySqlClient.MySqlException"></exception>
-        /// <exception cref="TimeoutException"></exception>
-        /// <exception cref="AggregateException"></exception>
+        /// <exception cref="MySqlConnector.MySqlException"></exception>
+		/// <exception cref="TimeoutException"></exception>
+		/// <exception cref="AggregateException"></exception>
+		/// <exception cref="InvalidOperationException"></exception>
         public string[][] SelectColumns((string Name, string Table, ulong NumberStartRow, ulong CountRows)[] columns,
             IsolationLevel isolationLevel = IsolationLevel.ReadCommitted)
         {
@@ -3671,9 +3724,10 @@ namespace RIS.Connection.MySQL
         /// <returns>
         ///     Массив массивов типа <see cref="string"/>, которые содержат ответ сервера.
         /// </returns>
-        /// <exception cref="MySql.Data.MySqlClient.MySqlException"></exception>
-        /// <exception cref="TimeoutException"></exception>
-        /// <exception cref="AggregateException"></exception>
+        /// <exception cref="MySqlConnector.MySqlException"></exception>
+		/// <exception cref="TimeoutException"></exception>
+		/// <exception cref="AggregateException"></exception>
+		/// <exception cref="InvalidOperationException"></exception>
         public string[][] SelectColumns((string Name, string Table, ulong NumberStartRow, ulong CountRows)[] columns,
             TimeSpan timeout, IsolationLevel isolationLevel = IsolationLevel.ReadCommitted)
         {
@@ -3707,9 +3761,10 @@ namespace RIS.Connection.MySQL
         /// <returns>
         ///     Массив массивов типа <see cref="string"/>, которые содержат ответ сервера.
         /// </returns>
-        /// <exception cref="MySql.Data.MySqlClient.MySqlException"></exception>
-        /// <exception cref="TimeoutException"></exception>
+        /// <exception cref="MySqlConnector.MySqlException"></exception>
+		/// <exception cref="TimeoutException"></exception>
 		/// <exception cref="AggregateException"></exception>
+		/// <exception cref="InvalidOperationException"></exception>
         public Task<string[][]> SelectColumnsAsync((string Name, string Table, ulong NumberStartRow, ulong CountRows)[] columns,
             IsolationLevel isolationLevel = IsolationLevel.ReadCommitted)
         {
@@ -3734,9 +3789,10 @@ namespace RIS.Connection.MySQL
         /// <returns>
         ///     Массив массивов типа <see cref="string"/>, которые содержат ответ сервера.
         /// </returns>
-        /// <exception cref="MySql.Data.MySqlClient.MySqlException"></exception>
-        /// <exception cref="TimeoutException"></exception>
+        /// <exception cref="MySqlConnector.MySqlException"></exception>
+		/// <exception cref="TimeoutException"></exception>
 		/// <exception cref="AggregateException"></exception>
+		/// <exception cref="InvalidOperationException"></exception>
         public async Task<string[][]> SelectColumnsAsync((string Name, string Table, ulong NumberStartRow, ulong CountRows)[] columns,
             TimeSpan timeout, IsolationLevel isolationLevel = IsolationLevel.ReadCommitted)
         {
@@ -3911,9 +3967,10 @@ namespace RIS.Connection.MySQL
         /// <returns>
         ///     Значение типа <see cref="string"/>, которое содержит ответ сервера.
         /// </returns>
-        /// <exception cref="MySql.Data.MySqlClient.MySqlException"></exception>
-        /// <exception cref="TimeoutException"></exception>
-        /// <exception cref="AggregateException"></exception>
+        /// <exception cref="MySqlConnector.MySqlException"></exception>
+		/// <exception cref="TimeoutException"></exception>
+		/// <exception cref="AggregateException"></exception>
+		/// <exception cref="InvalidOperationException"></exception>
         public string Select(string searchField, string table, string conditionName,
             string conditionValue, IsolationLevel isolationLevel = IsolationLevel.ReadCommitted)
         {
@@ -3943,9 +4000,10 @@ namespace RIS.Connection.MySQL
         /// <returns>
         ///     Значение типа <see cref="string"/>, которое содержит ответ сервера.
         /// </returns>
-        /// <exception cref="MySql.Data.MySqlClient.MySqlException"></exception>
-        /// <exception cref="TimeoutException"></exception>
-        /// <exception cref="AggregateException"></exception>
+        /// <exception cref="MySqlConnector.MySqlException"></exception>
+		/// <exception cref="TimeoutException"></exception>
+		/// <exception cref="AggregateException"></exception>
+		/// <exception cref="InvalidOperationException"></exception>
         public string Select(string searchField, string table, string conditionName,
             string conditionValue, TimeSpan timeout, IsolationLevel isolationLevel = IsolationLevel.ReadCommitted)
         {
@@ -3984,9 +4042,10 @@ namespace RIS.Connection.MySQL
         /// <returns>
         ///     Значение типа <see cref="string"/>, которое содержит ответ сервера.
         /// </returns>
-        /// <exception cref="MySql.Data.MySqlClient.MySqlException"></exception>
-        /// <exception cref="TimeoutException"></exception>
-        /// <exception cref="AggregateException"></exception>
+        /// <exception cref="MySqlConnector.MySqlException"></exception>
+		/// <exception cref="TimeoutException"></exception>
+		/// <exception cref="AggregateException"></exception>
+		/// <exception cref="InvalidOperationException"></exception>
         public Task<string> SelectAsync(string searchField, string table, string conditionName,
             string conditionValue, IsolationLevel isolationLevel = IsolationLevel.ReadCommitted)
         {
@@ -4016,9 +4075,10 @@ namespace RIS.Connection.MySQL
         /// <returns>
         ///     Значение типа <see cref="string"/>, которое содержит ответ сервера.
         /// </returns>
-        /// <exception cref="MySql.Data.MySqlClient.MySqlException"></exception>
-        /// <exception cref="TimeoutException"></exception>
+        /// <exception cref="MySqlConnector.MySqlException"></exception>
+		/// <exception cref="TimeoutException"></exception>
 		/// <exception cref="AggregateException"></exception>
+		/// <exception cref="InvalidOperationException"></exception>
         public async Task<string> SelectAsync(string searchField, string table, string conditionName,
             string conditionValue, TimeSpan timeout, IsolationLevel isolationLevel = IsolationLevel.ReadCommitted)
         {
@@ -4165,9 +4225,10 @@ namespace RIS.Connection.MySQL
         /// <returns>
         ///     Значение типа <see cref="string"/>, которое содержит ответ сервера.
         /// </returns>
-        /// <exception cref="MySql.Data.MySqlClient.MySqlException"></exception>
-        /// <exception cref="TimeoutException"></exception>
-        /// <exception cref="AggregateException"></exception>
+        /// <exception cref="MySqlConnector.MySqlException"></exception>
+		/// <exception cref="TimeoutException"></exception>
+		/// <exception cref="AggregateException"></exception>
+		/// <exception cref="InvalidOperationException"></exception>
         public string Select(string searchField, string table, string conditionName1,
             string conditionValue1, string conditionName2, string conditionValue2,
             IsolationLevel isolationLevel = IsolationLevel.ReadCommitted)
@@ -4205,9 +4266,10 @@ namespace RIS.Connection.MySQL
         /// <returns>
         ///     Значение типа <see cref="string"/>, которое содержит ответ сервера.
         /// </returns>
-        /// <exception cref="MySql.Data.MySqlClient.MySqlException"></exception>
-        /// <exception cref="TimeoutException"></exception>
-        /// <exception cref="AggregateException"></exception>
+        /// <exception cref="MySqlConnector.MySqlException"></exception>
+		/// <exception cref="TimeoutException"></exception>
+		/// <exception cref="AggregateException"></exception>
+		/// <exception cref="InvalidOperationException"></exception>
         public string Select(string searchField, string table, string conditionName1,
             string conditionValue1, string conditionName2, string conditionValue2,
             TimeSpan timeout, IsolationLevel isolationLevel = IsolationLevel.ReadCommitted)
@@ -4254,9 +4316,10 @@ namespace RIS.Connection.MySQL
         /// <returns>
         ///     Значение типа <see cref="string"/>, которое содержит ответ сервера.
         /// </returns>
-        /// <exception cref="MySql.Data.MySqlClient.MySqlException"></exception>
-        /// <exception cref="TimeoutException"></exception>
-        /// <exception cref="AggregateException"></exception>
+        /// <exception cref="MySqlConnector.MySqlException"></exception>
+		/// <exception cref="TimeoutException"></exception>
+		/// <exception cref="AggregateException"></exception>
+		/// <exception cref="InvalidOperationException"></exception>
         public Task<string> SelectAsync(string searchField, string table, string conditionName1,
             string conditionValue1, string conditionName2, string conditionValue2,
             IsolationLevel isolationLevel = IsolationLevel.ReadCommitted)
@@ -4294,9 +4357,10 @@ namespace RIS.Connection.MySQL
         /// <returns>
         ///     Значение типа <see cref="string"/>, которое содержит ответ сервера.
         /// </returns>
-        /// <exception cref="MySql.Data.MySqlClient.MySqlException"></exception>
-        /// <exception cref="TimeoutException"></exception>
+        /// <exception cref="MySqlConnector.MySqlException"></exception>
+		/// <exception cref="TimeoutException"></exception>
 		/// <exception cref="AggregateException"></exception>
+		/// <exception cref="InvalidOperationException"></exception>
         public async Task<string> SelectAsync(string searchField, string table, string conditionName1,
             string conditionValue1, string conditionName2, string conditionValue2,
             TimeSpan timeout, IsolationLevel isolationLevel = IsolationLevel.ReadCommitted)
@@ -4442,9 +4506,10 @@ namespace RIS.Connection.MySQL
         /// <returns>
         ///     Значение типа <see cref="string"/>, которое содержит ответ сервера.
         /// </returns>
-        /// <exception cref="MySql.Data.MySqlClient.MySqlException"></exception>
-        /// <exception cref="TimeoutException"></exception>
-        /// <exception cref="AggregateException"></exception>
+        /// <exception cref="MySqlConnector.MySqlException"></exception>
+		/// <exception cref="TimeoutException"></exception>
+		/// <exception cref="AggregateException"></exception>
+		/// <exception cref="InvalidOperationException"></exception>
         public string Select(string searchField, string table, (string Name, string Value)[] conditions,
             IsolationLevel isolationLevel = IsolationLevel.ReadCommitted)
         {
@@ -4473,9 +4538,10 @@ namespace RIS.Connection.MySQL
         /// <returns>
         ///     Значение типа <see cref="string"/>, которое содержит ответ сервера.
         /// </returns>
-        /// <exception cref="MySql.Data.MySqlClient.MySqlException"></exception>
-        /// <exception cref="TimeoutException"></exception>
-        /// <exception cref="AggregateException"></exception>
+        /// <exception cref="MySqlConnector.MySqlException"></exception>
+		/// <exception cref="TimeoutException"></exception>
+		/// <exception cref="AggregateException"></exception>
+		/// <exception cref="InvalidOperationException"></exception>
         public string Select(string searchField, string table, (string Name, string Value)[] conditions,
             TimeSpan timeout, IsolationLevel isolationLevel = IsolationLevel.ReadCommitted)
         {
@@ -4513,9 +4579,10 @@ namespace RIS.Connection.MySQL
         /// <returns>
         ///     Значение типа <see cref="string"/>, которое содержит ответ сервера.
         /// </returns>
-        /// <exception cref="MySql.Data.MySqlClient.MySqlException"></exception>
-        /// <exception cref="TimeoutException"></exception>
-        /// <exception cref="AggregateException"></exception>
+        /// <exception cref="MySqlConnector.MySqlException"></exception>
+		/// <exception cref="TimeoutException"></exception>
+		/// <exception cref="AggregateException"></exception>
+		/// <exception cref="InvalidOperationException"></exception>
         public Task<string> SelectAsync(string searchField, string table, (string Name, string Value)[] conditions,
             IsolationLevel isolationLevel = IsolationLevel.ReadCommitted)
         {
@@ -4544,9 +4611,10 @@ namespace RIS.Connection.MySQL
         /// <returns>
         ///     Значение типа <see cref="string"/>, которое содержит ответ сервера.
         /// </returns>
-        /// <exception cref="MySql.Data.MySqlClient.MySqlException"></exception>
-        /// <exception cref="TimeoutException"></exception>
+        /// <exception cref="MySqlConnector.MySqlException"></exception>
+		/// <exception cref="TimeoutException"></exception>
 		/// <exception cref="AggregateException"></exception>
+		/// <exception cref="InvalidOperationException"></exception>
         public async Task<string> SelectAsync(string searchField, string table, (string Name, string Value)[] conditions,
             TimeSpan timeout, IsolationLevel isolationLevel = IsolationLevel.ReadCommitted)
         {
@@ -4712,9 +4780,10 @@ namespace RIS.Connection.MySQL
         /// <returns>
         ///     Массив типа <see cref="string"/>, который содержит ответ сервера.
         /// </returns>
-        /// <exception cref="MySql.Data.MySqlClient.MySqlException"></exception>
-        /// <exception cref="TimeoutException"></exception>
-        /// <exception cref="AggregateException"></exception>
+        /// <exception cref="MySqlConnector.MySqlException"></exception>
+		/// <exception cref="TimeoutException"></exception>
+		/// <exception cref="AggregateException"></exception>
+		/// <exception cref="InvalidOperationException"></exception>
         public string[] Select(string[] searchFields, string table, string conditionName,
             string conditionValue, IsolationLevel isolationLevel = IsolationLevel.ReadCommitted)
         {
@@ -4744,9 +4813,10 @@ namespace RIS.Connection.MySQL
         /// <returns>
         ///     Массив типа <see cref="string"/>, который содержит ответ сервера.
         /// </returns>
-        /// <exception cref="MySql.Data.MySqlClient.MySqlException"></exception>
-        /// <exception cref="TimeoutException"></exception>
-        /// <exception cref="AggregateException"></exception>
+        /// <exception cref="MySqlConnector.MySqlException"></exception>
+		/// <exception cref="TimeoutException"></exception>
+		/// <exception cref="AggregateException"></exception>
+		/// <exception cref="InvalidOperationException"></exception>
         public string[] Select(string[] searchFields, string table, string conditionName,
             string conditionValue, TimeSpan timeout, IsolationLevel isolationLevel = IsolationLevel.ReadCommitted)
         {
@@ -4785,9 +4855,10 @@ namespace RIS.Connection.MySQL
         /// <returns>
         ///     Массив типа <see cref="string"/>, который содержит ответ сервера.
         /// </returns>
-        /// <exception cref="MySql.Data.MySqlClient.MySqlException"></exception>
-        /// <exception cref="TimeoutException"></exception>
-        /// <exception cref="AggregateException"></exception>
+        /// <exception cref="MySqlConnector.MySqlException"></exception>
+		/// <exception cref="TimeoutException"></exception>
+		/// <exception cref="AggregateException"></exception>
+		/// <exception cref="InvalidOperationException"></exception>
         public Task<string[]> SelectAsync(string[] searchFields, string table, string conditionName,
             string conditionValue, IsolationLevel isolationLevel = IsolationLevel.ReadCommitted)
         {
@@ -4817,9 +4888,10 @@ namespace RIS.Connection.MySQL
         /// <returns>
         ///     Массив типа <see cref="string"/>, который содержит ответ сервера.
         /// </returns>
-        /// <exception cref="MySql.Data.MySqlClient.MySqlException"></exception>
-        /// <exception cref="TimeoutException"></exception>
+        /// <exception cref="MySqlConnector.MySqlException"></exception>
+		/// <exception cref="TimeoutException"></exception>
 		/// <exception cref="AggregateException"></exception>
+		/// <exception cref="InvalidOperationException"></exception>
         public async Task<string[]> SelectAsync(string[] searchFields, string table, string conditionName,
             string conditionValue, TimeSpan timeout, IsolationLevel isolationLevel = IsolationLevel.ReadCommitted)
         {
@@ -4966,9 +5038,10 @@ namespace RIS.Connection.MySQL
         /// <returns>
         ///     Массив типа <see cref="string"/>, который содержит ответ сервера.
         /// </returns>
-        /// <exception cref="MySql.Data.MySqlClient.MySqlException"></exception>
-        /// <exception cref="TimeoutException"></exception>
-        /// <exception cref="AggregateException"></exception>
+        /// <exception cref="MySqlConnector.MySqlException"></exception>
+		/// <exception cref="TimeoutException"></exception>
+		/// <exception cref="AggregateException"></exception>
+		/// <exception cref="InvalidOperationException"></exception>
         public string[] Select(string[] searchFields, string table, string conditionName1,
             string conditionValue1, string conditionName2, string conditionValue2,
             IsolationLevel isolationLevel = IsolationLevel.ReadCommitted)
@@ -5006,9 +5079,10 @@ namespace RIS.Connection.MySQL
         /// <returns>
         ///     Массив типа <see cref="string"/>, который содержит ответ сервера.
         /// </returns>
-        /// <exception cref="MySql.Data.MySqlClient.MySqlException"></exception>
-        /// <exception cref="TimeoutException"></exception>
-        /// <exception cref="AggregateException"></exception>
+        /// <exception cref="MySqlConnector.MySqlException"></exception>
+		/// <exception cref="TimeoutException"></exception>
+		/// <exception cref="AggregateException"></exception>
+		/// <exception cref="InvalidOperationException"></exception>
         public string[] Select(string[] searchFields, string table, string conditionName1,
             string conditionValue1, string conditionName2, string conditionValue2,
             TimeSpan timeout, IsolationLevel isolationLevel = IsolationLevel.ReadCommitted)
@@ -5055,9 +5129,10 @@ namespace RIS.Connection.MySQL
         /// <returns>
         ///     Массив типа <see cref="string"/>, который содержит ответ сервера.
         /// </returns>
-        /// <exception cref="MySql.Data.MySqlClient.MySqlException"></exception>
-        /// <exception cref="TimeoutException"></exception>
-        /// <exception cref="AggregateException"></exception>
+        /// <exception cref="MySqlConnector.MySqlException"></exception>
+		/// <exception cref="TimeoutException"></exception>
+		/// <exception cref="AggregateException"></exception>
+		/// <exception cref="InvalidOperationException"></exception>
         public Task<string[]> SelectAsync(string[] searchFields, string table, string conditionName1,
             string conditionValue1, string conditionName2, string conditionValue2,
             IsolationLevel isolationLevel = IsolationLevel.ReadCommitted)
@@ -5095,9 +5170,10 @@ namespace RIS.Connection.MySQL
         /// <returns>
         ///     Массив типа <see cref="string"/>, который содержит ответ сервера.
         /// </returns>
-        /// <exception cref="MySql.Data.MySqlClient.MySqlException"></exception>
-        /// <exception cref="TimeoutException"></exception>
+        /// <exception cref="MySqlConnector.MySqlException"></exception>
+		/// <exception cref="TimeoutException"></exception>
 		/// <exception cref="AggregateException"></exception>
+		/// <exception cref="InvalidOperationException"></exception>
         public async Task<string[]> SelectAsync(string[] searchFields, string table, string conditionName1,
             string conditionValue1, string conditionName2, string conditionValue2,
             TimeSpan timeout, IsolationLevel isolationLevel = IsolationLevel.ReadCommitted)
@@ -5243,9 +5319,10 @@ namespace RIS.Connection.MySQL
         /// <returns>
         ///     Массив типа <see cref="string"/>, который содержит ответ сервера.
         /// </returns>
-        /// <exception cref="MySql.Data.MySqlClient.MySqlException"></exception>
-        /// <exception cref="TimeoutException"></exception>
-        /// <exception cref="AggregateException"></exception>
+        /// <exception cref="MySqlConnector.MySqlException"></exception>
+		/// <exception cref="TimeoutException"></exception>
+		/// <exception cref="AggregateException"></exception>
+		/// <exception cref="InvalidOperationException"></exception>
         public string[] Select(string[] searchFields, string table, (string Name, string Value)[] conditions,
             IsolationLevel isolationLevel = IsolationLevel.ReadCommitted)
         {
@@ -5274,9 +5351,10 @@ namespace RIS.Connection.MySQL
         /// <returns>
         ///     Массив типа <see cref="string"/>, который содержит ответ сервера.
         /// </returns>
-        /// <exception cref="MySql.Data.MySqlClient.MySqlException"></exception>
-        /// <exception cref="TimeoutException"></exception>
-        /// <exception cref="AggregateException"></exception>
+        /// <exception cref="MySqlConnector.MySqlException"></exception>
+		/// <exception cref="TimeoutException"></exception>
+		/// <exception cref="AggregateException"></exception>
+		/// <exception cref="InvalidOperationException"></exception>
         public string[] Select(string[] searchFields, string table, (string Name, string Value)[] conditions,
             TimeSpan timeout, IsolationLevel isolationLevel = IsolationLevel.ReadCommitted)
         {
@@ -5314,9 +5392,10 @@ namespace RIS.Connection.MySQL
         /// <returns>
         ///     Массив типа <see cref="string"/>, который содержит ответ сервера.
         /// </returns>
-        /// <exception cref="MySql.Data.MySqlClient.MySqlException"></exception>
-        /// <exception cref="TimeoutException"></exception>
-        /// <exception cref="AggregateException"></exception>
+        /// <exception cref="MySqlConnector.MySqlException"></exception>
+		/// <exception cref="TimeoutException"></exception>
+		/// <exception cref="AggregateException"></exception>
+		/// <exception cref="InvalidOperationException"></exception>
         public Task<string[]> SelectAsync(string[] searchFields, string table, (string Name, string Value)[] conditions,
             IsolationLevel isolationLevel = IsolationLevel.ReadCommitted)
         {
@@ -5345,9 +5424,10 @@ namespace RIS.Connection.MySQL
         /// <returns>
         ///     Массив типа <see cref="string"/>, который содержит ответ сервера.
         /// </returns>
-        /// <exception cref="MySql.Data.MySqlClient.MySqlException"></exception>
-        /// <exception cref="TimeoutException"></exception>
+        /// <exception cref="MySqlConnector.MySqlException"></exception>
+		/// <exception cref="TimeoutException"></exception>
 		/// <exception cref="AggregateException"></exception>
+		/// <exception cref="InvalidOperationException"></exception>
         public async Task<string[]> SelectAsync(string[] searchFields, string table, (string Name, string Value)[] conditions,
             TimeSpan timeout, IsolationLevel isolationLevel = IsolationLevel.ReadCommitted)
         {
@@ -5505,9 +5585,10 @@ namespace RIS.Connection.MySQL
         /// <returns>
         ///     Имеет возвращаемый тип <see langword="void"/>.
         /// </returns>
-        /// <exception cref="MySql.Data.MySqlClient.MySqlException"></exception>
-        /// <exception cref="TimeoutException"></exception>
-        /// <exception cref="AggregateException"></exception>
+        /// <exception cref="MySqlConnector.MySqlException"></exception>
+		/// <exception cref="TimeoutException"></exception>
+		/// <exception cref="AggregateException"></exception>
+		/// <exception cref="InvalidOperationException"></exception>
         public void Delete(string table,
             IsolationLevel isolationLevel = IsolationLevel.ReadCommitted)
         {
@@ -5528,9 +5609,10 @@ namespace RIS.Connection.MySQL
         /// <returns>
         ///     Имеет возвращаемый тип <see langword="void"/>.
         /// </returns>
-        /// <exception cref="MySql.Data.MySqlClient.MySqlException"></exception>
-        /// <exception cref="TimeoutException"></exception>
-        /// <exception cref="AggregateException"></exception>
+        /// <exception cref="MySqlConnector.MySqlException"></exception>
+		/// <exception cref="TimeoutException"></exception>
+		/// <exception cref="AggregateException"></exception>
+		/// <exception cref="InvalidOperationException"></exception>
         public void Delete(string table, TimeSpan timeout,
             IsolationLevel isolationLevel = IsolationLevel.ReadCommitted)
         {
@@ -5559,9 +5641,10 @@ namespace RIS.Connection.MySQL
         /// <returns>
         ///     Имеет возвращаемый тип <see langword="void"/>.
         /// </returns>
-        /// <exception cref="MySql.Data.MySqlClient.MySqlException"></exception>
-        /// <exception cref="TimeoutException"></exception>
-        /// <exception cref="AggregateException"></exception>
+        /// <exception cref="MySqlConnector.MySqlException"></exception>
+		/// <exception cref="TimeoutException"></exception>
+		/// <exception cref="AggregateException"></exception>
+		/// <exception cref="InvalidOperationException"></exception>
         public Task DeleteAsync(string table,
             IsolationLevel isolationLevel = IsolationLevel.ReadCommitted)
         {
@@ -5582,9 +5665,10 @@ namespace RIS.Connection.MySQL
         /// <returns>
         ///     Имеет возвращаемый тип <see langword="void"/>.
         /// </returns>
-        /// <exception cref="MySql.Data.MySqlClient.MySqlException"></exception>
-        /// <exception cref="TimeoutException"></exception>
+        /// <exception cref="MySqlConnector.MySqlException"></exception>
+		/// <exception cref="TimeoutException"></exception>
 		/// <exception cref="AggregateException"></exception>
+		/// <exception cref="InvalidOperationException"></exception>
         public async Task DeleteAsync(string table, TimeSpan timeout,
             IsolationLevel isolationLevel = IsolationLevel.ReadCommitted)
         {
@@ -5712,9 +5796,10 @@ namespace RIS.Connection.MySQL
         /// <returns>
         ///     Имеет возвращаемый тип <see langword="void"/>.
         /// </returns>
-        /// <exception cref="MySql.Data.MySqlClient.MySqlException"></exception>
-        /// <exception cref="TimeoutException"></exception>
-        /// <exception cref="AggregateException"></exception>
+        /// <exception cref="MySqlConnector.MySqlException"></exception>
+		/// <exception cref="TimeoutException"></exception>
+		/// <exception cref="AggregateException"></exception>
+		/// <exception cref="InvalidOperationException"></exception>
         public void Delete(string table, string conditionName, string conditionValue,
             IsolationLevel isolationLevel = IsolationLevel.ReadCommitted)
         {
@@ -5741,9 +5826,10 @@ namespace RIS.Connection.MySQL
         /// <returns>
         ///     Имеет возвращаемый тип <see langword="void"/>.
         /// </returns>
-        /// <exception cref="MySql.Data.MySqlClient.MySqlException"></exception>
-        /// <exception cref="TimeoutException"></exception>
-        /// <exception cref="AggregateException"></exception>
+        /// <exception cref="MySqlConnector.MySqlException"></exception>
+		/// <exception cref="TimeoutException"></exception>
+		/// <exception cref="AggregateException"></exception>
+		/// <exception cref="InvalidOperationException"></exception>
         public void Delete(string table, string conditionName, string conditionValue,
             TimeSpan timeout, IsolationLevel isolationLevel = IsolationLevel.ReadCommitted)
         {
@@ -5778,9 +5864,10 @@ namespace RIS.Connection.MySQL
         /// <returns>
         ///     Имеет возвращаемый тип <see langword="void"/>.
         /// </returns>
-        /// <exception cref="MySql.Data.MySqlClient.MySqlException"></exception>
-        /// <exception cref="TimeoutException"></exception>
-        /// <exception cref="AggregateException"></exception>
+        /// <exception cref="MySqlConnector.MySqlException"></exception>
+		/// <exception cref="TimeoutException"></exception>
+		/// <exception cref="AggregateException"></exception>
+		/// <exception cref="InvalidOperationException"></exception>
         public Task DeleteAsync(string table, string conditionName, string conditionValue,
             IsolationLevel isolationLevel = IsolationLevel.ReadCommitted)
         {
@@ -5807,9 +5894,10 @@ namespace RIS.Connection.MySQL
         /// <returns>
         ///     Имеет возвращаемый тип <see langword="void"/>.
         /// </returns>
-        /// <exception cref="MySql.Data.MySqlClient.MySqlException"></exception>
-        /// <exception cref="TimeoutException"></exception>
+        /// <exception cref="MySqlConnector.MySqlException"></exception>
+		/// <exception cref="TimeoutException"></exception>
 		/// <exception cref="AggregateException"></exception>
+		/// <exception cref="InvalidOperationException"></exception>
         public async Task DeleteAsync(string table, string conditionName, string conditionValue,
             TimeSpan timeout, IsolationLevel isolationLevel = IsolationLevel.ReadCommitted)
         {
@@ -5948,9 +6036,10 @@ namespace RIS.Connection.MySQL
         /// <returns>
         ///     Имеет возвращаемый тип <see langword="void"/>.
         /// </returns>
-        /// <exception cref="MySql.Data.MySqlClient.MySqlException"></exception>
-        /// <exception cref="TimeoutException"></exception>
-        /// <exception cref="AggregateException"></exception>
+        /// <exception cref="MySqlConnector.MySqlException"></exception>
+		/// <exception cref="TimeoutException"></exception>
+		/// <exception cref="AggregateException"></exception>
+		/// <exception cref="InvalidOperationException"></exception>
         public void Delete(string table, string conditionName1, string conditionValue1,
             string conditionName2, string conditionValue2,
             IsolationLevel isolationLevel = IsolationLevel.ReadCommitted)
@@ -5985,9 +6074,10 @@ namespace RIS.Connection.MySQL
         /// <returns>
         ///     Имеет возвращаемый тип <see langword="void"/>.
         /// </returns>
-        /// <exception cref="MySql.Data.MySqlClient.MySqlException"></exception>
-        /// <exception cref="TimeoutException"></exception>
-        /// <exception cref="AggregateException"></exception>
+        /// <exception cref="MySqlConnector.MySqlException"></exception>
+		/// <exception cref="TimeoutException"></exception>
+		/// <exception cref="AggregateException"></exception>
+		/// <exception cref="InvalidOperationException"></exception>
         public void Delete(string table, string conditionName1, string conditionValue1,
             string conditionName2, string conditionValue2, TimeSpan timeout,
             IsolationLevel isolationLevel = IsolationLevel.ReadCommitted)
@@ -6030,9 +6120,10 @@ namespace RIS.Connection.MySQL
         /// <returns>
         ///     Имеет возвращаемый тип <see langword="void"/>.
         /// </returns>
-        /// <exception cref="MySql.Data.MySqlClient.MySqlException"></exception>
-        /// <exception cref="TimeoutException"></exception>
-        /// <exception cref="AggregateException"></exception>
+        /// <exception cref="MySqlConnector.MySqlException"></exception>
+		/// <exception cref="TimeoutException"></exception>
+		/// <exception cref="AggregateException"></exception>
+		/// <exception cref="InvalidOperationException"></exception>
         public Task DeleteAsync(string table, string conditionName1, string conditionValue1,
             string conditionName2, string conditionValue2,
             IsolationLevel isolationLevel = IsolationLevel.ReadCommitted)
@@ -6067,9 +6158,10 @@ namespace RIS.Connection.MySQL
         /// <returns>
         ///     Имеет возвращаемый тип <see langword="void"/>.
         /// </returns>
-        /// <exception cref="MySql.Data.MySqlClient.MySqlException"></exception>
-        /// <exception cref="TimeoutException"></exception>
+        /// <exception cref="MySqlConnector.MySqlException"></exception>
+		/// <exception cref="TimeoutException"></exception>
 		/// <exception cref="AggregateException"></exception>
+		/// <exception cref="InvalidOperationException"></exception>
         public async Task DeleteAsync(string table, string conditionName1, string conditionValue1,
             string conditionName2, string conditionValue2, TimeSpan timeout,
             IsolationLevel isolationLevel = IsolationLevel.ReadCommitted)
@@ -6207,9 +6299,10 @@ namespace RIS.Connection.MySQL
         /// <returns>
         ///     Имеет возвращаемый тип <see langword="void"/>.
         /// </returns>
-        /// <exception cref="MySql.Data.MySqlClient.MySqlException"></exception>
-        /// <exception cref="TimeoutException"></exception>
-        /// <exception cref="AggregateException"></exception>
+        /// <exception cref="MySqlConnector.MySqlException"></exception>
+		/// <exception cref="TimeoutException"></exception>
+		/// <exception cref="AggregateException"></exception>
+		/// <exception cref="InvalidOperationException"></exception>
         public void Delete(string table, (string Name, string Value)[] conditions,
             IsolationLevel isolationLevel = IsolationLevel.ReadCommitted)
         {
@@ -6235,9 +6328,10 @@ namespace RIS.Connection.MySQL
         /// <returns>
         ///     Имеет возвращаемый тип <see langword="void"/>.
         /// </returns>
-        /// <exception cref="MySql.Data.MySqlClient.MySqlException"></exception>
-        /// <exception cref="TimeoutException"></exception>
-        /// <exception cref="AggregateException"></exception>
+        /// <exception cref="MySqlConnector.MySqlException"></exception>
+		/// <exception cref="TimeoutException"></exception>
+		/// <exception cref="AggregateException"></exception>
+		/// <exception cref="InvalidOperationException"></exception>
         public void Delete(string table, (string Name, string Value)[] conditions,
             TimeSpan timeout, IsolationLevel isolationLevel = IsolationLevel.ReadCommitted)
         {
@@ -6271,9 +6365,10 @@ namespace RIS.Connection.MySQL
         /// <returns>
         ///     Имеет возвращаемый тип <see langword="void"/>.
         /// </returns>
-        /// <exception cref="MySql.Data.MySqlClient.MySqlException"></exception>
-        /// <exception cref="TimeoutException"></exception>
-        /// <exception cref="AggregateException"></exception>
+        /// <exception cref="MySqlConnector.MySqlException"></exception>
+		/// <exception cref="TimeoutException"></exception>
+		/// <exception cref="AggregateException"></exception>
+		/// <exception cref="InvalidOperationException"></exception>
         public Task DeleteAsync(string table, (string Name, string Value)[] conditions,
             IsolationLevel isolationLevel = IsolationLevel.ReadCommitted)
         {
@@ -6299,9 +6394,10 @@ namespace RIS.Connection.MySQL
         /// <returns>
         ///     Имеет возвращаемый тип <see langword="void"/>.
         /// </returns>
-        /// <exception cref="MySql.Data.MySqlClient.MySqlException"></exception>
-        /// <exception cref="TimeoutException"></exception>
+        /// <exception cref="MySqlConnector.MySqlException"></exception>
+		/// <exception cref="TimeoutException"></exception>
 		/// <exception cref="AggregateException"></exception>
+		/// <exception cref="InvalidOperationException"></exception>
         public async Task DeleteAsync(string table, (string Name, string Value)[] conditions,
             TimeSpan timeout, IsolationLevel isolationLevel = IsolationLevel.ReadCommitted)
         {
@@ -6460,9 +6556,10 @@ namespace RIS.Connection.MySQL
         /// <returns>
         ///     Имеет возвращаемый тип <see langword="void"/>.
         /// </returns>
-        /// <exception cref="MySql.Data.MySqlClient.MySqlException"></exception>
-        /// <exception cref="TimeoutException"></exception>
-        /// <exception cref="AggregateException"></exception>
+        /// <exception cref="MySqlConnector.MySqlException"></exception>
+		/// <exception cref="TimeoutException"></exception>
+		/// <exception cref="AggregateException"></exception>
+		/// <exception cref="InvalidOperationException"></exception>
         public void Update(string changingField, string newFieldValue, string table,
             IsolationLevel isolationLevel = IsolationLevel.ReadCommitted)
         {
@@ -6489,9 +6586,10 @@ namespace RIS.Connection.MySQL
         /// <returns>
         ///     Имеет возвращаемый тип <see langword="void"/>.
         /// </returns>
-        /// <exception cref="MySql.Data.MySqlClient.MySqlException"></exception>
-        /// <exception cref="TimeoutException"></exception>
-        /// <exception cref="AggregateException"></exception>
+        /// <exception cref="MySqlConnector.MySqlException"></exception>
+		/// <exception cref="TimeoutException"></exception>
+		/// <exception cref="AggregateException"></exception>
+		/// <exception cref="InvalidOperationException"></exception>
         public void Update(string changingField, string newFieldValue, string table,
             TimeSpan timeout, IsolationLevel isolationLevel = IsolationLevel.ReadCommitted)
         {
@@ -6526,9 +6624,10 @@ namespace RIS.Connection.MySQL
         /// <returns>
         ///     Имеет возвращаемый тип <see langword="void"/>.
         /// </returns>
-        /// <exception cref="MySql.Data.MySqlClient.MySqlException"></exception>
-        /// <exception cref="TimeoutException"></exception>
-        /// <exception cref="AggregateException"></exception>
+        /// <exception cref="MySqlConnector.MySqlException"></exception>
+		/// <exception cref="TimeoutException"></exception>
+		/// <exception cref="AggregateException"></exception>
+		/// <exception cref="InvalidOperationException"></exception>
         public Task UpdateAsync(string changingField, string newFieldValue, string table,
             IsolationLevel isolationLevel = IsolationLevel.ReadCommitted)
         {
@@ -6555,9 +6654,10 @@ namespace RIS.Connection.MySQL
         /// <returns>
         ///     Имеет возвращаемый тип <see langword="void"/>.
         /// </returns>
-        /// <exception cref="MySql.Data.MySqlClient.MySqlException"></exception>
-        /// <exception cref="TimeoutException"></exception>
+        /// <exception cref="MySqlConnector.MySqlException"></exception>
+		/// <exception cref="TimeoutException"></exception>
 		/// <exception cref="AggregateException"></exception>
+		/// <exception cref="InvalidOperationException"></exception>
         public async Task UpdateAsync(string changingField, string newFieldValue, string table,
             TimeSpan timeout, IsolationLevel isolationLevel = IsolationLevel.ReadCommitted)
         {
@@ -6700,9 +6800,10 @@ namespace RIS.Connection.MySQL
         /// <returns>
         ///     Имеет возвращаемый тип <see langword="void"/>.
         /// </returns>
-        /// <exception cref="MySql.Data.MySqlClient.MySqlException"></exception>
-        /// <exception cref="TimeoutException"></exception>
-        /// <exception cref="AggregateException"></exception>
+        /// <exception cref="MySqlConnector.MySqlException"></exception>
+		/// <exception cref="TimeoutException"></exception>
+		/// <exception cref="AggregateException"></exception>
+		/// <exception cref="InvalidOperationException"></exception>
         public void Update(string changingField, string newFieldValue, string table,
             string conditionName, string conditionValue,
             IsolationLevel isolationLevel = IsolationLevel.ReadCommitted)
@@ -6736,9 +6837,10 @@ namespace RIS.Connection.MySQL
         /// <returns>
         ///     Имеет возвращаемый тип <see langword="void"/>.
         /// </returns>
-        /// <exception cref="MySql.Data.MySqlClient.MySqlException"></exception>
-        /// <exception cref="TimeoutException"></exception>
-        /// <exception cref="AggregateException"></exception>
+        /// <exception cref="MySqlConnector.MySqlException"></exception>
+		/// <exception cref="TimeoutException"></exception>
+		/// <exception cref="AggregateException"></exception>
+		/// <exception cref="InvalidOperationException"></exception>
         public void Update(string changingField, string newFieldValue, string table,
             string conditionName, string conditionValue, TimeSpan timeout,
             IsolationLevel isolationLevel = IsolationLevel.ReadCommitted)
@@ -6781,9 +6883,10 @@ namespace RIS.Connection.MySQL
         /// <returns>
         ///     Имеет возвращаемый тип <see langword="void"/>.
         /// </returns>
-        /// <exception cref="MySql.Data.MySqlClient.MySqlException"></exception>
-        /// <exception cref="TimeoutException"></exception>
-        /// <exception cref="AggregateException"></exception>
+        /// <exception cref="MySqlConnector.MySqlException"></exception>
+		/// <exception cref="TimeoutException"></exception>
+		/// <exception cref="AggregateException"></exception>
+		/// <exception cref="InvalidOperationException"></exception>
         public Task UpdateAsync(string changingField, string newFieldValue, string table,
             string conditionName, string conditionValue,
             IsolationLevel isolationLevel = IsolationLevel.ReadCommitted)
@@ -6817,9 +6920,10 @@ namespace RIS.Connection.MySQL
         /// <returns>
         ///     Имеет возвращаемый тип <see langword="void"/>.
         /// </returns>
-        /// <exception cref="MySql.Data.MySqlClient.MySqlException"></exception>
-        /// <exception cref="TimeoutException"></exception>
+        /// <exception cref="MySqlConnector.MySqlException"></exception>
+		/// <exception cref="TimeoutException"></exception>
 		/// <exception cref="AggregateException"></exception>
+		/// <exception cref="InvalidOperationException"></exception>
         public async Task UpdateAsync(string changingField, string newFieldValue, string table,
             string conditionName, string conditionValue, TimeSpan timeout,
             IsolationLevel isolationLevel = IsolationLevel.ReadCommitted)
@@ -6975,9 +7079,10 @@ namespace RIS.Connection.MySQL
         /// <returns>
         ///     Имеет возвращаемый тип <see langword="void"/>.
         /// </returns>
-        /// <exception cref="MySql.Data.MySqlClient.MySqlException"></exception>
-        /// <exception cref="TimeoutException"></exception>
-        /// <exception cref="AggregateException"></exception>
+        /// <exception cref="MySqlConnector.MySqlException"></exception>
+		/// <exception cref="TimeoutException"></exception>
+		/// <exception cref="AggregateException"></exception>
+		/// <exception cref="InvalidOperationException"></exception>
         public void Update(string changingField, string newFieldValue, string table,
             string conditionName1, string conditionValue1, string conditionName2, string conditionValue2,
             IsolationLevel isolationLevel = IsolationLevel.ReadCommitted)
@@ -7018,9 +7123,10 @@ namespace RIS.Connection.MySQL
         /// <returns>
         ///     Имеет возвращаемый тип <see langword="void"/>.
         /// </returns>
-        /// <exception cref="MySql.Data.MySqlClient.MySqlException"></exception>
-        /// <exception cref="TimeoutException"></exception>
-        /// <exception cref="AggregateException"></exception>
+        /// <exception cref="MySqlConnector.MySqlException"></exception>
+		/// <exception cref="TimeoutException"></exception>
+		/// <exception cref="AggregateException"></exception>
+		/// <exception cref="InvalidOperationException"></exception>
         public void Update(string changingField, string newFieldValue, string table,
             string conditionName1, string conditionValue1, string conditionName2, string conditionValue2,
             TimeSpan timeout, IsolationLevel isolationLevel = IsolationLevel.ReadCommitted)
@@ -7069,9 +7175,10 @@ namespace RIS.Connection.MySQL
         /// <returns>
         ///     Имеет возвращаемый тип <see langword="void"/>.
         /// </returns>
-        /// <exception cref="MySql.Data.MySqlClient.MySqlException"></exception>
-        /// <exception cref="TimeoutException"></exception>
-        /// <exception cref="AggregateException"></exception>
+        /// <exception cref="MySqlConnector.MySqlException"></exception>
+		/// <exception cref="TimeoutException"></exception>
+		/// <exception cref="AggregateException"></exception>
+		/// <exception cref="InvalidOperationException"></exception>
         public Task UpdateAsync(string changingField, string newFieldValue, string table,
             string conditionName1, string conditionValue1, string conditionName2, string conditionValue2,
             IsolationLevel isolationLevel = IsolationLevel.ReadCommitted)
@@ -7112,9 +7219,10 @@ namespace RIS.Connection.MySQL
         /// <returns>
         ///     Имеет возвращаемый тип <see langword="void"/>.
         /// </returns>
-        /// <exception cref="MySql.Data.MySqlClient.MySqlException"></exception>
-        /// <exception cref="TimeoutException"></exception>
+        /// <exception cref="MySqlConnector.MySqlException"></exception>
+		/// <exception cref="TimeoutException"></exception>
 		/// <exception cref="AggregateException"></exception>
+		/// <exception cref="InvalidOperationException"></exception>
         public async Task UpdateAsync(string changingField, string newFieldValue, string table,
             string conditionName1, string conditionValue1, string conditionName2, string conditionValue2,
             TimeSpan timeout, IsolationLevel isolationLevel = IsolationLevel.ReadCommitted)
@@ -7268,9 +7376,10 @@ namespace RIS.Connection.MySQL
         /// <returns>
         ///     Имеет возвращаемый тип <see langword="void"/>.
         /// </returns>
-        /// <exception cref="MySql.Data.MySqlClient.MySqlException"></exception>
-        /// <exception cref="TimeoutException"></exception>
-        /// <exception cref="AggregateException"></exception>
+        /// <exception cref="MySqlConnector.MySqlException"></exception>
+		/// <exception cref="TimeoutException"></exception>
+		/// <exception cref="AggregateException"></exception>
+		/// <exception cref="InvalidOperationException"></exception>
         public void Update(string changingField, string newFieldValue, string table,
             (string Name, string Value)[] conditions,
             IsolationLevel isolationLevel = IsolationLevel.ReadCommitted)
@@ -7303,9 +7412,10 @@ namespace RIS.Connection.MySQL
         /// <returns>
         ///     Имеет возвращаемый тип <see langword="void"/>.
         /// </returns>
-        /// <exception cref="MySql.Data.MySqlClient.MySqlException"></exception>
-        /// <exception cref="TimeoutException"></exception>
-        /// <exception cref="AggregateException"></exception>
+        /// <exception cref="MySqlConnector.MySqlException"></exception>
+		/// <exception cref="TimeoutException"></exception>
+		/// <exception cref="AggregateException"></exception>
+		/// <exception cref="InvalidOperationException"></exception>
         public void Update(string changingField, string newFieldValue, string table,
             (string Name, string Value)[] conditions, TimeSpan timeout,
             IsolationLevel isolationLevel = IsolationLevel.ReadCommitted)
@@ -7346,9 +7456,10 @@ namespace RIS.Connection.MySQL
         /// <returns>
         ///     Имеет возвращаемый тип <see langword="void"/>.
         /// </returns>
-        /// <exception cref="MySql.Data.MySqlClient.MySqlException"></exception>
-        /// <exception cref="TimeoutException"></exception>
-        /// <exception cref="AggregateException"></exception>
+        /// <exception cref="MySqlConnector.MySqlException"></exception>
+		/// <exception cref="TimeoutException"></exception>
+		/// <exception cref="AggregateException"></exception>
+		/// <exception cref="InvalidOperationException"></exception>
         public Task UpdateAsync(string changingField, string newFieldValue, string table,
             (string Name, string Value)[] conditions,
             IsolationLevel isolationLevel = IsolationLevel.ReadCommitted)
@@ -7381,9 +7492,10 @@ namespace RIS.Connection.MySQL
         /// <returns>
         ///     Имеет возвращаемый тип <see langword="void"/>.
         /// </returns>
-        /// <exception cref="MySql.Data.MySqlClient.MySqlException"></exception>
-        /// <exception cref="TimeoutException"></exception>
+        /// <exception cref="MySqlConnector.MySqlException"></exception>
+		/// <exception cref="TimeoutException"></exception>
 		/// <exception cref="AggregateException"></exception>
+		/// <exception cref="InvalidOperationException"></exception>
         public async Task UpdateAsync(string changingField, string newFieldValue, string table,
             (string Name, string Value)[] conditions, TimeSpan timeout,
             IsolationLevel isolationLevel = IsolationLevel.ReadCommitted)
@@ -7549,9 +7661,10 @@ namespace RIS.Connection.MySQL
         /// <returns>
         ///     Имеет возвращаемый тип <see langword="void"/>.
         /// </returns>
-        /// <exception cref="MySql.Data.MySqlClient.MySqlException"></exception>
-        /// <exception cref="TimeoutException"></exception>
-        /// <exception cref="AggregateException"></exception>
+        /// <exception cref="MySqlConnector.MySqlException"></exception>
+		/// <exception cref="TimeoutException"></exception>
+		/// <exception cref="AggregateException"></exception>
+		/// <exception cref="InvalidOperationException"></exception>
         public long Insert(string[] values, string table,
             IsolationLevel isolationLevel = IsolationLevel.ReadCommitted)
         {
@@ -7575,9 +7688,10 @@ namespace RIS.Connection.MySQL
         /// <returns>
         ///     Имеет возвращаемый тип <see langword="void"/>.
         /// </returns>
-        /// <exception cref="MySql.Data.MySqlClient.MySqlException"></exception>
-        /// <exception cref="TimeoutException"></exception>
-        /// <exception cref="AggregateException"></exception>
+        /// <exception cref="MySqlConnector.MySqlException"></exception>
+		/// <exception cref="TimeoutException"></exception>
+		/// <exception cref="AggregateException"></exception>
+		/// <exception cref="InvalidOperationException"></exception>
         public long Insert(string[] values, string table, TimeSpan timeout,
             IsolationLevel isolationLevel = IsolationLevel.ReadCommitted)
         {
@@ -7610,9 +7724,10 @@ namespace RIS.Connection.MySQL
         /// <returns>
         ///     Имеет возвращаемый тип <see langword="void"/>.
         /// </returns>
-        /// <exception cref="MySql.Data.MySqlClient.MySqlException"></exception>
-        /// <exception cref="TimeoutException"></exception>
-        /// <exception cref="AggregateException"></exception>
+        /// <exception cref="MySqlConnector.MySqlException"></exception>
+		/// <exception cref="TimeoutException"></exception>
+		/// <exception cref="AggregateException"></exception>
+		/// <exception cref="InvalidOperationException"></exception>
         public Task<long> InsertAsync(string[] values, string table,
             IsolationLevel isolationLevel = IsolationLevel.ReadCommitted)
         {
@@ -7636,9 +7751,10 @@ namespace RIS.Connection.MySQL
         /// <returns>
         ///     Имеет возвращаемый тип <see langword="void"/>.
         /// </returns>
-        /// <exception cref="MySql.Data.MySqlClient.MySqlException"></exception>
-        /// <exception cref="TimeoutException"></exception>
+        /// <exception cref="MySqlConnector.MySqlException"></exception>
+		/// <exception cref="TimeoutException"></exception>
 		/// <exception cref="AggregateException"></exception>
+		/// <exception cref="InvalidOperationException"></exception>
         public async Task<long> InsertAsync(string[] values, string table, TimeSpan timeout,
             IsolationLevel isolationLevel = IsolationLevel.ReadCommitted)
         {
@@ -7793,9 +7909,10 @@ namespace RIS.Connection.MySQL
         /// <returns>
         ///     Имеет возвращаемый тип <see langword="void"/>.
         /// </returns>
-        /// <exception cref="MySql.Data.MySqlClient.MySqlException"></exception>
-        /// <exception cref="TimeoutException"></exception>
-        /// <exception cref="AggregateException"></exception>
+        /// <exception cref="MySqlConnector.MySqlException"></exception>
+		/// <exception cref="TimeoutException"></exception>
+		/// <exception cref="AggregateException"></exception>
+		/// <exception cref="InvalidOperationException"></exception>
         public void TruncateTable(string table,
             IsolationLevel isolationLevel = IsolationLevel.ReadCommitted)
         {
@@ -7816,9 +7933,10 @@ namespace RIS.Connection.MySQL
         /// <returns>
         ///     Имеет возвращаемый тип <see langword="void"/>.
         /// </returns>
-        /// <exception cref="MySql.Data.MySqlClient.MySqlException"></exception>
-        /// <exception cref="TimeoutException"></exception>
-        /// <exception cref="AggregateException"></exception>
+        /// <exception cref="MySqlConnector.MySqlException"></exception>
+		/// <exception cref="TimeoutException"></exception>
+		/// <exception cref="AggregateException"></exception>
+		/// <exception cref="InvalidOperationException"></exception>
         public void TruncateTable(string table, TimeSpan timeout,
             IsolationLevel isolationLevel = IsolationLevel.ReadCommitted)
         {
@@ -7847,9 +7965,10 @@ namespace RIS.Connection.MySQL
         /// <returns>
         ///     Имеет возвращаемый тип <see langword="void"/>.
         /// </returns>
-        /// <exception cref="MySql.Data.MySqlClient.MySqlException"></exception>
-        /// <exception cref="TimeoutException"></exception>
-        /// <exception cref="AggregateException"></exception>
+        /// <exception cref="MySqlConnector.MySqlException"></exception>
+		/// <exception cref="TimeoutException"></exception>
+		/// <exception cref="AggregateException"></exception>
+		/// <exception cref="InvalidOperationException"></exception>
         public Task TruncateTableAsync(string table,
             IsolationLevel isolationLevel = IsolationLevel.ReadCommitted)
         {
@@ -7870,9 +7989,10 @@ namespace RIS.Connection.MySQL
         /// <returns>
         ///     Имеет возвращаемый тип <see langword="void"/>.
         /// </returns>
-        /// <exception cref="MySql.Data.MySqlClient.MySqlException"></exception>
-        /// <exception cref="TimeoutException"></exception>
+        /// <exception cref="MySqlConnector.MySqlException"></exception>
+		/// <exception cref="TimeoutException"></exception>
 		/// <exception cref="AggregateException"></exception>
+		/// <exception cref="InvalidOperationException"></exception>
         public async Task TruncateTableAsync(string table, TimeSpan timeout,
             IsolationLevel isolationLevel = IsolationLevel.ReadCommitted)
         {
@@ -8005,9 +8125,10 @@ namespace RIS.Connection.MySQL
         /// <returns>
         ///     Значение типа <see cref="string"/>, которое содержит ответ сервера.
         /// </returns>
-        /// <exception cref="MySql.Data.MySqlClient.MySqlException"></exception>
-        /// <exception cref="TimeoutException"></exception>
-        /// <exception cref="AggregateException"></exception>
+        /// <exception cref="MySqlConnector.MySqlException"></exception>
+		/// <exception cref="TimeoutException"></exception>
+		/// <exception cref="AggregateException"></exception>
+		/// <exception cref="InvalidOperationException"></exception>
         public string Union_Insert_SelectFunction(string[] valuesInsert, string tableInsert,
             string nameFunction, string[] parametersValuesFunction,
             IsolationLevel isolationLevel = IsolationLevel.ReadCommitted)
@@ -8039,9 +8160,10 @@ namespace RIS.Connection.MySQL
         /// <returns>
         ///     Значение типа <see cref="string"/>, которое содержит ответ сервера.
         /// </returns>
-        /// <exception cref="MySql.Data.MySqlClient.MySqlException"></exception>
-        /// <exception cref="TimeoutException"></exception>
-        /// <exception cref="AggregateException"></exception>
+        /// <exception cref="MySqlConnector.MySqlException"></exception>
+		/// <exception cref="TimeoutException"></exception>
+		/// <exception cref="AggregateException"></exception>
+		/// <exception cref="InvalidOperationException"></exception>
         public string Union_Insert_SelectFunction(string[] valuesInsert, string tableInsert,
             string nameFunction, string[] parametersValuesFunction, TimeSpan timeout,
             IsolationLevel isolationLevel = IsolationLevel.ReadCommitted)
@@ -8082,9 +8204,10 @@ namespace RIS.Connection.MySQL
         /// <returns>
         ///     Значение типа <see cref="string"/>, которое содержит ответ сервера.
         /// </returns>
-        /// <exception cref="MySql.Data.MySqlClient.MySqlException"></exception>
-        /// <exception cref="TimeoutException"></exception>
-        /// <exception cref="AggregateException"></exception>
+        /// <exception cref="MySqlConnector.MySqlException"></exception>
+		/// <exception cref="TimeoutException"></exception>
+		/// <exception cref="AggregateException"></exception>
+		/// <exception cref="InvalidOperationException"></exception>
         public Task<string> Union_Insert_SelectFunctionAsync(string[] valuesInsert, string tableInsert,
             string nameFunction, string[] parametersValuesFunction,
             IsolationLevel isolationLevel = IsolationLevel.ReadCommitted)
@@ -8116,9 +8239,10 @@ namespace RIS.Connection.MySQL
         /// <returns>
         ///     Значение типа <see cref="string"/>, которое содержит ответ сервера.
         /// </returns>
-        /// <exception cref="MySql.Data.MySqlClient.MySqlException"></exception>
-        /// <exception cref="TimeoutException"></exception>
+        /// <exception cref="MySqlConnector.MySqlException"></exception>
+		/// <exception cref="TimeoutException"></exception>
 		/// <exception cref="AggregateException"></exception>
+		/// <exception cref="InvalidOperationException"></exception>
         public async Task<string> Union_Insert_SelectFunctionAsync(string[] valuesInsert, string tableInsert,
             string nameFunction, string[] parametersValuesFunction, TimeSpan timeout,
             IsolationLevel isolationLevel = IsolationLevel.ReadCommitted)
@@ -8309,9 +8433,10 @@ namespace RIS.Connection.MySQL
         /// <returns>
         ///     Значение типа <see cref="string"/>, которое содержит ответ сервера.
         /// </returns>
-        /// <exception cref="MySql.Data.MySqlClient.MySqlException"></exception>
-        /// <exception cref="TimeoutException"></exception>
-        /// <exception cref="AggregateException"></exception>
+        /// <exception cref="MySqlConnector.MySqlException"></exception>
+		/// <exception cref="TimeoutException"></exception>
+		/// <exception cref="AggregateException"></exception>
+		/// <exception cref="InvalidOperationException"></exception>
         public string Union_Insert_SelectFunction(string[] valuesInsert, string tableInsert,
             string nameFunction, string[] parametersValuesFunction, string tableFunction,
             IsolationLevel isolationLevel = IsolationLevel.ReadCommitted)
@@ -8346,9 +8471,10 @@ namespace RIS.Connection.MySQL
         /// <returns>
         ///     Значение типа <see cref="string"/>, которое содержит ответ сервера.
         /// </returns>
-        /// <exception cref="MySql.Data.MySqlClient.MySqlException"></exception>
-        /// <exception cref="TimeoutException"></exception>
-        /// <exception cref="AggregateException"></exception>
+        /// <exception cref="MySqlConnector.MySqlException"></exception>
+		/// <exception cref="TimeoutException"></exception>
+		/// <exception cref="AggregateException"></exception>
+		/// <exception cref="InvalidOperationException"></exception>
         public string Union_Insert_SelectFunction(string[] valuesInsert, string tableInsert,
             string nameFunction, string[] parametersValuesFunction, string tableFunction,
             TimeSpan timeout, IsolationLevel isolationLevel = IsolationLevel.ReadCommitted)
@@ -8392,9 +8518,10 @@ namespace RIS.Connection.MySQL
         /// <returns>
         ///     Значение типа <see cref="string"/>, которое содержит ответ сервера.
         /// </returns>
-        /// <exception cref="MySql.Data.MySqlClient.MySqlException"></exception>
-        /// <exception cref="TimeoutException"></exception>
-        /// <exception cref="AggregateException"></exception>
+        /// <exception cref="MySqlConnector.MySqlException"></exception>
+		/// <exception cref="TimeoutException"></exception>
+		/// <exception cref="AggregateException"></exception>
+		/// <exception cref="InvalidOperationException"></exception>
         public Task<string> Union_Insert_SelectFunctionAsync(string[] valuesInsert, string tableInsert,
             string nameFunction, string[] parametersValuesFunction, string tableFunction,
             IsolationLevel isolationLevel = IsolationLevel.ReadCommitted)
@@ -8429,9 +8556,10 @@ namespace RIS.Connection.MySQL
         /// <returns>
         ///     Значение типа <see cref="string"/>, которое содержит ответ сервера.
         /// </returns>
-        /// <exception cref="MySql.Data.MySqlClient.MySqlException"></exception>
-        /// <exception cref="TimeoutException"></exception>
+        /// <exception cref="MySqlConnector.MySqlException"></exception>
+		/// <exception cref="TimeoutException"></exception>
 		/// <exception cref="AggregateException"></exception>
+		/// <exception cref="InvalidOperationException"></exception>
         public async Task<string> Union_Insert_SelectFunctionAsync(string[] valuesInsert, string tableInsert,
             string nameFunction, string[] parametersValuesFunction, string tableFunction,
             TimeSpan timeout, IsolationLevel isolationLevel = IsolationLevel.ReadCommitted)

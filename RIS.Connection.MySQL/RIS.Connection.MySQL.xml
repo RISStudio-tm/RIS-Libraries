@@ -26,12 +26,12 @@
         </member>
         <member name="P:RIS.Connection.MySQL.MySQLConnection.ConnectionsArray">
             <summary>
-                Позволяет получать массив типа <see cref="T:MySql.Data.MySqlClient.MySqlConnection"/> SQL-соединений, которые используются в данном экземпляре класса <see cref="T:RIS.Connection.MySQL.MySQLConnection"/>.
+                Позволяет получать массив типа <see cref="T:MySqlConnector.MySqlConnection"/> SQL-соединений, которые используются в данном экземпляре класса <see cref="T:RIS.Connection.MySQL.MySQLConnection"/>.
             </summary>
         </member>
         <member name="P:RIS.Connection.MySQL.MySQLConnection.Connections">
             <summary>
-                Позволяет получать <see cref="T:System.Collections.ObjectModel.ReadOnlyCollection`1"/>, где T это <see cref="T:MySql.Data.MySqlClient.MySqlConnection"/>, SQL-соединений, которые используются в данном экземпляре класса <see cref="T:RIS.Connection.MySQL.MySQLConnection"/>.
+                Позволяет получать <see cref="T:System.Collections.ObjectModel.ReadOnlyCollection`1"/>, где T это <see cref="T:MySqlConnector.MySqlConnection"/>, SQL-соединений, которые используются в данном экземпляре класса <see cref="T:RIS.Connection.MySQL.MySQLConnection"/>.
             </summary>
         </member>
         <member name="P:RIS.Connection.MySQL.MySQLConnection.Requests">
@@ -116,7 +116,7 @@
                 Открывает соединения в количестве <paramref name="numberConnections"/> c MySQL базой данных <paramref name="database"/>, расположенной по адресу хоста <paramref name="ipAddress"/>, используя кодировку <paramref name="charset"/> и аутентификацию по имени пользователя (логину) <paramref name="login"/> и паролю <paramref name="password"/>
             </summary>
             <param name="numberConnections">
-                Количество SQL-соединений <see cref="T:MySql.Data.MySqlClient.MySqlConnection"/>
+                Количество SQL-соединений <see cref="T:MySqlConnector.MySqlConnection"/>
             </param>
             <param name="ipAddress">
                 Адрес хоста, на котором расположена база данных.
@@ -142,7 +142,7 @@
                 Открывает соединения в количестве <paramref name="numberConnections"/> c MySQL базой данных <paramref name="database"/>, расположенной по адресу хоста <paramref name="ipAddress"/>, используя кодировку <paramref name="charset"/>, стандартное время ожидания SQL-команд <paramref name="millisecondsTimeout"/> и аутентификацию по имени пользователя (логину) <paramref name="login"/> и паролю <paramref name="password"/>
             </summary>
             <param name="numberConnections">
-                Количество SQL-соединений <see cref="T:MySql.Data.MySqlClient.MySqlConnection"/>
+                Количество SQL-соединений <see cref="T:MySqlConnector.MySqlConnection"/>
             </param>
             <param name="millisecondsTimeout">
                 Стандартное время ожидания SQL-команд.
@@ -171,7 +171,7 @@
                 Открывает соединения в количестве <paramref name="numberConnections"/> c MySQL базой данных <paramref name="database"/>, расположенной по адресу хоста <paramref name="ipAddress"/>, используя кодировку <paramref name="charset"/>, стандартное время ожидания SQL-команд <paramref name="timeout"/> и аутентификацию по имени пользователя (логину) <paramref name="login"/> и паролю <paramref name="password"/>
             </summary>
             <param name="numberConnections">
-                Количество SQL-соединений <see cref="T:MySql.Data.MySqlClient.MySqlConnection"/>
+                Количество SQL-соединений <see cref="T:MySqlConnector.MySqlConnection"/>
             </param>
             <param name="timeout">
                 Стандартное время ожидания SQL-команд.
@@ -200,7 +200,7 @@
                 Открывает соединения в количестве <paramref name="numberConnections"/> c MySQL базой данных с использованием строки подключения <paramref name="connectionString"/>
             </summary>
             <param name="numberConnections">
-                Количество SQL-соединений <see cref="T:MySql.Data.MySqlClient.MySqlConnection"/>
+                Количество SQL-соединений <see cref="T:MySqlConnector.MySqlConnection"/>
             </param>
             <param name="connectionString">
                 Строка подключения для создания соединения с базой данных.
@@ -214,7 +214,7 @@
                 Открывает соединения в количестве <paramref name="numberConnections"/> c MySQL базой данных с использованием строки подключения <paramref name="connectionString"/> и стандартного времени ожидания SQL-команд <paramref name="millisecondsTimeout"/>
             </summary>
             <param name="numberConnections">
-                Количество SQL-соединений <see cref="T:MySql.Data.MySqlClient.MySqlConnection"/>
+                Количество SQL-соединений <see cref="T:MySqlConnector.MySqlConnection"/>
             </param>
             <param name="millisecondsTimeout">
                 Стандартное время ожидания SQL-команд.
@@ -231,7 +231,7 @@
                 Открывает соединения в количестве <paramref name="numberConnections"/> c MySQL базой данных с использованием строки подключения <paramref name="connectionString"/> и стандартного времени ожидания SQL-команд <paramref name="timeout"/>
             </summary>
             <param name="numberConnections">
-                Количество SQL-соединений <see cref="T:MySql.Data.MySqlClient.MySqlConnection"/>
+                Количество SQL-соединений <see cref="T:MySqlConnector.MySqlConnection"/>
             </param>
             <param name="timeout">
                 Стандартное время ожидания SQL-команд.
@@ -293,9 +293,10 @@
             <returns>
                 Значение типа <see cref="T:System.Int64"/>, возвращённое оператором RETURN и массив значений типа <see cref="T:System.String"/> выходных параметров процедуры, доступных после её вызова.
             </returns>
-            <exception cref="T:MySql.Data.MySqlClient.MySqlException"></exception>
+            <exception cref="T:MySqlConnector.MySqlException"></exception>
             <exception cref="T:System.TimeoutException"></exception>
             <exception cref="T:System.AggregateException"></exception>
+            <exception cref="T:System.InvalidOperationException"></exception>
         </member>
         <member name="M:RIS.Connection.MySQL.Requests.ExecStoredProcedure(System.String,System.ValueTuple{System.String,System.String}[],System.String[],System.TimeSpan,System.Data.IsolationLevel)">
             <summary>
@@ -321,9 +322,10 @@
             <returns>
                 Значение типа <see cref="T:System.Int64"/>, возвращённое оператором RETURN и массив значений типа <see cref="T:System.String"/> выходных параметров процедуры, доступных после её вызова.
             </returns>
-            <exception cref="T:MySql.Data.MySqlClient.MySqlException"></exception>
+            <exception cref="T:MySqlConnector.MySqlException"></exception>
             <exception cref="T:System.TimeoutException"></exception>
             <exception cref="T:System.AggregateException"></exception>
+            <exception cref="T:System.InvalidOperationException"></exception>
         </member>
         <member name="M:RIS.Connection.MySQL.Requests.ExecStoredProcedureAsync(System.String,System.ValueTuple{System.String,System.String}[],System.String[],System.Data.IsolationLevel)">
             <summary>
@@ -346,9 +348,10 @@
             <returns>
                 Значение типа <see cref="T:System.Int64"/>, возвращённое оператором RETURN и массив значений типа <see cref="T:System.String"/> выходных параметров процедуры, доступных после её вызова.
             </returns>
-            <exception cref="T:MySql.Data.MySqlClient.MySqlException"></exception>
+            <exception cref="T:MySqlConnector.MySqlException"></exception>
             <exception cref="T:System.TimeoutException"></exception>
             <exception cref="T:System.AggregateException"></exception>
+            <exception cref="T:System.InvalidOperationException"></exception>
         </member>
         <member name="M:RIS.Connection.MySQL.Requests.ExecStoredProcedureAsync(System.String,System.ValueTuple{System.String,System.String}[],System.String[],System.TimeSpan,System.Data.IsolationLevel)">
             <summary>
@@ -374,9 +377,10 @@
             <returns>
                 Значение типа <see cref="T:System.Int64"/>, возвращённое оператором RETURN и массив значений типа <see cref="T:System.String"/> выходных параметров процедуры, доступных после её вызова.
             </returns>
-            <exception cref="T:MySql.Data.MySqlClient.MySqlException"></exception>
+            <exception cref="T:MySqlConnector.MySqlException"></exception>
             <exception cref="T:System.TimeoutException"></exception>
             <exception cref="T:System.AggregateException"></exception>
+            <exception cref="T:System.InvalidOperationException"></exception>
         </member>
         <member name="M:RIS.Connection.MySQL.Requests.ExecStoredProcedureNotReturn(System.String,System.ValueTuple{System.String,System.String}[],System.String[],System.Data.IsolationLevel)">
             <summary>
@@ -399,9 +403,10 @@
             <returns>
                 Массив значений типа <see cref="T:System.String"/> выходных параметров процедуры, доступных после её вызова.
             </returns>
-            <exception cref="T:MySql.Data.MySqlClient.MySqlException"></exception>
+            <exception cref="T:MySqlConnector.MySqlException"></exception>
             <exception cref="T:System.TimeoutException"></exception>
             <exception cref="T:System.AggregateException"></exception>
+            <exception cref="T:System.InvalidOperationException"></exception>
         </member>
         <member name="M:RIS.Connection.MySQL.Requests.ExecStoredProcedureNotReturn(System.String,System.ValueTuple{System.String,System.String}[],System.String[],System.TimeSpan,System.Data.IsolationLevel)">
             <summary>
@@ -427,9 +432,10 @@
             <returns>
                 Массив значений типа <see cref="T:System.String"/> выходных параметров процедуры, доступных после её вызова.
             </returns>
-            <exception cref="T:MySql.Data.MySqlClient.MySqlException"></exception>
+            <exception cref="T:MySqlConnector.MySqlException"></exception>
             <exception cref="T:System.TimeoutException"></exception>
             <exception cref="T:System.AggregateException"></exception>
+            <exception cref="T:System.InvalidOperationException"></exception>
         </member>
         <member name="M:RIS.Connection.MySQL.Requests.ExecStoredProcedureNotReturnAsync(System.String,System.ValueTuple{System.String,System.String}[],System.String[],System.Data.IsolationLevel)">
             <summary>
@@ -452,9 +458,10 @@
             <returns>
                 Массив значений типа <see cref="T:System.String"/> выходных параметров процедуры, доступных после её вызова.
             </returns>
-            <exception cref="T:MySql.Data.MySqlClient.MySqlException"></exception>
+            <exception cref="T:MySqlConnector.MySqlException"></exception>
             <exception cref="T:System.TimeoutException"></exception>
             <exception cref="T:System.AggregateException"></exception>
+            <exception cref="T:System.InvalidOperationException"></exception>
         </member>
         <member name="M:RIS.Connection.MySQL.Requests.ExecStoredProcedureNotReturnAsync(System.String,System.ValueTuple{System.String,System.String}[],System.String[],System.TimeSpan,System.Data.IsolationLevel)">
             <summary>
@@ -480,9 +487,10 @@
             <returns>
                 Массив значений типа <see cref="T:System.String"/> выходных параметров процедуры, доступных после её вызова.
             </returns>
-            <exception cref="T:MySql.Data.MySqlClient.MySqlException"></exception>
+            <exception cref="T:MySqlConnector.MySqlException"></exception>
             <exception cref="T:System.TimeoutException"></exception>
             <exception cref="T:System.AggregateException"></exception>
+            <exception cref="T:System.InvalidOperationException"></exception>
         </member>
         <member name="M:RIS.Connection.MySQL.Requests.CustomCommand(System.String,System.Data.IsolationLevel)">
             <summary>
@@ -497,9 +505,10 @@
             <returns>
                 Значение типа <see cref="T:System.Data.DataSet"/>, которое содержит ответ сервера.
             </returns>
-            <exception cref="T:MySql.Data.MySqlClient.MySqlException"></exception>
+            <exception cref="T:MySqlConnector.MySqlException"></exception>
             <exception cref="T:System.TimeoutException"></exception>
             <exception cref="T:System.AggregateException"></exception>
+            <exception cref="T:System.InvalidOperationException"></exception>
         </member>
         <member name="M:RIS.Connection.MySQL.Requests.CustomCommand(System.String,System.TimeSpan,System.Data.IsolationLevel)">
             <summary>
@@ -517,9 +526,10 @@
             <returns>
                 Значение типа <see cref="T:System.Data.DataSet"/>, которое содержит ответ сервера.
             </returns>
-            <exception cref="T:MySql.Data.MySqlClient.MySqlException"></exception>
+            <exception cref="T:MySqlConnector.MySqlException"></exception>
             <exception cref="T:System.TimeoutException"></exception>
             <exception cref="T:System.AggregateException"></exception>
+            <exception cref="T:System.InvalidOperationException"></exception>
         </member>
         <member name="M:RIS.Connection.MySQL.Requests.CustomCommandAsync(System.String,System.Data.IsolationLevel)">
             <summary>
@@ -534,9 +544,10 @@
             <returns>
                 Значение типа <see cref="T:System.Data.DataSet"/>, которое содержит ответ сервера.
             </returns>
-            <exception cref="T:MySql.Data.MySqlClient.MySqlException"></exception>
+            <exception cref="T:MySqlConnector.MySqlException"></exception>
             <exception cref="T:System.TimeoutException"></exception>
             <exception cref="T:System.AggregateException"></exception>
+            <exception cref="T:System.InvalidOperationException"></exception>
         </member>
         <member name="M:RIS.Connection.MySQL.Requests.CustomCommandAsync(System.String,System.TimeSpan,System.Data.IsolationLevel)">
             <summary>
@@ -554,9 +565,10 @@
             <returns>
                 Значение типа <see cref="T:System.Data.DataSet"/>, которое содержит ответ сервера.
             </returns>
-            <exception cref="T:MySql.Data.MySqlClient.MySqlException"></exception>
+            <exception cref="T:MySqlConnector.MySqlException"></exception>
             <exception cref="T:System.TimeoutException"></exception>
             <exception cref="T:System.AggregateException"></exception>
+            <exception cref="T:System.InvalidOperationException"></exception>
         </member>
         <member name="M:RIS.Connection.MySQL.Requests.CustomCommand(System.String,System.ValueTuple{System.String,System.String}[],System.Data.IsolationLevel)">
             <summary>
@@ -576,9 +588,10 @@
             <returns>
                 Значение типа <see cref="T:System.Data.DataSet"/>, которое содержит ответ сервера.
             </returns>
-            <exception cref="T:MySql.Data.MySqlClient.MySqlException"></exception>
+            <exception cref="T:MySqlConnector.MySqlException"></exception>
             <exception cref="T:System.TimeoutException"></exception>
             <exception cref="T:System.AggregateException"></exception>
+            <exception cref="T:System.InvalidOperationException"></exception>
         </member>
         <member name="M:RIS.Connection.MySQL.Requests.CustomCommand(System.String,System.ValueTuple{System.String,System.String}[],System.TimeSpan,System.Data.IsolationLevel)">
             <summary>
@@ -601,9 +614,10 @@
             <returns>
                 Значение типа <see cref="T:System.Data.DataSet"/>, которое содержит ответ сервера.
             </returns>
-            <exception cref="T:MySql.Data.MySqlClient.MySqlException"></exception>
+            <exception cref="T:MySqlConnector.MySqlException"></exception>
             <exception cref="T:System.TimeoutException"></exception>
             <exception cref="T:System.AggregateException"></exception>
+            <exception cref="T:System.InvalidOperationException"></exception>
         </member>
         <member name="M:RIS.Connection.MySQL.Requests.CustomCommandAsync(System.String,System.ValueTuple{System.String,System.String}[],System.Data.IsolationLevel)">
             <summary>
@@ -623,9 +637,10 @@
             <returns>
                 Значение типа <see cref="T:System.Data.DataSet"/>, которое содержит ответ сервера.
             </returns>
-            <exception cref="T:MySql.Data.MySqlClient.MySqlException"></exception>
+            <exception cref="T:MySqlConnector.MySqlException"></exception>
             <exception cref="T:System.TimeoutException"></exception>
             <exception cref="T:System.AggregateException"></exception>
+            <exception cref="T:System.InvalidOperationException"></exception>
         </member>
         <member name="M:RIS.Connection.MySQL.Requests.CustomCommandAsync(System.String,System.ValueTuple{System.String,System.String}[],System.TimeSpan,System.Data.IsolationLevel)">
             <summary>
@@ -648,9 +663,10 @@
             <returns>
                 Значение типа <see cref="T:System.Data.DataSet"/>, которое содержит ответ сервера.
             </returns>
-            <exception cref="T:MySql.Data.MySqlClient.MySqlException"></exception>
+            <exception cref="T:MySqlConnector.MySqlException"></exception>
             <exception cref="T:System.TimeoutException"></exception>
             <exception cref="T:System.AggregateException"></exception>
+            <exception cref="T:System.InvalidOperationException"></exception>
         </member>
         <member name="M:RIS.Connection.MySQL.Requests.CustomCommandNonQuery(System.String,System.Data.IsolationLevel)">
             <summary>
@@ -665,9 +681,10 @@
             <returns>
                 Имеет возвращаемый тип <see langword="void"/>.
             </returns>
-            <exception cref="T:MySql.Data.MySqlClient.MySqlException"></exception>
+            <exception cref="T:MySqlConnector.MySqlException"></exception>
             <exception cref="T:System.TimeoutException"></exception>
             <exception cref="T:System.AggregateException"></exception>
+            <exception cref="T:System.InvalidOperationException"></exception>
         </member>
         <member name="M:RIS.Connection.MySQL.Requests.CustomCommandNonQuery(System.String,System.TimeSpan,System.Data.IsolationLevel)">
             <summary>
@@ -685,9 +702,10 @@
             <returns>
                 Имеет возвращаемый тип <see langword="void"/>.
             </returns>
-            <exception cref="T:MySql.Data.MySqlClient.MySqlException"></exception>
+            <exception cref="T:MySqlConnector.MySqlException"></exception>
             <exception cref="T:System.TimeoutException"></exception>
             <exception cref="T:System.AggregateException"></exception>
+            <exception cref="T:System.InvalidOperationException"></exception>
         </member>
         <member name="M:RIS.Connection.MySQL.Requests.CustomCommandNonQueryAsync(System.String,System.Data.IsolationLevel)">
             <summary>
@@ -702,9 +720,10 @@
             <returns>
                 Имеет возвращаемый тип <see langword="void"/>.
             </returns>
-            <exception cref="T:MySql.Data.MySqlClient.MySqlException"></exception>
+            <exception cref="T:MySqlConnector.MySqlException"></exception>
             <exception cref="T:System.TimeoutException"></exception>
             <exception cref="T:System.AggregateException"></exception>
+            <exception cref="T:System.InvalidOperationException"></exception>
         </member>
         <member name="M:RIS.Connection.MySQL.Requests.CustomCommandNonQueryAsync(System.String,System.TimeSpan,System.Data.IsolationLevel)">
             <summary>
@@ -722,9 +741,10 @@
             <returns>
                 Имеет возвращаемый тип <see langword="void"/>.
             </returns>
-            <exception cref="T:MySql.Data.MySqlClient.MySqlException"></exception>
+            <exception cref="T:MySqlConnector.MySqlException"></exception>
             <exception cref="T:System.TimeoutException"></exception>
             <exception cref="T:System.AggregateException"></exception>
+            <exception cref="T:System.InvalidOperationException"></exception>
         </member>
         <member name="M:RIS.Connection.MySQL.Requests.CustomCommandNonQuery(System.String,System.ValueTuple{System.String,System.String}[],System.Data.IsolationLevel)">
             <summary>
@@ -744,9 +764,10 @@
             <returns>
                 Имеет возвращаемый тип <see langword="void"/>.
             </returns>
-            <exception cref="T:MySql.Data.MySqlClient.MySqlException"></exception>
+            <exception cref="T:MySqlConnector.MySqlException"></exception>
             <exception cref="T:System.TimeoutException"></exception>
             <exception cref="T:System.AggregateException"></exception>
+            <exception cref="T:System.InvalidOperationException"></exception>
         </member>
         <member name="M:RIS.Connection.MySQL.Requests.CustomCommandNonQuery(System.String,System.ValueTuple{System.String,System.String}[],System.TimeSpan,System.Data.IsolationLevel)">
             <summary>
@@ -769,9 +790,10 @@
             <returns>
                 Имеет возвращаемый тип <see langword="void"/>.
             </returns>
-            <exception cref="T:MySql.Data.MySqlClient.MySqlException"></exception>
+            <exception cref="T:MySqlConnector.MySqlException"></exception>
             <exception cref="T:System.TimeoutException"></exception>
             <exception cref="T:System.AggregateException"></exception>
+            <exception cref="T:System.InvalidOperationException"></exception>
         </member>
         <member name="M:RIS.Connection.MySQL.Requests.CustomCommandNonQueryAsync(System.String,System.ValueTuple{System.String,System.String}[],System.Data.IsolationLevel)">
             <summary>
@@ -791,9 +813,10 @@
             <returns>
                 Имеет возвращаемый тип <see langword="void"/>.
             </returns>
-            <exception cref="T:MySql.Data.MySqlClient.MySqlException"></exception>
+            <exception cref="T:MySqlConnector.MySqlException"></exception>
             <exception cref="T:System.TimeoutException"></exception>
             <exception cref="T:System.AggregateException"></exception>
+            <exception cref="T:System.InvalidOperationException"></exception>
         </member>
         <member name="M:RIS.Connection.MySQL.Requests.CustomCommandNonQueryAsync(System.String,System.ValueTuple{System.String,System.String}[],System.TimeSpan,System.Data.IsolationLevel)">
             <summary>
@@ -816,9 +839,10 @@
             <returns>
                 Имеет возвращаемый тип <see langword="void"/>.
             </returns>
-            <exception cref="T:MySql.Data.MySqlClient.MySqlException"></exception>
+            <exception cref="T:MySqlConnector.MySqlException"></exception>
             <exception cref="T:System.TimeoutException"></exception>
             <exception cref="T:System.AggregateException"></exception>
+            <exception cref="T:System.InvalidOperationException"></exception>
         </member>
         <member name="M:RIS.Connection.MySQL.Requests.SelectFunction(System.String,System.String[],System.Data.IsolationLevel)">
             <summary>
@@ -836,9 +860,10 @@
             <returns>
                 Значение типа <see cref="T:System.String"/>, которое содержит ответ сервера.
             </returns>
-            <exception cref="T:MySql.Data.MySqlClient.MySqlException"></exception>
+            <exception cref="T:MySqlConnector.MySqlException"></exception>
             <exception cref="T:System.TimeoutException"></exception>
             <exception cref="T:System.AggregateException"></exception>
+            <exception cref="T:System.InvalidOperationException"></exception>
         </member>
         <member name="M:RIS.Connection.MySQL.Requests.SelectFunction(System.String,System.String[],System.TimeSpan,System.Data.IsolationLevel)">
             <summary>
@@ -859,9 +884,10 @@
             <returns>
                 Значение типа <see cref="T:System.String"/>, которое содержит ответ сервера.
             </returns>
-            <exception cref="T:MySql.Data.MySqlClient.MySqlException"></exception>
+            <exception cref="T:MySqlConnector.MySqlException"></exception>
             <exception cref="T:System.TimeoutException"></exception>
             <exception cref="T:System.AggregateException"></exception>
+            <exception cref="T:System.InvalidOperationException"></exception>
         </member>
         <member name="M:RIS.Connection.MySQL.Requests.SelectFunctionAsync(System.String,System.String[],System.Data.IsolationLevel)">
             <summary>
@@ -879,9 +905,10 @@
             <returns>
                 Значение типа <see cref="T:System.String"/>, которое содержит ответ сервера.
             </returns>
-            <exception cref="T:MySql.Data.MySqlClient.MySqlException"></exception>
+            <exception cref="T:MySqlConnector.MySqlException"></exception>
             <exception cref="T:System.TimeoutException"></exception>
             <exception cref="T:System.AggregateException"></exception>
+            <exception cref="T:System.InvalidOperationException"></exception>
         </member>
         <member name="M:RIS.Connection.MySQL.Requests.SelectFunctionAsync(System.String,System.String[],System.TimeSpan,System.Data.IsolationLevel)">
             <summary>
@@ -902,9 +929,10 @@
             <returns>
                 Значение типа <see cref="T:System.String"/>, которое содержит ответ сервера.
             </returns>
-            <exception cref="T:MySql.Data.MySqlClient.MySqlException"></exception>
+            <exception cref="T:MySqlConnector.MySqlException"></exception>
             <exception cref="T:System.TimeoutException"></exception>
             <exception cref="T:System.AggregateException"></exception>
+            <exception cref="T:System.InvalidOperationException"></exception>
         </member>
         <member name="M:RIS.Connection.MySQL.Requests.SelectFunction(System.String,System.String[],System.String,System.Data.IsolationLevel)">
             <summary>
@@ -925,9 +953,10 @@
             <returns>
                 Значение типа <see cref="T:System.String"/>, которое содержит ответ сервера.
             </returns>
-            <exception cref="T:MySql.Data.MySqlClient.MySqlException"></exception>
+            <exception cref="T:MySqlConnector.MySqlException"></exception>
             <exception cref="T:System.TimeoutException"></exception>
             <exception cref="T:System.AggregateException"></exception>
+            <exception cref="T:System.InvalidOperationException"></exception>
         </member>
         <member name="M:RIS.Connection.MySQL.Requests.SelectFunction(System.String,System.String[],System.String,System.TimeSpan,System.Data.IsolationLevel)">
             <summary>
@@ -951,9 +980,10 @@
             <returns>
                 Значение типа <see cref="T:System.String"/>, которое содержит ответ сервера.
             </returns>
-            <exception cref="T:MySql.Data.MySqlClient.MySqlException"></exception>
+            <exception cref="T:MySqlConnector.MySqlException"></exception>
             <exception cref="T:System.TimeoutException"></exception>
             <exception cref="T:System.AggregateException"></exception>
+            <exception cref="T:System.InvalidOperationException"></exception>
         </member>
         <member name="M:RIS.Connection.MySQL.Requests.SelectFunctionAsync(System.String,System.String[],System.String,System.Data.IsolationLevel)">
             <summary>
@@ -974,9 +1004,10 @@
             <returns>
                 Значение типа <see cref="T:System.String"/>, которое содержит ответ сервера.
             </returns>
-            <exception cref="T:MySql.Data.MySqlClient.MySqlException"></exception>
+            <exception cref="T:MySqlConnector.MySqlException"></exception>
             <exception cref="T:System.TimeoutException"></exception>
             <exception cref="T:System.AggregateException"></exception>
+            <exception cref="T:System.InvalidOperationException"></exception>
         </member>
         <member name="M:RIS.Connection.MySQL.Requests.SelectFunctionAsync(System.String,System.String[],System.String,System.TimeSpan,System.Data.IsolationLevel)">
             <summary>
@@ -1000,9 +1031,10 @@
             <returns>
                 Значение типа <see cref="T:System.String"/>, которое содержит ответ сервера.
             </returns>
-            <exception cref="T:MySql.Data.MySqlClient.MySqlException"></exception>
+            <exception cref="T:MySqlConnector.MySqlException"></exception>
             <exception cref="T:System.TimeoutException"></exception>
             <exception cref="T:System.AggregateException"></exception>
+            <exception cref="T:System.InvalidOperationException"></exception>
         </member>
         <member name="M:RIS.Connection.MySQL.Requests.SelectColumn(System.String,System.String,System.UInt64,System.UInt64,System.Data.IsolationLevel)">
             <summary>
@@ -1026,9 +1058,10 @@
             <returns>
                 Массив типа <see cref="T:System.String"/>, который содержит ответ сервера.
             </returns>
-            <exception cref="T:MySql.Data.MySqlClient.MySqlException"></exception>
+            <exception cref="T:MySqlConnector.MySqlException"></exception>
             <exception cref="T:System.TimeoutException"></exception>
             <exception cref="T:System.AggregateException"></exception>
+            <exception cref="T:System.InvalidOperationException"></exception>
         </member>
         <member name="M:RIS.Connection.MySQL.Requests.SelectColumn(System.String,System.String,System.UInt64,System.UInt64,System.TimeSpan,System.Data.IsolationLevel)">
             <summary>
@@ -1055,9 +1088,10 @@
             <returns>
                 Массив типа <see cref="T:System.String"/>, который содержит ответ сервера.
             </returns>
-            <exception cref="T:MySql.Data.MySqlClient.MySqlException"></exception>
+            <exception cref="T:MySqlConnector.MySqlException"></exception>
             <exception cref="T:System.TimeoutException"></exception>
             <exception cref="T:System.AggregateException"></exception>
+            <exception cref="T:System.InvalidOperationException"></exception>
         </member>
         <member name="M:RIS.Connection.MySQL.Requests.SelectColumnAsync(System.String,System.String,System.UInt64,System.UInt64,System.Data.IsolationLevel)">
             <summary>
@@ -1081,9 +1115,10 @@
             <returns>
                 Массив типа <see cref="T:System.String"/>, который содержит ответ сервера.
             </returns>
-            <exception cref="T:MySql.Data.MySqlClient.MySqlException"></exception>
+            <exception cref="T:MySqlConnector.MySqlException"></exception>
             <exception cref="T:System.TimeoutException"></exception>
             <exception cref="T:System.AggregateException"></exception>
+            <exception cref="T:System.InvalidOperationException"></exception>
         </member>
         <member name="M:RIS.Connection.MySQL.Requests.SelectColumnAsync(System.String,System.String,System.UInt64,System.UInt64,System.TimeSpan,System.Data.IsolationLevel)">
             <summary>
@@ -1110,9 +1145,10 @@
             <returns>
                 Массив типа <see cref="T:System.String"/>, который содержит ответ сервера.
             </returns>
-            <exception cref="T:MySql.Data.MySqlClient.MySqlException"></exception>
+            <exception cref="T:MySqlConnector.MySqlException"></exception>
             <exception cref="T:System.TimeoutException"></exception>
             <exception cref="T:System.AggregateException"></exception>
+            <exception cref="T:System.InvalidOperationException"></exception>
         </member>
         <member name="M:RIS.Connection.MySQL.Requests.SelectColumn(System.String,System.String,System.String,System.String,System.UInt64,System.UInt64,System.Data.IsolationLevel)">
             <summary>
@@ -1142,9 +1178,10 @@
             <returns>
                 Массив типа <see cref="T:System.String"/>, который содержит ответ сервера.
             </returns>
-            <exception cref="T:MySql.Data.MySqlClient.MySqlException"></exception>
+            <exception cref="T:MySqlConnector.MySqlException"></exception>
             <exception cref="T:System.TimeoutException"></exception>
             <exception cref="T:System.AggregateException"></exception>
+            <exception cref="T:System.InvalidOperationException"></exception>
         </member>
         <member name="M:RIS.Connection.MySQL.Requests.SelectColumn(System.String,System.String,System.String,System.String,System.UInt64,System.UInt64,System.TimeSpan,System.Data.IsolationLevel)">
             <summary>
@@ -1177,9 +1214,10 @@
             <returns>
                 Массив типа <see cref="T:System.String"/>, который содержит ответ сервера.
             </returns>
-            <exception cref="T:MySql.Data.MySqlClient.MySqlException"></exception>
+            <exception cref="T:MySqlConnector.MySqlException"></exception>
             <exception cref="T:System.TimeoutException"></exception>
             <exception cref="T:System.AggregateException"></exception>
+            <exception cref="T:System.InvalidOperationException"></exception>
         </member>
         <member name="M:RIS.Connection.MySQL.Requests.SelectColumnAsync(System.String,System.String,System.String,System.String,System.UInt64,System.UInt64,System.Data.IsolationLevel)">
             <summary>
@@ -1209,9 +1247,10 @@
             <returns>
                 Массив типа <see cref="T:System.String"/>, который содержит ответ сервера.
             </returns>
-            <exception cref="T:MySql.Data.MySqlClient.MySqlException"></exception>
+            <exception cref="T:MySqlConnector.MySqlException"></exception>
             <exception cref="T:System.TimeoutException"></exception>
             <exception cref="T:System.AggregateException"></exception>
+            <exception cref="T:System.InvalidOperationException"></exception>
         </member>
         <member name="M:RIS.Connection.MySQL.Requests.SelectColumnAsync(System.String,System.String,System.String,System.String,System.UInt64,System.UInt64,System.TimeSpan,System.Data.IsolationLevel)">
             <summary>
@@ -1244,9 +1283,10 @@
             <returns>
                 Массив типа <see cref="T:System.String"/>, который содержит ответ сервера.
             </returns>
-            <exception cref="T:MySql.Data.MySqlClient.MySqlException"></exception>
+            <exception cref="T:MySqlConnector.MySqlException"></exception>
             <exception cref="T:System.TimeoutException"></exception>
             <exception cref="T:System.AggregateException"></exception>
+            <exception cref="T:System.InvalidOperationException"></exception>
         </member>
         <member name="M:RIS.Connection.MySQL.Requests.SelectColumn(System.String,System.String,System.String,System.String,System.String,System.String,System.UInt64,System.UInt64,System.Data.IsolationLevel)">
             <summary>
@@ -1282,9 +1322,10 @@
             <returns>
                 Массив типа <see cref="T:System.String"/>, который содержит ответ сервера.
             </returns>
-            <exception cref="T:MySql.Data.MySqlClient.MySqlException"></exception>
+            <exception cref="T:MySqlConnector.MySqlException"></exception>
             <exception cref="T:System.TimeoutException"></exception>
             <exception cref="T:System.AggregateException"></exception>
+            <exception cref="T:System.InvalidOperationException"></exception>
         </member>
         <member name="M:RIS.Connection.MySQL.Requests.SelectColumn(System.String,System.String,System.String,System.String,System.String,System.String,System.UInt64,System.UInt64,System.TimeSpan,System.Data.IsolationLevel)">
             <summary>
@@ -1323,9 +1364,10 @@
             <returns>
                 Массив типа <see cref="T:System.String"/>, который содержит ответ сервера.
             </returns>
-            <exception cref="T:MySql.Data.MySqlClient.MySqlException"></exception>
+            <exception cref="T:MySqlConnector.MySqlException"></exception>
             <exception cref="T:System.TimeoutException"></exception>
             <exception cref="T:System.AggregateException"></exception>
+            <exception cref="T:System.InvalidOperationException"></exception>
         </member>
         <member name="M:RIS.Connection.MySQL.Requests.SelectColumnAsync(System.String,System.String,System.String,System.String,System.String,System.String,System.UInt64,System.UInt64,System.Data.IsolationLevel)">
             <summary>
@@ -1361,9 +1403,10 @@
             <returns>
                 Массив типа <see cref="T:System.String"/>, который содержит ответ сервера.
             </returns>
-            <exception cref="T:MySql.Data.MySqlClient.MySqlException"></exception>
+            <exception cref="T:MySqlConnector.MySqlException"></exception>
             <exception cref="T:System.TimeoutException"></exception>
             <exception cref="T:System.AggregateException"></exception>
+            <exception cref="T:System.InvalidOperationException"></exception>
         </member>
         <member name="M:RIS.Connection.MySQL.Requests.SelectColumnAsync(System.String,System.String,System.String,System.String,System.String,System.String,System.UInt64,System.UInt64,System.TimeSpan,System.Data.IsolationLevel)">
             <summary>
@@ -1402,9 +1445,10 @@
             <returns>
                 Массив типа <see cref="T:System.String"/>, который содержит ответ сервера.
             </returns>
-            <exception cref="T:MySql.Data.MySqlClient.MySqlException"></exception>
+            <exception cref="T:MySqlConnector.MySqlException"></exception>
             <exception cref="T:System.TimeoutException"></exception>
             <exception cref="T:System.AggregateException"></exception>
+            <exception cref="T:System.InvalidOperationException"></exception>
         </member>
         <member name="M:RIS.Connection.MySQL.Requests.SelectColumn(System.String,System.String,System.ValueTuple{System.String,System.String}[],System.UInt64,System.UInt64,System.Data.IsolationLevel)">
             <summary>
@@ -1433,9 +1477,10 @@
             <returns>
                 Массив типа <see cref="T:System.String"/>, который содержит ответ сервера.
             </returns>
-            <exception cref="T:MySql.Data.MySqlClient.MySqlException"></exception>
+            <exception cref="T:MySqlConnector.MySqlException"></exception>
             <exception cref="T:System.TimeoutException"></exception>
             <exception cref="T:System.AggregateException"></exception>
+            <exception cref="T:System.InvalidOperationException"></exception>
         </member>
         <member name="M:RIS.Connection.MySQL.Requests.SelectColumn(System.String,System.String,System.ValueTuple{System.String,System.String}[],System.UInt64,System.UInt64,System.TimeSpan,System.Data.IsolationLevel)">
             <summary>
@@ -1467,9 +1512,10 @@
             <returns>
                 Массив типа <see cref="T:System.String"/>, который содержит ответ сервера.
             </returns>
-            <exception cref="T:MySql.Data.MySqlClient.MySqlException"></exception>
+            <exception cref="T:MySqlConnector.MySqlException"></exception>
             <exception cref="T:System.TimeoutException"></exception>
             <exception cref="T:System.AggregateException"></exception>
+            <exception cref="T:System.InvalidOperationException"></exception>
         </member>
         <member name="M:RIS.Connection.MySQL.Requests.SelectColumnAsync(System.String,System.String,System.ValueTuple{System.String,System.String}[],System.UInt64,System.UInt64,System.Data.IsolationLevel)">
             <summary>
@@ -1498,9 +1544,10 @@
             <returns>
                 Массив типа <see cref="T:System.String"/>, который содержит ответ сервера.
             </returns>
-            <exception cref="T:MySql.Data.MySqlClient.MySqlException"></exception>
+            <exception cref="T:MySqlConnector.MySqlException"></exception>
             <exception cref="T:System.TimeoutException"></exception>
             <exception cref="T:System.AggregateException"></exception>
+            <exception cref="T:System.InvalidOperationException"></exception>
         </member>
         <member name="M:RIS.Connection.MySQL.Requests.SelectColumnAsync(System.String,System.String,System.ValueTuple{System.String,System.String}[],System.UInt64,System.UInt64,System.TimeSpan,System.Data.IsolationLevel)">
             <summary>
@@ -1532,9 +1579,10 @@
             <returns>
                 Массив типа <see cref="T:System.String"/>, который содержит ответ сервера.
             </returns>
-            <exception cref="T:MySql.Data.MySqlClient.MySqlException"></exception>
+            <exception cref="T:MySqlConnector.MySqlException"></exception>
             <exception cref="T:System.TimeoutException"></exception>
             <exception cref="T:System.AggregateException"></exception>
+            <exception cref="T:System.InvalidOperationException"></exception>
         </member>
         <member name="M:RIS.Connection.MySQL.Requests.SelectColumns(System.String[],System.String,System.UInt64,System.UInt64,System.Data.IsolationLevel)">
             <summary>
@@ -1558,9 +1606,10 @@
             <returns>
                 Массив массивов типа <see cref="T:System.String"/>, которые содержат ответ сервера.
             </returns>
-            <exception cref="T:MySql.Data.MySqlClient.MySqlException"></exception>
+            <exception cref="T:MySqlConnector.MySqlException"></exception>
             <exception cref="T:System.TimeoutException"></exception>
             <exception cref="T:System.AggregateException"></exception>
+            <exception cref="T:System.InvalidOperationException"></exception>
         </member>
         <member name="M:RIS.Connection.MySQL.Requests.SelectColumns(System.String[],System.String,System.UInt64,System.UInt64,System.TimeSpan,System.Data.IsolationLevel)">
             <summary>
@@ -1587,9 +1636,10 @@
             <returns>
                 Массив массивов типа <see cref="T:System.String"/>, которые содержат ответ сервера.
             </returns>
-            <exception cref="T:MySql.Data.MySqlClient.MySqlException"></exception>
+            <exception cref="T:MySqlConnector.MySqlException"></exception>
             <exception cref="T:System.TimeoutException"></exception>
             <exception cref="T:System.AggregateException"></exception>
+            <exception cref="T:System.InvalidOperationException"></exception>
         </member>
         <member name="M:RIS.Connection.MySQL.Requests.SelectColumnsAsync(System.String[],System.String,System.UInt64,System.UInt64,System.Data.IsolationLevel)">
             <summary>
@@ -1613,9 +1663,10 @@
             <returns>
                 Массив массивов типа <see cref="T:System.String"/>, которые содержат ответ сервера.
             </returns>
-            <exception cref="T:MySql.Data.MySqlClient.MySqlException"></exception>
+            <exception cref="T:MySqlConnector.MySqlException"></exception>
             <exception cref="T:System.TimeoutException"></exception>
             <exception cref="T:System.AggregateException"></exception>
+            <exception cref="T:System.InvalidOperationException"></exception>
         </member>
         <member name="M:RIS.Connection.MySQL.Requests.SelectColumnsAsync(System.String[],System.String,System.UInt64,System.UInt64,System.TimeSpan,System.Data.IsolationLevel)">
             <summary>
@@ -1642,9 +1693,10 @@
             <returns>
                 Массив массивов типа <see cref="T:System.String"/>, которые содержат ответ сервера.
             </returns>
-            <exception cref="T:MySql.Data.MySqlClient.MySqlException"></exception>
+            <exception cref="T:MySqlConnector.MySqlException"></exception>
             <exception cref="T:System.TimeoutException"></exception>
             <exception cref="T:System.AggregateException"></exception>
+            <exception cref="T:System.InvalidOperationException"></exception>
         </member>
         <member name="M:RIS.Connection.MySQL.Requests.SelectColumns(System.ValueTuple{System.String,System.String,System.UInt64,System.UInt64}[],System.Data.IsolationLevel)">
             <summary>
@@ -1663,9 +1715,10 @@
             <returns>
                 Массив массивов типа <see cref="T:System.String"/>, которые содержат ответ сервера.
             </returns>
-            <exception cref="T:MySql.Data.MySqlClient.MySqlException"></exception>
+            <exception cref="T:MySqlConnector.MySqlException"></exception>
             <exception cref="T:System.TimeoutException"></exception>
             <exception cref="T:System.AggregateException"></exception>
+            <exception cref="T:System.InvalidOperationException"></exception>
         </member>
         <member name="M:RIS.Connection.MySQL.Requests.SelectColumns(System.ValueTuple{System.String,System.String,System.UInt64,System.UInt64}[],System.TimeSpan,System.Data.IsolationLevel)">
             <summary>
@@ -1687,9 +1740,10 @@
             <returns>
                 Массив массивов типа <see cref="T:System.String"/>, которые содержат ответ сервера.
             </returns>
-            <exception cref="T:MySql.Data.MySqlClient.MySqlException"></exception>
+            <exception cref="T:MySqlConnector.MySqlException"></exception>
             <exception cref="T:System.TimeoutException"></exception>
             <exception cref="T:System.AggregateException"></exception>
+            <exception cref="T:System.InvalidOperationException"></exception>
         </member>
         <member name="M:RIS.Connection.MySQL.Requests.SelectColumnsAsync(System.ValueTuple{System.String,System.String,System.UInt64,System.UInt64}[],System.Data.IsolationLevel)">
             <summary>
@@ -1708,9 +1762,10 @@
             <returns>
                 Массив массивов типа <see cref="T:System.String"/>, которые содержат ответ сервера.
             </returns>
-            <exception cref="T:MySql.Data.MySqlClient.MySqlException"></exception>
+            <exception cref="T:MySqlConnector.MySqlException"></exception>
             <exception cref="T:System.TimeoutException"></exception>
             <exception cref="T:System.AggregateException"></exception>
+            <exception cref="T:System.InvalidOperationException"></exception>
         </member>
         <member name="M:RIS.Connection.MySQL.Requests.SelectColumnsAsync(System.ValueTuple{System.String,System.String,System.UInt64,System.UInt64}[],System.TimeSpan,System.Data.IsolationLevel)">
             <summary>
@@ -1732,9 +1787,10 @@
             <returns>
                 Массив массивов типа <see cref="T:System.String"/>, которые содержат ответ сервера.
             </returns>
-            <exception cref="T:MySql.Data.MySqlClient.MySqlException"></exception>
+            <exception cref="T:MySqlConnector.MySqlException"></exception>
             <exception cref="T:System.TimeoutException"></exception>
             <exception cref="T:System.AggregateException"></exception>
+            <exception cref="T:System.InvalidOperationException"></exception>
         </member>
         <member name="M:RIS.Connection.MySQL.Requests.Select(System.String,System.String,System.String,System.String,System.Data.IsolationLevel)">
             <summary>
@@ -1758,9 +1814,10 @@
             <returns>
                 Значение типа <see cref="T:System.String"/>, которое содержит ответ сервера.
             </returns>
-            <exception cref="T:MySql.Data.MySqlClient.MySqlException"></exception>
+            <exception cref="T:MySqlConnector.MySqlException"></exception>
             <exception cref="T:System.TimeoutException"></exception>
             <exception cref="T:System.AggregateException"></exception>
+            <exception cref="T:System.InvalidOperationException"></exception>
         </member>
         <member name="M:RIS.Connection.MySQL.Requests.Select(System.String,System.String,System.String,System.String,System.TimeSpan,System.Data.IsolationLevel)">
             <summary>
@@ -1787,9 +1844,10 @@
             <returns>
                 Значение типа <see cref="T:System.String"/>, которое содержит ответ сервера.
             </returns>
-            <exception cref="T:MySql.Data.MySqlClient.MySqlException"></exception>
+            <exception cref="T:MySqlConnector.MySqlException"></exception>
             <exception cref="T:System.TimeoutException"></exception>
             <exception cref="T:System.AggregateException"></exception>
+            <exception cref="T:System.InvalidOperationException"></exception>
         </member>
         <member name="M:RIS.Connection.MySQL.Requests.SelectAsync(System.String,System.String,System.String,System.String,System.Data.IsolationLevel)">
             <summary>
@@ -1813,9 +1871,10 @@
             <returns>
                 Значение типа <see cref="T:System.String"/>, которое содержит ответ сервера.
             </returns>
-            <exception cref="T:MySql.Data.MySqlClient.MySqlException"></exception>
+            <exception cref="T:MySqlConnector.MySqlException"></exception>
             <exception cref="T:System.TimeoutException"></exception>
             <exception cref="T:System.AggregateException"></exception>
+            <exception cref="T:System.InvalidOperationException"></exception>
         </member>
         <member name="M:RIS.Connection.MySQL.Requests.SelectAsync(System.String,System.String,System.String,System.String,System.TimeSpan,System.Data.IsolationLevel)">
             <summary>
@@ -1842,9 +1901,10 @@
             <returns>
                 Значение типа <see cref="T:System.String"/>, которое содержит ответ сервера.
             </returns>
-            <exception cref="T:MySql.Data.MySqlClient.MySqlException"></exception>
+            <exception cref="T:MySqlConnector.MySqlException"></exception>
             <exception cref="T:System.TimeoutException"></exception>
             <exception cref="T:System.AggregateException"></exception>
+            <exception cref="T:System.InvalidOperationException"></exception>
         </member>
         <member name="M:RIS.Connection.MySQL.Requests.Select(System.String,System.String,System.String,System.String,System.String,System.String,System.Data.IsolationLevel)">
             <summary>
@@ -1874,9 +1934,10 @@
             <returns>
                 Значение типа <see cref="T:System.String"/>, которое содержит ответ сервера.
             </returns>
-            <exception cref="T:MySql.Data.MySqlClient.MySqlException"></exception>
+            <exception cref="T:MySqlConnector.MySqlException"></exception>
             <exception cref="T:System.TimeoutException"></exception>
             <exception cref="T:System.AggregateException"></exception>
+            <exception cref="T:System.InvalidOperationException"></exception>
         </member>
         <member name="M:RIS.Connection.MySQL.Requests.Select(System.String,System.String,System.String,System.String,System.String,System.String,System.TimeSpan,System.Data.IsolationLevel)">
             <summary>
@@ -1909,9 +1970,10 @@
             <returns>
                 Значение типа <see cref="T:System.String"/>, которое содержит ответ сервера.
             </returns>
-            <exception cref="T:MySql.Data.MySqlClient.MySqlException"></exception>
+            <exception cref="T:MySqlConnector.MySqlException"></exception>
             <exception cref="T:System.TimeoutException"></exception>
             <exception cref="T:System.AggregateException"></exception>
+            <exception cref="T:System.InvalidOperationException"></exception>
         </member>
         <member name="M:RIS.Connection.MySQL.Requests.SelectAsync(System.String,System.String,System.String,System.String,System.String,System.String,System.Data.IsolationLevel)">
             <summary>
@@ -1941,9 +2003,10 @@
             <returns>
                 Значение типа <see cref="T:System.String"/>, которое содержит ответ сервера.
             </returns>
-            <exception cref="T:MySql.Data.MySqlClient.MySqlException"></exception>
+            <exception cref="T:MySqlConnector.MySqlException"></exception>
             <exception cref="T:System.TimeoutException"></exception>
             <exception cref="T:System.AggregateException"></exception>
+            <exception cref="T:System.InvalidOperationException"></exception>
         </member>
         <member name="M:RIS.Connection.MySQL.Requests.SelectAsync(System.String,System.String,System.String,System.String,System.String,System.String,System.TimeSpan,System.Data.IsolationLevel)">
             <summary>
@@ -1976,9 +2039,10 @@
             <returns>
                 Значение типа <see cref="T:System.String"/>, которое содержит ответ сервера.
             </returns>
-            <exception cref="T:MySql.Data.MySqlClient.MySqlException"></exception>
+            <exception cref="T:MySqlConnector.MySqlException"></exception>
             <exception cref="T:System.TimeoutException"></exception>
             <exception cref="T:System.AggregateException"></exception>
+            <exception cref="T:System.InvalidOperationException"></exception>
         </member>
         <member name="M:RIS.Connection.MySQL.Requests.Select(System.String,System.String,System.ValueTuple{System.String,System.String}[],System.Data.IsolationLevel)">
             <summary>
@@ -2001,9 +2065,10 @@
             <returns>
                 Значение типа <see cref="T:System.String"/>, которое содержит ответ сервера.
             </returns>
-            <exception cref="T:MySql.Data.MySqlClient.MySqlException"></exception>
+            <exception cref="T:MySqlConnector.MySqlException"></exception>
             <exception cref="T:System.TimeoutException"></exception>
             <exception cref="T:System.AggregateException"></exception>
+            <exception cref="T:System.InvalidOperationException"></exception>
         </member>
         <member name="M:RIS.Connection.MySQL.Requests.Select(System.String,System.String,System.ValueTuple{System.String,System.String}[],System.TimeSpan,System.Data.IsolationLevel)">
             <summary>
@@ -2029,9 +2094,10 @@
             <returns>
                 Значение типа <see cref="T:System.String"/>, которое содержит ответ сервера.
             </returns>
-            <exception cref="T:MySql.Data.MySqlClient.MySqlException"></exception>
+            <exception cref="T:MySqlConnector.MySqlException"></exception>
             <exception cref="T:System.TimeoutException"></exception>
             <exception cref="T:System.AggregateException"></exception>
+            <exception cref="T:System.InvalidOperationException"></exception>
         </member>
         <member name="M:RIS.Connection.MySQL.Requests.SelectAsync(System.String,System.String,System.ValueTuple{System.String,System.String}[],System.Data.IsolationLevel)">
             <summary>
@@ -2054,9 +2120,10 @@
             <returns>
                 Значение типа <see cref="T:System.String"/>, которое содержит ответ сервера.
             </returns>
-            <exception cref="T:MySql.Data.MySqlClient.MySqlException"></exception>
+            <exception cref="T:MySqlConnector.MySqlException"></exception>
             <exception cref="T:System.TimeoutException"></exception>
             <exception cref="T:System.AggregateException"></exception>
+            <exception cref="T:System.InvalidOperationException"></exception>
         </member>
         <member name="M:RIS.Connection.MySQL.Requests.SelectAsync(System.String,System.String,System.ValueTuple{System.String,System.String}[],System.TimeSpan,System.Data.IsolationLevel)">
             <summary>
@@ -2082,9 +2149,10 @@
             <returns>
                 Значение типа <see cref="T:System.String"/>, которое содержит ответ сервера.
             </returns>
-            <exception cref="T:MySql.Data.MySqlClient.MySqlException"></exception>
+            <exception cref="T:MySqlConnector.MySqlException"></exception>
             <exception cref="T:System.TimeoutException"></exception>
             <exception cref="T:System.AggregateException"></exception>
+            <exception cref="T:System.InvalidOperationException"></exception>
         </member>
         <member name="M:RIS.Connection.MySQL.Requests.Select(System.String[],System.String,System.String,System.String,System.Data.IsolationLevel)">
             <summary>
@@ -2108,9 +2176,10 @@
             <returns>
                 Массив типа <see cref="T:System.String"/>, который содержит ответ сервера.
             </returns>
-            <exception cref="T:MySql.Data.MySqlClient.MySqlException"></exception>
+            <exception cref="T:MySqlConnector.MySqlException"></exception>
             <exception cref="T:System.TimeoutException"></exception>
             <exception cref="T:System.AggregateException"></exception>
+            <exception cref="T:System.InvalidOperationException"></exception>
         </member>
         <member name="M:RIS.Connection.MySQL.Requests.Select(System.String[],System.String,System.String,System.String,System.TimeSpan,System.Data.IsolationLevel)">
             <summary>
@@ -2137,9 +2206,10 @@
             <returns>
                 Массив типа <see cref="T:System.String"/>, который содержит ответ сервера.
             </returns>
-            <exception cref="T:MySql.Data.MySqlClient.MySqlException"></exception>
+            <exception cref="T:MySqlConnector.MySqlException"></exception>
             <exception cref="T:System.TimeoutException"></exception>
             <exception cref="T:System.AggregateException"></exception>
+            <exception cref="T:System.InvalidOperationException"></exception>
         </member>
         <member name="M:RIS.Connection.MySQL.Requests.SelectAsync(System.String[],System.String,System.String,System.String,System.Data.IsolationLevel)">
             <summary>
@@ -2163,9 +2233,10 @@
             <returns>
                 Массив типа <see cref="T:System.String"/>, который содержит ответ сервера.
             </returns>
-            <exception cref="T:MySql.Data.MySqlClient.MySqlException"></exception>
+            <exception cref="T:MySqlConnector.MySqlException"></exception>
             <exception cref="T:System.TimeoutException"></exception>
             <exception cref="T:System.AggregateException"></exception>
+            <exception cref="T:System.InvalidOperationException"></exception>
         </member>
         <member name="M:RIS.Connection.MySQL.Requests.SelectAsync(System.String[],System.String,System.String,System.String,System.TimeSpan,System.Data.IsolationLevel)">
             <summary>
@@ -2192,9 +2263,10 @@
             <returns>
                 Массив типа <see cref="T:System.String"/>, который содержит ответ сервера.
             </returns>
-            <exception cref="T:MySql.Data.MySqlClient.MySqlException"></exception>
+            <exception cref="T:MySqlConnector.MySqlException"></exception>
             <exception cref="T:System.TimeoutException"></exception>
             <exception cref="T:System.AggregateException"></exception>
+            <exception cref="T:System.InvalidOperationException"></exception>
         </member>
         <member name="M:RIS.Connection.MySQL.Requests.Select(System.String[],System.String,System.String,System.String,System.String,System.String,System.Data.IsolationLevel)">
             <summary>
@@ -2224,9 +2296,10 @@
             <returns>
                 Массив типа <see cref="T:System.String"/>, который содержит ответ сервера.
             </returns>
-            <exception cref="T:MySql.Data.MySqlClient.MySqlException"></exception>
+            <exception cref="T:MySqlConnector.MySqlException"></exception>
             <exception cref="T:System.TimeoutException"></exception>
             <exception cref="T:System.AggregateException"></exception>
+            <exception cref="T:System.InvalidOperationException"></exception>
         </member>
         <member name="M:RIS.Connection.MySQL.Requests.Select(System.String[],System.String,System.String,System.String,System.String,System.String,System.TimeSpan,System.Data.IsolationLevel)">
             <summary>
@@ -2259,9 +2332,10 @@
             <returns>
                 Массив типа <see cref="T:System.String"/>, который содержит ответ сервера.
             </returns>
-            <exception cref="T:MySql.Data.MySqlClient.MySqlException"></exception>
+            <exception cref="T:MySqlConnector.MySqlException"></exception>
             <exception cref="T:System.TimeoutException"></exception>
             <exception cref="T:System.AggregateException"></exception>
+            <exception cref="T:System.InvalidOperationException"></exception>
         </member>
         <member name="M:RIS.Connection.MySQL.Requests.SelectAsync(System.String[],System.String,System.String,System.String,System.String,System.String,System.Data.IsolationLevel)">
             <summary>
@@ -2291,9 +2365,10 @@
             <returns>
                 Массив типа <see cref="T:System.String"/>, который содержит ответ сервера.
             </returns>
-            <exception cref="T:MySql.Data.MySqlClient.MySqlException"></exception>
+            <exception cref="T:MySqlConnector.MySqlException"></exception>
             <exception cref="T:System.TimeoutException"></exception>
             <exception cref="T:System.AggregateException"></exception>
+            <exception cref="T:System.InvalidOperationException"></exception>
         </member>
         <member name="M:RIS.Connection.MySQL.Requests.SelectAsync(System.String[],System.String,System.String,System.String,System.String,System.String,System.TimeSpan,System.Data.IsolationLevel)">
             <summary>
@@ -2326,9 +2401,10 @@
             <returns>
                 Массив типа <see cref="T:System.String"/>, который содержит ответ сервера.
             </returns>
-            <exception cref="T:MySql.Data.MySqlClient.MySqlException"></exception>
+            <exception cref="T:MySqlConnector.MySqlException"></exception>
             <exception cref="T:System.TimeoutException"></exception>
             <exception cref="T:System.AggregateException"></exception>
+            <exception cref="T:System.InvalidOperationException"></exception>
         </member>
         <member name="M:RIS.Connection.MySQL.Requests.Select(System.String[],System.String,System.ValueTuple{System.String,System.String}[],System.Data.IsolationLevel)">
             <summary>
@@ -2351,9 +2427,10 @@
             <returns>
                 Массив типа <see cref="T:System.String"/>, который содержит ответ сервера.
             </returns>
-            <exception cref="T:MySql.Data.MySqlClient.MySqlException"></exception>
+            <exception cref="T:MySqlConnector.MySqlException"></exception>
             <exception cref="T:System.TimeoutException"></exception>
             <exception cref="T:System.AggregateException"></exception>
+            <exception cref="T:System.InvalidOperationException"></exception>
         </member>
         <member name="M:RIS.Connection.MySQL.Requests.Select(System.String[],System.String,System.ValueTuple{System.String,System.String}[],System.TimeSpan,System.Data.IsolationLevel)">
             <summary>
@@ -2379,9 +2456,10 @@
             <returns>
                 Массив типа <see cref="T:System.String"/>, который содержит ответ сервера.
             </returns>
-            <exception cref="T:MySql.Data.MySqlClient.MySqlException"></exception>
+            <exception cref="T:MySqlConnector.MySqlException"></exception>
             <exception cref="T:System.TimeoutException"></exception>
             <exception cref="T:System.AggregateException"></exception>
+            <exception cref="T:System.InvalidOperationException"></exception>
         </member>
         <member name="M:RIS.Connection.MySQL.Requests.SelectAsync(System.String[],System.String,System.ValueTuple{System.String,System.String}[],System.Data.IsolationLevel)">
             <summary>
@@ -2404,9 +2482,10 @@
             <returns>
                 Массив типа <see cref="T:System.String"/>, который содержит ответ сервера.
             </returns>
-            <exception cref="T:MySql.Data.MySqlClient.MySqlException"></exception>
+            <exception cref="T:MySqlConnector.MySqlException"></exception>
             <exception cref="T:System.TimeoutException"></exception>
             <exception cref="T:System.AggregateException"></exception>
+            <exception cref="T:System.InvalidOperationException"></exception>
         </member>
         <member name="M:RIS.Connection.MySQL.Requests.SelectAsync(System.String[],System.String,System.ValueTuple{System.String,System.String}[],System.TimeSpan,System.Data.IsolationLevel)">
             <summary>
@@ -2432,9 +2511,10 @@
             <returns>
                 Массив типа <see cref="T:System.String"/>, который содержит ответ сервера.
             </returns>
-            <exception cref="T:MySql.Data.MySqlClient.MySqlException"></exception>
+            <exception cref="T:MySqlConnector.MySqlException"></exception>
             <exception cref="T:System.TimeoutException"></exception>
             <exception cref="T:System.AggregateException"></exception>
+            <exception cref="T:System.InvalidOperationException"></exception>
         </member>
         <member name="M:RIS.Connection.MySQL.Requests.Delete(System.String,System.Data.IsolationLevel)">
             <summary>
@@ -2449,9 +2529,10 @@
             <returns>
                 Имеет возвращаемый тип <see langword="void"/>.
             </returns>
-            <exception cref="T:MySql.Data.MySqlClient.MySqlException"></exception>
+            <exception cref="T:MySqlConnector.MySqlException"></exception>
             <exception cref="T:System.TimeoutException"></exception>
             <exception cref="T:System.AggregateException"></exception>
+            <exception cref="T:System.InvalidOperationException"></exception>
         </member>
         <member name="M:RIS.Connection.MySQL.Requests.Delete(System.String,System.TimeSpan,System.Data.IsolationLevel)">
             <summary>
@@ -2469,9 +2550,10 @@
             <returns>
                 Имеет возвращаемый тип <see langword="void"/>.
             </returns>
-            <exception cref="T:MySql.Data.MySqlClient.MySqlException"></exception>
+            <exception cref="T:MySqlConnector.MySqlException"></exception>
             <exception cref="T:System.TimeoutException"></exception>
             <exception cref="T:System.AggregateException"></exception>
+            <exception cref="T:System.InvalidOperationException"></exception>
         </member>
         <member name="M:RIS.Connection.MySQL.Requests.DeleteAsync(System.String,System.Data.IsolationLevel)">
             <summary>
@@ -2486,9 +2568,10 @@
             <returns>
                 Имеет возвращаемый тип <see langword="void"/>.
             </returns>
-            <exception cref="T:MySql.Data.MySqlClient.MySqlException"></exception>
+            <exception cref="T:MySqlConnector.MySqlException"></exception>
             <exception cref="T:System.TimeoutException"></exception>
             <exception cref="T:System.AggregateException"></exception>
+            <exception cref="T:System.InvalidOperationException"></exception>
         </member>
         <member name="M:RIS.Connection.MySQL.Requests.DeleteAsync(System.String,System.TimeSpan,System.Data.IsolationLevel)">
             <summary>
@@ -2506,9 +2589,10 @@
             <returns>
                 Имеет возвращаемый тип <see langword="void"/>.
             </returns>
-            <exception cref="T:MySql.Data.MySqlClient.MySqlException"></exception>
+            <exception cref="T:MySqlConnector.MySqlException"></exception>
             <exception cref="T:System.TimeoutException"></exception>
             <exception cref="T:System.AggregateException"></exception>
+            <exception cref="T:System.InvalidOperationException"></exception>
         </member>
         <member name="M:RIS.Connection.MySQL.Requests.Delete(System.String,System.String,System.String,System.Data.IsolationLevel)">
             <summary>
@@ -2529,9 +2613,10 @@
             <returns>
                 Имеет возвращаемый тип <see langword="void"/>.
             </returns>
-            <exception cref="T:MySql.Data.MySqlClient.MySqlException"></exception>
+            <exception cref="T:MySqlConnector.MySqlException"></exception>
             <exception cref="T:System.TimeoutException"></exception>
             <exception cref="T:System.AggregateException"></exception>
+            <exception cref="T:System.InvalidOperationException"></exception>
         </member>
         <member name="M:RIS.Connection.MySQL.Requests.Delete(System.String,System.String,System.String,System.TimeSpan,System.Data.IsolationLevel)">
             <summary>
@@ -2555,9 +2640,10 @@
             <returns>
                 Имеет возвращаемый тип <see langword="void"/>.
             </returns>
-            <exception cref="T:MySql.Data.MySqlClient.MySqlException"></exception>
+            <exception cref="T:MySqlConnector.MySqlException"></exception>
             <exception cref="T:System.TimeoutException"></exception>
             <exception cref="T:System.AggregateException"></exception>
+            <exception cref="T:System.InvalidOperationException"></exception>
         </member>
         <member name="M:RIS.Connection.MySQL.Requests.DeleteAsync(System.String,System.String,System.String,System.Data.IsolationLevel)">
             <summary>
@@ -2578,9 +2664,10 @@
             <returns>
                 Имеет возвращаемый тип <see langword="void"/>.
             </returns>
-            <exception cref="T:MySql.Data.MySqlClient.MySqlException"></exception>
+            <exception cref="T:MySqlConnector.MySqlException"></exception>
             <exception cref="T:System.TimeoutException"></exception>
             <exception cref="T:System.AggregateException"></exception>
+            <exception cref="T:System.InvalidOperationException"></exception>
         </member>
         <member name="M:RIS.Connection.MySQL.Requests.DeleteAsync(System.String,System.String,System.String,System.TimeSpan,System.Data.IsolationLevel)">
             <summary>
@@ -2604,9 +2691,10 @@
             <returns>
                 Имеет возвращаемый тип <see langword="void"/>.
             </returns>
-            <exception cref="T:MySql.Data.MySqlClient.MySqlException"></exception>
+            <exception cref="T:MySqlConnector.MySqlException"></exception>
             <exception cref="T:System.TimeoutException"></exception>
             <exception cref="T:System.AggregateException"></exception>
+            <exception cref="T:System.InvalidOperationException"></exception>
         </member>
         <member name="M:RIS.Connection.MySQL.Requests.Delete(System.String,System.String,System.String,System.String,System.String,System.Data.IsolationLevel)">
             <summary>
@@ -2633,9 +2721,10 @@
             <returns>
                 Имеет возвращаемый тип <see langword="void"/>.
             </returns>
-            <exception cref="T:MySql.Data.MySqlClient.MySqlException"></exception>
+            <exception cref="T:MySqlConnector.MySqlException"></exception>
             <exception cref="T:System.TimeoutException"></exception>
             <exception cref="T:System.AggregateException"></exception>
+            <exception cref="T:System.InvalidOperationException"></exception>
         </member>
         <member name="M:RIS.Connection.MySQL.Requests.Delete(System.String,System.String,System.String,System.String,System.String,System.TimeSpan,System.Data.IsolationLevel)">
             <summary>
@@ -2665,9 +2754,10 @@
             <returns>
                 Имеет возвращаемый тип <see langword="void"/>.
             </returns>
-            <exception cref="T:MySql.Data.MySqlClient.MySqlException"></exception>
+            <exception cref="T:MySqlConnector.MySqlException"></exception>
             <exception cref="T:System.TimeoutException"></exception>
             <exception cref="T:System.AggregateException"></exception>
+            <exception cref="T:System.InvalidOperationException"></exception>
         </member>
         <member name="M:RIS.Connection.MySQL.Requests.DeleteAsync(System.String,System.String,System.String,System.String,System.String,System.Data.IsolationLevel)">
             <summary>
@@ -2694,9 +2784,10 @@
             <returns>
                 Имеет возвращаемый тип <see langword="void"/>.
             </returns>
-            <exception cref="T:MySql.Data.MySqlClient.MySqlException"></exception>
+            <exception cref="T:MySqlConnector.MySqlException"></exception>
             <exception cref="T:System.TimeoutException"></exception>
             <exception cref="T:System.AggregateException"></exception>
+            <exception cref="T:System.InvalidOperationException"></exception>
         </member>
         <member name="M:RIS.Connection.MySQL.Requests.DeleteAsync(System.String,System.String,System.String,System.String,System.String,System.TimeSpan,System.Data.IsolationLevel)">
             <summary>
@@ -2726,9 +2817,10 @@
             <returns>
                 Имеет возвращаемый тип <see langword="void"/>.
             </returns>
-            <exception cref="T:MySql.Data.MySqlClient.MySqlException"></exception>
+            <exception cref="T:MySqlConnector.MySqlException"></exception>
             <exception cref="T:System.TimeoutException"></exception>
             <exception cref="T:System.AggregateException"></exception>
+            <exception cref="T:System.InvalidOperationException"></exception>
         </member>
         <member name="M:RIS.Connection.MySQL.Requests.Delete(System.String,System.ValueTuple{System.String,System.String}[],System.Data.IsolationLevel)">
             <summary>
@@ -2748,9 +2840,10 @@
             <returns>
                 Имеет возвращаемый тип <see langword="void"/>.
             </returns>
-            <exception cref="T:MySql.Data.MySqlClient.MySqlException"></exception>
+            <exception cref="T:MySqlConnector.MySqlException"></exception>
             <exception cref="T:System.TimeoutException"></exception>
             <exception cref="T:System.AggregateException"></exception>
+            <exception cref="T:System.InvalidOperationException"></exception>
         </member>
         <member name="M:RIS.Connection.MySQL.Requests.Delete(System.String,System.ValueTuple{System.String,System.String}[],System.TimeSpan,System.Data.IsolationLevel)">
             <summary>
@@ -2773,9 +2866,10 @@
             <returns>
                 Имеет возвращаемый тип <see langword="void"/>.
             </returns>
-            <exception cref="T:MySql.Data.MySqlClient.MySqlException"></exception>
+            <exception cref="T:MySqlConnector.MySqlException"></exception>
             <exception cref="T:System.TimeoutException"></exception>
             <exception cref="T:System.AggregateException"></exception>
+            <exception cref="T:System.InvalidOperationException"></exception>
         </member>
         <member name="M:RIS.Connection.MySQL.Requests.DeleteAsync(System.String,System.ValueTuple{System.String,System.String}[],System.Data.IsolationLevel)">
             <summary>
@@ -2795,9 +2889,10 @@
             <returns>
                 Имеет возвращаемый тип <see langword="void"/>.
             </returns>
-            <exception cref="T:MySql.Data.MySqlClient.MySqlException"></exception>
+            <exception cref="T:MySqlConnector.MySqlException"></exception>
             <exception cref="T:System.TimeoutException"></exception>
             <exception cref="T:System.AggregateException"></exception>
+            <exception cref="T:System.InvalidOperationException"></exception>
         </member>
         <member name="M:RIS.Connection.MySQL.Requests.DeleteAsync(System.String,System.ValueTuple{System.String,System.String}[],System.TimeSpan,System.Data.IsolationLevel)">
             <summary>
@@ -2820,9 +2915,10 @@
             <returns>
                 Имеет возвращаемый тип <see langword="void"/>.
             </returns>
-            <exception cref="T:MySql.Data.MySqlClient.MySqlException"></exception>
+            <exception cref="T:MySqlConnector.MySqlException"></exception>
             <exception cref="T:System.TimeoutException"></exception>
             <exception cref="T:System.AggregateException"></exception>
+            <exception cref="T:System.InvalidOperationException"></exception>
         </member>
         <member name="M:RIS.Connection.MySQL.Requests.Update(System.String,System.String,System.String,System.Data.IsolationLevel)">
             <summary>
@@ -2843,9 +2939,10 @@
             <returns>
                 Имеет возвращаемый тип <see langword="void"/>.
             </returns>
-            <exception cref="T:MySql.Data.MySqlClient.MySqlException"></exception>
+            <exception cref="T:MySqlConnector.MySqlException"></exception>
             <exception cref="T:System.TimeoutException"></exception>
             <exception cref="T:System.AggregateException"></exception>
+            <exception cref="T:System.InvalidOperationException"></exception>
         </member>
         <member name="M:RIS.Connection.MySQL.Requests.Update(System.String,System.String,System.String,System.TimeSpan,System.Data.IsolationLevel)">
             <summary>
@@ -2869,9 +2966,10 @@
             <returns>
                 Имеет возвращаемый тип <see langword="void"/>.
             </returns>
-            <exception cref="T:MySql.Data.MySqlClient.MySqlException"></exception>
+            <exception cref="T:MySqlConnector.MySqlException"></exception>
             <exception cref="T:System.TimeoutException"></exception>
             <exception cref="T:System.AggregateException"></exception>
+            <exception cref="T:System.InvalidOperationException"></exception>
         </member>
         <member name="M:RIS.Connection.MySQL.Requests.UpdateAsync(System.String,System.String,System.String,System.Data.IsolationLevel)">
             <summary>
@@ -2892,9 +2990,10 @@
             <returns>
                 Имеет возвращаемый тип <see langword="void"/>.
             </returns>
-            <exception cref="T:MySql.Data.MySqlClient.MySqlException"></exception>
+            <exception cref="T:MySqlConnector.MySqlException"></exception>
             <exception cref="T:System.TimeoutException"></exception>
             <exception cref="T:System.AggregateException"></exception>
+            <exception cref="T:System.InvalidOperationException"></exception>
         </member>
         <member name="M:RIS.Connection.MySQL.Requests.UpdateAsync(System.String,System.String,System.String,System.TimeSpan,System.Data.IsolationLevel)">
             <summary>
@@ -2918,9 +3017,10 @@
             <returns>
                 Имеет возвращаемый тип <see langword="void"/>.
             </returns>
-            <exception cref="T:MySql.Data.MySqlClient.MySqlException"></exception>
+            <exception cref="T:MySqlConnector.MySqlException"></exception>
             <exception cref="T:System.TimeoutException"></exception>
             <exception cref="T:System.AggregateException"></exception>
+            <exception cref="T:System.InvalidOperationException"></exception>
         </member>
         <member name="M:RIS.Connection.MySQL.Requests.Update(System.String,System.String,System.String,System.String,System.String,System.Data.IsolationLevel)">
             <summary>
@@ -2947,9 +3047,10 @@
             <returns>
                 Имеет возвращаемый тип <see langword="void"/>.
             </returns>
-            <exception cref="T:MySql.Data.MySqlClient.MySqlException"></exception>
+            <exception cref="T:MySqlConnector.MySqlException"></exception>
             <exception cref="T:System.TimeoutException"></exception>
             <exception cref="T:System.AggregateException"></exception>
+            <exception cref="T:System.InvalidOperationException"></exception>
         </member>
         <member name="M:RIS.Connection.MySQL.Requests.Update(System.String,System.String,System.String,System.String,System.String,System.TimeSpan,System.Data.IsolationLevel)">
             <summary>
@@ -2979,9 +3080,10 @@
             <returns>
                 Имеет возвращаемый тип <see langword="void"/>.
             </returns>
-            <exception cref="T:MySql.Data.MySqlClient.MySqlException"></exception>
+            <exception cref="T:MySqlConnector.MySqlException"></exception>
             <exception cref="T:System.TimeoutException"></exception>
             <exception cref="T:System.AggregateException"></exception>
+            <exception cref="T:System.InvalidOperationException"></exception>
         </member>
         <member name="M:RIS.Connection.MySQL.Requests.UpdateAsync(System.String,System.String,System.String,System.String,System.String,System.Data.IsolationLevel)">
             <summary>
@@ -3008,9 +3110,10 @@
             <returns>
                 Имеет возвращаемый тип <see langword="void"/>.
             </returns>
-            <exception cref="T:MySql.Data.MySqlClient.MySqlException"></exception>
+            <exception cref="T:MySqlConnector.MySqlException"></exception>
             <exception cref="T:System.TimeoutException"></exception>
             <exception cref="T:System.AggregateException"></exception>
+            <exception cref="T:System.InvalidOperationException"></exception>
         </member>
         <member name="M:RIS.Connection.MySQL.Requests.UpdateAsync(System.String,System.String,System.String,System.String,System.String,System.TimeSpan,System.Data.IsolationLevel)">
             <summary>
@@ -3040,9 +3143,10 @@
             <returns>
                 Имеет возвращаемый тип <see langword="void"/>.
             </returns>
-            <exception cref="T:MySql.Data.MySqlClient.MySqlException"></exception>
+            <exception cref="T:MySqlConnector.MySqlException"></exception>
             <exception cref="T:System.TimeoutException"></exception>
             <exception cref="T:System.AggregateException"></exception>
+            <exception cref="T:System.InvalidOperationException"></exception>
         </member>
         <member name="M:RIS.Connection.MySQL.Requests.Update(System.String,System.String,System.String,System.String,System.String,System.String,System.String,System.Data.IsolationLevel)">
             <summary>
@@ -3075,9 +3179,10 @@
             <returns>
                 Имеет возвращаемый тип <see langword="void"/>.
             </returns>
-            <exception cref="T:MySql.Data.MySqlClient.MySqlException"></exception>
+            <exception cref="T:MySqlConnector.MySqlException"></exception>
             <exception cref="T:System.TimeoutException"></exception>
             <exception cref="T:System.AggregateException"></exception>
+            <exception cref="T:System.InvalidOperationException"></exception>
         </member>
         <member name="M:RIS.Connection.MySQL.Requests.Update(System.String,System.String,System.String,System.String,System.String,System.String,System.String,System.TimeSpan,System.Data.IsolationLevel)">
             <summary>
@@ -3113,9 +3218,10 @@
             <returns>
                 Имеет возвращаемый тип <see langword="void"/>.
             </returns>
-            <exception cref="T:MySql.Data.MySqlClient.MySqlException"></exception>
+            <exception cref="T:MySqlConnector.MySqlException"></exception>
             <exception cref="T:System.TimeoutException"></exception>
             <exception cref="T:System.AggregateException"></exception>
+            <exception cref="T:System.InvalidOperationException"></exception>
         </member>
         <member name="M:RIS.Connection.MySQL.Requests.UpdateAsync(System.String,System.String,System.String,System.String,System.String,System.String,System.String,System.Data.IsolationLevel)">
             <summary>
@@ -3148,9 +3254,10 @@
             <returns>
                 Имеет возвращаемый тип <see langword="void"/>.
             </returns>
-            <exception cref="T:MySql.Data.MySqlClient.MySqlException"></exception>
+            <exception cref="T:MySqlConnector.MySqlException"></exception>
             <exception cref="T:System.TimeoutException"></exception>
             <exception cref="T:System.AggregateException"></exception>
+            <exception cref="T:System.InvalidOperationException"></exception>
         </member>
         <member name="M:RIS.Connection.MySQL.Requests.UpdateAsync(System.String,System.String,System.String,System.String,System.String,System.String,System.String,System.TimeSpan,System.Data.IsolationLevel)">
             <summary>
@@ -3186,9 +3293,10 @@
             <returns>
                 Имеет возвращаемый тип <see langword="void"/>.
             </returns>
-            <exception cref="T:MySql.Data.MySqlClient.MySqlException"></exception>
+            <exception cref="T:MySqlConnector.MySqlException"></exception>
             <exception cref="T:System.TimeoutException"></exception>
             <exception cref="T:System.AggregateException"></exception>
+            <exception cref="T:System.InvalidOperationException"></exception>
         </member>
         <member name="M:RIS.Connection.MySQL.Requests.Update(System.String,System.String,System.String,System.ValueTuple{System.String,System.String}[],System.Data.IsolationLevel)">
             <summary>
@@ -3214,9 +3322,10 @@
             <returns>
                 Имеет возвращаемый тип <see langword="void"/>.
             </returns>
-            <exception cref="T:MySql.Data.MySqlClient.MySqlException"></exception>
+            <exception cref="T:MySqlConnector.MySqlException"></exception>
             <exception cref="T:System.TimeoutException"></exception>
             <exception cref="T:System.AggregateException"></exception>
+            <exception cref="T:System.InvalidOperationException"></exception>
         </member>
         <member name="M:RIS.Connection.MySQL.Requests.Update(System.String,System.String,System.String,System.ValueTuple{System.String,System.String}[],System.TimeSpan,System.Data.IsolationLevel)">
             <summary>
@@ -3245,9 +3354,10 @@
             <returns>
                 Имеет возвращаемый тип <see langword="void"/>.
             </returns>
-            <exception cref="T:MySql.Data.MySqlClient.MySqlException"></exception>
+            <exception cref="T:MySqlConnector.MySqlException"></exception>
             <exception cref="T:System.TimeoutException"></exception>
             <exception cref="T:System.AggregateException"></exception>
+            <exception cref="T:System.InvalidOperationException"></exception>
         </member>
         <member name="M:RIS.Connection.MySQL.Requests.UpdateAsync(System.String,System.String,System.String,System.ValueTuple{System.String,System.String}[],System.Data.IsolationLevel)">
             <summary>
@@ -3273,9 +3383,10 @@
             <returns>
                 Имеет возвращаемый тип <see langword="void"/>.
             </returns>
-            <exception cref="T:MySql.Data.MySqlClient.MySqlException"></exception>
+            <exception cref="T:MySqlConnector.MySqlException"></exception>
             <exception cref="T:System.TimeoutException"></exception>
             <exception cref="T:System.AggregateException"></exception>
+            <exception cref="T:System.InvalidOperationException"></exception>
         </member>
         <member name="M:RIS.Connection.MySQL.Requests.UpdateAsync(System.String,System.String,System.String,System.ValueTuple{System.String,System.String}[],System.TimeSpan,System.Data.IsolationLevel)">
             <summary>
@@ -3304,9 +3415,10 @@
             <returns>
                 Имеет возвращаемый тип <see langword="void"/>.
             </returns>
-            <exception cref="T:MySql.Data.MySqlClient.MySqlException"></exception>
+            <exception cref="T:MySqlConnector.MySqlException"></exception>
             <exception cref="T:System.TimeoutException"></exception>
             <exception cref="T:System.AggregateException"></exception>
+            <exception cref="T:System.InvalidOperationException"></exception>
         </member>
         <member name="M:RIS.Connection.MySQL.Requests.Insert(System.String[],System.String,System.Data.IsolationLevel)">
             <summary>
@@ -3324,9 +3436,10 @@
             <returns>
                 Имеет возвращаемый тип <see langword="void"/>.
             </returns>
-            <exception cref="T:MySql.Data.MySqlClient.MySqlException"></exception>
+            <exception cref="T:MySqlConnector.MySqlException"></exception>
             <exception cref="T:System.TimeoutException"></exception>
             <exception cref="T:System.AggregateException"></exception>
+            <exception cref="T:System.InvalidOperationException"></exception>
         </member>
         <member name="M:RIS.Connection.MySQL.Requests.Insert(System.String[],System.String,System.TimeSpan,System.Data.IsolationLevel)">
             <summary>
@@ -3347,9 +3460,10 @@
             <returns>
                 Имеет возвращаемый тип <see langword="void"/>.
             </returns>
-            <exception cref="T:MySql.Data.MySqlClient.MySqlException"></exception>
+            <exception cref="T:MySqlConnector.MySqlException"></exception>
             <exception cref="T:System.TimeoutException"></exception>
             <exception cref="T:System.AggregateException"></exception>
+            <exception cref="T:System.InvalidOperationException"></exception>
         </member>
         <member name="M:RIS.Connection.MySQL.Requests.InsertAsync(System.String[],System.String,System.Data.IsolationLevel)">
             <summary>
@@ -3367,9 +3481,10 @@
             <returns>
                 Имеет возвращаемый тип <see langword="void"/>.
             </returns>
-            <exception cref="T:MySql.Data.MySqlClient.MySqlException"></exception>
+            <exception cref="T:MySqlConnector.MySqlException"></exception>
             <exception cref="T:System.TimeoutException"></exception>
             <exception cref="T:System.AggregateException"></exception>
+            <exception cref="T:System.InvalidOperationException"></exception>
         </member>
         <member name="M:RIS.Connection.MySQL.Requests.InsertAsync(System.String[],System.String,System.TimeSpan,System.Data.IsolationLevel)">
             <summary>
@@ -3390,9 +3505,10 @@
             <returns>
                 Имеет возвращаемый тип <see langword="void"/>.
             </returns>
-            <exception cref="T:MySql.Data.MySqlClient.MySqlException"></exception>
+            <exception cref="T:MySqlConnector.MySqlException"></exception>
             <exception cref="T:System.TimeoutException"></exception>
             <exception cref="T:System.AggregateException"></exception>
+            <exception cref="T:System.InvalidOperationException"></exception>
         </member>
         <member name="M:RIS.Connection.MySQL.Requests.TruncateTable(System.String,System.Data.IsolationLevel)">
             <summary>
@@ -3407,9 +3523,10 @@
             <returns>
                 Имеет возвращаемый тип <see langword="void"/>.
             </returns>
-            <exception cref="T:MySql.Data.MySqlClient.MySqlException"></exception>
+            <exception cref="T:MySqlConnector.MySqlException"></exception>
             <exception cref="T:System.TimeoutException"></exception>
             <exception cref="T:System.AggregateException"></exception>
+            <exception cref="T:System.InvalidOperationException"></exception>
         </member>
         <member name="M:RIS.Connection.MySQL.Requests.TruncateTable(System.String,System.TimeSpan,System.Data.IsolationLevel)">
             <summary>
@@ -3427,9 +3544,10 @@
             <returns>
                 Имеет возвращаемый тип <see langword="void"/>.
             </returns>
-            <exception cref="T:MySql.Data.MySqlClient.MySqlException"></exception>
+            <exception cref="T:MySqlConnector.MySqlException"></exception>
             <exception cref="T:System.TimeoutException"></exception>
             <exception cref="T:System.AggregateException"></exception>
+            <exception cref="T:System.InvalidOperationException"></exception>
         </member>
         <member name="M:RIS.Connection.MySQL.Requests.TruncateTableAsync(System.String,System.Data.IsolationLevel)">
             <summary>
@@ -3444,9 +3562,10 @@
             <returns>
                 Имеет возвращаемый тип <see langword="void"/>.
             </returns>
-            <exception cref="T:MySql.Data.MySqlClient.MySqlException"></exception>
+            <exception cref="T:MySqlConnector.MySqlException"></exception>
             <exception cref="T:System.TimeoutException"></exception>
             <exception cref="T:System.AggregateException"></exception>
+            <exception cref="T:System.InvalidOperationException"></exception>
         </member>
         <member name="M:RIS.Connection.MySQL.Requests.TruncateTableAsync(System.String,System.TimeSpan,System.Data.IsolationLevel)">
             <summary>
@@ -3464,9 +3583,10 @@
             <returns>
                 Имеет возвращаемый тип <see langword="void"/>.
             </returns>
-            <exception cref="T:MySql.Data.MySqlClient.MySqlException"></exception>
+            <exception cref="T:MySqlConnector.MySqlException"></exception>
             <exception cref="T:System.TimeoutException"></exception>
             <exception cref="T:System.AggregateException"></exception>
+            <exception cref="T:System.InvalidOperationException"></exception>
         </member>
         <member name="M:RIS.Connection.MySQL.Requests.Union_Insert_SelectFunction(System.String[],System.String,System.String,System.String[],System.Data.IsolationLevel)">
             <summary>
@@ -3490,9 +3610,10 @@
             <returns>
                 Значение типа <see cref="T:System.String"/>, которое содержит ответ сервера.
             </returns>
-            <exception cref="T:MySql.Data.MySqlClient.MySqlException"></exception>
+            <exception cref="T:MySqlConnector.MySqlException"></exception>
             <exception cref="T:System.TimeoutException"></exception>
             <exception cref="T:System.AggregateException"></exception>
+            <exception cref="T:System.InvalidOperationException"></exception>
         </member>
         <member name="M:RIS.Connection.MySQL.Requests.Union_Insert_SelectFunction(System.String[],System.String,System.String,System.String[],System.TimeSpan,System.Data.IsolationLevel)">
             <summary>
@@ -3519,9 +3640,10 @@
             <returns>
                 Значение типа <see cref="T:System.String"/>, которое содержит ответ сервера.
             </returns>
-            <exception cref="T:MySql.Data.MySqlClient.MySqlException"></exception>
+            <exception cref="T:MySqlConnector.MySqlException"></exception>
             <exception cref="T:System.TimeoutException"></exception>
             <exception cref="T:System.AggregateException"></exception>
+            <exception cref="T:System.InvalidOperationException"></exception>
         </member>
         <member name="M:RIS.Connection.MySQL.Requests.Union_Insert_SelectFunctionAsync(System.String[],System.String,System.String,System.String[],System.Data.IsolationLevel)">
             <summary>
@@ -3545,9 +3667,10 @@
             <returns>
                 Значение типа <see cref="T:System.String"/>, которое содержит ответ сервера.
             </returns>
-            <exception cref="T:MySql.Data.MySqlClient.MySqlException"></exception>
+            <exception cref="T:MySqlConnector.MySqlException"></exception>
             <exception cref="T:System.TimeoutException"></exception>
             <exception cref="T:System.AggregateException"></exception>
+            <exception cref="T:System.InvalidOperationException"></exception>
         </member>
         <member name="M:RIS.Connection.MySQL.Requests.Union_Insert_SelectFunctionAsync(System.String[],System.String,System.String,System.String[],System.TimeSpan,System.Data.IsolationLevel)">
             <summary>
@@ -3574,9 +3697,10 @@
             <returns>
                 Значение типа <see cref="T:System.String"/>, которое содержит ответ сервера.
             </returns>
-            <exception cref="T:MySql.Data.MySqlClient.MySqlException"></exception>
+            <exception cref="T:MySqlConnector.MySqlException"></exception>
             <exception cref="T:System.TimeoutException"></exception>
             <exception cref="T:System.AggregateException"></exception>
+            <exception cref="T:System.InvalidOperationException"></exception>
         </member>
         <member name="M:RIS.Connection.MySQL.Requests.Union_Insert_SelectFunction(System.String[],System.String,System.String,System.String[],System.String,System.Data.IsolationLevel)">
             <summary>
@@ -3603,9 +3727,10 @@
             <returns>
                 Значение типа <see cref="T:System.String"/>, которое содержит ответ сервера.
             </returns>
-            <exception cref="T:MySql.Data.MySqlClient.MySqlException"></exception>
+            <exception cref="T:MySqlConnector.MySqlException"></exception>
             <exception cref="T:System.TimeoutException"></exception>
             <exception cref="T:System.AggregateException"></exception>
+            <exception cref="T:System.InvalidOperationException"></exception>
         </member>
         <member name="M:RIS.Connection.MySQL.Requests.Union_Insert_SelectFunction(System.String[],System.String,System.String,System.String[],System.String,System.TimeSpan,System.Data.IsolationLevel)">
             <summary>
@@ -3635,9 +3760,10 @@
             <returns>
                 Значение типа <see cref="T:System.String"/>, которое содержит ответ сервера.
             </returns>
-            <exception cref="T:MySql.Data.MySqlClient.MySqlException"></exception>
+            <exception cref="T:MySqlConnector.MySqlException"></exception>
             <exception cref="T:System.TimeoutException"></exception>
             <exception cref="T:System.AggregateException"></exception>
+            <exception cref="T:System.InvalidOperationException"></exception>
         </member>
         <member name="M:RIS.Connection.MySQL.Requests.Union_Insert_SelectFunctionAsync(System.String[],System.String,System.String,System.String[],System.String,System.Data.IsolationLevel)">
             <summary>
@@ -3664,9 +3790,10 @@
             <returns>
                 Значение типа <see cref="T:System.String"/>, которое содержит ответ сервера.
             </returns>
-            <exception cref="T:MySql.Data.MySqlClient.MySqlException"></exception>
+            <exception cref="T:MySqlConnector.MySqlException"></exception>
             <exception cref="T:System.TimeoutException"></exception>
             <exception cref="T:System.AggregateException"></exception>
+            <exception cref="T:System.InvalidOperationException"></exception>
         </member>
         <member name="M:RIS.Connection.MySQL.Requests.Union_Insert_SelectFunctionAsync(System.String[],System.String,System.String,System.String[],System.String,System.TimeSpan,System.Data.IsolationLevel)">
             <summary>
@@ -3696,9 +3823,10 @@
             <returns>
                 Значение типа <see cref="T:System.String"/>, которое содержит ответ сервера.
             </returns>
-            <exception cref="T:MySql.Data.MySqlClient.MySqlException"></exception>
+            <exception cref="T:MySqlConnector.MySqlException"></exception>
             <exception cref="T:System.TimeoutException"></exception>
             <exception cref="T:System.AggregateException"></exception>
+            <exception cref="T:System.InvalidOperationException"></exception>
         </member>
     </members>
 </doc>

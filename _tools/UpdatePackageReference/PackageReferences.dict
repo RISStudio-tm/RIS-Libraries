@@ -1,0 +1,8 @@
+RIS=3.4.2
+RIS.Collections=4.5.85
+RIS.Text=3.0.51
+RIS.Reflection=3.4.56
+RIS.Graphics=2.3.17
+RIS.Cryptography=2.7.168
+RIS.Logging=2.2.7
+RIS.Connection.MySQL=3.0.1

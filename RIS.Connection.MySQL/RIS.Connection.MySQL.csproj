@@ -1,16 +1,16 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
+
   <PropertyGroup>
     <TargetFrameworks>netcoreapp3.1;net48</TargetFrameworks>
     <Configurations>Debug;Release;Release Nuget</Configurations>
     <RootNamespace>RIS.Connection.MySQL</RootNamespace>
     <AssemblyName>RIS.Connection.MySQL</AssemblyName>
-    <AssemblyVersion>2.7.19.0</AssemblyVersion>
-    <FileVersion>2.7.19.0</FileVersion>
+    <AssemblyVersion>3.0.1.0</AssemblyVersion>
+    <FileVersion>3.0.1.0</FileVersion>
     <PackageId>RIS.Connection.MySQL</PackageId>
     <Product>RIS.Connection.MySQL</Product>
-    <Version>2.7.9</Version>
-    <Description>
-    </Description>
+    <Version>3.0.1</Version>
+    <Description></Description>
     <PackageTags>dotnet, dotnetcore, netframework, netcore, library</PackageTags>
     <Authors>Dmitry Ponomarev</Authors>
     <Company>RISStudio</Company>
@@ -20,39 +20,51 @@
     <PackageProjectUrl>https://github.com/RISStudio-tm/RIS-Libraries</PackageProjectUrl>
     <RepositoryUrl>https://github.com/RISStudio-tm/RIS-Libraries</RepositoryUrl>
   </PropertyGroup>
+  
   <PropertyGroup>
     <DocumentationFile>RIS.Connection.MySQL.xml</DocumentationFile>
-    <NoWarn>$(NoWarn);CS0067;SS003;SS004;U2U1009</NoWarn>
+    <NoWarn>$(NoWarn);CA2100;CS0067;SS003;SS004;U2U1009</NoWarn>
   </PropertyGroup>
+  
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release Nuget|AnyCPU'">
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
   </PropertyGroup>
-  <Target Name="PreBuild" BeforeTargets="PreBuildEvent" Condition="'$(Configuration)|$(Platform)'=='Release Nuget|AnyCPU'">
-    <Exec Command="..\_tools\ChangePackageVersion.exe &quot;$(ProjectPath)&quot;" />
+
+  <Target Name="PreBuild" BeforeTargets="BeforeBuild" Condition="'$(Configuration)|$(Platform)'=='Release Nuget|AnyCPU'">
+    <Exec Command="&quot;ChangePackageVersion.exe&quot; &quot;$(MSBuildProjectFullPath)&quot;" WorkingDirectory="..\_tools\ChangePackageVersion" />
+    <Exec Command="&quot;UpdatePackageReference.exe&quot; &quot;$(MSBuildProjectFullPath)&quot;" WorkingDirectory="..\_tools\UpdatePackageReference" />
   </Target>
+
+  <Target Name="PostPack" AfterTargets="Pack" Condition="'$(Configuration)|$(Platform)'=='Release Nuget|AnyCPU'">
+    <Exec Command="&quot;CopyPackage.exe&quot; &quot;..\..\_packages&quot; &quot;$(MSBuildProjectFullPath)&quot; &quot;$(Configuration)&quot;" WorkingDirectory="..\_tools\CopyPackage" />
+  </Target>
+  
   <ItemGroup>
     <None Include="..\LICENSE">
       <Pack>True</Pack>
-      <PackagePath>
-      </PackagePath>
+      <PackagePath></PackagePath>
     </None>
     <None Include="..\_resources\RISStudio-icon-1.png">
       <Pack>True</Pack>
-      <PackagePath>
-      </PackagePath>
+      <PackagePath></PackagePath>
     </None>
   </ItemGroup>
+  
   <ItemGroup>
-    <PackageReference Include="MySql.Data" Version="8.0.19" />
+    <PackageReference Include="MySqlConnector" Version="1.0.1" />
   </ItemGroup>
+  
   <ItemGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
     <ProjectReference Include="..\RIS\RIS.csproj" />
   </ItemGroup>
+  
   <ItemGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
     <ProjectReference Include="..\RIS\RIS.csproj" />
   </ItemGroup>
+  
   <ItemGroup Condition="'$(Configuration)|$(Platform)'=='Release Nuget|AnyCPU'">
     <!--PackageReference for NuGet-->
-    <ProjectReference Include="..\RIS\RIS.csproj" />
+    <PackageReference Include="RIS" Version="3.4.2" />
   </ItemGroup>
+  
 </Project>

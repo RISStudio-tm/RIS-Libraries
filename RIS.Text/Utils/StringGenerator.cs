@@ -4,7 +4,7 @@
 using System;
 using System.Text;
 
-namespace RIS.Text.Encoding
+namespace RIS.Text
 {
     public static class StringGenerator
     {
