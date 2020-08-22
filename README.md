@@ -1,4 +1,4 @@
-# <div align="center">![Logo](_resources/RISStudio-icon-2.png)</div>
+# <div align="center">![Logo](_resources/RISStudio-logo-3.png)</div>
 # <div align="center">**RIS-Libraries**</div>
 # <div align="center">[![CodeLines](https://tokei.rs/b1/github/RISStudio-tm/RIS-Libraries?category=code)](https://github.com/RISStudio-tm/RIS-Libraries)</div>
 
