@@ -302,13 +302,13 @@ namespace RIS.Collections.Nestable
         public static string ToStringRepresentDictionary<TValue>(string key, TValue[] value)
         {
             if (value.Length == 0)
-                return "[]";
+                return $"[{ToStringRepresentDictionary<TValue>(key)}::]";
 
             StringBuilder result = new StringBuilder();
 
             result.Append('[');
 
-            result.Append(key);
+            result.Append(ToStringRepresentDictionary<TValue>(key));
             result.Append("::");
 
             for (int i = 0; i < value.Length; ++i)
@@ -344,13 +344,13 @@ namespace RIS.Collections.Nestable
             }
 
             if (value.Length == 0)
-                return $"{{{key}::{GetCollectionType(value)}||}}";
+                return $"{{{ToStringRepresentDictionary<TValue>(key)}::{GetCollectionType(value)}||}}";
 
             StringBuilder result = new StringBuilder();
 
             result.Append('{');
 
-            result.Append(key);
+            result.Append(ToStringRepresentDictionary<TValue>(key));
             result.Append("::");
 
             result.Append(GetCollectionType(value));
@@ -390,13 +390,13 @@ namespace RIS.Collections.Nestable
         public static string ToStringRepresentDictionary<TValue>(string key, INestableDictionary<TValue> value)
         {
             if (value.Length == 0)
-                return $"{{{key}::{GetCollectionType(value)}||}}";
+                return $"{{{ToStringRepresentDictionary<TValue>(key)}::{GetCollectionType(value)}||}}";
 
             StringBuilder result = new StringBuilder();
 
             result.Append('{');
 
-            result.Append(key);
+            result.Append(ToStringRepresentDictionary<TValue>(key));
             result.Append("::");
 
             result.Append(GetCollectionType(value));
@@ -408,15 +408,15 @@ namespace RIS.Collections.Nestable
                 {
                     case NestedType.Element:
                         result.Append('"');
-                        result.Append(ToStringRepresentDictionary(ToStringRepresentDictionary<TValue>(value.GetKey(i)), value[i].GetElement()));
+                        result.Append(ToStringRepresentDictionary(value.GetKey(i), value[i].GetElement()));
                         result.Append("\",");
                         break;
                     case NestedType.Array:
-                        result.Append(ToStringRepresentDictionary(ToStringRepresentDictionary<TValue>(value.GetKey(i)), value[i].GetArray()));
+                        result.Append(ToStringRepresentDictionary(value.GetKey(i), value[i].GetArray()));
                         result.Append(',');
                         break;
                     case NestedType.NestableCollection:
-                        result.Append(ToStringRepresentDictionary(ToStringRepresentDictionary<TValue>(value.GetKey(i)), value[i].GetNestableCollection()));
+                        result.Append(ToStringRepresentDictionary(value.GetKey(i), value[i].GetNestableCollection()));
                         result.Append(',');
                         break;
                 }
@@ -519,8 +519,7 @@ namespace RIS.Collections.Nestable
                 case CollectionGeneralType.List:
                     break;
                 case CollectionGeneralType.Dictionary:
-                    FromStringRepresentDictionary<TValue>(represent, (INestableDictionary<TValue>)value);
-                    break;
+                    return FromStringRepresentDictionary<TValue>(represent, (INestableDictionary<TValue>)value);
                 case CollectionGeneralType.Unknown:
                 default:
                     var exception =
@@ -718,6 +717,7 @@ namespace RIS.Collections.Nestable
                 return value;
 
             int divideIndex = typeDivide + 1;
+            divideIndex -= key.Length != 0 ? key.Length + 2 : 0 ;
 
             do
             {
@@ -734,8 +734,8 @@ namespace RIS.Collections.Nestable
 
                     if (representSub.Contains("::"))
                     {
-                        int resultKeyDivide = representSub.IndexOf("::", 1, StringComparison.Ordinal);
-                        string resultKey = FromStringRepresentDictionary<TValue>(representSub.Substring(1, resultKeyDivide - 1));
+                        int resultKeyDivide = representSub.IndexOf("::", 0, StringComparison.Ordinal);
+                        string resultKey = FromStringRepresentDictionary<TValue>(representSub.Substring(0, resultKeyDivide));
 
                         representSub = $"{representSub.Substring(resultKeyDivide + 2)}";
 
