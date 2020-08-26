@@ -1,18 +1,18 @@
-<Project Sdk="Microsoft.NET.Sdk.WindowsDesktop">
+﻿<Project Sdk="Microsoft.NET.Sdk.WindowsDesktop">
 
   <PropertyGroup>
     <TargetFrameworks>netcoreapp3.1</TargetFrameworks>
     <Configurations>Debug;Release;Release Nuget</Configurations>
     <RootNamespace>RIS.Graphics</RootNamespace>
     <AssemblyName>RIS.Graphics</AssemblyName>
-    <AssemblyVersion>2.3.17.0</AssemblyVersion>
-    <FileVersion>2.3.17.0</FileVersion>
+    <AssemblyVersion>2.3.18.0</AssemblyVersion>
+    <FileVersion>2.3.18.0</FileVersion>
     <UseWPF>true</UseWPF>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <PackageId>RIS.Graphics</PackageId>
     <Product>RIS.Graphics</Product>
-    <Version>2.3.17</Version>
-    <Description></Description>
+    <Version>2.3.18</Version>
+    <Description>A library designed for various types of tasks. Part of the RIS "ecosystem".</Description>
     <PackageTags>dotnet, dotnetcore, netframework, netcore, library</PackageTags>
     <Authors>Dmitry Ponomarev</Authors>
     <Company>RISStudio</Company>
@@ -20,6 +20,7 @@
     <PackageLicenseFile>LICENSE</PackageLicenseFile>
     <PackageIcon>RISStudio-icon-1.png</PackageIcon>
     <PackageProjectUrl>https://github.com/RISStudio-tm/RIS-Libraries</PackageProjectUrl>
+    <RepositoryType>git</RepositoryType>
     <RepositoryUrl>https://github.com/RISStudio-tm/RIS-Libraries</RepositoryUrl>
   </PropertyGroup>
   
@@ -70,7 +71,7 @@
   
   <ItemGroup Condition="'$(Configuration)|$(Platform)'=='Release Nuget|AnyCPU'">
     <!--PackageReference for NuGet-->
-    <PackageReference Include="RIS" Version="3.4.2" />
+    <ProjectReference Include="..\RIS\RIS.csproj" />
   </ItemGroup>
   
 </Project>

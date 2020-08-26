@@ -1,17 +1,17 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFrameworks>netcoreapp3.1;net48</TargetFrameworks>
     <Configurations>Debug;Release;Release Nuget</Configurations>
     <RootNamespace>RIS</RootNamespace>
     <AssemblyName>RIS</AssemblyName>
-    <AssemblyVersion>3.4.2.0</AssemblyVersion>
-    <FileVersion>3.4.2.0</FileVersion>
+    <AssemblyVersion>3.4.3.0</AssemblyVersion>
+    <FileVersion>3.4.3.0</FileVersion>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <PackageId>RIS</PackageId>
     <Product>RIS</Product>
-    <Version>3.4.2</Version>
-    <Description></Description>
+    <Version>3.4.3</Version>
+    <Description>A library designed for various types of tasks. The core of the RIS "ecosystem".</Description>
     <PackageTags>dotnet, dotnetcore, netframework, netcore, library</PackageTags>
     <Authors>Dmitry Ponomarev</Authors>
     <Company>RISStudio</Company>
@@ -19,6 +19,7 @@
     <PackageLicenseFile>LICENSE</PackageLicenseFile>
     <PackageIcon>RISStudio-icon-1.png</PackageIcon>
     <PackageProjectUrl>https://github.com/RISStudio-tm/RIS-Libraries</PackageProjectUrl>
+    <RepositoryType>git</RepositoryType>
     <RepositoryUrl>https://github.com/RISStudio-tm/RIS-Libraries</RepositoryUrl>
   </PropertyGroup>
   

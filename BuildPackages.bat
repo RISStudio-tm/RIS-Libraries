@@ -1,0 +1,1 @@
+@%comspec% /k " "D:\Visual Studio 2019\Common7\Tools\VsDevCmd.bat" & cd "%~dp0" & dotnet build -c "Release Nuget" "RIS-Libraries.sln" & exit "

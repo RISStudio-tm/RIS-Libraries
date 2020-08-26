@@ -513,17 +513,17 @@ MigrationBackup/
 
 # Files
 
-dotnet_build.txt
-PublishPackages.exe.lnk
-_tools/PublishPackages/config.ini
-_tools/PublishPackages/lastlog.log
-_tools/UpdatePackageReference/PackageReferences.dict
+*.lnk
+_tools/PublishPackages/*.ini
+_tools/PublishPackages/*.log
+_tools/UpdatePackageReference/*.dict
 
 # Directories
 
 .git/
 .vs/
 .idea/
+_packages/
 
 ##################################### Project #####################################
 
@@ -533,5 +533,5 @@ _tools/UpdatePackageReference/PackageReferences.dict
 
 # Directories
 
-ConsoleTest/
+ConsoleTest*/
 

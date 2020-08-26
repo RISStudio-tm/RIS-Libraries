@@ -1,16 +1,16 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFrameworks>netcoreapp3.1;net48</TargetFrameworks>
     <Configurations>Debug;Release;Release Nuget</Configurations>
     <RootNamespace>RIS.Text</RootNamespace>
     <AssemblyName>RIS.Text</AssemblyName>
-    <AssemblyVersion>3.0.51.0</AssemblyVersion>
-    <FileVersion>3.0.51.0</FileVersion>
+    <AssemblyVersion>3.0.52.0</AssemblyVersion>
+    <FileVersion>3.0.52.0</FileVersion>
     <PackageId>RIS.Text</PackageId>
     <Product>RIS.Text</Product>
-    <Version>3.0.51</Version>
-    <Description></Description>
+    <Version>3.0.52</Version>
+    <Description>A library designed for various types of tasks. Part of the RIS "ecosystem".</Description>
     <PackageTags>dotnet, dotnetcore, netframework, netcore, library</PackageTags>
     <Authors>Dmitry Ponomarev</Authors>
     <Company>RISStudio</Company>
@@ -18,6 +18,7 @@
     <PackageLicenseFile>LICENSE</PackageLicenseFile>
     <PackageIcon>RISStudio-icon-1.png</PackageIcon>
     <PackageProjectUrl>https://github.com/RISStudio-tm/RIS-Libraries</PackageProjectUrl>
+    <RepositoryType>git</RepositoryType>
     <RepositoryUrl>https://github.com/RISStudio-tm/RIS-Libraries</RepositoryUrl>
   </PropertyGroup>
   
@@ -59,7 +60,7 @@
   
   <ItemGroup Condition="'$(Configuration)|$(Platform)'=='Release Nuget|AnyCPU'">
     <!--PackageReference for NuGet-->
-    <PackageReference Include="RIS" Version="3.4.2" />
+    <ProjectReference Include="..\RIS\RIS.csproj" />
   </ItemGroup>
   
 </Project>
