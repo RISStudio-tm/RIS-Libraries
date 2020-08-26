@@ -444,6 +444,63 @@ namespace RIS.Collections.Nestable
             }
         }
 
+        public bool ChangeKey(string oldKey, string newKey)
+        {
+            if (!KeysCollection.ContainsKey(oldKey))
+            {
+                var exception = new KeyNotFoundException("Коллекция не содержит элемент с указанным старым ключом");
+                Events.OnError(this, new RErrorEventArgs(exception.Message, exception.StackTrace));
+                OnError(new RErrorEventArgs(exception.Message, exception.StackTrace));
+                throw exception;
+            }
+
+            if (string.IsNullOrEmpty(newKey) || string.IsNullOrWhiteSpace(newKey))
+            {
+                var exception = new Exception("Новый ключ не может быть null, пустым или содержать только пробелы");
+                Events.OnError(this, new RErrorEventArgs(exception.Message, exception.StackTrace));
+                OnError(new RErrorEventArgs(exception.Message, exception.StackTrace));
+                throw exception;
+            }
+            else if (KeysCollection.ContainsKey(newKey))
+            {
+                var exception = new KeyNotFoundException("Коллекция уже содержит элемент с указанным новым ключом");
+                Events.OnError(this, new RErrorEventArgs(exception.Message, exception.StackTrace));
+                OnError(new RErrorEventArgs(exception.Message, exception.StackTrace));
+                throw exception;
+            }
+
+            (int index, NestedElementNode<T> node) = KeysCollection[oldKey];
+
+            KeysCollection.Add(newKey, (index, node));
+            ValuesCollection[index] = (newKey, node);
+
+            KeysCollection.Remove(oldKey);
+
+            if (node.NestedElementRef.Type != NestedType.NestableCollection)
+                return true;
+
+            INestableCollection<T> valueCollection = node.NestedElementRef.GetNestableCollection();
+
+            switch (NestableCollectionHelper.GetGeneralType(valueCollection))
+            {
+                case CollectionGeneralType.Array:
+                case CollectionGeneralType.List:
+                    break;
+                case CollectionGeneralType.Dictionary:
+                    ((INestableDictionary<T>)valueCollection).Key = newKey;
+                    break;
+                case CollectionGeneralType.Unknown:
+                default:
+                    var exception =
+                        new ArgumentException("Недопустимое значение CollectionGeneralType у коллекции", nameof(node.NestedElement));
+                    Events.OnError(this, new RErrorEventArgs(exception.Message, exception.StackTrace));
+                    OnError(new RErrorEventArgs(exception.Message, exception.StackTrace));
+                    throw exception;
+            }
+
+            return true;
+        }
+
         public string ToStringRepresent()
         {
             return NestableCollectionHelper.ToStringRepresent<T>(this);

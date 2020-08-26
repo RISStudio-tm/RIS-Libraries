@@ -17,6 +17,11 @@ namespace RIS.Collections.Nestable
 
         ref NestedElement<T> GetRef(int index);
 
+        void Set(int index, NestedElement<T> value);
+        void Set(int index, T value);
+        void Set(int index, T[] value);
+        void Set(int index, INestableCollection<T> value);
+
         string ToStringRepresent();
 
         void FromStringRepresent(string represent);
@@ -37,21 +42,11 @@ namespace RIS.Collections.Nestable
 
     public interface INestableArray<T> : INestableCollection<T>
     {
-        ref NestedElement<T> GetRef(int index);
 
-        void Set(int index, NestedElement<T> value);
-        void Set(int index, T value);
-        void Set(int index, T[] value);
-        void Set(int index, INestableCollection<T> value);
     }
 
     public interface INestableList<T> : INestableCollection<T>
     {
-        void Set(int index, NestedElement<T> value);
-        void Set(int index, T value);
-        void Set(int index, T[] value);
-        void Set(int index, INestableCollection<T> value);
-
         bool Insert(NestedElement<T> value, int index);
         bool Insert(T value, int index);
         bool Insert(T[] value, int index);
@@ -74,14 +69,12 @@ namespace RIS.Collections.Nestable
 
         ref NestedElement<T> GetRef(string key);
 
-        void Set(int index, NestedElement<T> value);
         void Set(string key, NestedElement<T> value);
-        void Set(int index, T value);
         void Set(string key, T value);
-        void Set(int index, T[] value);
         void Set(string key, T[] value);
-        void Set(int index, INestableCollection<T> value);
         void Set(string key, INestableCollection<T> value);
+
+        bool ChangeKey(string oldKey, string newKey);
 
         bool Add(string key, NestedElement<T> value);
         bool Add(string key, T value);
