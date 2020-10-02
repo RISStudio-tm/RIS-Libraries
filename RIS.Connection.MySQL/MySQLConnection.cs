@@ -28,6 +28,8 @@ namespace RIS.Connection.MySQL
         /// </summary>
         public event EventHandler<RErrorEventArgs> Error;
 
+        private object LockObjCheckConnectionComplete { get; }
+
         private MySqlConnection[] _connections;
         /// <summary>
         ///     Позволяет получать массив типа <see cref="MySqlConnector.MySqlConnection"/> SQL-соединений, которые используются в данном экземпляре класса <see cref="RIS.Connection.MySQL.MySQLConnection"/>.
@@ -50,28 +52,58 @@ namespace RIS.Connection.MySQL
             }
         }
         /// <summary>
-        ///     Позволяет получать экзепляр класса <see cref="RIS.Connection.MySQL.Requests"/>, который используется в данном экземпляре класса <see cref="RIS.Connection.MySQL.MySQLConnection"/> для работы с запросами к SQL-соединениям из массива <see cref="Connections"/>.
+        ///     Позволяет получать тип сервиса <see cref="RIS.Connection.MySQL.IRequestEngine"/>, который используется в данном экземпляре класса <see cref="RIS.Connection.MySQL.MySQLConnection"/> для обработки запросов к SQL-соединениям из массива <see cref="RIS.Connection.MySQL.MySQLConnection.Connections"/>.
         /// </summary>
-        public Requests Requests { get; private set; }
+        public RequestEngineType RequestEngineType { get; private set; }
+        /// <summary>
+        ///     Позволяет получать экземпляр сервиса <see cref="RIS.Connection.MySQL.IRequestEngine"/>, который используется в данном экземпляре класса <see cref="RIS.Connection.MySQL.MySQLConnection"/> для обработки запросов к SQL-соединениям из массива <see cref="RIS.Connection.MySQL.MySQLConnection.Connections"/>.
+        /// </summary>
+        public IRequestEngine RequestEngine { get; private set; }
+        private object LockObjConnectionComplete { get; }
+        private bool _connectionComplete;
         /// <summary>
         ///     Позволяет получать состояние подключения к MySQL базе данных.
         /// </summary>
-        public bool ConnectionComplete { get; private set; }
+        public bool ConnectionComplete
+        {
+            get
+            {
+                lock (LockObjConnectionComplete)
+                {
+                    return _connectionComplete;
+                }
+            }
+            private set
+            {
+                lock (LockObjConnectionComplete)
+                {
+                    _connectionComplete = value;
+                }
+            }
+        }
+
+        /// <summary>
+        ///     Инициализирует новый экземпляр класса <see cref="RIS.Connection.MySQL.MySQLConnection"/>.
+        /// </summary>
+        /// <param name="requestEngineType">
+        ///     Тип сервиса для выполнения запросов к MySQL базе данных.
+        /// </param>
+        public MySQLConnection(RequestEngineType requestEngineType = RequestEngineType.Default)
+        {
+            _connections = Array.Empty<MySqlConnection>();
+            RequestEngineType = requestEngineType;
+            _connectionComplete = false;
+
+            LockObjCheckConnectionComplete = new object();
+            LockObjConnectionComplete = new object();
+        }
 
         /// <summary>
         ///     Закрывает соединения и освобождает ресурсы.
         /// </summary>
         ~MySQLConnection()
         {
-            CloseConnection();
-        }
-
-        /// <summary>
-        ///     Инициализирует новый экземпляр класса <see cref="RIS.Connection.MySQL.MySQLConnection"/> и его внутренние переменные.
-        /// </summary>
-        public MySQLConnection()
-        {
-
+            Close();
         }
 
         /// <summary>
@@ -170,41 +202,9 @@ namespace RIS.Connection.MySQL
         /// <returns>
         ///     Значение типа <see cref="bool"/>. Если <see langword="true"/>, то соединение открыто успешно, иначе <see langword="false"/>.
         /// </returns>
-        public bool OpenConnection(byte numberConnections, string ipAddress, string database, string login, string password, string charset = "utf8")
+        public bool Open(byte numberConnections, string ipAddress, string database, string login, string password, string charset = "utf8mb4")
         {
-            return OpenConnection(numberConnections, TimeSpan.FromMilliseconds(20000),
-                ipAddress, database, login, password, charset);
-        }
-        /// <summary>
-        ///     Открывает соединения в количестве <paramref name="numberConnections"/> c MySQL базой данных <paramref name="database"/>, расположенной по адресу хоста <paramref name="ipAddress"/>, используя кодировку <paramref name="charset"/>, стандартное время ожидания SQL-команд <paramref name="millisecondsTimeout"/> и аутентификацию по имени пользователя (логину) <paramref name="login"/> и паролю <paramref name="password"/>
-        /// </summary>
-        /// <param name="numberConnections">
-        ///     Количество SQL-соединений <see cref="MySqlConnector.MySqlConnection"/>
-        /// </param>
-        /// <param name="millisecondsTimeout">
-        ///     Стандартное время ожидания SQL-команд.
-        /// </param>
-        /// <param name="ipAddress">
-        ///     Адрес хоста, на котором расположена база данных.
-        /// </param>
-        /// <param name="database">
-        ///     Название базы данных.
-        /// </param>
-        /// <param name="login">
-        ///     Имя пользователя (логин).
-        /// </param>
-        /// <param name="password">
-        ///     Пароль пользователя.
-        /// </param>
-        /// <param name="charset">
-        ///     Кодировка для передаваемых и принимаемых данных.
-        /// </param>
-        /// <returns>
-        ///     Значение типа <see cref="bool"/>. Если <see langword="true"/>, то соединение открыто успешно, иначе <see langword="false"/>.
-        /// </returns>
-        public bool OpenConnection(byte numberConnections, uint millisecondsTimeout, string ipAddress, string database, string login, string password, string charset = "utf8")
-        {
-            return OpenConnection(numberConnections, TimeSpan.FromMilliseconds(millisecondsTimeout), 
+            return Open(numberConnections, TimeSpan.FromMilliseconds(20000),
                 ipAddress, database, login, password, charset);
         }
         /// <summary>
@@ -234,17 +234,19 @@ namespace RIS.Connection.MySQL
         /// <returns>
         ///     Значение типа <see cref="bool"/>. Если <see langword="true"/>, то соединение открыто успешно, иначе <see langword="false"/>.
         /// </returns>
-        public bool OpenConnection(byte numberConnections, TimeSpan timeout, string ipAddress, string database, string login, string password, string charset = "utf8")
+        public bool Open(byte numberConnections, TimeSpan timeout, string ipAddress, string database, string login, string password, string charset = "utf8mb4")
         {
-            MySqlConnectionStringBuilder connectionStringBuilder = new MySqlConnectionStringBuilder(string.Empty);
-            connectionStringBuilder.DefaultCommandTimeout = (uint)timeout.TotalSeconds;
-            connectionStringBuilder.Server = ipAddress;
-            connectionStringBuilder.Database = database;
-            connectionStringBuilder.UserID = login;
-            connectionStringBuilder.Password = password;
-            connectionStringBuilder.CharacterSet = charset;
+            MySqlConnectionStringBuilder connectionStringBuilder = new MySqlConnectionStringBuilder(string.Empty)
+            {
+                DefaultCommandTimeout = (uint)timeout.TotalSeconds,
+                Server = ipAddress,
+                Database = database,
+                UserID = login,
+                Password = password,
+                CharacterSet = charset
+            };
 
-            return OpenConnection(numberConnections, connectionStringBuilder.ConnectionString);
+            return Open(numberConnections, connectionStringBuilder.ConnectionString);
         }
         /// <summary>
         ///     Открывает соединения в количестве <paramref name="numberConnections"/> c MySQL базой данных с использованием строки подключения <paramref name="connectionString"/>
@@ -258,29 +260,9 @@ namespace RIS.Connection.MySQL
         /// <returns>
         ///     Значение типа <see cref="bool"/>. Если <see langword="true"/>, то соединение открыто успешно, иначе <see langword="false"/>.
         /// </returns>
-        public bool OpenConnection(byte numberConnections, string connectionString)
+        public bool Open(byte numberConnections, string connectionString)
         {
-            return OpenConnection(numberConnections, TimeSpan.FromMilliseconds(20000),
-                connectionString);
-        }
-        /// <summary>
-        ///     Открывает соединения в количестве <paramref name="numberConnections"/> c MySQL базой данных с использованием строки подключения <paramref name="connectionString"/> и стандартного времени ожидания SQL-команд <paramref name="millisecondsTimeout"/>
-        /// </summary>
-        /// <param name="numberConnections">
-        ///     Количество SQL-соединений <see cref="MySqlConnector.MySqlConnection"/>
-        /// </param>
-        /// <param name="millisecondsTimeout">
-        ///     Стандартное время ожидания SQL-команд.
-        /// </param>
-        /// <param name="connectionString">
-        ///     Строка подключения для создания соединения с базой данных.
-        /// </param>
-        /// <returns>
-        ///     Значение типа <see cref="bool"/>. Если <see langword="true"/>, то соединение открыто успешно, иначе <see langword="false"/>.
-        /// </returns>
-        public bool OpenConnection(byte numberConnections, uint millisecondsTimeout, string connectionString)
-        {
-            return OpenConnection(numberConnections, TimeSpan.FromMilliseconds(millisecondsTimeout),
+            return Open(numberConnections, TimeSpan.FromMilliseconds(20000),
                 connectionString);
         }
         /// <summary>
@@ -298,7 +280,7 @@ namespace RIS.Connection.MySQL
         /// <returns>
         ///     Значение типа <see cref="bool"/>. Если <see langword="true"/>, то соединение открыто успешно, иначе <see langword="false"/>.
         /// </returns>
-        public bool OpenConnection(byte numberConnections, TimeSpan timeout, string connectionString)
+        public bool Open(byte numberConnections, TimeSpan timeout, string connectionString)
         {
             try
             {
@@ -307,12 +289,23 @@ namespace RIS.Connection.MySQL
 
                 Task.Factory.StartNew(() => CreateConnections(numberConnections, connectionString)).Wait();
 
-                if (ConnectionComplete)
+                if (!ConnectionComplete)
+                    return false;
+
+                switch (RequestEngineType)
                 {
-                    Requests = new Requests(this, timeout);
+                    case RequestEngineType.Default:
+                        RequestEngine = new DefaultRequestEngine(this, timeout);
+                        break;
+                    default:
+                        var exception =
+                            new Exception("Недопустимое значение поля RequestEngineType в [MySQLConnection] для создания экземпляра сервиса для выполнения запросов к MySQL базе данных");
+                        Events.OnError(new RErrorEventArgs(exception.Message, exception.StackTrace));
+                        OnError(new RErrorEventArgs(exception.Message, exception.StackTrace));
+                        throw exception;
                 }
 
-                return ConnectionComplete;
+                return true;
             }
             catch (Exception ex)
             {
@@ -325,23 +318,31 @@ namespace RIS.Connection.MySQL
         /// <summary>
         ///     Закрывает соединения и освобождает ресурсы.
         /// </summary>
-        public void CloseConnection()
+        public void Close()
         {
-            if (!ConnectionComplete)
-                return;
-
-            ConnectionComplete = false;
-            Requests.CancelAllRequests();
-            Requests = null;
-            foreach (var connection in ConnectionsArray)
+            lock (LockObjCheckConnectionComplete)
             {
+                if (!ConnectionComplete)
+                    return;
+
+                ConnectionComplete = false;
+            }
+
+            RequestEngine.CancelAll();
+
+            RequestEngine = null;
+
+            foreach (MySqlConnection connection in _connections)
+            {
+                connection.StateChange -= Connection_StateChange;
+
                 if (connection?.State != ConnectionState.Closed)
-                {
                     connection?.Close();
-                }
+
                 connection?.Dispose();
             }
-            _connections = null;
+
+            _connections = Array.Empty<MySqlConnection>();
         }
 
         private void CreateConnections(byte numberConnections, string connectionString)
@@ -360,22 +361,18 @@ namespace RIS.Connection.MySQL
                         if (ConnectionsArray[i].State == ConnectionState.Connecting)
                         {
                             Thread.Sleep(100);
-                            continue;
                         }
-
-                        if (ConnectionsArray[i].State == ConnectionState.Broken)
+                        else if (ConnectionsArray[i].State == ConnectionState.Broken)
                         {
                             ConnectionComplete = false;
                             break;
                         }
-
-                        if (ConnectionsArray[i].State == ConnectionState.Closed)
+                        else if (ConnectionsArray[i].State == ConnectionState.Closed)
                         {
                             ConnectionComplete = false;
                             break;
                         }
-
-                        if (ConnectionsArray[i].State == ConnectionState.Open)
+                        else if (ConnectionsArray[i].State == ConnectionState.Open)
                         {
                             ConnectionComplete = true;
                             ConnectionsArray[i].StateChange += Connection_StateChange;
@@ -407,15 +404,13 @@ namespace RIS.Connection.MySQL
 
         private void Connection_StateChange(object sender, StateChangeEventArgs e)
         {
-            if (e.CurrentState == ConnectionState.Closed)
+            if (e.CurrentState == ConnectionState.Broken)
             {
-                CloseConnection();
-
-                return;
+                Close();
             }
-            else if (e.CurrentState == ConnectionState.Broken)
+            else if (e.CurrentState == ConnectionState.Closed)
             {
-                CloseConnection();
+                Close();
             }
         }
     }

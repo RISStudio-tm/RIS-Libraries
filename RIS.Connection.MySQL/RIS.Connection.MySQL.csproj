@@ -5,11 +5,11 @@
     <Configurations>Debug;Release;Release Nuget</Configurations>
     <RootNamespace>RIS.Connection.MySQL</RootNamespace>
     <AssemblyName>RIS.Connection.MySQL</AssemblyName>
-    <AssemblyVersion>3.0.2.0</AssemblyVersion>
-    <FileVersion>3.0.2.0</FileVersion>
+    <AssemblyVersion>4.0.0.0</AssemblyVersion>
+    <FileVersion>4.0.0.0</FileVersion>
     <PackageId>RIS.Connection.MySQL</PackageId>
     <Product>RIS.Connection.MySQL</Product>
-    <Version>3.0.2</Version>
+    <Version>4.0.0</Version>
     <Description>A library designed for various types of tasks. Part of the RIS "ecosystem".</Description>
     <PackageTags>dotnet, dotnetcore, netframework, netcore, library</PackageTags>
     <Authors>Dmitry Ponomarev</Authors>
@@ -24,7 +24,7 @@
   
   <PropertyGroup>
     <DocumentationFile>RIS.Connection.MySQL.xml</DocumentationFile>
-    <NoWarn>$(NoWarn);CA2100;CS0067;SS003;SS004;U2U1009</NoWarn>
+    <NoWarn>$(NoWarn);U2U1016;CA2100;CS0067;SS003;SS004;U2U1009</NoWarn>
   </PropertyGroup>
   
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release Nuget|AnyCPU'">
