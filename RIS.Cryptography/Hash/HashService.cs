@@ -8,8 +8,8 @@ namespace RIS.Cryptography.Hash
     public class HashService
     {
         public event EventHandler<RInformationEventArgs> Information;
-		public event EventHandler<RWarningEventArgs> Warning;
-		public event EventHandler<RErrorEventArgs> Error;
+        public event EventHandler<RWarningEventArgs> Warning;
+        public event EventHandler<RErrorEventArgs> Error;
 
         public IHashMethod HashMethod { get; private set; }
 

@@ -10,8 +10,8 @@ namespace RIS.Logging
     public sealed class Log
     {
         public event EventHandler<RInformationEventArgs> Information;
-		public event EventHandler<RWarningEventArgs> Warning;
-		public event EventHandler<RErrorEventArgs> Error;
+        public event EventHandler<RWarningEventArgs> Warning;
+        public event EventHandler<RErrorEventArgs> Error;
 
         private StreamWriter LogFile { get; set; }
 

@@ -12,8 +12,8 @@ namespace RIS.Collections.Nestable
     public class NestableArrayCAL<T> : INestableArray<T>, ICollection, IEnumerable<T>, IEnumerable
     {
         public event EventHandler<RInformationEventArgs> Information;
-		public event EventHandler<RWarningEventArgs> Warning;
-		public event EventHandler<RErrorEventArgs> Error;
+        public event EventHandler<RWarningEventArgs> Warning;
+        public event EventHandler<RErrorEventArgs> Error;
 
         public NestedElement<T> this[int index]
         {

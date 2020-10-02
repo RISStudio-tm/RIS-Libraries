@@ -11,8 +11,8 @@ namespace RIS.Cryptography.Cipher
     public static class CipherMethods
     {
         public static event EventHandler<RInformationEventArgs> Information;
-		public static event EventHandler<RWarningEventArgs> Warning;
-		public static event EventHandler<RErrorEventArgs> Error;
+        public static event EventHandler<RWarningEventArgs> Warning;
+        public static event EventHandler<RErrorEventArgs> Error;
 
         private static string[] CipherMethodsNames { get; }
         private static int CipherMethodsCount { get; }
@@ -80,8 +80,8 @@ namespace RIS.Cryptography.Cipher
         public sealed class RSAiCSP : ICipherMethod
         {
             public event EventHandler<RInformationEventArgs> Information;
-		public event EventHandler<RWarningEventArgs> Warning;
-		public event EventHandler<RErrorEventArgs> Error;
+        public event EventHandler<RWarningEventArgs> Warning;
+        public event EventHandler<RErrorEventArgs> Error;
 
             public enum CipherKeySizes
             {
@@ -631,8 +631,8 @@ namespace RIS.Cryptography.Cipher
         public sealed class RSAiCNG : ICipherMethod
         {
             public event EventHandler<RInformationEventArgs> Information;
-		public event EventHandler<RWarningEventArgs> Warning;
-		public event EventHandler<RErrorEventArgs> Error;
+        public event EventHandler<RWarningEventArgs> Warning;
+        public event EventHandler<RErrorEventArgs> Error;
 
             public enum CipherKeySizes
             {
@@ -1177,8 +1177,8 @@ namespace RIS.Cryptography.Cipher
         public sealed class Rijndael : ICipherMethod
         {
             public event EventHandler<RInformationEventArgs> Information;
-		public event EventHandler<RWarningEventArgs> Warning;
-		public event EventHandler<RErrorEventArgs> Error;
+        public event EventHandler<RWarningEventArgs> Warning;
+        public event EventHandler<RErrorEventArgs> Error;
 
             public enum CipherKeySizes
             {

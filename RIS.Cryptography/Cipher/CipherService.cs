@@ -8,8 +8,8 @@ namespace RIS.Cryptography.Cipher
     public class CipherService
     {
         public event EventHandler<RInformationEventArgs> Information;
-		public event EventHandler<RWarningEventArgs> Warning;
-		public event EventHandler<RErrorEventArgs> Error;
+        public event EventHandler<RWarningEventArgs> Warning;
+        public event EventHandler<RErrorEventArgs> Error;
 
         public ICipherMethod CipherMethod { get; private set; }
 

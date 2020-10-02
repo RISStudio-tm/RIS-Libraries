@@ -51,8 +51,8 @@ namespace RIS.Collections.Concurrent
         }
 
         public static event EventHandler<RInformationEventArgs> Information;
-		public static event EventHandler<RWarningEventArgs> Warning;
-		public static event EventHandler<RErrorEventArgs> Error;
+        public static event EventHandler<RWarningEventArgs> Warning;
+        public static event EventHandler<RErrorEventArgs> Error;
 
         private volatile Anchor _anchor;
 

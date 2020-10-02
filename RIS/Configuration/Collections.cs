@@ -13,8 +13,8 @@ namespace RIS.Configuration
     public sealed class AppConfigElementList : IEnumerable, IDisposable
     {
         public event EventHandler<RInformationEventArgs> Information;
-		public event EventHandler<RWarningEventArgs> Warning;
-		public event EventHandler<RErrorEventArgs> Error;
+        public event EventHandler<RWarningEventArgs> Warning;
+        public event EventHandler<RErrorEventArgs> Error;
 
         public AppConfigElement this[string key]
         {
@@ -232,8 +232,8 @@ namespace RIS.Configuration
     public sealed class RuntimeConfigElementList : IEnumerable, IDisposable
     {
         public event EventHandler<RInformationEventArgs> Information;
-		public event EventHandler<RWarningEventArgs> Warning;
-		public event EventHandler<RErrorEventArgs> Error;
+        public event EventHandler<RWarningEventArgs> Warning;
+        public event EventHandler<RErrorEventArgs> Error;
 
         public RuntimeConfigElement this[string key]
         {

@@ -10,8 +10,8 @@ namespace RIS.Logging
     public static class LogUtilities
     {
         public static event EventHandler<RInformationEventArgs> Information;
-		public static event EventHandler<RWarningEventArgs> Warning;
-		public static event EventHandler<RErrorEventArgs> Error;
+        public static event EventHandler<RWarningEventArgs> Warning;
+        public static event EventHandler<RErrorEventArgs> Error;
 
         public static void OnInformation(RInformationEventArgs e)
         {

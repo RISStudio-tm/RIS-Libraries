@@ -15,8 +15,8 @@ namespace RIS.Mathematics
         public event EventHandler<RErrorEventArgs> Error;
 
         public static event EventHandler<RInformationEventArgs> InformationStatic;
-		public static event EventHandler<RWarningEventArgs> WarningStatic;
-		public static event EventHandler<RErrorEventArgs> ErrorStatic;
+        public static event EventHandler<RWarningEventArgs> WarningStatic;
+        public static event EventHandler<RErrorEventArgs> ErrorStatic;
 
         public double this[int rowIndex, int columnIndex]
         {

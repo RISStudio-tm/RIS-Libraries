@@ -19,8 +19,8 @@ namespace RIS
     public static class Environment
     {
         public static event EventHandler<RInformationEventArgs> Information;
-		public static event EventHandler<RWarningEventArgs> Warning;
-		public static event EventHandler<RErrorEventArgs> Error;
+        public static event EventHandler<RWarningEventArgs> Warning;
+        public static event EventHandler<RErrorEventArgs> Error;
 
         public static string ExecAppDirectoryName { get; }
         public static string ExecAppFileName { get; }

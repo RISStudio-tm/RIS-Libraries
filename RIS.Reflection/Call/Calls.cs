@@ -10,8 +10,8 @@ namespace RIS.Reflection.Call
     public static class Calls
     {
         public static event EventHandler<RInformationEventArgs> Information;
-		public static event EventHandler<RWarningEventArgs> Warning;
-		public static event EventHandler<RErrorEventArgs> Error;
+        public static event EventHandler<RWarningEventArgs> Warning;
+        public static event EventHandler<RErrorEventArgs> Error;
 
         public static void OnInformation(RInformationEventArgs e)
         {
@@ -479,8 +479,8 @@ namespace RIS.Reflection.Call
         where TInstance : class, new()
     {
         public event EventHandler<RInformationEventArgs> Information;
-		public event EventHandler<RWarningEventArgs> Warning;
-		public event EventHandler<RErrorEventArgs> Error;
+        public event EventHandler<RWarningEventArgs> Warning;
+        public event EventHandler<RErrorEventArgs> Error;
 
         private readonly Type _instanceType;
         private readonly NewExpression _instance;

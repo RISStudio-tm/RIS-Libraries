@@ -16,8 +16,8 @@ namespace RIS.Cryptography.Hash
     public static class HashMethods
     {
         public static event EventHandler<RInformationEventArgs> Information;
-		public static event EventHandler<RWarningEventArgs> Warning;
-		public static event EventHandler<RErrorEventArgs> Error;
+        public static event EventHandler<RWarningEventArgs> Warning;
+        public static event EventHandler<RErrorEventArgs> Error;
 
         private static string[] HashMethodsNames { get; }
         private static int HashMethodsCount { get; }

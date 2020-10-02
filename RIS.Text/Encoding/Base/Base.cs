@@ -11,8 +11,8 @@ namespace RIS.Text.Encoding.Base
     public abstract class Base
     {
         public event EventHandler<RInformationEventArgs> Information;
-		public event EventHandler<RWarningEventArgs> Warning;
-		public event EventHandler<RErrorEventArgs> Error;
+        public event EventHandler<RWarningEventArgs> Warning;
+        public event EventHandler<RErrorEventArgs> Error;
 
         public uint CharsCount { get; }
 

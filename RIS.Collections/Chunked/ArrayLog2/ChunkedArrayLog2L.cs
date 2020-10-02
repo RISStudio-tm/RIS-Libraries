@@ -10,8 +10,8 @@ namespace RIS.Collections.Chunked
     public class ChunkedArrayLog2L<T> : IChunkedArray<T>, ICollection, IEnumerable<T>, IEnumerable
     {
         public event EventHandler<RInformationEventArgs> Information;
-		public event EventHandler<RWarningEventArgs> Warning;
-		public event EventHandler<RErrorEventArgs> Error;
+        public event EventHandler<RWarningEventArgs> Warning;
+        public event EventHandler<RErrorEventArgs> Error;
 
         public T this[long index]
         {

@@ -11,8 +11,8 @@ namespace RIS.Collections.Nestable
     public class NestableListL<T> : INestableList<T>, ICollection, IEnumerable<T>, IEnumerable
     {
         public event EventHandler<RInformationEventArgs> Information;
-		public event EventHandler<RWarningEventArgs> Warning;
-		public event EventHandler<RErrorEventArgs> Error;
+        public event EventHandler<RWarningEventArgs> Warning;
+        public event EventHandler<RErrorEventArgs> Error;
 
         public NestedElement<T> this[int index]
         {

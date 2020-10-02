@@ -15,8 +15,8 @@ namespace RIS.Synchronization
         }
 
         public event EventHandler<RInformationEventArgs> Information;
-		public event EventHandler<RWarningEventArgs> Warning;
-		public event EventHandler<RErrorEventArgs> Error;
+        public event EventHandler<RWarningEventArgs> Warning;
+        public event EventHandler<RErrorEventArgs> Error;
 
         private readonly object _writerLock;
         private readonly TInner _leftInner;

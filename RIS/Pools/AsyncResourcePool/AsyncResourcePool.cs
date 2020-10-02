@@ -84,8 +84,8 @@ namespace RIS.Pools
         }
 
         public static event EventHandler<RInformationEventArgs> Information;
-		public static event EventHandler<RWarningEventArgs> Warning;
-		public static event EventHandler<RErrorEventArgs> Error;
+        public static event EventHandler<RWarningEventArgs> Warning;
+        public static event EventHandler<RErrorEventArgs> Error;
 
         private readonly int _minNumResources;
         private readonly int _maxNumResources;
