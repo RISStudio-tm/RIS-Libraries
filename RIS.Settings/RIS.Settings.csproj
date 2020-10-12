@@ -1,0 +1,69 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFrameworks>netcoreapp3.1;net48</TargetFrameworks>
+    <Configurations>Debug;Release;Release Nuget</Configurations>
+    <RootNamespace>RIS.Settings</RootNamespace>
+    <AssemblyName>RIS.Settings</AssemblyName>
+    <AssemblyVersion>1.0.0.0</AssemblyVersion>
+    <FileVersion>1.0.0.0</FileVersion>
+    <PackageId>RIS.Settings</PackageId>
+    <Product>RIS.Settings</Product>
+    <Version>1.0.0</Version>
+    <Description>A library designed for various types of tasks. Part of the RIS "ecosystem".</Description>
+    <PackageTags>dotnet, dotnetcore, netframework, netcore, library</PackageTags>
+    <Authors>Dmitry Ponomarev</Authors>
+    <Company>RISStudio</Company>
+    <Copyright>Copyright (c) RISStudio, 2020</Copyright>
+    <PackageLicenseFile>LICENSE</PackageLicenseFile>
+    <PackageIcon>RISStudio-icon-1.png</PackageIcon>
+    <PackageProjectUrl>https://github.com/RISStudio-tm/RIS-Libraries</PackageProjectUrl>
+    <RepositoryType>git</RepositoryType>
+    <RepositoryUrl>https://github.com/RISStudio-tm/RIS-Libraries</RepositoryUrl>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <NoWarn>$(NoWarn);CS0067;SS003;SS004;U2U1009</NoWarn>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release Nuget|AnyCPU'">
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+  </PropertyGroup>
+
+  <Target Name="PreBuild" BeforeTargets="BeforeBuild" Condition="'$(Configuration)|$(Platform)'=='Release Nuget|AnyCPU'">
+    <!--<Exec Command="&quot;ChangePackageVersion.exe&quot; &quot;$(MSBuildProjectFullPath)&quot;" WorkingDirectory="..\_tools\ChangePackageVersion" />
+    <Exec Command="&quot;UpdatePackageReference.exe&quot; &quot;$(MSBuildProjectFullPath)&quot;" WorkingDirectory="..\_tools\UpdatePackageReference" />-->
+  </Target>
+
+  <Target Name="PostPack" AfterTargets="Pack" Condition="'$(Configuration)|$(Platform)'=='Release Nuget|AnyCPU'">
+    <Exec Command="&quot;CopyPackage.exe&quot; &quot;..\..\_packages&quot; &quot;$(MSBuildProjectFullPath)&quot; &quot;$(Configuration)&quot;" WorkingDirectory="..\_tools\CopyPackage" />
+  </Target>
+
+  <ItemGroup>
+    <None Include="..\LICENSE">
+      <Pack>True</Pack>
+      <PackagePath></PackagePath>
+    </None>
+    <None Include="..\_resources\RISStudio-icon-1.png">
+      <Pack>True</Pack>
+      <PackagePath></PackagePath>
+    </None>
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <ProjectReference Include="..\RIS.Collections\RIS.Collections.csproj" />
+    <ProjectReference Include="..\RIS\RIS.csproj" />
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <ProjectReference Include="..\RIS.Collections\RIS.Collections.csproj" />
+    <ProjectReference Include="..\RIS\RIS.csproj" />
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(Configuration)|$(Platform)'=='Release Nuget|AnyCPU'">
+    <!--PackageReference for NuGet-->
+    <ProjectReference Include="..\RIS.Collections\RIS.Collections.csproj" />
+    <ProjectReference Include="..\RIS\RIS.csproj" />
+  </ItemGroup>
+
+</Project>
