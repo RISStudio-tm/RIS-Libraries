@@ -32,6 +32,10 @@
     ![Nuget](https://img.shields.io/nuget/v/RIS.Reflection?style=plastic)
     ![Nuget](https://img.shields.io/nuget/dt/RIS.Reflection?style=plastic)
     
+- **[RIS.Settings](https://www.nuget.org/packages/RIS.Settings)**<br/>
+    ![Nuget](https://img.shields.io/nuget/v/RIS.Settings?style=plastic)
+    ![Nuget](https://img.shields.io/nuget/dt/RIS.Settings?style=plastic)
+    
 - **[RIS.Text](https://www.nuget.org/packages/RIS.Text)**<br/>
     ![Nuget](https://img.shields.io/nuget/v/RIS.Text?style=plastic)
     ![Nuget](https://img.shields.io/nuget/dt/RIS.Text?style=plastic)
