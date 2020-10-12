@@ -32,6 +32,7 @@ namespace RIS.Settings
         public void Load()
         {
             OnLoadSettings(_settingsList);
+            OnSaveSettings(_settingsList);
         }
 
         public void Save()
