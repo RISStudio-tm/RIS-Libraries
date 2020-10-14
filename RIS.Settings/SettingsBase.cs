@@ -18,10 +18,17 @@ namespace RIS.Settings
 
         private IEnumerable<Setting> BuildSettingsList()
         {
-            foreach (PropertyInfo prop in GetType().GetProperties(BindingFlags.Instance | BindingFlags.Public))
+            foreach (PropertyInfo property in GetType().GetProperties(BindingFlags.Instance | BindingFlags.Public))
             {
-                if (!Attribute.IsDefined(prop, typeof(ExcludedSettingAttribute)))
-                    yield return new Setting(this, prop);
+                if (Attribute.IsDefined(property, typeof(ExcludedSettingAttribute)))
+                    continue;
+
+                string category = null;
+
+                if (Attribute.IsDefined(property, typeof(SettingCategoryAttribute)))
+                    category = ((SettingCategoryAttribute)property.GetCustomAttribute(typeof(SettingCategoryAttribute)))?.Name;
+
+                yield return new Setting(this, property, category);
             }
         }
 

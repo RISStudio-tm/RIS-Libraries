@@ -6,8 +6,13 @@ using System;
 namespace RIS.Settings
 {
     [AttributeUsage(AttributeTargets.Property)]
-    public sealed class ExcludedSettingAttribute : Attribute
+    public sealed class SettingCategoryAttribute : Attribute
     {
+        public string Name { get; }
 
+        public SettingCategoryAttribute(string name)
+        {
+            Name = name;
+        }
     }
 }

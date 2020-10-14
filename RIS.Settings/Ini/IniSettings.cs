@@ -33,7 +33,10 @@ namespace RIS.Settings.Ini
 
             foreach (Setting setting in settings)
             {
-                string value = SettingsFile.GetString(SettingsFile.DefaultSectionName, setting.Name);
+                string sectionName = string.IsNullOrWhiteSpace(setting.CategoryName)
+                    ? SettingsFile.DefaultSectionName
+                    : setting.CategoryName;
+                string value = SettingsFile.GetString(sectionName, setting.Name);
 
                 if (value != null)
                     setting.SetValueFromString(value);
@@ -44,10 +47,13 @@ namespace RIS.Settings.Ini
         {
             foreach (Setting setting in settings)
             {
+                string sectionName = string.IsNullOrWhiteSpace(setting.CategoryName)
+                    ? SettingsFile.DefaultSectionName
+                    : setting.CategoryName;
                 string value = setting.GetValueToString();
 
                 if (value != null)
-                    SettingsFile.Set(SettingsFile.DefaultSectionName, setting.Name, value);
+                    SettingsFile.Set(sectionName, setting.Name, value);
             }
 
             SettingsFile.Save();

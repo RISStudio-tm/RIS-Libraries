@@ -26,11 +26,13 @@ namespace RIS.Settings
                 return _propertyInfo.PropertyType;
             }
         }
+        public string CategoryName { get; }
 
-        public Setting(SettingsBase settings, PropertyInfo propertyInfo)
+        public Setting(SettingsBase settings, PropertyInfo propertyInfo, string category = null)
         {
             _settingsBase = settings;
             _propertyInfo = propertyInfo;
+            CategoryName = category;
         }
 
         public object GetValue()

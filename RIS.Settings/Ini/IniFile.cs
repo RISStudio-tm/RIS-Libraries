@@ -38,8 +38,8 @@ namespace RIS.Settings.Ini
             _boolOptions = boolOptions ?? new IniBoolOptions(true, _comparer);
             _sections = new Dictionary<string, IniSection>(_comparer);
 
-            DefaultSectionName = defaultSectionName;
-            CommentCharacter = commentCharacter;
+            DefaultSectionName = string.IsNullOrWhiteSpace(defaultSectionName) ? "General" : defaultSectionName;
+            CommentCharacter = commentCharacter == '\0' ? ';' : commentCharacter;
         }
         public IniFile(string path,
             string defaultSectionName = "General", char commentCharacter = ';',
