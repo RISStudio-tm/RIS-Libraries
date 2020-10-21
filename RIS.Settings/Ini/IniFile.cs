@@ -281,13 +281,13 @@ namespace RIS.Settings.Ini
 
             foreach (IniSection section in _sections.Values)
             {
+                if (section.Settings.Count == 0)
+                    continue;
+
                 if (isFirstLine)
                     isFirstLine = false;
                 else
                     writer.WriteLine();
-
-                if (section.Settings.Count == 0)
-                    continue;
 
                 writer.WriteLine($"[{section.Name}]");
 
@@ -316,6 +316,43 @@ namespace RIS.Settings.Ini
             return _sections.TryGetValue(sectionName, out IniSection section)
                 ? section.Settings.Values
                 : Enumerable.Empty<IniSetting>();
+        }
+
+        public IniSection GetSection(string sectionName)
+        {
+            if (sectionName == null)
+            {
+                var exception = new ArgumentNullException(nameof(sectionName), $"{nameof(sectionName)} cannot be null");
+                Events.OnError(this, new RErrorEventArgs(exception.Message, exception.StackTrace));
+                OnError(this, new RErrorEventArgs(exception.Message, exception.StackTrace));
+                throw exception;
+            }
+
+            if (!_sections.TryGetValue(sectionName, out IniSection section))
+            {
+                var exception = new ArgumentNullException(nameof(sectionName), $"Section with name [{nameof(sectionName)}] not found");
+                Events.OnError(this, new RErrorEventArgs(exception.Message, exception.StackTrace));
+                OnError(this, new RErrorEventArgs(exception.Message, exception.StackTrace));
+                throw exception;
+            }
+
+            return section;
+        }
+
+        public void RemoveSection(string sectionName)
+        {
+            if (sectionName == null)
+            {
+                var exception = new ArgumentNullException(nameof(sectionName), $"{nameof(sectionName)} cannot be null");
+                Events.OnError(this, new RErrorEventArgs(exception.Message, exception.StackTrace));
+                OnError(this, new RErrorEventArgs(exception.Message, exception.StackTrace));
+                throw exception;
+            }
+
+            if (!_sections.TryGetValue(sectionName, out IniSection _))
+                return;
+
+            _sections.Remove(sectionName);
         }
 
         public bool GetBoolean(string sectionName, string settingName, bool defaultValue = false)
@@ -504,6 +541,32 @@ namespace RIS.Settings.Ini
             }
 
             setting.Value = value ?? string.Empty;
+        }
+
+        public void Remove(string sectionName, string settingName)
+        {
+            if (sectionName == null)
+            {
+                var exception = new ArgumentNullException(nameof(sectionName), $"{nameof(sectionName)} cannot be null");
+                Events.OnError(this, new RErrorEventArgs(exception.Message, exception.StackTrace));
+                OnError(this, new RErrorEventArgs(exception.Message, exception.StackTrace));
+                throw exception;
+            }
+            else if (settingName == null)
+            {
+                var exception = new ArgumentNullException(nameof(settingName), $"{nameof(settingName)} cannot be null");
+                Events.OnError(this, new RErrorEventArgs(exception.Message, exception.StackTrace));
+                OnError(this, new RErrorEventArgs(exception.Message, exception.StackTrace));
+                throw exception;
+            }
+
+            if (!_sections.TryGetValue(sectionName, out IniSection section)
+                || !section.Settings.TryGetValue(settingName, out IniSetting _))
+            {
+                return;
+            }
+
+            section.Settings.Remove(settingName);
         }
 
         public void Clear()

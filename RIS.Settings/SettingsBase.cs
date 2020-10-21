@@ -32,13 +32,13 @@ namespace RIS.Settings
             }
         }
 
-        protected abstract void OnLoadSettings(IEnumerable<Setting> settings);
+        protected abstract void OnLoadSettings(IEnumerable<Setting> settings, SettingsLoadOptions options = SettingsLoadOptions.None);
 
         protected abstract void OnSaveSettings(IEnumerable<Setting> settings);
 
-        public void Load()
+        public void Load(SettingsLoadOptions options = SettingsLoadOptions.None)
         {
-            OnLoadSettings(_settingsList);
+            OnLoadSettings(_settingsList, options);
             OnSaveSettings(_settingsList);
         }
 

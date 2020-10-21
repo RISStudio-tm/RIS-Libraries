@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace RIS.Settings.Ini
 {
@@ -27,11 +28,13 @@ namespace RIS.Settings.Ini
             SettingsFile = new IniFile();
         }
 
-        protected override void OnLoadSettings(IEnumerable<Setting> settings)
+        protected override void OnLoadSettings(IEnumerable<Setting> settings, SettingsLoadOptions options = SettingsLoadOptions.None)
         {
             SettingsFile.Load(SettingsFilePath);
 
-            foreach (Setting setting in settings)
+            Setting[] settingsArray = settings as Setting[] ?? settings.ToArray();
+
+            foreach (Setting setting in settingsArray)
             {
                 string sectionName = string.IsNullOrWhiteSpace(setting.CategoryName)
                     ? SettingsFile.DefaultSectionName
@@ -40,6 +43,57 @@ namespace RIS.Settings.Ini
 
                 if (value != null)
                     setting.SetValueFromString(value);
+            }
+
+            if (options.HasFlag(SettingsLoadOptions.RemoveUnused))
+            {
+                foreach (var sectionName in SettingsFile.GetSections())
+                {
+                    bool settingExist = false;
+
+                    foreach (var iniSetting in SettingsFile.GetSectionSettings(sectionName))
+                    {
+                        foreach (Setting setting in settingsArray)
+                        {
+                            if (setting.Name != iniSetting.Name)
+                                continue;
+
+                            if (setting.CategoryName != sectionName)
+                            {
+                                if (options.HasFlag(SettingsLoadOptions.DeduplicatePreserveValues))
+                                    setting.SetValueFromString(iniSetting.Value);
+
+                                break;
+                            }
+
+                            settingExist = true;
+
+                            break;
+                        }
+
+                        if (!settingExist)
+                            SettingsFile.Remove(sectionName, iniSetting?.Name);
+                    }
+                }
+            }
+            else if (options.HasFlag(SettingsLoadOptions.DeduplicatePreserveValues))
+            {
+                foreach (var sectionName in SettingsFile.GetSections())
+                {
+                    IniSection section = SettingsFile.GetSection(sectionName);
+
+                    foreach (Setting setting in settingsArray)
+                    {
+                        if (!section.Settings.TryGetValue(setting.Name, out IniSetting iniSetting)
+                            || setting.CategoryName == sectionName)
+                        {
+                            continue;
+                        }
+
+                        setting.SetValueFromString(iniSetting.Value);
+                        SettingsFile.Remove(sectionName, iniSetting?.Name);
+                    }
+                }
             }
         }
 
