@@ -18,8 +18,10 @@ namespace RIS.Graphics.WPF.Controls
           DependencyProperty.Register("HiddenText", typeof(string), typeof(ExtendedPasswordBox), new UIPropertyMetadata(string.Empty));
         public static readonly DependencyProperty PasswordVisibleProperty =
           DependencyProperty.Register("PasswordVisible", typeof(bool), typeof(ExtendedPasswordBox), new UIPropertyMetadata(false));
-        private readonly DispatcherTimer _maskTimer;
+
         private const char PasswordChar = '●';
+
+        private readonly DispatcherTimer _maskTimer;
 
         public SecureString Password
         {

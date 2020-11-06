@@ -1,0 +1,35 @@
+﻿<!--Copyright (c) RISStudio, 2020. All rights reserved.-->
+<!--Licensed under the Apache License, Version 2.0. See LICENSE file in the project root for license information.-->
+    
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:controls="clr-namespace:RIS.Graphics.WPF.Controls.Indicators.Loading"
+                    xmlns:extensions="clr-namespace:RIS.Graphics.WPF.Controls.Indicators.Loading.Extensions.Markup">
+
+    <ResourceDictionary.MergedDictionaries>
+        <ResourceDictionary Source="pack://application:,,,/RIS.Graphics;Component/Themes/Colors.xaml"/>
+
+        <ResourceDictionary Source="pack://application:,,,/RIS.Graphics;Component/WPF/Controls/Indicators/Loading/Styles/LoadingArc.xaml"/>
+        <ResourceDictionary Source="pack://application:,,,/RIS.Graphics;Component/WPF/Controls/Indicators/Loading/Styles/LoadingArcs.xaml"/>
+        <ResourceDictionary Source="pack://application:,,,/RIS.Graphics;Component/WPF/Controls/Indicators/Loading/Styles/LoadingArcsRing.xaml"/>
+        <ResourceDictionary Source="pack://application:,,,/RIS.Graphics;Component/WPF/Controls/Indicators/Loading/Styles/LoadingDoubleBounce.xaml"/>
+        <ResourceDictionary Source="pack://application:,,,/RIS.Graphics;Component/WPF/Controls/Indicators/Loading/Styles/LoadingFlipPlane.xaml"/>
+        <ResourceDictionary Source="pack://application:,,,/RIS.Graphics;Component/WPF/Controls/Indicators/Loading/Styles/LoadingPulse.xaml"/>
+        <ResourceDictionary Source="pack://application:,,,/RIS.Graphics;Component/WPF/Controls/Indicators/Loading/Styles/LoadingRing.xaml"/>
+        <ResourceDictionary Source="pack://application:,,,/RIS.Graphics;Component/WPF/Controls/Indicators/Loading/Styles/LoadingThreeDots.xaml"/>
+        <ResourceDictionary Source="pack://application:,,,/RIS.Graphics;Component/WPF/Controls/Indicators/Loading/Styles/LoadingWave.xaml"/>
+    </ResourceDictionary.MergedDictionaries>
+
+    <Style x:Key="LoadingArcStyle" TargetType="{x:Type controls:LoadingIndicator}" BasedOn="{StaticResource LoadingArcStyleKey}"/>
+    <Style x:Key="LoadingArcsStyle" TargetType="{x:Type controls:LoadingIndicator}" BasedOn="{StaticResource LoadingArcsStyleKey}"/>
+    <Style x:Key="LoadingArcsRingStyle" TargetType="{x:Type controls:LoadingIndicator}" BasedOn="{StaticResource LoadingArcsRingStyleKey}"/>
+    <Style x:Key="LoadingDoubleBounceStyle" TargetType="{x:Type controls:LoadingIndicator}" BasedOn="{StaticResource LoadingDoubleBounceStyleKey}"/>
+    <Style x:Key="LoadingFlipPlaneStyle" TargetType="{x:Type controls:LoadingIndicator}" BasedOn="{StaticResource LoadingFlipPlaneStyleKey}"/>
+    <Style x:Key="LoadingPulseStyle" TargetType="{x:Type controls:LoadingIndicator}" BasedOn="{StaticResource LoadingPulseStyleKey}"/>
+    <Style x:Key="LoadingRingStyle" TargetType="{x:Type controls:LoadingIndicator}" BasedOn="{StaticResource LoadingRingStyleKey}"/>
+    <Style x:Key="LoadingThreeDotsStyle" TargetType="{x:Type controls:LoadingIndicator}" BasedOn="{StaticResource LoadingThreeDotsStyleKey}"/>
+    <Style x:Key="LoadingWaveStyle" TargetType="{x:Type controls:LoadingIndicator}" BasedOn="{StaticResource LoadingWaveStyleKey}"/>
+
+    <Style TargetType="{x:Type controls:LoadingIndicator}" BasedOn="{extensions:MultiStyle
+        LoadingArcStyle LoadingArcsStyle LoadingArcsRingStyle LoadingDoubleBounceStyle LoadingFlipPlaneStyle LoadingPulseStyle LoadingRingStyle LoadingThreeDotsStyle LoadingWaveStyle}"/>
+</ResourceDictionary>
