@@ -3,25 +3,14 @@
 
 using System;
 using System.Globalization;
-using System.Threading.Tasks;
 using System.Windows.Data;
+using NCalc;
 
 namespace RIS.Graphics.WPF.Xaml.Converters
 {
-    public class ScriptEvaluatorConverter : IMultiValueConverter, IValueConverter
+    public sealed class ScriptEvaluatorConverter : IMultiValueConverter, IValueConverter
     {
-        private bool _trapExceptions;
-        public bool TrapExceptions
-        {
-            get
-            {
-                return _trapExceptions;
-            }
-            set
-            {
-                _trapExceptions = true;
-            }
-        }
+        public bool ThrowExceptions { get; set; }
 
         public object Convert(object[] values, Type targetType,
             object parameter, CultureInfo culture)
@@ -29,19 +18,19 @@ namespace RIS.Graphics.WPF.Xaml.Converters
             try
             {
                 string parameterString = parameter.ToString();
-                NCalc.Expression parameterExpression = new NCalc.Expression(parameterString);
+                Expression parameterExpression = new Expression(parameterString);
 
                 for (int i = 0; i < values.Length; ++i)
                 {
-                    parameterExpression.Parameters.Add($"@values[{i}]", values[i]);
+                    parameterExpression.Parameters.Add($"values{{{i}}}", values[i]);
                 }
 
-                return Task.Factory.StartNew(() => parameterExpression.Evaluate());
+                return parameterExpression.Evaluate();
             }
             catch
             {
-                if (TrapExceptions)
-                    return null;
+                if (!ThrowExceptions)
+                    return Binding.DoNothing;
 
                 throw;
             }

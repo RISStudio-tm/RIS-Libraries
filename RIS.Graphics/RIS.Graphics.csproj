@@ -5,13 +5,13 @@
     <Configurations>Debug;Release;Release Nuget</Configurations>
     <RootNamespace>RIS.Graphics</RootNamespace>
     <AssemblyName>RIS.Graphics</AssemblyName>
-    <AssemblyVersion>2.4.1.0</AssemblyVersion>
-    <FileVersion>2.4.1.0</FileVersion>
+    <AssemblyVersion>2.4.2.0</AssemblyVersion>
+    <FileVersion>2.4.2.0</FileVersion>
     <UseWPF>true</UseWPF>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <PackageId>RIS.Graphics</PackageId>
     <Product>RIS.Graphics</Product>
-    <Version>2.4.1</Version>
+    <Version>2.4.2</Version>
     <Description>A library designed for various types of tasks. Part of the RIS "ecosystem".</Description>
     <PackageTags>dotnet, dotnetcore, netframework, netcore, library</PackageTags>
     <Authors>Dmitry Ponomarev</Authors>
@@ -82,8 +82,8 @@
   
   <ItemGroup>
     <PackageReference Include="ControlzEx" Version="4.4.0" />
-    <PackageReference Include="CoreCLR-NCalc" Version="2.2.88" />
-    <PackageReference Include="MahApps.Metro" Version="2.3.3" />
+    <PackageReference Include="CoreCLR-NCalc" Version="2.2.92" />
+    <PackageReference Include="MahApps.Metro" Version="2.3.4" />
     <PackageReference Include="MaterialDesignColors" Version="1.2.7" />
     <PackageReference Include="MaterialDesignThemes" Version="3.2.0" />
     <PackageReference Include="MaterialDesignThemes.MahApps" Version="0.1.5" />
