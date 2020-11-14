@@ -15,8 +15,8 @@ namespace RIS.Synchronization
         private static readonly long UnlockedThreadId = 0;
         internal long _owningId = UnlockedThreadId;
         private static int _globalThreadCounter;
-        //private static readonly ThreadLocal<int> _threadId;
-        private static readonly AsyncLocal<int> _threadId;
+        private static readonly ThreadLocal<int> _threadId;
+        //private static readonly AsyncLocal<int> _threadId;
         public static long ThreadId
         {
             get
@@ -27,8 +27,8 @@ namespace RIS.Synchronization
 
         static AsyncLock()
         {
-            //_threadId = new ThreadLocal<int>(() => Interlocked.Increment(ref _globalThreadCounter));
-            _threadId = new AsyncLocal<int>((_) => Interlocked.Increment(ref _globalThreadCounter));
+            _threadId = new ThreadLocal<int>(() => Interlocked.Increment(ref _globalThreadCounter));
+            //_threadId = new AsyncLocal<int>((_) => Interlocked.Increment(ref _globalThreadCounter));
         }
 
         private readonly struct InternalLock : IDisposable

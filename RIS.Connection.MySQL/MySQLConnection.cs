@@ -404,13 +404,12 @@ namespace RIS.Connection.MySQL
 
         private void Connection_StateChange(object sender, StateChangeEventArgs e)
         {
-            if (e.CurrentState == ConnectionState.Broken)
+            switch (e.CurrentState)
             {
-                Close();
-            }
-            else if (e.CurrentState == ConnectionState.Closed)
-            {
-                Close();
+                case ConnectionState.Broken:
+                case ConnectionState.Closed:
+                    Close();
+                    break;
             }
         }
     }

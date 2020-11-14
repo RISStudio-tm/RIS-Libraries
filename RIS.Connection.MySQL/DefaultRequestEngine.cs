@@ -52,14 +52,10 @@ namespace RIS.Connection.MySQL
             }
             set
             {
-                if (value.TotalSeconds < TimeSpan.FromSeconds(3000).TotalSeconds)
-                {
-                    _commandTimeout = TimeSpan.FromSeconds(3000);
-                }
-                else
-                {
-                    _commandTimeout = value;
-                }
+                if (value.TotalSeconds < TimeSpan.FromSeconds(3).TotalSeconds)
+                    value = TimeSpan.FromSeconds(3);
+
+                _commandTimeout = value;
             }
         }
         /// <summary>
