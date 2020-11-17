@@ -2,6 +2,7 @@
 // Licensed under the Apache License, Version 2.0. See LICENSE file in the project root for license information. 
 
 using System;
+using System.Collections.ObjectModel;
 using System.Globalization;
 using System.Reflection;
 #if NETCOREAPP
@@ -19,7 +20,8 @@ namespace RIS.Cryptography.Hash
         public static event EventHandler<RWarningEventArgs> Warning;
         public static event EventHandler<RErrorEventArgs> Error;
 
-        private static string[] HashMethodsNames { get; }
+        private static ReadOnlyCollection<Type> HashMethodsTypes { get; }
+        private static ReadOnlyCollection<string> HashMethodsNames { get; }
         private static int HashMethodsCount { get; }
         private static RNGCryptoServiceProvider RNGProvider { get; }
 
@@ -33,18 +35,28 @@ namespace RIS.Cryptography.Hash
             Type hashMethodsType = typeof(HashMethods);
             MemberInfo[] hashMethods =
                 hashMethodsType.FindMembers(MemberTypes.NestedType, BindingFlags.Public,
-                    (info, criteria) =>
-                        typeof(HashMethods).GetNestedType(info.Name).IsClass &&
+                    (info, _) =>
+                        typeof(HashMethods).GetNestedType(info.Name)?.IsClass != false &&
                         typeof(IHashMethod).IsAssignableFrom(typeof(HashMethods).GetNestedType(info.Name)),
                     "IsClass && IsAssignableFrom");
 
             HashMethodsCount = hashMethods.Length;
 
-            HashMethodsNames = new string[hashMethods.Length];
-            for (int i = 0; i < HashMethodsNames.Length; ++i)
+            Type[] hashMethodsTypes = new Type[hashMethods.Length];
+            for (int i = 0; i < hashMethodsTypes.Length; ++i)
             {
-                HashMethodsNames[i] = hashMethods[i].Name;
+                hashMethodsTypes[i] = hashMethods[i].GetType();
             }
+
+            HashMethodsTypes = new ReadOnlyCollection<Type>(hashMethodsTypes);
+
+            string[] hashMethodsNames = new string[hashMethods.Length];
+            for (int i = 0; i < hashMethodsNames.Length; ++i)
+            {
+                hashMethodsNames[i] = hashMethods[i].Name;
+            }
+
+            HashMethodsNames = new ReadOnlyCollection<string>(hashMethodsNames);
         }
 
         public static void OnInformation(RInformationEventArgs e)
@@ -74,12 +86,17 @@ namespace RIS.Cryptography.Hash
             Error?.Invoke(sender, e);
         }
 
-        public static string[] GetNamesHashMethods()
+        public static ReadOnlyCollection<Type> GetTypes()
+        {
+            return HashMethodsTypes;
+        }
+
+        public static ReadOnlyCollection<string> GetNames()
         {
             return HashMethodsNames;
         }
 
-        public static int GetCountHashMethods()
+        public static int GetCount()
         {
             return HashMethodsCount;
         }
@@ -119,9 +136,14 @@ namespace RIS.Cryptography.Hash
             public string GetHash(string plainText)
             {
                 byte[] data = TextEncoding.GetBytes(plainText);
+
+                return GetHash(data);
+            }
+            public string GetHash(byte[] data)
+            {
                 byte[] hashBytes = SHAService.ComputeHash(data);
 
-                StringBuilder hashText = new StringBuilder();
+                StringBuilder hashText = new StringBuilder(hashBytes.Length * 2);
                 for (int i = 0; i < hashBytes.Length; ++i)
                 {
                     hashText.Append(hashBytes[i].ToString("x2"));
@@ -154,9 +176,14 @@ namespace RIS.Cryptography.Hash
             public string GetHash(string plainText)
             {
                 byte[] data = TextEncoding.GetBytes(plainText);
+
+                return GetHash(data);
+            }
+            public string GetHash(byte[] data)
+            {
                 byte[] hashBytes = SHAService.ComputeHash(data);
 
-                StringBuilder hashText = new StringBuilder();
+                StringBuilder hashText = new StringBuilder(hashBytes.Length * 2);
                 for (int i = 0; i < hashBytes.Length; ++i)
                 {
                     hashText.Append(hashBytes[i].ToString("x2"));
@@ -189,9 +216,14 @@ namespace RIS.Cryptography.Hash
             public string GetHash(string plainText)
             {
                 byte[] data = TextEncoding.GetBytes(plainText);
+
+                return GetHash(data);
+            }
+            public string GetHash(byte[] data)
+            {
                 byte[] hashBytes = SHAService.ComputeHash(data);
 
-                StringBuilder hashText = new StringBuilder();
+                StringBuilder hashText = new StringBuilder(hashBytes.Length * 2);
                 for (int i = 0; i < hashBytes.Length; ++i)
                 {
                     hashText.Append(hashBytes[i].ToString("x2"));
@@ -224,9 +256,14 @@ namespace RIS.Cryptography.Hash
             public string GetHash(string plainText)
             {
                 byte[] data = TextEncoding.GetBytes(plainText);
+
+                return GetHash(data);
+            }
+            public string GetHash(byte[] data)
+            {
                 byte[] hashBytes = SHAService.ComputeHash(data);
 
-                StringBuilder hashText = new StringBuilder();
+                StringBuilder hashText = new StringBuilder(hashBytes.Length * 2);
                 for (int i = 0; i < hashBytes.Length; ++i)
                 {
                     hashText.Append(hashBytes[i].ToString("x2"));
@@ -259,9 +296,14 @@ namespace RIS.Cryptography.Hash
             public string GetHash(string plainText)
             {
                 byte[] data = TextEncoding.GetBytes(plainText);
+
+                return GetHash(data);
+            }
+            public string GetHash(byte[] data)
+            {
                 byte[] hashBytes = MDService.ComputeHash(data);
 
-                StringBuilder hashText = new StringBuilder();
+                StringBuilder hashText = new StringBuilder(hashBytes.Length * 2);
                 for (int i = 0; i < hashBytes.Length; ++i)
                 {
                     hashText.Append(hashBytes[i].ToString("x2"));
@@ -296,9 +338,14 @@ namespace RIS.Cryptography.Hash
             public string GetHash(string plainText)
             {
                 byte[] data = TextEncoding.GetBytes(plainText);
+
+                return GetHash(data);
+            }
+            public string GetHash(byte[] data)
+            {
                 byte[] hashBytes = SHAService.ComputeHash(data);
 
-                StringBuilder hashText = new StringBuilder();
+                StringBuilder hashText = new StringBuilder(hashBytes.Length * 2);
                 for (int i = 0; i < hashBytes.Length; ++i)
                 {
                     hashText.Append(hashBytes[i].ToString("x2"));
@@ -331,9 +378,14 @@ namespace RIS.Cryptography.Hash
             public string GetHash(string plainText)
             {
                 byte[] data = TextEncoding.GetBytes(plainText);
+
+                return GetHash(data);
+            }
+            public string GetHash(byte[] data)
+            {
                 byte[] hashBytes = SHAService.ComputeHash(data);
 
-                StringBuilder hashText = new StringBuilder();
+                StringBuilder hashText = new StringBuilder(hashBytes.Length * 2);
                 for (int i = 0; i < hashBytes.Length; ++i)
                 {
                     hashText.Append(hashBytes[i].ToString("x2"));
@@ -366,12 +418,16 @@ namespace RIS.Cryptography.Hash
             public string GetHash(string plainText)
             {
                 byte[] data = TextEncoding.GetBytes(plainText);
+
+                return GetHash(data);
+            }
+            public string GetHash(byte[] data)
+            {
                 byte[] hashBytes = SHAService.ComputeHash(data);
 
-                StringBuilder hashText = new StringBuilder();
+                StringBuilder hashText = new StringBuilder(hashBytes.Length * 2);
                 for (int i = 0; i < hashBytes.Length; ++i)
                 {
-
                     hashText.Append(hashBytes[i].ToString("x2"));
                 }
 
@@ -402,9 +458,14 @@ namespace RIS.Cryptography.Hash
             public string GetHash(string plainText)
             {
                 byte[] data = TextEncoding.GetBytes(plainText);
+
+                return GetHash(data);
+            }
+            public string GetHash(byte[] data)
+            {
                 byte[] hashBytes = SHAService.ComputeHash(data);
 
-                StringBuilder hashText = new StringBuilder();
+                StringBuilder hashText = new StringBuilder(hashBytes.Length * 2);
                 for (int i = 0; i < hashBytes.Length; ++i)
                 {
                     hashText.Append(hashBytes[i].ToString("x2"));
@@ -437,9 +498,14 @@ namespace RIS.Cryptography.Hash
             public string GetHash(string plainText)
             {
                 byte[] data = TextEncoding.GetBytes(plainText);
+
+                return GetHash(data);
+            }
+            public string GetHash(byte[] data)
+            {
                 byte[] hashBytes = MDService.ComputeHash(data);
 
-                StringBuilder hashText = new StringBuilder();
+                StringBuilder hashText = new StringBuilder(hashBytes.Length * 2);
                 for (int i = 0; i < hashBytes.Length; ++i)
                 {
                     hashText.Append(hashBytes[i].ToString("x2"));
@@ -458,9 +524,9 @@ namespace RIS.Cryptography.Hash
         public sealed class RIPEMD160 : IHashMethod
         {
             private RIS.Cryptography.Hash.Algorithms.RIPEMD160Managed RIPEMDService { get; }
-            
+
             public bool Initialized { get; }
-            
+
             public RIPEMD160()
             {
                 RIPEMDService = new RIS.Cryptography.Hash.Algorithms.RIPEMD160Managed();
@@ -472,9 +538,14 @@ namespace RIS.Cryptography.Hash
             public string GetHash(string plainText)
             {
                 byte[] data = TextEncoding.GetBytes(plainText);
+
+                return GetHash(data);
+            }
+            public string GetHash(byte[] data)
+            {
                 byte[] hashBytes = RIPEMDService.ComputeHash(data);
 
-                StringBuilder hashText = new StringBuilder();
+                StringBuilder hashText = new StringBuilder(hashBytes.Length * 2);
                 for (int i = 0; i < hashBytes.Length; ++i)
                 {
                     hashText.Append(hashBytes[i].ToString("x2"));
@@ -485,7 +556,7 @@ namespace RIS.Cryptography.Hash
             public bool VerifyHash(string plainText, string hashText)
             {
                 var plainTextHash = GetHash(plainText);
-                
+
                 return Utils.SecureEquals(plainTextHash, hashText, true, true);
             }
         }
@@ -507,6 +578,11 @@ namespace RIS.Cryptography.Hash
             public string GetHash(string plainText)
             {
                 byte[] data = TextEncoding.GetBytes(plainText);
+
+                return GetHash(data);
+            }
+            public string GetHash(byte[] data)
+            {
                 uint hashValue = BitConverter.ToUInt32(CRCService.ComputeHash(data), 0);
 
                 return hashValue.ToString("x2", CultureInfo.InvariantCulture);
@@ -514,7 +590,7 @@ namespace RIS.Cryptography.Hash
             public bool VerifyHash(string plainText, string hashText)
             {
                 var plainTextHash = GetHash(plainText);
-                
+
                 return Utils.SecureEquals(plainTextHash, hashText, true, true);
             }
         }
@@ -544,13 +620,18 @@ namespace RIS.Cryptography.Hash
 
                 Initialized = true;
             }
-            
+
             public string GetHash(string plainText)
             {
-                
+                byte[] data = TextEncoding.GetBytes(plainText);
+
+                return GetHash(data);
+            }
+            public string GetHash(byte[] data)
+            {
+
 #if NETCOREAPP
 
-                byte[] data = TextEncoding.GetBytes(plainText);
                 ulong hashValue = 0xFFFFFFFF;
 
                 if (Sse42.X64.IsSupported)
@@ -564,13 +645,21 @@ namespace RIS.Cryptography.Hash
                         hashValue = Sse42.X64.Crc32(hashValue, BitConverter.ToUInt64(dataSpan.Slice(i, 8)));
 
                     if (remainingCount % 2 == 0)
+                    {
                         for (int i = 0; i < remainingCount; i += 2)
-                            hashValue = Sse42.Crc32((uint)hashValue,
+                        {
+                            hashValue = Sse42.Crc32((uint) hashValue,
                                 BitConverter.ToUInt16(dataSpan.Slice(dataSpan.Length - remainingCount + i, 2)));
+                        }
+                    }
                     else
+                    {
                         for (int i = 0; i < remainingCount; ++i)
-                            hashValue = Sse42.Crc32((uint)hashValue,
+                        {
+                            hashValue = Sse42.Crc32((uint) hashValue,
                                 dataSpan.Slice(dataSpan.Length - remainingCount + i, 1)[0]);
+                        }
+                    }
 
                     //if (remainingCount == 1)
                     //{
@@ -619,13 +708,21 @@ namespace RIS.Cryptography.Hash
                         hashValue = Sse42.Crc32((uint)hashValue, BitConverter.ToUInt32(dataSpan.Slice(i, 4)));
 
                     if (remainingCount % 2 == 0)
+                    {
                         for (int i = 0; i < remainingCount; i += 2)
-                            hashValue = Sse42.Crc32((uint)hashValue,
+                        {
+                            hashValue = Sse42.Crc32((uint) hashValue,
                                 BitConverter.ToUInt16(dataSpan.Slice(dataSpan.Length - remainingCount + i, 2)));
+                        }
+                    }
                     else
+                    {
                         for (int i = 0; i < remainingCount; ++i)
-                            hashValue = Sse42.Crc32((uint)hashValue,
+                        {
+                            hashValue = Sse42.Crc32((uint) hashValue,
                                 dataSpan.Slice(dataSpan.Length - remainingCount + i, 1)[0]);
+                        }
+                    }
 
                     //if (remainingCount == 1)
                     //{
@@ -648,22 +745,18 @@ namespace RIS.Cryptography.Hash
                     hashValue = BitConverter.ToUInt32(CRCService.ComputeHash(data), 0);
                 }
 
-                return hashValue.ToString("x2", CultureInfo.InvariantCulture);
-
 #elif NETFRAMEWORK
 
-                byte[] data = TextEncoding.GetBytes(plainText);
                 uint hashValue = BitConverter.ToUInt32(CRCService.ComputeHash(data), 0);
-                
-                return hashValue.ToString("x2", CultureInfo.InvariantCulture);
 
 #endif
 
+                return hashValue.ToString("x2", CultureInfo.InvariantCulture);
             }
             public bool VerifyHash(string plainText, string hashText)
             {
                 var plainTextHash = GetHash(plainText);
-                
+
                 return Utils.SecureEquals(plainTextHash, hashText, true, true);
             }
         }
@@ -685,6 +778,11 @@ namespace RIS.Cryptography.Hash
             public string GetHash(string plainText)
             {
                 byte[] data = TextEncoding.GetBytes(plainText);
+
+                return GetHash(data);
+            }
+            public string GetHash(byte[] data)
+            {
                 uint hashValue = BitConverter.ToUInt32(CRCService.ComputeHash(data), 0);
 
                 return hashValue.ToString("x2", CultureInfo.InvariantCulture);
@@ -714,6 +812,11 @@ namespace RIS.Cryptography.Hash
             public string GetHash(string plainText)
             {
                 byte[] data = TextEncoding.GetBytes(plainText);
+
+                return GetHash(data);
+            }
+            public string GetHash(byte[] data)
+            {
                 uint hashValue = BitConverter.ToUInt32(CRCService.ComputeHash(data), 0);
 
                 return hashValue.ToString("x2", CultureInfo.InvariantCulture);
@@ -799,6 +902,12 @@ namespace RIS.Cryptography.Hash
 
                 return hashText;
             }
+            public string GetHash(byte[] data)
+            {
+                string plainText = TextEncoding.GetString(data);
+
+                return GetHash(plainText);
+            }
             public bool VerifyHash(string plainText, string hashText)
             {
                 if (UseEnhancedAlgorithm)
@@ -835,19 +944,27 @@ namespace RIS.Cryptography.Hash
                 isUpdated = metadata.WorkFactor != newWorkFactor;
 
                 if (isUpdated)
+                {
                     if (UseEnhancedAlgorithm)
+                    {
                         newHashText = global::BCrypt.Net.BCrypt.EnhancedHashPassword(
                             plainText,
                             HashMethodOriginal,
                             newWorkFactor);
+                    }
                     else
+                    {
                         newHashText = global::BCrypt.Net.BCrypt.HashPassword(
                             plainText,
                             global::BCrypt.Net.BCrypt.GenerateSalt(newWorkFactor),
                             false,
                             HashMethodOriginal);
+                    }
+                }
                 else
+                {
                     newHashText = hashText;
+                }
 
                 return true;
             }
@@ -1037,6 +1154,10 @@ namespace RIS.Cryptography.Hash
             {
                 byte[] data = TextEncoding.GetBytes(plainText);
 
+                return GetHash(data);
+            }
+            public string GetHash(byte[] data)
+            {
                 Konscious.Security.Cryptography.Argon2i argon2Service = new Konscious.Security.Cryptography.Argon2i(data)
                 {
                     Salt = SaltBytes,
@@ -1049,7 +1170,7 @@ namespace RIS.Cryptography.Hash
 
                 byte[] hashBytes = argon2Service.GetBytes(FixedHashLength ? HashLength : SaltBytes.Length);
 
-                StringBuilder hashText = new StringBuilder();
+                StringBuilder hashText = new StringBuilder(hashBytes.Length * 2);
                 for (int i = 0; i < hashBytes.Length; ++i)
                 {
                     hashText.Append(hashBytes[i].ToString("x2"));
@@ -1249,6 +1370,10 @@ namespace RIS.Cryptography.Hash
             {
                 byte[] data = TextEncoding.GetBytes(plainText);
 
+                return GetHash(data);
+            }
+            public string GetHash(byte[] data)
+            {
                 Konscious.Security.Cryptography.Argon2d argon2Service = new Konscious.Security.Cryptography.Argon2d(data)
                 {
                     Salt = SaltBytes,
@@ -1261,7 +1386,7 @@ namespace RIS.Cryptography.Hash
 
                 byte[] hashBytes = argon2Service.GetBytes(FixedHashLength ? HashLength : SaltBytes.Length);
 
-                StringBuilder hashText = new StringBuilder();
+                StringBuilder hashText = new StringBuilder(hashBytes.Length * 2);
                 for (int i = 0; i < hashBytes.Length; ++i)
                 {
                     hashText.Append(hashBytes[i].ToString("x2"));
@@ -1461,6 +1586,10 @@ namespace RIS.Cryptography.Hash
             {
                 byte[] data = TextEncoding.GetBytes(plainText);
 
+                return GetHash(data);
+            }
+            public string GetHash(byte[] data)
+            {
                 Konscious.Security.Cryptography.Argon2id argon2Service = new Konscious.Security.Cryptography.Argon2id(data)
                 {
                     Salt = SaltBytes,
@@ -1473,7 +1602,7 @@ namespace RIS.Cryptography.Hash
 
                 byte[] hashBytes = argon2Service.GetBytes(FixedHashLength ? HashLength : SaltBytes.Length);
 
-                StringBuilder hashText = new StringBuilder();
+                StringBuilder hashText = new StringBuilder(hashBytes.Length * 2);
                 for (int i = 0; i < hashBytes.Length; ++i)
                 {
                     hashText.Append(hashBytes[i].ToString("x2"));
@@ -1649,6 +1778,10 @@ namespace RIS.Cryptography.Hash
             {
                 byte[] data = TextEncoding.GetBytes(plainText);
 
+                return GetHash(data);
+            }
+            public string GetHash(byte[] data)
+            {
                 byte[] hashSalt = Convert.FromBase64String(GenSalt(SaltLength));
 
                 Konscious.Security.Cryptography.Argon2i argon2Service = new Konscious.Security.Cryptography.Argon2i(data)
@@ -1663,7 +1796,7 @@ namespace RIS.Cryptography.Hash
 
                 byte[] hashBytes = argon2Service.GetBytes(FixedHashLength ? HashLength : hashSalt.Length);
 
-                StringBuilder hashText = new StringBuilder();
+                StringBuilder hashText = new StringBuilder(hashBytes.Length * 2);
                 for (int i = 0; i < hashBytes.Length; ++i)
                 {
                     hashText.Append(hashBytes[i].ToString("x2"));
@@ -1678,6 +1811,10 @@ namespace RIS.Cryptography.Hash
             {
                 byte[] data = TextEncoding.GetBytes(plainText);
 
+                return GetHash(data, salt);
+            }
+            public string GetHash(byte[] data, string salt)
+            {
                 byte[] hashSalt;
                 try
                 {
@@ -1700,7 +1837,7 @@ namespace RIS.Cryptography.Hash
 
                 byte[] hashBytes = argon2Service.GetBytes(FixedHashLength ? HashLength : hashSalt.Length);
 
-                StringBuilder hashText = new StringBuilder();
+                StringBuilder hashText = new StringBuilder(hashBytes.Length * 2);
                 for (int i = 0; i < hashBytes.Length; ++i)
                 {
                     hashText.Append(hashBytes[i].ToString("x2"));
@@ -1888,6 +2025,10 @@ namespace RIS.Cryptography.Hash
             {
                 byte[] data = TextEncoding.GetBytes(plainText);
 
+                return GetHash(data);
+            }
+            public string GetHash(byte[] data)
+            {
                 byte[] hashSalt = Convert.FromBase64String(GenSalt(SaltLength));
 
                 Konscious.Security.Cryptography.Argon2d argon2Service = new Konscious.Security.Cryptography.Argon2d(data)
@@ -1902,7 +2043,7 @@ namespace RIS.Cryptography.Hash
 
                 byte[] hashBytes = argon2Service.GetBytes(FixedHashLength ? HashLength : hashSalt.Length);
 
-                StringBuilder hashText = new StringBuilder();
+                StringBuilder hashText = new StringBuilder(hashBytes.Length * 2);
                 for (int i = 0; i < hashBytes.Length; ++i)
                 {
                     hashText.Append(hashBytes[i].ToString("x2"));
@@ -1917,6 +2058,10 @@ namespace RIS.Cryptography.Hash
             {
                 byte[] data = TextEncoding.GetBytes(plainText);
 
+                return GetHash(data, salt);
+            }
+            public string GetHash(byte[] data, string salt)
+            {
                 byte[] hashSalt;
                 try
                 {
@@ -1939,7 +2084,7 @@ namespace RIS.Cryptography.Hash
 
                 byte[] hashBytes = argon2Service.GetBytes(FixedHashLength ? HashLength : hashSalt.Length);
 
-                StringBuilder hashText = new StringBuilder();
+                StringBuilder hashText = new StringBuilder(hashBytes.Length * 2);
                 for (int i = 0; i < hashBytes.Length; ++i)
                 {
                     hashText.Append(hashBytes[i].ToString("x2"));
@@ -2127,6 +2272,10 @@ namespace RIS.Cryptography.Hash
             {
                 byte[] data = TextEncoding.GetBytes(plainText);
 
+                return GetHash(data);
+            }
+            public string GetHash(byte[] data)
+            {
                 byte[] hashSalt = Convert.FromBase64String(GenSalt(SaltLength));
 
                 Konscious.Security.Cryptography.Argon2id argon2Service = new Konscious.Security.Cryptography.Argon2id(data)
@@ -2141,7 +2290,7 @@ namespace RIS.Cryptography.Hash
 
                 byte[] hashBytes = argon2Service.GetBytes(FixedHashLength ? HashLength : hashSalt.Length);
 
-                StringBuilder hashText = new StringBuilder();
+                StringBuilder hashText = new StringBuilder(hashBytes.Length * 2);
                 for (int i = 0; i < hashBytes.Length; ++i)
                 {
                     hashText.Append(hashBytes[i].ToString("x2"));
@@ -2156,6 +2305,10 @@ namespace RIS.Cryptography.Hash
             {
                 byte[] data = TextEncoding.GetBytes(plainText);
 
+                return GetHash(data, salt);
+            }
+            public string GetHash(byte[] data, string salt)
+            {
                 byte[] hashSalt;
                 try
                 {
@@ -2178,7 +2331,7 @@ namespace RIS.Cryptography.Hash
 
                 byte[] hashBytes = argon2Service.GetBytes(FixedHashLength ? HashLength : hashSalt.Length);
 
-                StringBuilder hashText = new StringBuilder();
+                StringBuilder hashText = new StringBuilder(hashBytes.Length * 2);
                 for (int i = 0; i < hashBytes.Length; ++i)
                 {
                     hashText.Append(hashBytes[i].ToString("x2"));
@@ -2401,6 +2554,79 @@ namespace RIS.Cryptography.Hash
             {
                 byte[] data = TextEncoding.GetBytes(plainText);
 
+                return GetHash(data, memorySize, iterations,
+                    degreeOfParallelism, associatedData, knownSecret);
+            }
+            public string GetHash(string plainText, string salt)
+            {
+                return GetHash(plainText, salt, MemorySize, Iterations,
+                    DegreeOfParallelism, AssociatedData, KnownSecret);
+            }
+            public string GetHash(string plainText, string salt, int memorySize, int iterations,
+                int degreeOfParallelism)
+            {
+                return GetHash(plainText, salt, memorySize, iterations,
+                    degreeOfParallelism, AssociatedData, KnownSecret);
+            }
+            public string GetHash(string plainText, string salt, int memorySize, int iterations,
+                int degreeOfParallelism, byte[] associatedData)
+            {
+                return GetHash(plainText, salt, memorySize, iterations,
+                    degreeOfParallelism, Convert.ToBase64String(associatedData), KnownSecret);
+            }
+            public string GetHash(string plainText, string salt, int memorySize, int iterations,
+                int degreeOfParallelism, string associatedData)
+            {
+                return GetHash(plainText, salt, memorySize, iterations,
+                    degreeOfParallelism, associatedData, KnownSecret);
+            }
+            public string GetHash(string plainText, string salt, int memorySize, int iterations,
+                int degreeOfParallelism, byte[] associatedData, byte[] knownSecret)
+            {
+                return GetHash(plainText, salt, memorySize, iterations,
+                    degreeOfParallelism, Convert.ToBase64String(associatedData), Convert.ToBase64String(knownSecret));
+            }
+            public string GetHash(string plainText, string salt, int memorySize, int iterations,
+                int degreeOfParallelism, string associatedData, string knownSecret)
+            {
+                byte[] data = TextEncoding.GetBytes(plainText);
+
+                return GetHash(data, salt, memorySize, iterations,
+                    degreeOfParallelism, associatedData, knownSecret);
+            }
+
+            public string GetHash(byte[] data)
+            {
+                return GetHash(data, MemorySize, Iterations,
+                    DegreeOfParallelism, AssociatedData, KnownSecret);
+            }
+            public string GetHash(byte[] data, int memorySize, int iterations,
+                int degreeOfParallelism)
+            {
+                return GetHash(data, memorySize, iterations,
+                    degreeOfParallelism, AssociatedData, KnownSecret);
+            }
+            public string GetHash(byte[] data, int memorySize, int iterations,
+                int degreeOfParallelism, byte[] associatedData)
+            {
+                return GetHash(data, memorySize, iterations,
+                    degreeOfParallelism, Convert.ToBase64String(associatedData), KnownSecret);
+            }
+            public string GetHash(byte[] data, int memorySize, int iterations,
+                int degreeOfParallelism, string associatedData)
+            {
+                return GetHash(data, memorySize, iterations,
+                    degreeOfParallelism, associatedData, KnownSecret);
+            }
+            public string GetHash(byte[] data, int memorySize, int iterations,
+                int degreeOfParallelism, byte[] associatedData, byte[] knownSecret)
+            {
+                return GetHash(data, memorySize, iterations,
+                    degreeOfParallelism, Convert.ToBase64String(associatedData), Convert.ToBase64String(knownSecret));
+            }
+            public string GetHash(byte[] data, int memorySize, int iterations,
+                int degreeOfParallelism, string associatedData, string knownSecret)
+            {
                 byte[] hashSalt = Convert.FromBase64String(GenSalt(SaltLength));
 
                 if (memorySize < 8)
@@ -2444,7 +2670,7 @@ namespace RIS.Cryptography.Hash
 
                 byte[] hashBytes = argon2Service.GetBytes(FixedHashLength ? HashLength : hashSalt.Length);
 
-                StringBuilder hashText = new StringBuilder();
+                StringBuilder hashText = new StringBuilder(hashBytes.Length * 2);
                 for (int i = 0; i < hashBytes.Length; ++i)
                 {
                     hashText.Append(hashBytes[i].ToString("x2"));
@@ -2454,40 +2680,38 @@ namespace RIS.Cryptography.Hash
 
                 return hashString;
             }
-            public string GetHash(string plainText, string salt)
+            public string GetHash(byte[] data, string salt)
             {
-                return GetHash(plainText, salt, MemorySize, Iterations,
+                return GetHash(data, salt, MemorySize, Iterations,
                     DegreeOfParallelism, AssociatedData, KnownSecret);
             }
-            public string GetHash(string plainText, string salt, int memorySize, int iterations,
+            public string GetHash(byte[] data, string salt, int memorySize, int iterations,
                 int degreeOfParallelism)
             {
-                return GetHash(plainText, salt, memorySize, iterations,
+                return GetHash(data, salt, memorySize, iterations,
                     degreeOfParallelism, AssociatedData, KnownSecret);
             }
-            public string GetHash(string plainText, string salt, int memorySize, int iterations,
+            public string GetHash(byte[] data, string salt, int memorySize, int iterations,
                 int degreeOfParallelism, byte[] associatedData)
             {
-                return GetHash(plainText, salt, memorySize, iterations,
+                return GetHash(data, salt, memorySize, iterations,
                     degreeOfParallelism, Convert.ToBase64String(associatedData), KnownSecret);
             }
-            public string GetHash(string plainText, string salt, int memorySize, int iterations,
+            public string GetHash(byte[] data, string salt, int memorySize, int iterations,
                 int degreeOfParallelism, string associatedData)
             {
-                return GetHash(plainText, salt, memorySize, iterations,
+                return GetHash(data, salt, memorySize, iterations,
                     degreeOfParallelism, associatedData, KnownSecret);
             }
-            public string GetHash(string plainText, string salt, int memorySize, int iterations,
+            public string GetHash(byte[] data, string salt, int memorySize, int iterations,
                 int degreeOfParallelism, byte[] associatedData, byte[] knownSecret)
             {
-                return GetHash(plainText, salt, memorySize, iterations,
+                return GetHash(data, salt, memorySize, iterations,
                     degreeOfParallelism, Convert.ToBase64String(associatedData), Convert.ToBase64String(knownSecret));
             }
-            public string GetHash(string plainText, string salt, int memorySize, int iterations,
+            public string GetHash(byte[] data, string salt, int memorySize, int iterations,
                 int degreeOfParallelism, string associatedData, string knownSecret)
             {
-                byte[] data = TextEncoding.GetBytes(plainText);
-
                 byte[] hashSalt;
                 try
                 {
@@ -2539,7 +2763,7 @@ namespace RIS.Cryptography.Hash
 
                 byte[] hashBytes = argon2Service.GetBytes(FixedHashLength ? HashLength : hashSalt.Length);
 
-                StringBuilder hashText = new StringBuilder();
+                StringBuilder hashText = new StringBuilder(hashBytes.Length * 2);
                 for (int i = 0; i < hashBytes.Length; ++i)
                 {
                     hashText.Append(hashBytes[i].ToString("x2"));
@@ -2831,6 +3055,79 @@ namespace RIS.Cryptography.Hash
             {
                 byte[] data = TextEncoding.GetBytes(plainText);
 
+                return GetHash(data, memorySize, iterations,
+                    degreeOfParallelism, associatedData, knownSecret);
+            }
+            public string GetHash(string plainText, string salt)
+            {
+                return GetHash(plainText, salt, MemorySize, Iterations,
+                    DegreeOfParallelism, AssociatedData, KnownSecret);
+            }
+            public string GetHash(string plainText, string salt, int memorySize, int iterations,
+                int degreeOfParallelism)
+            {
+                return GetHash(plainText, salt, memorySize, iterations,
+                    degreeOfParallelism, AssociatedData, KnownSecret);
+            }
+            public string GetHash(string plainText, string salt, int memorySize, int iterations,
+                int degreeOfParallelism, byte[] associatedData)
+            {
+                return GetHash(plainText, salt, memorySize, iterations,
+                    degreeOfParallelism, Convert.ToBase64String(associatedData), KnownSecret);
+            }
+            public string GetHash(string plainText, string salt, int memorySize, int iterations,
+                int degreeOfParallelism, string associatedData)
+            {
+                return GetHash(plainText, salt, memorySize, iterations,
+                    degreeOfParallelism, associatedData, KnownSecret);
+            }
+            public string GetHash(string plainText, string salt, int memorySize, int iterations,
+                int degreeOfParallelism, byte[] associatedData, byte[] knownSecret)
+            {
+                return GetHash(plainText, salt, memorySize, iterations,
+                    degreeOfParallelism, Convert.ToBase64String(associatedData), Convert.ToBase64String(knownSecret));
+            }
+            public string GetHash(string plainText, string salt, int memorySize, int iterations,
+                int degreeOfParallelism, string associatedData, string knownSecret)
+            {
+                byte[] data = TextEncoding.GetBytes(plainText);
+
+                return GetHash(data, salt, memorySize, iterations,
+                    degreeOfParallelism, associatedData, knownSecret);
+            }
+
+            public string GetHash(byte[] data)
+            {
+                return GetHash(data, MemorySize, Iterations,
+                    DegreeOfParallelism, AssociatedData, KnownSecret);
+            }
+            public string GetHash(byte[] data, int memorySize, int iterations,
+                int degreeOfParallelism)
+            {
+                return GetHash(data, memorySize, iterations,
+                    degreeOfParallelism, AssociatedData, KnownSecret);
+            }
+            public string GetHash(byte[] data, int memorySize, int iterations,
+                int degreeOfParallelism, byte[] associatedData)
+            {
+                return GetHash(data, memorySize, iterations,
+                    degreeOfParallelism, Convert.ToBase64String(associatedData), KnownSecret);
+            }
+            public string GetHash(byte[] data, int memorySize, int iterations,
+                int degreeOfParallelism, string associatedData)
+            {
+                return GetHash(data, memorySize, iterations,
+                    degreeOfParallelism, associatedData, KnownSecret);
+            }
+            public string GetHash(byte[] data, int memorySize, int iterations,
+                int degreeOfParallelism, byte[] associatedData, byte[] knownSecret)
+            {
+                return GetHash(data, memorySize, iterations,
+                    degreeOfParallelism, Convert.ToBase64String(associatedData), Convert.ToBase64String(knownSecret));
+            }
+            public string GetHash(byte[] data, int memorySize, int iterations,
+                int degreeOfParallelism, string associatedData, string knownSecret)
+            {
                 byte[] hashSalt = Convert.FromBase64String(GenSalt(SaltLength));
 
                 if (memorySize < 8)
@@ -2874,7 +3171,7 @@ namespace RIS.Cryptography.Hash
 
                 byte[] hashBytes = argon2Service.GetBytes(FixedHashLength ? HashLength : hashSalt.Length);
 
-                StringBuilder hashText = new StringBuilder();
+                StringBuilder hashText = new StringBuilder(hashBytes.Length * 2);
                 for (int i = 0; i < hashBytes.Length; ++i)
                 {
                     hashText.Append(hashBytes[i].ToString("x2"));
@@ -2884,40 +3181,38 @@ namespace RIS.Cryptography.Hash
 
                 return hashString;
             }
-            public string GetHash(string plainText, string salt)
+            public string GetHash(byte[] data, string salt)
             {
-                return GetHash(plainText, salt, MemorySize, Iterations,
+                return GetHash(data, salt, MemorySize, Iterations,
                     DegreeOfParallelism, AssociatedData, KnownSecret);
             }
-            public string GetHash(string plainText, string salt, int memorySize, int iterations,
+            public string GetHash(byte[] data, string salt, int memorySize, int iterations,
                 int degreeOfParallelism)
             {
-                return GetHash(plainText, salt, memorySize, iterations,
+                return GetHash(data, salt, memorySize, iterations,
                     degreeOfParallelism, AssociatedData, KnownSecret);
             }
-            public string GetHash(string plainText, string salt, int memorySize, int iterations,
+            public string GetHash(byte[] data, string salt, int memorySize, int iterations,
                 int degreeOfParallelism, byte[] associatedData)
             {
-                return GetHash(plainText, salt, memorySize, iterations,
+                return GetHash(data, salt, memorySize, iterations,
                     degreeOfParallelism, Convert.ToBase64String(associatedData), KnownSecret);
             }
-            public string GetHash(string plainText, string salt, int memorySize, int iterations,
+            public string GetHash(byte[] data, string salt, int memorySize, int iterations,
                 int degreeOfParallelism, string associatedData)
             {
-                return GetHash(plainText, salt, memorySize, iterations,
+                return GetHash(data, salt, memorySize, iterations,
                     degreeOfParallelism, associatedData, KnownSecret);
             }
-            public string GetHash(string plainText, string salt, int memorySize, int iterations,
+            public string GetHash(byte[] data, string salt, int memorySize, int iterations,
                 int degreeOfParallelism, byte[] associatedData, byte[] knownSecret)
             {
-                return GetHash(plainText, salt, memorySize, iterations,
+                return GetHash(data, salt, memorySize, iterations,
                     degreeOfParallelism, Convert.ToBase64String(associatedData), Convert.ToBase64String(knownSecret));
             }
-            public string GetHash(string plainText, string salt, int memorySize, int iterations,
+            public string GetHash(byte[] data, string salt, int memorySize, int iterations,
                 int degreeOfParallelism, string associatedData, string knownSecret)
             {
-                byte[] data = TextEncoding.GetBytes(plainText);
-
                 byte[] hashSalt;
                 try
                 {
@@ -2969,7 +3264,7 @@ namespace RIS.Cryptography.Hash
 
                 byte[] hashBytes = argon2Service.GetBytes(FixedHashLength ? HashLength : hashSalt.Length);
 
-                StringBuilder hashText = new StringBuilder();
+                StringBuilder hashText = new StringBuilder(hashBytes.Length * 2);
                 for (int i = 0; i < hashBytes.Length; ++i)
                 {
                     hashText.Append(hashBytes[i].ToString("x2"));
@@ -3261,6 +3556,79 @@ namespace RIS.Cryptography.Hash
             {
                 byte[] data = TextEncoding.GetBytes(plainText);
 
+                return GetHash(data, memorySize, iterations,
+                    degreeOfParallelism, associatedData, knownSecret);
+            }
+            public string GetHash(string plainText, string salt)
+            {
+                return GetHash(plainText, salt, MemorySize, Iterations,
+                    DegreeOfParallelism, AssociatedData, KnownSecret);
+            }
+            public string GetHash(string plainText, string salt, int memorySize, int iterations,
+                int degreeOfParallelism)
+            {
+                return GetHash(plainText, salt, memorySize, iterations,
+                    degreeOfParallelism, AssociatedData, KnownSecret);
+            }
+            public string GetHash(string plainText, string salt, int memorySize, int iterations,
+                int degreeOfParallelism, byte[] associatedData)
+            {
+                return GetHash(plainText, salt, memorySize, iterations,
+                    degreeOfParallelism, Convert.ToBase64String(associatedData), KnownSecret);
+            }
+            public string GetHash(string plainText, string salt, int memorySize, int iterations,
+                int degreeOfParallelism, string associatedData)
+            {
+                return GetHash(plainText, salt, memorySize, iterations,
+                    degreeOfParallelism, associatedData, KnownSecret);
+            }
+            public string GetHash(string plainText, string salt, int memorySize, int iterations,
+                int degreeOfParallelism, byte[] associatedData, byte[] knownSecret)
+            {
+                return GetHash(plainText, salt, memorySize, iterations,
+                    degreeOfParallelism, Convert.ToBase64String(associatedData), Convert.ToBase64String(knownSecret));
+            }
+            public string GetHash(string plainText, string salt, int memorySize, int iterations,
+                int degreeOfParallelism, string associatedData, string knownSecret)
+            {
+                byte[] data = TextEncoding.GetBytes(plainText);
+
+                return GetHash(data, salt, memorySize, iterations,
+                    degreeOfParallelism, associatedData, knownSecret);
+            }
+
+            public string GetHash(byte[] data)
+            {
+                return GetHash(data, MemorySize, Iterations,
+                    DegreeOfParallelism, AssociatedData, KnownSecret);
+            }
+            public string GetHash(byte[] data, int memorySize, int iterations,
+                int degreeOfParallelism)
+            {
+                return GetHash(data, memorySize, iterations,
+                    degreeOfParallelism, AssociatedData, KnownSecret);
+            }
+            public string GetHash(byte[] data, int memorySize, int iterations,
+                int degreeOfParallelism, byte[] associatedData)
+            {
+                return GetHash(data, memorySize, iterations,
+                    degreeOfParallelism, Convert.ToBase64String(associatedData), KnownSecret);
+            }
+            public string GetHash(byte[] data, int memorySize, int iterations,
+                int degreeOfParallelism, string associatedData)
+            {
+                return GetHash(data, memorySize, iterations,
+                    degreeOfParallelism, associatedData, KnownSecret);
+            }
+            public string GetHash(byte[] data, int memorySize, int iterations,
+                int degreeOfParallelism, byte[] associatedData, byte[] knownSecret)
+            {
+                return GetHash(data, memorySize, iterations,
+                    degreeOfParallelism, Convert.ToBase64String(associatedData), Convert.ToBase64String(knownSecret));
+            }
+            public string GetHash(byte[] data, int memorySize, int iterations,
+                int degreeOfParallelism, string associatedData, string knownSecret)
+            {
                 byte[] hashSalt = Convert.FromBase64String(GenSalt(SaltLength));
 
                 if (memorySize < 8)
@@ -3304,7 +3672,7 @@ namespace RIS.Cryptography.Hash
 
                 byte[] hashBytes = argon2Service.GetBytes(FixedHashLength ? HashLength : hashSalt.Length);
 
-                StringBuilder hashText = new StringBuilder();
+                StringBuilder hashText = new StringBuilder(hashBytes.Length * 2);
                 for (int i = 0; i < hashBytes.Length; ++i)
                 {
                     hashText.Append(hashBytes[i].ToString("x2"));
@@ -3314,40 +3682,38 @@ namespace RIS.Cryptography.Hash
 
                 return hashString;
             }
-            public string GetHash(string plainText, string salt)
+            public string GetHash(byte[] data, string salt)
             {
-                return GetHash(plainText, salt, MemorySize, Iterations,
+                return GetHash(data, salt, MemorySize, Iterations,
                     DegreeOfParallelism, AssociatedData, KnownSecret);
             }
-            public string GetHash(string plainText, string salt, int memorySize, int iterations,
+            public string GetHash(byte[] data, string salt, int memorySize, int iterations,
                 int degreeOfParallelism)
             {
-                return GetHash(plainText, salt, memorySize, iterations,
+                return GetHash(data, salt, memorySize, iterations,
                     degreeOfParallelism, AssociatedData, KnownSecret);
             }
-            public string GetHash(string plainText, string salt, int memorySize, int iterations,
+            public string GetHash(byte[] data, string salt, int memorySize, int iterations,
                 int degreeOfParallelism, byte[] associatedData)
             {
-                return GetHash(plainText, salt, memorySize, iterations,
+                return GetHash(data, salt, memorySize, iterations,
                     degreeOfParallelism, Convert.ToBase64String(associatedData), KnownSecret);
             }
-            public string GetHash(string plainText, string salt, int memorySize, int iterations,
+            public string GetHash(byte[] data, string salt, int memorySize, int iterations,
                 int degreeOfParallelism, string associatedData)
             {
-                return GetHash(plainText, salt, memorySize, iterations,
+                return GetHash(data, salt, memorySize, iterations,
                     degreeOfParallelism, associatedData, KnownSecret);
             }
-            public string GetHash(string plainText, string salt, int memorySize, int iterations,
+            public string GetHash(byte[] data, string salt, int memorySize, int iterations,
                 int degreeOfParallelism, byte[] associatedData, byte[] knownSecret)
             {
-                return GetHash(plainText, salt, memorySize, iterations,
+                return GetHash(data, salt, memorySize, iterations,
                     degreeOfParallelism, Convert.ToBase64String(associatedData), Convert.ToBase64String(knownSecret));
             }
-            public string GetHash(string plainText, string salt, int memorySize, int iterations,
+            public string GetHash(byte[] data, string salt, int memorySize, int iterations,
                 int degreeOfParallelism, string associatedData, string knownSecret)
             {
-                byte[] data = TextEncoding.GetBytes(plainText);
-
                 byte[] hashSalt;
                 try
                 {
@@ -3399,7 +3765,7 @@ namespace RIS.Cryptography.Hash
 
                 byte[] hashBytes = argon2Service.GetBytes(FixedHashLength ? HashLength : hashSalt.Length);
 
-                StringBuilder hashText = new StringBuilder();
+                StringBuilder hashText = new StringBuilder(hashBytes.Length * 2);
                 for (int i = 0; i < hashBytes.Length; ++i)
                 {
                     hashText.Append(hashBytes[i].ToString("x2"));

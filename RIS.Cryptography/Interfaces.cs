@@ -18,6 +18,7 @@ namespace RIS.Cryptography
         bool Initialized { get; }
 
         string GetHash(string plainText);
+        string GetHash(byte[] data);
         bool VerifyHash(string plainText, string hashText);
     }
 }

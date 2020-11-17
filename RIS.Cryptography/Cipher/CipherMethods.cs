@@ -2,6 +2,7 @@
 // Licensed under the Apache License, Version 2.0. See LICENSE file in the project root for license information. 
 
 using System;
+using System.Collections.ObjectModel;
 using System.Reflection;
 using System.Security.Cryptography;
 using System.Text;
@@ -14,7 +15,8 @@ namespace RIS.Cryptography.Cipher
         public static event EventHandler<RWarningEventArgs> Warning;
         public static event EventHandler<RErrorEventArgs> Error;
 
-        private static string[] CipherMethodsNames { get; }
+        private static ReadOnlyCollection<Type> CipherMethodsTypes { get; }
+        private static ReadOnlyCollection<string> CipherMethodsNames { get; }
         private static int CipherMethodsCount { get; }
 
         public static Encoding TextEncoding { get; }
@@ -26,18 +28,28 @@ namespace RIS.Cryptography.Cipher
             Type cipherMethodsType = typeof(CipherMethods);
             MemberInfo[] cipherMethods =
                 cipherMethodsType.FindMembers(MemberTypes.NestedType, BindingFlags.Public,
-                    (info, criteria) =>
-                        typeof(CipherMethods).GetNestedType(info.Name).IsClass &&
+                    (info, _) =>
+                        typeof(CipherMethods).GetNestedType(info.Name)?.IsClass != false &&
                         typeof(ICipherMethod).IsAssignableFrom(typeof(CipherMethods).GetNestedType(info.Name)),
                     "IsClass && IsAssignableFrom");
 
             CipherMethodsCount = cipherMethods.Length;
 
-            CipherMethodsNames = new string[cipherMethods.Length];
-            for (int i = 0; i < CipherMethodsNames.Length; ++i)
+            Type[] cipherMethodsTypes = new Type[cipherMethods.Length];
+            for (int i = 0; i < cipherMethodsTypes.Length; ++i)
             {
-                CipherMethodsNames[i] = cipherMethods[i].Name;
+                cipherMethodsTypes[i] = cipherMethods[i].GetType();
             }
+
+            CipherMethodsTypes = new ReadOnlyCollection<Type>(cipherMethodsTypes);
+
+            string[] cipherMethodsNames = new string[cipherMethods.Length];
+            for (int i = 0; i < cipherMethodsNames.Length; ++i)
+            {
+                cipherMethodsNames[i] = cipherMethods[i].Name;
+            }
+
+            CipherMethodsNames = new ReadOnlyCollection<string>(cipherMethodsNames);
         }
 
         public static void OnInformation(RInformationEventArgs e)
@@ -67,12 +79,17 @@ namespace RIS.Cryptography.Cipher
             Error?.Invoke(sender, e);
         }
 
-        public static string[] GetNamesCipherMethods()
+        public static ReadOnlyCollection<Type> GetTypes()
+        {
+            return CipherMethodsTypes;
+        }
+
+        public static ReadOnlyCollection<string> GetNames()
         {
             return CipherMethodsNames;
         }
 
-        public static int GetCountCipherMethods()
+        public static int GetCount()
         {
             return CipherMethodsCount;
         }
@@ -80,8 +97,8 @@ namespace RIS.Cryptography.Cipher
         public sealed class RSAiCSP : ICipherMethod
         {
             public event EventHandler<RInformationEventArgs> Information;
-        public event EventHandler<RWarningEventArgs> Warning;
-        public event EventHandler<RErrorEventArgs> Error;
+            public event EventHandler<RWarningEventArgs> Warning;
+            public event EventHandler<RErrorEventArgs> Error;
 
             public enum CipherKeySizes
             {
@@ -135,7 +152,7 @@ namespace RIS.Cryptography.Cipher
                 {
                     RSACryptoServiceProvider rsaService = new RSACryptoServiceProvider();
                     KeySizes keySizes = rsaService.LegalKeySizes[0];
-                    int countSizes = (keySizes.MaxSize - keySizes.MinSize) / keySizes.SkipSize + 1;
+                    int countSizes = ((keySizes.MaxSize - keySizes.MinSize) / keySizes.SkipSize) + 1;
                     int size = keySizes.MinSize;
 
                     for (int i = 0; i < countSizes; ++i)
@@ -189,7 +206,7 @@ namespace RIS.Cryptography.Cipher
                 {
                     RSACryptoServiceProvider rsaService = new RSACryptoServiceProvider();
                     KeySizes keySizes = rsaService.LegalKeySizes[0];
-                    int countSizes = (keySizes.MaxSize - keySizes.MinSize) / keySizes.SkipSize + 1;
+                    int countSizes = ((keySizes.MaxSize - keySizes.MinSize) / keySizes.SkipSize) + 1;
                     int size = keySizes.MinSize;
 
                     for (int i = 0; i < countSizes; ++i)
@@ -325,7 +342,7 @@ namespace RIS.Cryptography.Cipher
                     {
                         RSACryptoServiceProvider rsaService = new RSACryptoServiceProvider();
                         KeySizes keySizes = rsaService.LegalKeySizes[0];
-                        int countSizes = (keySizes.MaxSize - keySizes.MinSize) / keySizes.SkipSize + 1;
+                        int countSizes = ((keySizes.MaxSize - keySizes.MinSize) / keySizes.SkipSize) + 1;
                         int size = keySizes.MinSize;
 
                         for (int i = 0; i < countSizes; ++i)
@@ -383,7 +400,7 @@ namespace RIS.Cryptography.Cipher
                     {
                         RSACryptoServiceProvider rsaService = new RSACryptoServiceProvider();
                         KeySizes keySizes = rsaService.LegalKeySizes[0];
-                        int countSizes = (keySizes.MaxSize - keySizes.MinSize) / keySizes.SkipSize + 1;
+                        int countSizes = ((keySizes.MaxSize - keySizes.MinSize) / keySizes.SkipSize) + 1;
                         int size = keySizes.MinSize;
 
                         for (int i = 0; i < countSizes; ++i)
@@ -631,8 +648,8 @@ namespace RIS.Cryptography.Cipher
         public sealed class RSAiCNG : ICipherMethod
         {
             public event EventHandler<RInformationEventArgs> Information;
-        public event EventHandler<RWarningEventArgs> Warning;
-        public event EventHandler<RErrorEventArgs> Error;
+            public event EventHandler<RWarningEventArgs> Warning;
+            public event EventHandler<RErrorEventArgs> Error;
 
             public enum CipherKeySizes
             {
@@ -686,7 +703,7 @@ namespace RIS.Cryptography.Cipher
                 {
                     RSACng rsaService = new RSACng();
                     KeySizes keySizes = rsaService.LegalKeySizes[0];
-                    int countSizes = (keySizes.MaxSize - keySizes.MinSize) / keySizes.SkipSize + 1;
+                    int countSizes = ((keySizes.MaxSize - keySizes.MinSize) / keySizes.SkipSize) + 1;
                     int size = keySizes.MinSize;
 
                     for (int i = 0; i < countSizes; ++i)
@@ -740,7 +757,7 @@ namespace RIS.Cryptography.Cipher
                 {
                     RSACng rsaService = new RSACng();
                     KeySizes keySizes = rsaService.LegalKeySizes[0];
-                    int countSizes = (keySizes.MaxSize - keySizes.MinSize) / keySizes.SkipSize + 1;
+                    int countSizes = ((keySizes.MaxSize - keySizes.MinSize) / keySizes.SkipSize) + 1;
                     int size = keySizes.MinSize;
 
                     for (int i = 0; i < countSizes; ++i)
@@ -871,7 +888,7 @@ namespace RIS.Cryptography.Cipher
                     {
                         RSACng rsaService = new RSACng();
                         KeySizes keySizes = rsaService.LegalKeySizes[0];
-                        int countSizes = (keySizes.MaxSize - keySizes.MinSize) / keySizes.SkipSize + 1;
+                        int countSizes = ((keySizes.MaxSize - keySizes.MinSize) / keySizes.SkipSize) + 1;
                         int size = keySizes.MinSize;
 
                         for (int i = 0; i < countSizes; ++i)
@@ -929,7 +946,7 @@ namespace RIS.Cryptography.Cipher
                     {
                         RSACng rsaService = new RSACng();
                         KeySizes keySizes = rsaService.LegalKeySizes[0];
-                        int countSizes = (keySizes.MaxSize - keySizes.MinSize) / keySizes.SkipSize + 1;
+                        int countSizes = ((keySizes.MaxSize - keySizes.MinSize) / keySizes.SkipSize) + 1;
                         int size = keySizes.MinSize;
 
                         for (int i = 0; i < countSizes; ++i)
@@ -1177,8 +1194,8 @@ namespace RIS.Cryptography.Cipher
         public sealed class Rijndael : ICipherMethod
         {
             public event EventHandler<RInformationEventArgs> Information;
-        public event EventHandler<RWarningEventArgs> Warning;
-        public event EventHandler<RErrorEventArgs> Error;
+            public event EventHandler<RWarningEventArgs> Warning;
+            public event EventHandler<RErrorEventArgs> Error;
 
             public enum CipherKeySizes
             {
@@ -1223,7 +1240,7 @@ namespace RIS.Cryptography.Cipher
                 set
                 {
                     KeySizes blockSizes = RijndaelService.LegalBlockSizes[0];
-                    int countSizes = (blockSizes.MaxSize - blockSizes.MinSize) / blockSizes.SkipSize + 1;
+                    int countSizes = ((blockSizes.MaxSize - blockSizes.MinSize) / blockSizes.SkipSize) + 1;
                     int size = blockSizes.MinSize;
 
                     for (int i = 0; i < countSizes; ++i)
@@ -1284,7 +1301,7 @@ namespace RIS.Cryptography.Cipher
                 {
                     RijndaelManaged rijndaelService = new RijndaelManaged();
                     KeySizes keySizes = rijndaelService.LegalKeySizes[0];
-                    int countSizes = (keySizes.MaxSize - keySizes.MinSize) / keySizes.SkipSize + 1;
+                    int countSizes = ((keySizes.MaxSize - keySizes.MinSize) / keySizes.SkipSize) + 1;
                     int size = keySizes.MinSize;
 
                     for (int i = 0; i < countSizes; ++i)
@@ -1314,11 +1331,13 @@ namespace RIS.Cryptography.Cipher
 
                     rijndaelService.Dispose();
 
-                    RijndaelService = new RijndaelManaged();
-                    RijndaelService.BlockSize = 128;
-                    RijndaelService.Padding = PaddingMode.ISO10126;
-                    RijndaelService.Mode = CipherMode.CBC;
-                    RijndaelService.KeySize = keySize;
+                    RijndaelService = new RijndaelManaged
+                    {
+                        BlockSize = 128,
+                        Padding = PaddingMode.ISO10126,
+                        Mode = CipherMode.CBC,
+                        KeySize = keySize
+                    };
 
                     GenIVAfterEncrypt = true;
                     Initialized = true;
@@ -1339,11 +1358,13 @@ namespace RIS.Cryptography.Cipher
             {
                 try
                 {
-                    RijndaelService = new RijndaelManaged();
-                    RijndaelService.BlockSize = 128;
-                    RijndaelService.Padding = PaddingMode.ISO10126;
-                    RijndaelService.Mode = CipherMode.CBC;
-                    RijndaelService.KeySize = (int)keySize;
+                    RijndaelService = new RijndaelManaged
+                    {
+                        BlockSize = 128,
+                        Padding = PaddingMode.ISO10126,
+                        Mode = CipherMode.CBC,
+                        KeySize = (int)keySize
+                    };
 
                     GenIVAfterEncrypt = true;
                     Initialized = true;
@@ -1364,58 +1385,60 @@ namespace RIS.Cryptography.Cipher
             {
                 try
                 {
-                    if (key != string.Empty)
+                    if (string.IsNullOrEmpty(key))
+                        return;
+
+                    RijndaelManaged rijndaelService = new RijndaelManaged();
+                    KeySizes keySizes = rijndaelService.LegalKeySizes[0];
+                    int countSizes = ((keySizes.MaxSize - keySizes.MinSize) / keySizes.SkipSize) + 1;
+                    int size = keySizes.MinSize;
+
+                    for (int i = 0; i < countSizes; ++i)
                     {
-                        RijndaelManaged rijndaelService = new RijndaelManaged();
-                        KeySizes keySizes = rijndaelService.LegalKeySizes[0];
-                        int countSizes = (keySizes.MaxSize - keySizes.MinSize) / keySizes.SkipSize + 1;
-                        int size = keySizes.MinSize;
-
-                        for (int i = 0; i < countSizes; ++i)
+                        if (size == keySize)
                         {
-                            if (size == keySize)
-                            {
-                                rijndaelService.KeySize = keySize;
-                                break;
-                            }
-
-                            if (i != countSizes - 1)
-                            {
-                                size += keySizes.SkipSize;
-                            }
-                            else
-                            {
-                                if (rijndaelService.KeySize != keySize)
-                                {
-                                    var exception = new Exception(
-                                        $"KeySize[{keySize}] not supported for CipherMethod[{this.GetType().FullName}]");
-                                    Events.OnError(this, new RErrorEventArgs(exception.Message, exception.StackTrace));
-                                    OnError(new RErrorEventArgs(exception.Message, exception.StackTrace));
-                                    throw exception;
-                                }
-                            }
+                            rijndaelService.KeySize = keySize;
+                            break;
                         }
 
-                        rijndaelService.Dispose();
-
-                        RijndaelService = new RijndaelManaged();
-                        RijndaelService.BlockSize = 128;
-                        RijndaelService.Padding = PaddingMode.ISO10126;
-                        RijndaelService.Mode = CipherMode.CBC;
-                        RijndaelService.KeySize = keySize;
-
-                        if (keyInBase64)
+                        if (i != countSizes - 1)
                         {
-                            RijndaelService.Key = Convert.FromBase64String(key);
+                            size += keySizes.SkipSize;
                         }
                         else
                         {
-                            RijndaelService.Key = Convert.FromBase64String(Convert.ToBase64String(TextEncoding.GetBytes(key)));
+                            if (rijndaelService.KeySize != keySize)
+                            {
+                                var exception = new Exception(
+                                    $"KeySize[{keySize}] not supported for CipherMethod[{this.GetType().FullName}]");
+                                Events.OnError(this, new RErrorEventArgs(exception.Message, exception.StackTrace));
+                                OnError(new RErrorEventArgs(exception.Message, exception.StackTrace));
+                                throw exception;
+                            }
                         }
-
-                        GenIVAfterEncrypt = true;
-                        Initialized = true;
                     }
+
+                    rijndaelService.Dispose();
+
+                    RijndaelService = new RijndaelManaged
+                    {
+                        BlockSize = 128,
+                        Padding = PaddingMode.ISO10126,
+                        Mode = CipherMode.CBC,
+                        KeySize = keySize
+                    };
+
+                    if (keyInBase64)
+                    {
+                        RijndaelService.Key = Convert.FromBase64String(key);
+                    }
+                    else
+                    {
+                        RijndaelService.Key = Convert.FromBase64String(Convert.ToBase64String(TextEncoding.GetBytes(key)));
+                    }
+
+                    GenIVAfterEncrypt = true;
+                    Initialized = true;
                 }
                 catch (Exception ex)
                 {
@@ -1433,26 +1456,28 @@ namespace RIS.Cryptography.Cipher
             {
                 try
                 {
-                    if (key != string.Empty)
+                    if (string.IsNullOrEmpty(key))
+                        return;
+
+                    RijndaelService = new RijndaelManaged
                     {
-                        RijndaelService = new RijndaelManaged();
-                        RijndaelService.BlockSize = 128;
-                        RijndaelService.Padding = PaddingMode.ISO10126;
-                        RijndaelService.Mode = CipherMode.CBC;
-                        RijndaelService.KeySize = (int)keySize;
+                        BlockSize = 128,
+                        Padding = PaddingMode.ISO10126,
+                        Mode = CipherMode.CBC,
+                        KeySize = (int)keySize
+                    };
 
-                        if (keyInBase64)
-                        {
-                            RijndaelService.Key = Convert.FromBase64String(key);
-                        }
-                        else
-                        {
-                            RijndaelService.Key = Convert.FromBase64String(Convert.ToBase64String(TextEncoding.GetBytes(key)));
-                        }
-
-                        GenIVAfterEncrypt = true;
-                        Initialized = true;
+                    if (keyInBase64)
+                    {
+                        RijndaelService.Key = Convert.FromBase64String(key);
                     }
+                    else
+                    {
+                        RijndaelService.Key = Convert.FromBase64String(Convert.ToBase64String(TextEncoding.GetBytes(key)));
+                    }
+
+                    GenIVAfterEncrypt = true;
+                    Initialized = true;
                 }
                 catch (Exception ex)
                 {
@@ -1470,67 +1495,69 @@ namespace RIS.Cryptography.Cipher
             {
                 try
                 {
-                    if (key != string.Empty)
+                    if (string.IsNullOrEmpty(key))
+                        return;
+
+                    RijndaelManaged rijndaelService = new RijndaelManaged();
+                    KeySizes keySizes = rijndaelService.LegalKeySizes[0];
+                    int countSizes = ((keySizes.MaxSize - keySizes.MinSize) / keySizes.SkipSize) + 1;
+                    int size = keySizes.MinSize;
+
+                    for (int i = 0; i < countSizes; ++i)
                     {
-                        RijndaelManaged rijndaelService = new RijndaelManaged();
-                        KeySizes keySizes = rijndaelService.LegalKeySizes[0];
-                        int countSizes = (keySizes.MaxSize - keySizes.MinSize) / keySizes.SkipSize + 1;
-                        int size = keySizes.MinSize;
-
-                        for (int i = 0; i < countSizes; ++i)
+                        if (size == keySize)
                         {
-                            if (size == keySize)
-                            {
-                                rijndaelService.KeySize = keySize;
-                                break;
-                            }
-
-                            if (i != countSizes - 1)
-                            {
-                                size += keySizes.SkipSize;
-                            }
-                            else
-                            {
-                                if (rijndaelService.KeySize != keySize)
-                                {
-                                    var exception = new Exception(
-                                        $"KeySize[{keySize}] not supported for CipherMethod[{this.GetType().FullName}]");
-                                    Events.OnError(this, new RErrorEventArgs(exception.Message, exception.StackTrace));
-                                    OnError(new RErrorEventArgs(exception.Message, exception.StackTrace));
-                                    throw exception;
-                                }
-                            }
+                            rijndaelService.KeySize = keySize;
+                            break;
                         }
 
-                        rijndaelService.Dispose();
-
-                        RijndaelService = new RijndaelManaged();
-                        RijndaelService.BlockSize = 128;
-                        RijndaelService.Padding = PaddingMode.ISO10126;
-                        RijndaelService.Mode = CipherMode.CBC;
-                        RijndaelService.KeySize = keySize;
-
-                        if (keyInBase64)
+                        if (i != countSizes - 1)
                         {
-                            RijndaelService.Key = Convert.FromBase64String(key);
+                            size += keySizes.SkipSize;
                         }
                         else
                         {
-                            RijndaelService.Key = Convert.FromBase64String(Convert.ToBase64String(TextEncoding.GetBytes(key)));
+                            if (rijndaelService.KeySize != keySize)
+                            {
+                                var exception = new Exception(
+                                    $"KeySize[{keySize}] not supported for CipherMethod[{this.GetType().FullName}]");
+                                Events.OnError(this, new RErrorEventArgs(exception.Message, exception.StackTrace));
+                                OnError(new RErrorEventArgs(exception.Message, exception.StackTrace));
+                                throw exception;
+                            }
                         }
-
-                        if (ivInBase64)
-                        {
-                            RijndaelService.IV = Convert.FromBase64String(iv);
-                        }
-                        else
-                        {
-                            RijndaelService.IV = Convert.FromBase64String(Convert.ToBase64String(TextEncoding.GetBytes(iv)));
-                        }
-
-                        GenIVAfterEncrypt = true;
-                        Initialized = true;
                     }
+
+                    rijndaelService.Dispose();
+
+                    RijndaelService = new RijndaelManaged
+                    {
+                        BlockSize = 128,
+                        Padding = PaddingMode.ISO10126,
+                        Mode = CipherMode.CBC,
+                        KeySize = keySize
+                    };
+
+                    if (keyInBase64)
+                    {
+                        RijndaelService.Key = Convert.FromBase64String(key);
+                    }
+                    else
+                    {
+                        RijndaelService.Key = Convert.FromBase64String(Convert.ToBase64String(TextEncoding.GetBytes(key)));
+                    }
+
+                    if (ivInBase64)
+                    {
+                        RijndaelService.IV = Convert.FromBase64String(iv);
+                    }
+                    else
+                    {
+                        RijndaelService.IV = Convert.FromBase64String(Convert.ToBase64String(TextEncoding.GetBytes(iv)));
+                    }
+
+                    GenIVAfterEncrypt = true;
+                    Initialized = true;
                 }
                 catch (Exception ex)
                 {
@@ -1548,35 +1575,37 @@ namespace RIS.Cryptography.Cipher
             {
                 try
                 {
-                    if (key != string.Empty)
+                    if (string.IsNullOrEmpty(key))
+                        return;
+
+                    RijndaelService = new RijndaelManaged
                     {
-                        RijndaelService = new RijndaelManaged();
-                        RijndaelService.BlockSize = 128;
-                        RijndaelService.Padding = PaddingMode.ISO10126;
-                        RijndaelService.Mode = CipherMode.CBC;
-                        RijndaelService.KeySize = (int)keySize;
+                        BlockSize = 128,
+                        Padding = PaddingMode.ISO10126,
+                        Mode = CipherMode.CBC,
+                        KeySize = (int)keySize
+                    };
 
-                        if (keyInBase64)
-                        {
-                            RijndaelService.Key = Convert.FromBase64String(key);
-                        }
-                        else
-                        {
-                            RijndaelService.Key = Convert.FromBase64String(Convert.ToBase64String(TextEncoding.GetBytes(key)));
-                        }
-
-                        if (ivInBase64)
-                        {
-                            RijndaelService.IV = Convert.FromBase64String(iv);
-                        }
-                        else
-                        {
-                            RijndaelService.IV = Convert.FromBase64String(Convert.ToBase64String(TextEncoding.GetBytes(iv)));
-                        }
-
-                        GenIVAfterEncrypt = true;
-                        Initialized = true;
+                    if (keyInBase64)
+                    {
+                        RijndaelService.Key = Convert.FromBase64String(key);
                     }
+                    else
+                    {
+                        RijndaelService.Key = Convert.FromBase64String(Convert.ToBase64String(TextEncoding.GetBytes(key)));
+                    }
+
+                    if (ivInBase64)
+                    {
+                        RijndaelService.IV = Convert.FromBase64String(iv);
+                    }
+                    else
+                    {
+                        RijndaelService.IV = Convert.FromBase64String(Convert.ToBase64String(TextEncoding.GetBytes(iv)));
+                    }
+
+                    GenIVAfterEncrypt = true;
+                    Initialized = true;
                 }
                 catch (Exception ex)
                 {
@@ -1656,8 +1685,7 @@ namespace RIS.Cryptography.Cipher
 
                     decryptedData = transform.TransformFinalBlock(data, 0, data.Length);
 
-                    string plainText = TextEncoding.GetString(decryptedData);
-                    return plainText;
+                    return TextEncoding.GetString(decryptedData);
                 }
                 catch (ArgumentNullException ex)
                 {

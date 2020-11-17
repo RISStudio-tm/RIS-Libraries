@@ -14,9 +14,9 @@ namespace RIS.Cryptography.Hash.Algorithms
         protected bool ReflectedInput = true;
         protected bool ReflectedOutput = true;
         protected uint[] Table { get; private set; }
-        protected uint CurrentInitial { get; private set; }
+        protected uint CurrentInitial { get; set; }
 
-        public CRC32Base()
+        protected CRC32Base()
         {
             HashSizeValue = 32;
         }

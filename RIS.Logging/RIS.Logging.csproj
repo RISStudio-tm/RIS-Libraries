@@ -5,11 +5,11 @@
     <Configurations>Debug;Release;Release Nuget</Configurations>
     <RootNamespace>RIS.Logging</RootNamespace>
     <AssemblyName>RIS.Logging</AssemblyName>
-    <AssemblyVersion>2.2.10.0</AssemblyVersion>
-    <FileVersion>2.2.10.0</FileVersion>
+    <AssemblyVersion>2.2.11.0</AssemblyVersion>
+    <FileVersion>2.2.11.0</FileVersion>
     <PackageId>RIS.Logging</PackageId>
     <Product>RIS.Logging</Product>
-    <Version>2.2.10</Version>
+    <Version>2.2.11</Version>
     <Description>A library designed for various types of tasks. Part of the RIS "ecosystem".</Description>
     <PackageTags>dotnet, dotnetcore, netframework, netcore, library</PackageTags>
     <Authors>Dmitry Ponomarev</Authors>

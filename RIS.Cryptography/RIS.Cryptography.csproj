@@ -5,12 +5,12 @@
     <Configurations>Debug;Release;Release Nuget</Configurations>
     <RootNamespace>RIS.Cryptography</RootNamespace>
     <AssemblyName>RIS.Cryptography</AssemblyName>
-    <AssemblyVersion>2.7.169.0</AssemblyVersion>
-    <FileVersion>2.7.169.0</FileVersion>
+    <AssemblyVersion>2.8.1.0</AssemblyVersion>
+    <FileVersion>2.8.1.0</FileVersion>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <PackageId>RIS.Cryptography</PackageId>
     <Product>RIS.Cryptography</Product>
-    <Version>2.7.169</Version>
+    <Version>2.8.1</Version>
     <Description>A library designed for various types of tasks. Part of the RIS "ecosystem".</Description>
     <PackageTags>dotnet, dotnetcore, netframework, netcore, library</PackageTags>
     <Authors>Dmitry Ponomarev</Authors>
