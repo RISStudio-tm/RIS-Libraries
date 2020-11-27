@@ -5,6 +5,7 @@ using System;
 using System.Configuration;
 using System.Diagnostics;
 using System.IO;
+using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 #if NETFRAMEWORK
@@ -23,8 +24,22 @@ namespace RIS
         public static event EventHandler<RErrorEventArgs> Error;
 
         public static string ExecAppDirectoryName { get; }
+        public static string ExecAppFilePath { get; }
         public static string ExecAppFileName { get; }
         public static string ExecAppFileNameWithoutExtension { get; }
+        public static string ExecAppAssemblyFilePath { get; }
+        public static string ExecAppAssemblyFileName { get; }
+        public static string ExecAppAssemblyFileNameWithoutExtension { get; }
+        public static Process Process { get; }
+        public static string ExecProcessDirectoryName { get; }
+        public static string ExecProcessFilePath { get; }
+        public static string ExecProcessFileName { get; }
+        public static string ExecProcessFileNameWithoutExtension { get; }
+        public static string ExecProcessAssemblyFilePath { get; }
+        public static string ExecProcessAssemblyFileName { get; }
+        public static string ExecProcessAssemblyFileNameWithoutExtension { get; }
+        public static bool IsStandalone { get; }
+        public static bool IsSingleFile { get; }
         public static int PlatformWordSize { get; }
         public static int PlatformWordSizeBits { get; }
 
@@ -58,10 +73,64 @@ namespace RIS
 
         static Environment()
         {
-            System.Configuration.Configuration configuration = ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.None);
-            ExecAppDirectoryName = Path.GetDirectoryName(configuration.FilePath);
-            ExecAppFileName = Path.GetFileNameWithoutExtension(Path.GetFileNameWithoutExtension(configuration.FilePath)) + ".exe";
-            ExecAppFileNameWithoutExtension = Path.GetFileNameWithoutExtension(ExecAppFileName);
+            Assembly execAppAssembly = Assembly.GetEntryAssembly();
+
+            ExecAppDirectoryName = ValidateDirectoryPath(
+                Path.GetDirectoryName(execAppAssembly?.Location));
+            ExecAppFilePath = ValidateFilePath(
+                Path.ChangeExtension(execAppAssembly?.Location, "exe"));
+            ExecAppFileName = ValidateFilePath(
+                Path.ChangeExtension(Path.GetFileName(ExecAppFilePath), "exe"));
+            ExecAppFileNameWithoutExtension =
+                Path.GetFileNameWithoutExtension(ExecAppFileName);
+            ExecAppAssemblyFilePath = ValidateFilePath(
+                Path.ChangeExtension(execAppAssembly?.Location, "dll"));
+            ExecAppAssemblyFileName = ValidateFilePath(
+                Path.ChangeExtension(Path.GetFileName(ExecAppAssemblyFilePath), "dll"));
+            ExecAppAssemblyFileNameWithoutExtension =
+                Path.GetFileNameWithoutExtension(ExecAppAssemblyFileName);
+
+            Process = Process.GetCurrentProcess();
+
+            ExecProcessDirectoryName = ValidateDirectoryPath(
+                Path.GetDirectoryName(Process.MainModule?.FileName));
+            ExecProcessFilePath = ValidateFilePath(
+                Path.ChangeExtension(Process.MainModule?.FileName, "exe"));
+            ExecProcessFileName = ValidateFilePath(
+                Path.ChangeExtension(Path.GetFileName(ExecProcessFilePath), "exe"));
+            ExecProcessFileNameWithoutExtension =
+                Path.GetFileNameWithoutExtension(ExecProcessFileName);
+            ExecProcessAssemblyFilePath = ValidateFilePath(
+                Path.ChangeExtension(Process.MainModule?.FileName, "dll"));
+            ExecProcessAssemblyFileName = ValidateFilePath(
+                Path.ChangeExtension(Path.GetFileName(ExecProcessAssemblyFilePath), "dll"));
+            ExecProcessAssemblyFileNameWithoutExtension =
+                Path.GetFileNameWithoutExtension(ExecProcessAssemblyFileName);
+
+#if NETFRAMEWORK
+
+            IsStandalone = false;
+
+#elif NETCOREAPP
+
+            if (File.Exists(Path.Combine(ExecAppDirectoryName, "hostfxr.dll"))
+                && File.Exists(Path.Combine(ExecAppDirectoryName, "hostpolicy.dll")))
+            {
+                IsStandalone = true;
+            }
+
+#endif
+
+#if NETFRAMEWORK
+
+            IsSingleFile = false;
+
+#elif NETCOREAPP
+
+            if (!File.Exists(ExecProcessAssemblyFilePath))
+                IsSingleFile = true;
+
+#endif
 
             PlatformWordSize = IntPtr.Size;
             PlatformWordSizeBits = PlatformWordSize * 8;
@@ -132,6 +201,22 @@ namespace RIS
         public static void OnError(object sender, RErrorEventArgs e)
         {
             Error?.Invoke(sender, e);
+        }
+
+        private static string ValidateFilePath(string path)
+        {
+            if (string.IsNullOrWhiteSpace(path) || !File.Exists(path))
+                return "Unknown";
+
+            return path;
+        }
+
+        private static string ValidateDirectoryPath(string path)
+        {
+            if (string.IsNullOrWhiteSpace(path) || !Directory.Exists(path))
+                return "Unknown";
+
+            return path;
         }
 
         public static void SetGCLOHThresholdSize(uint sizeInBytes)
