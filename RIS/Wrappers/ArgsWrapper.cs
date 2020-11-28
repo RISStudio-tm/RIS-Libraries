@@ -24,13 +24,9 @@ namespace RIS.Wrappers
         }
 
         public ArgsWrapper(object[] values)
+            : this(values.ToList())
         {
-            _values = new List<object>();
 
-            for (int i = 0; i < values.Length; ++i)
-            {
-                _values.Add(values[i]);
-            }
         }
         public ArgsWrapper(IList<object> values)
         {
@@ -104,13 +100,13 @@ namespace RIS.Wrappers
             return (T)value;
         }
 
-        public IEnumerable<object> EnumerateValues()
+        public IEnumerable<object> Enumerate()
         {
             return _values;
         }
-        public IEnumerable<T> EnumerateValues<T>()
+        public IEnumerable<T> Enumerate<T>()
         {
-            return EnumerateValues().OfType<T>();
+            return Enumerate().OfType<T>();
         }
     }
 }

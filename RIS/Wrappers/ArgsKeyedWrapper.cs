@@ -24,15 +24,9 @@ namespace RIS.Wrappers
         }
 
         public ArgsKeyedWrapper((string Key, object Value)[] values)
+            : this(values.ToList())
         {
-            _values = new Dictionary<string, object>();
 
-            for (int i = 0; i < values.Length; ++i)
-            {
-                (string Key, object Value) value = values[i];
-
-                _values.Add(value.Key, value.Value);
-            }
         }
         public ArgsKeyedWrapper(IList<(string Key, object Value)> values)
         {
@@ -152,6 +146,18 @@ namespace RIS.Wrappers
             }
 
             return (T)value;
+        }
+
+        public IEnumerable<KeyValuePair<string, object>> Enumerate()
+        {
+            return _values.ToList();
+        }
+        public IEnumerable<KeyValuePair<string, T>> Enumerate<T>()
+        {
+            return Enumerate().Select(pair =>
+            {
+                return new KeyValuePair<string, T>(pair.Key, (T)pair.Value);
+            });
         }
 
         public IEnumerable<string> EnumerateKeys()
