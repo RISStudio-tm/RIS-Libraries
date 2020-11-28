@@ -106,8 +106,8 @@ namespace RIS.Cryptography.Hash
             if (length < 1)
             {
                 var exception = new ArgumentOutOfRangeException(nameof(length), "Salt length cannot be less than 1");
-                Events.OnError(new RErrorEventArgs(exception.Message, exception.StackTrace));
-                OnError(new RErrorEventArgs(exception.Message, exception.StackTrace));
+                Events.OnError(new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
+                OnError(new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
                 throw exception;
             }
 

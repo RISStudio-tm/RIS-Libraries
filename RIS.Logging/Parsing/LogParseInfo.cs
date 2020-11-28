@@ -85,15 +85,15 @@ namespace RIS.Logging.Parsing
             if (!File.Exists(path))
             {
                 var exception = new DirectoryNotFoundException("Невозможно открыть лог-файл, так как указанный каталог не существует");
-                Events.OnError(this, new RErrorEventArgs(exception.Message, exception.StackTrace));
-                OnError(new RErrorEventArgs(exception.Message, exception.StackTrace));
+                Events.OnError(this, new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
+                OnError(new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
                 throw exception;
             }
             else if (Path.GetExtension(path) != ".rlog" && Path.GetExtension(path) != ".rdlog")
             {
                 var exception = new Exception("Невозможно открыть лог-файл, так как расширение файла имеет неподдерживаемый формат");
-                Events.OnError(this, new RErrorEventArgs(exception.Message, exception.StackTrace));
-                OnError(new RErrorEventArgs(exception.Message, exception.StackTrace));
+                Events.OnError(this, new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
+                OnError(new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
                 throw exception;
             }
 
@@ -112,8 +112,8 @@ namespace RIS.Logging.Parsing
             }
             catch (Exception ex)
             {
-                Events.OnError(this, new RErrorEventArgs(ex.Message, ex.StackTrace));
-                OnError(new RErrorEventArgs(ex.Message, ex.StackTrace));
+                Events.OnError(this, new RErrorEventArgs(ex, ex.Message, ex.StackTrace));
+                OnError(new RErrorEventArgs(ex, ex.Message, ex.StackTrace));
                 throw;
             }
         }
@@ -151,8 +151,8 @@ namespace RIS.Logging.Parsing
                 }
                 catch (IOException ex)
                 {
-                    Events.OnError(this, new RErrorEventArgs(ex.Message, ex.StackTrace));
-                    OnError(new RErrorEventArgs(ex.Message, ex.StackTrace));
+                    Events.OnError(this, new RErrorEventArgs(ex, ex.Message, ex.StackTrace));
+                    OnError(new RErrorEventArgs(ex, ex.Message, ex.StackTrace));
                     continue;
                 }
 
@@ -169,8 +169,8 @@ namespace RIS.Logging.Parsing
                 }
                 catch (Exception ex)
                 {
-                    Events.OnError(this, new RErrorEventArgs(ex.Message, ex.StackTrace));
-                    OnError(new RErrorEventArgs(ex.Message, ex.StackTrace));
+                    Events.OnError(this, new RErrorEventArgs(ex, ex.Message, ex.StackTrace));
+                    OnError(new RErrorEventArgs(ex, ex.Message, ex.StackTrace));
                     throw;
                 }
             }

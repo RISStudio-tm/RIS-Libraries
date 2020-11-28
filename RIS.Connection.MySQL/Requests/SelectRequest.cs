@@ -112,7 +112,7 @@ namespace RIS.Connection.MySQL.Requests
             {
                 var exception = new ArgumentNullException(nameof(engine), $"{nameof(engine)} cannot be null");
                 Events.OnError(this,
-                    new RErrorEventArgs(exception.Message, exception.StackTrace));
+                    new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
                 throw exception;
             }
 
@@ -169,9 +169,9 @@ namespace RIS.Connection.MySQL.Requests
             {
                 var exception = new Exception("MySQLConnection is not open");
                 Events.OnError(this,
-                    new RErrorEventArgs(exception.Message, exception.StackTrace));
+                    new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
                 Engine.CurrentMySQLConnection.OnError(this,
-                    new RErrorEventArgs(exception.Message, exception.StackTrace));
+                    new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
                 throw exception;
             }
 
@@ -222,9 +222,9 @@ namespace RIS.Connection.MySQL.Requests
                 {
                     var exception = new TimeoutException($"MySQLRequest[{sql}] waiting timeout[{Timeout}] or canceled");
                     Events.OnError(this,
-                        new RErrorEventArgs(exception.Message, exception.StackTrace));
+                        new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
                     Engine.CurrentMySQLConnection.OnError(this,
-                        new RErrorEventArgs(exception.Message, exception.StackTrace));
+                        new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
 
                     if (command?.Transaction != null)
                         await command.Transaction.RollbackAsync().ConfigureAwait(false);
@@ -234,9 +234,9 @@ namespace RIS.Connection.MySQL.Requests
                 catch (Exception ex)
                 {
                     Events.OnError(this,
-                        new RErrorEventArgs($"MySQLRequest[{sql}] execute error - " + ex.Message, ex.StackTrace));
+                        new RErrorEventArgs(ex, $"MySQLRequest[{sql}] execute error - " + ex.Message, ex.StackTrace));
                     Engine.CurrentMySQLConnection.OnError(this,
-                        new RErrorEventArgs(ex.Message, ex.StackTrace));
+                        new RErrorEventArgs(ex, $"MySQLRequest[{sqlBuilder}] execute error - " + ex.Message, ex.StackTrace));
 
                     if (command?.Transaction != null)
                         await command.Transaction.RollbackAsync().ConfigureAwait(false);
@@ -260,9 +260,9 @@ namespace RIS.Connection.MySQL.Requests
             {
                 var exception = new TimeoutException($"MySQLRequest[unknown] waiting Timeout[{Timeout}] or canceled");
                 Events.OnError(this,
-                    new RErrorEventArgs(exception.Message, exception.StackTrace));
+                    new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
                 Engine.CurrentMySQLConnection.OnError(this,
-                    new RErrorEventArgs(exception.Message, exception.StackTrace));
+                    new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
 
                 throw exception;
             }
@@ -289,9 +289,9 @@ namespace RIS.Connection.MySQL.Requests
             {
                 var exception = new Exception("Failed to cancel request");
                 Events.OnError(this,
-                    new RErrorEventArgs(exception.Message, exception.StackTrace));
+                    new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
                 Engine.CurrentMySQLConnection.OnError(this,
-                    new RErrorEventArgs(exception.Message, exception.StackTrace));
+                    new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
                 throw exception;
             }
         }

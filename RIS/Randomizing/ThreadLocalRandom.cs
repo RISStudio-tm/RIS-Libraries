@@ -8,21 +8,34 @@ namespace RIS.Randomizing
 {
     internal sealed class ThreadLocalRandom : Random, IGaussianRandom
     {
-        internal static readonly DateTime SeedTime = DateTime.UtcNow;
-        private double? _nextGaussian;
-
+        private static readonly object InstanceSyncRoot = new object();
         [ThreadStatic]
-        private static ThreadLocalRandom _current;
+        private static volatile ThreadLocalRandom _current;
         public static ThreadLocalRandom Current
         {
             get
             {
-                return _current ?? (_current = new ThreadLocalRandom());
+                if (_current == null)
+                {
+                    lock (InstanceSyncRoot)
+                    {
+                        if (_current == null)
+                            _current = new ThreadLocalRandom();
+                    }
+                }
+
+                return _current;
             }
         }
 
+        internal static readonly DateTime SeedTime = DateTime.UtcNow;
+        private double? _nextGaussian;
+
         private ThreadLocalRandom()
-            : base(Rand.HashCombine(Rand.HashCombine(SeedTime.GetHashCode(), Thread.CurrentThread.ManagedThreadId), System.Environment.TickCount))
+            : base(Rand.HashCombine(Rand.HashCombine(
+                    SeedTime.GetHashCode(),
+                    Thread.CurrentThread.ManagedThreadId),
+                System.Environment.TickCount))
         {
 
         }
@@ -37,7 +50,7 @@ namespace RIS.Randomizing
                 return result;
             }
 
-            (double number1, double number2) = this.InternalNextTwoGaussian();
+            (double number1, double number2) = this.NextTwoGaussianInternal();
 
             _nextGaussian = number2;
 

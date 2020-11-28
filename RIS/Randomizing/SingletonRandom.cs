@@ -7,7 +7,24 @@ namespace RIS.Randomizing
 {
     internal sealed class SingletonRandom : Random, IGaussianRandom
     {
-        public static readonly SingletonRandom Instance = new SingletonRandom();
+        private static readonly object InstanceSyncRoot = new object();
+        private static volatile SingletonRandom _instance;
+        public static SingletonRandom Instance
+        {
+            get
+            {
+                if (_instance == null)
+                {
+                    lock (InstanceSyncRoot)
+                    {
+                        if (_instance == null)
+                            _instance = new SingletonRandom();
+                    }
+                }
+
+                return _instance;
+            }
+        }
 
         private SingletonRandom()
             : base(0)

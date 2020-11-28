@@ -71,7 +71,7 @@ namespace RIS.Versioning
             if (version == null)
             {
                 var exception = new ArgumentNullException(nameof(version), $"{nameof(version)} не должен быть равен null");
-                Events.OnError(new RErrorEventArgs(exception.Message, exception.StackTrace));
+                Events.OnError(new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
                 throw exception;
             }
 
@@ -84,7 +84,7 @@ namespace RIS.Versioning
                 var exception = allowZerosVersion
                     ? new FormatException($"Не удалось распознать формат Semanic Version 2.0.0 (с поддержкой нулевой версии и с поддержкой wildcards) в строке [{version}]")
                     : new FormatException($"Не удалось распознать формат Semanic Version 2.0.0 (без поддержки нулевой версии и с поддержкой wildcards) в строке [{version}]");
-                Events.OnError(new RErrorEventArgs(exception.Message, exception.StackTrace));
+                Events.OnError(new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
                 throw exception;
             }
 

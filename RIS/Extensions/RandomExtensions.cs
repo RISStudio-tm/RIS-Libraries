@@ -21,10 +21,10 @@ namespace RIS.Randomizing
             if (gaussianRandom != null)
                 return gaussianRandom.NextGaussian();
 
-            return random.InternalNextTwoGaussian().Number1;
+            return random.NextTwoGaussianInternal().Number1;
         }
 
-        internal static (double Number1, double Number2) InternalNextTwoGaussian(this Random random)
+        internal static (double Number1, double Number2) NextTwoGaussianInternal(this Random random)
         {
             double number1, number2, s;
 

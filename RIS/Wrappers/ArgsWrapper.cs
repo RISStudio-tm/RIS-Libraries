@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace RIS.Wrappers
 {
@@ -73,15 +74,15 @@ namespace RIS.Wrappers
             if (index < 0)
             {
                 var exception = new IndexOutOfRangeException("Индекс не может быть меньше 0");
-                Events.OnError(this, new RErrorEventArgs(exception.Message, exception.StackTrace));
-                OnError(new RErrorEventArgs(exception.Message, exception.StackTrace));
+                Events.OnError(this, new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
+                OnError(new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
                 throw exception;
             }
             else if (index > _values.Count - 1)
             {
                 var exception = new IndexOutOfRangeException("Индекс не может быть больше длины коллекции");
-                Events.OnError(this, new RErrorEventArgs(exception.Message, exception.StackTrace));
-                OnError(new RErrorEventArgs(exception.Message, exception.StackTrace));
+                Events.OnError(this, new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
+                OnError(new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
                 throw exception;
             }
 
@@ -89,33 +90,27 @@ namespace RIS.Wrappers
         }
         public T Get<T>(int index)
         {
-            if (index < 0)
-            {
-                var exception = new IndexOutOfRangeException("Индекс не может быть меньше 0");
-                Events.OnError(this, new RErrorEventArgs(exception.Message, exception.StackTrace));
-                OnError(new RErrorEventArgs(exception.Message, exception.StackTrace));
-                throw exception;
-            }
-            else if (index > _values.Count - 1)
-            {
-                var exception = new IndexOutOfRangeException("Индекс не может быть больше длины коллекции");
-                Events.OnError(this, new RErrorEventArgs(exception.Message, exception.StackTrace));
-                OnError(new RErrorEventArgs(exception.Message, exception.StackTrace));
-                throw exception;
-            }
-
-            object value = _values[index];
+            object value = Get(index);
 
             if (!(value is T))
             {
                 var exception =
                     new Exception($"Значение элемента с индексом {index} невозможно привести к типу {typeof(T)}");
-                Events.OnError(this, new RErrorEventArgs(exception.Message, exception.StackTrace));
-                OnError(new RErrorEventArgs(exception.Message, exception.StackTrace));
+                Events.OnError(this, new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
+                OnError(new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
                 throw exception;
             }
 
-            return (T) value;
+            return (T)value;
+        }
+
+        public IEnumerable<object> EnumerateValues()
+        {
+            return _values;
+        }
+        public IEnumerable<T> EnumerateValues<T>()
+        {
+            return EnumerateValues().OfType<T>();
         }
     }
 }

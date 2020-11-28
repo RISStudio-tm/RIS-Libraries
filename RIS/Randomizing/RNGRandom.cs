@@ -14,10 +14,10 @@ namespace RIS.Randomizing
         private readonly byte[] _buffer;
         private int _nextByteIndex;
 
-        internal RNGRandom(RandomNumberGenerator randomNumberGenerator)
+        public RNGRandom(RandomNumberGenerator random)
             : base(0)
         {
-            _random = randomNumberGenerator;
+            _random = random;
             _buffer = new byte[BufferLength];
             _nextByteIndex = BufferLength;
         }

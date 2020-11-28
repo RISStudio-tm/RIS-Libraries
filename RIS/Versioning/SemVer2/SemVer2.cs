@@ -54,7 +54,7 @@ namespace RIS.Versioning
             if (!allowZerosVersion && major == 0 && minor == 0 && patch == 0)
             {
                 var exception = new FormatException($"Не удалось распознать формат Semanic Version 2.0.0 (без поддержки нулевой версии и без поддержки wildcards) в строке [{major}.{minor}.{patch}]");
-                Events.OnError(new RErrorEventArgs(exception.Message, exception.StackTrace));
+                Events.OnError(new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
                 throw exception;
             }
 
@@ -77,7 +77,7 @@ namespace RIS.Versioning
             if (!allowZerosVersion && major == 0 && minor == 0 && patch == 0)
             {
                 var exception = new FormatException($"Не удалось распознать формат Semanic Version 2.0.0 (без поддержки нулевой версии и без поддержки wildcards) в строке [{major}.{minor}.{patch}]");
-                Events.OnError(new RErrorEventArgs(exception.Message, exception.StackTrace));
+                Events.OnError(new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
                 throw exception;
             }
 
@@ -100,7 +100,7 @@ namespace RIS.Versioning
             if (version == null)
             {
                 var exception = new ArgumentNullException(nameof(version), $"{nameof(version)} не должен быть равен null");
-                Events.OnError(new RErrorEventArgs(exception.Message, exception.StackTrace));
+                Events.OnError(new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
                 throw exception;
             }
 
@@ -113,7 +113,7 @@ namespace RIS.Versioning
                 var exception = allowZerosVersion
                     ? new FormatException($"Не удалось распознать формат Semanic Version 2.0.0 (с поддержкой нулевой версии и без поддержки wildcards) в строке [{version}]")
                     : new FormatException($"Не удалось распознать формат Semanic Version 2.0.0 (без поддержки нулевой версии и без поддержки wildcards) в строке [{version}]");
-                Events.OnError(new RErrorEventArgs(exception.Message, exception.StackTrace));
+                Events.OnError(new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
                 throw exception;
             }
 
@@ -162,7 +162,7 @@ namespace RIS.Versioning
             if (version == null)
             {
                 var exception = new ArgumentNullException(nameof(version), $"{nameof(version)} не должен быть равен null");
-                Events.OnError(new RErrorEventArgs(exception.Message, exception.StackTrace));
+                Events.OnError(new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
                 throw exception;
             }
 

@@ -136,8 +136,8 @@ namespace RIS.Logging
             if (!Directory.Exists(logsPath))
             {
                 var exception = new DirectoryNotFoundException("Невозможно начать удаление лог-файлов, так как указанный каталог не существует");
-                Events.OnError(new RErrorEventArgs(exception.Message, exception.StackTrace));
-                OnError(new RErrorEventArgs(exception.Message, exception.StackTrace));
+                Events.OnError(new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
+                OnError(new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
                 throw exception;
             }
 
@@ -180,8 +180,8 @@ namespace RIS.Logging
                         }
                         catch (Exception ex)
                         {
-                            Events.OnError(new RErrorEventArgs(ex.Message, ex.StackTrace));
-                            OnError(new RErrorEventArgs(ex.Message, ex.StackTrace));
+                            Events.OnError(new RErrorEventArgs(ex, ex.Message, ex.StackTrace));
+                            OnError(new RErrorEventArgs(ex, ex.Message, ex.StackTrace));
                         }
                     }
                 }
@@ -190,8 +190,8 @@ namespace RIS.Logging
             }
             catch (Exception ex)
             {
-                Events.OnError(new RErrorEventArgs(ex.Message, ex.StackTrace));
-                OnError(new RErrorEventArgs(ex.Message, ex.StackTrace));
+                Events.OnError(new RErrorEventArgs(ex, ex.Message, ex.StackTrace));
+                OnError(new RErrorEventArgs(ex, ex.Message, ex.StackTrace));
                 throw;
             }
         }

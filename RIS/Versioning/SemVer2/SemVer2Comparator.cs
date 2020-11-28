@@ -18,7 +18,7 @@ namespace RIS.Versioning
             if (pattern == null)
             {
                 var exception = new ArgumentNullException(nameof(pattern), $"{nameof(pattern)} не должен быть равен null");
-                Events.OnError(new RErrorEventArgs(exception.Message, exception.StackTrace));
+                Events.OnError(new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
                 throw exception;
             }
 
@@ -27,7 +27,7 @@ namespace RIS.Versioning
             if (!match.Success)
             {
                 var exception = new FormatException($"Недопустимый шаблон компаратора [{pattern}]");
-                Events.OnError(new RErrorEventArgs(exception.Message, exception.StackTrace));
+                Events.OnError(new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
                 throw exception;
             }
 
@@ -85,7 +85,7 @@ namespace RIS.Versioning
             if (version == null)
             {
                 var exception = new ArgumentNullException(nameof(version), $"{nameof(version)} не должен быть равен null");
-                Events.OnError(new RErrorEventArgs(exception.Message, exception.StackTrace));
+                Events.OnError(new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
                 throw exception;
             }
 
@@ -112,7 +112,7 @@ namespace RIS.Versioning
                     return CompareOperator.GreaterThanOrEqual;
                 default:
                     var exception = new FormatException($"Недопустимый оператор сравнения компаратора [{pattern}]");
-                    Events.OnError(new RErrorEventArgs(exception.Message, exception.StackTrace));
+                    Events.OnError(new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
                     throw exception;
             }
         }
@@ -134,7 +134,7 @@ namespace RIS.Versioning
                     return ">=";
                 default:
                     var exception = new FormatException($"Недопустимый оператор сравнения компаратора [{compareOperator}]");
-                    Events.OnError(new RErrorEventArgs(exception.Message, exception.StackTrace));
+                    Events.OnError(new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
                     throw exception;
             }
         }
@@ -221,7 +221,7 @@ namespace RIS.Versioning
                     return version >= Version;
                 default:
                     var exception = new ArgumentNullException(nameof(CompareOperator), $"Недопустимый оператор сравнения компаратора [{CompareOperator}]");
-                    Events.OnError(new RErrorEventArgs(exception.Message, exception.StackTrace));
+                    Events.OnError(new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
                     throw exception;
             }
         }

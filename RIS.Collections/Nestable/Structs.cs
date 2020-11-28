@@ -16,7 +16,7 @@ namespace RIS.Collections.Nestable
                 //{
                 //    var exception =
                 //        new Exception("Поле Value в [NestedElement] содержит значение null, которое не может быть возвращено");
-                //    Events.OnError(this, new RErrorEventArgs(exception.Message, exception.StackTrace));
+                //    Events.OnError(this, new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
                 //    throw exception;
                 //}
 
@@ -28,7 +28,7 @@ namespace RIS.Collections.Nestable
                 {
                     var exception =
                         new Exception("Поле Value в [NestedElement] не может содержать значение null");
-                    Events.OnError(this, new RErrorEventArgs(exception.Message, exception.StackTrace));
+                    Events.OnError(this, new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
                     throw exception;
                 }
 
@@ -42,7 +42,7 @@ namespace RIS.Collections.Nestable
                 {
                     var exception =
                         new Exception("Поле Value в [NestedElement] не может содержать значение переданного типа");
-                    Events.OnError(this, new RErrorEventArgs(exception.Message, exception.StackTrace));
+                    Events.OnError(this, new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
                     throw exception;
                 }
 
@@ -91,7 +91,7 @@ namespace RIS.Collections.Nestable
             {
                 var exception =
                     new InvalidCastException("Невозможно получить значение [NestedElement], так как оно содержит не тип Element");
-                Events.OnError(this, new RErrorEventArgs(exception.Message, exception.StackTrace));
+                Events.OnError(this, new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
                 throw exception;
             }
 
@@ -103,7 +103,7 @@ namespace RIS.Collections.Nestable
             {
                 var exception =
                     new InvalidCastException("Невозможно получить значение [NestedElement], так как оно содержит не тип Array");
-                Events.OnError(this, new RErrorEventArgs(exception.Message, exception.StackTrace));
+                Events.OnError(this, new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
                 throw exception;
             }
 
@@ -115,7 +115,7 @@ namespace RIS.Collections.Nestable
             {
                 var exception =
                     new InvalidCastException("Невозможно получить значение [NestedElement], так как оно содержит не тип NestableCollection");
-                Events.OnError(this, new RErrorEventArgs(exception.Message, exception.StackTrace));
+                Events.OnError(this, new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
                 throw exception;
             }
 
@@ -127,14 +127,14 @@ namespace RIS.Collections.Nestable
             if (element == null)
             {
                 var exception = new ArgumentNullException(nameof(element), "Невозможно сравнить [NestedElement] и null");
-                Events.OnError(this, new RErrorEventArgs(exception.Message, exception.StackTrace));
+                Events.OnError(this, new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
                 throw exception;
             }
 
             if (!(element is NestedElement<T>))
             {
                 var exception = new ArgumentNullException(nameof(element), "Невозможно сравнить [NestedElement] и другой тип");
-                Events.OnError(this, new RErrorEventArgs(exception.Message, exception.StackTrace));
+                Events.OnError(this, new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
                 throw exception;
             }
 
@@ -166,7 +166,7 @@ namespace RIS.Collections.Nestable
             {
                 var exception =
                     new Exception("Невозможно преобразовать [NestedElement] к типу Element, так как поле Value равно null");
-                Events.OnError(new RErrorEventArgs(exception.Message, exception.StackTrace));
+                Events.OnError(new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
                 throw exception;
             }
 
@@ -174,7 +174,7 @@ namespace RIS.Collections.Nestable
             {
                 var exception =
                     new InvalidCastException("Невозможно преобразовать [NestedElement] к типу Element");
-                Events.OnError(new RErrorEventArgs(exception.Message, exception.StackTrace));
+                Events.OnError(new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
                 throw exception;
             }
 
@@ -186,7 +186,7 @@ namespace RIS.Collections.Nestable
             {
                 var exception =
                     new Exception("Невозможно преобразовать [NestedElement] к типу Array, так как поле Value равно null");
-                Events.OnError(new RErrorEventArgs(exception.Message, exception.StackTrace));
+                Events.OnError(new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
                 throw exception;
             }
 
@@ -194,7 +194,7 @@ namespace RIS.Collections.Nestable
             {
                 var exception =
                     new InvalidCastException("Невозможно преобразовать [NestedElement] к типу Array");
-                Events.OnError(new RErrorEventArgs(exception.Message, exception.StackTrace));
+                Events.OnError(new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
                 throw exception;
             }
 

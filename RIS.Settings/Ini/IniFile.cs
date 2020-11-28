@@ -92,8 +92,8 @@ namespace RIS.Settings.Ini
             if (path == null)
             {
                 var exception = new ArgumentNullException(nameof(path), $"{nameof(path)} cannot be null");
-                Events.OnError(this, new RErrorEventArgs(exception.Message, exception.StackTrace));
-                OnError(this, new RErrorEventArgs(exception.Message, exception.StackTrace));
+                Events.OnError(this, new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
+                OnError(this, new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
                 throw exception;
             }
 
@@ -106,8 +106,8 @@ namespace RIS.Settings.Ini
             }
             catch (Exception ex)
             {
-                Events.OnError(this, new RErrorEventArgs(ex.Message, ex.StackTrace));
-                OnError(this, new RErrorEventArgs(ex.Message, ex.StackTrace));
+                Events.OnError(this, new RErrorEventArgs(ex, ex.Message, ex.StackTrace));
+                OnError(this, new RErrorEventArgs(ex, ex.Message, ex.StackTrace));
                 throw;
             }
         }
@@ -121,8 +121,8 @@ namespace RIS.Settings.Ini
             if (path == null)
             {
                 var exception = new ArgumentNullException(nameof(path), $"{nameof(path)} cannot be null");
-                Events.OnError(this, new RErrorEventArgs(exception.Message, exception.StackTrace));
-                OnError(this, new RErrorEventArgs(exception.Message, exception.StackTrace));
+                Events.OnError(this, new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
+                OnError(this, new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
                 throw exception;
             }
 
@@ -152,8 +152,8 @@ namespace RIS.Settings.Ini
             if (path == null)
             {
                 var exception = new ArgumentNullException(nameof(path), $"{nameof(path)} cannot be null");
-                Events.OnError(this, new RErrorEventArgs(exception.Message, exception.StackTrace));
-                OnError(this, new RErrorEventArgs(exception.Message, exception.StackTrace));
+                Events.OnError(this, new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
+                OnError(this, new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
                 throw exception;
             }
 
@@ -179,8 +179,8 @@ namespace RIS.Settings.Ini
             if (reader == null)
             {
                 var exception = new ArgumentNullException(nameof(reader), $"{nameof(reader)} cannot be null");
-                Events.OnError(this, new RErrorEventArgs(exception.Message, exception.StackTrace));
-                OnError(this, new RErrorEventArgs(exception.Message, exception.StackTrace));
+                Events.OnError(this, new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
+                OnError(this, new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
                 throw exception;
             }
 
@@ -272,8 +272,8 @@ namespace RIS.Settings.Ini
             if (writer == null)
             {
                 var exception = new ArgumentNullException(nameof(writer), $"{nameof(writer)} cannot be null");
-                Events.OnError(this, new RErrorEventArgs(exception.Message, exception.StackTrace));
-                OnError(this, new RErrorEventArgs(exception.Message, exception.StackTrace));
+                Events.OnError(this, new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
+                OnError(this, new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
                 throw exception;
             }
 
@@ -308,8 +308,8 @@ namespace RIS.Settings.Ini
             if (sectionName == null)
             {
                 var exception = new ArgumentNullException(nameof(sectionName), $"{nameof(sectionName)} cannot be null");
-                Events.OnError(this, new RErrorEventArgs(exception.Message, exception.StackTrace));
-                OnError(this, new RErrorEventArgs(exception.Message, exception.StackTrace));
+                Events.OnError(this, new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
+                OnError(this, new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
                 throw exception;
             }
 
@@ -323,16 +323,16 @@ namespace RIS.Settings.Ini
             if (sectionName == null)
             {
                 var exception = new ArgumentNullException(nameof(sectionName), $"{nameof(sectionName)} cannot be null");
-                Events.OnError(this, new RErrorEventArgs(exception.Message, exception.StackTrace));
-                OnError(this, new RErrorEventArgs(exception.Message, exception.StackTrace));
+                Events.OnError(this, new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
+                OnError(this, new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
                 throw exception;
             }
 
             if (!_sections.TryGetValue(sectionName, out IniSection section))
             {
                 var exception = new ArgumentNullException(nameof(sectionName), $"Section with name [{nameof(sectionName)}] not found");
-                Events.OnError(this, new RErrorEventArgs(exception.Message, exception.StackTrace));
-                OnError(this, new RErrorEventArgs(exception.Message, exception.StackTrace));
+                Events.OnError(this, new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
+                OnError(this, new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
                 throw exception;
             }
 
@@ -344,8 +344,8 @@ namespace RIS.Settings.Ini
             if (sectionName == null)
             {
                 var exception = new ArgumentNullException(nameof(sectionName), $"{nameof(sectionName)} cannot be null");
-                Events.OnError(this, new RErrorEventArgs(exception.Message, exception.StackTrace));
-                OnError(this, new RErrorEventArgs(exception.Message, exception.StackTrace));
+                Events.OnError(this, new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
+                OnError(this, new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
                 throw exception;
             }
 
@@ -438,15 +438,15 @@ namespace RIS.Settings.Ini
             if (sectionName == null)
             {
                 var exception = new ArgumentNullException(nameof(sectionName), $"{nameof(sectionName)} cannot be null");
-                Events.OnError(this, new RErrorEventArgs(exception.Message, exception.StackTrace));
-                OnError(this, new RErrorEventArgs(exception.Message, exception.StackTrace));
+                Events.OnError(this, new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
+                OnError(this, new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
                 throw exception;
             }
             else if (settingName == null)
             {
                 var exception = new ArgumentNullException(nameof(settingName), $"{nameof(settingName)} cannot be null");
-                Events.OnError(this, new RErrorEventArgs(exception.Message, exception.StackTrace));
-                OnError(this, new RErrorEventArgs(exception.Message, exception.StackTrace));
+                Events.OnError(this, new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
+                OnError(this, new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
                 throw exception;
             }
 
@@ -516,15 +516,15 @@ namespace RIS.Settings.Ini
             if (sectionName == null)
             {
                 var exception = new ArgumentNullException(nameof(sectionName), $"{nameof(sectionName)} cannot be null");
-                Events.OnError(this, new RErrorEventArgs(exception.Message, exception.StackTrace));
-                OnError(this, new RErrorEventArgs(exception.Message, exception.StackTrace));
+                Events.OnError(this, new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
+                OnError(this, new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
                 throw exception;
             }
             else if (settingName == null)
             {
                 var exception = new ArgumentNullException(nameof(settingName), $"{nameof(settingName)} cannot be null");
-                Events.OnError(this, new RErrorEventArgs(exception.Message, exception.StackTrace));
-                OnError(this, new RErrorEventArgs(exception.Message, exception.StackTrace));
+                Events.OnError(this, new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
+                OnError(this, new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
                 throw exception;
             }
 
@@ -548,15 +548,15 @@ namespace RIS.Settings.Ini
             if (sectionName == null)
             {
                 var exception = new ArgumentNullException(nameof(sectionName), $"{nameof(sectionName)} cannot be null");
-                Events.OnError(this, new RErrorEventArgs(exception.Message, exception.StackTrace));
-                OnError(this, new RErrorEventArgs(exception.Message, exception.StackTrace));
+                Events.OnError(this, new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
+                OnError(this, new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
                 throw exception;
             }
             else if (settingName == null)
             {
                 var exception = new ArgumentNullException(nameof(settingName), $"{nameof(settingName)} cannot be null");
-                Events.OnError(this, new RErrorEventArgs(exception.Message, exception.StackTrace));
-                OnError(this, new RErrorEventArgs(exception.Message, exception.StackTrace));
+                Events.OnError(this, new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
+                OnError(this, new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
                 throw exception;
             }
 

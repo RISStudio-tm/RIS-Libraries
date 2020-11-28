@@ -17,7 +17,7 @@ namespace RIS.Versioning
             if (pattern == null)
             {
                 var exception = new ArgumentNullException(nameof(pattern), $"{nameof(pattern)} не должен быть равен null");
-                Events.OnError(new RErrorEventArgs(exception.Message, exception.StackTrace));
+                Events.OnError(new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
                 throw exception;
             }
 

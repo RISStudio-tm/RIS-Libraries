@@ -121,7 +121,7 @@ namespace RIS.Randomizing
                 return result;
             }
 
-            (double number1, double number2) = this.InternalNextTwoGaussian();
+            (double number1, double number2) = this.NextTwoGaussianInternal();
 
             _nextGaussian = number2;
 

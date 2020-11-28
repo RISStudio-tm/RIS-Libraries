@@ -163,8 +163,8 @@ namespace RIS.Configuration
             if (!ConfigIsLoaded)
             {
                 var exception = new ConfigurationErrorsException("Не удалось сохранить файл конфигурации, так как он не загружен");
-                Events.OnError(new RErrorEventArgs(exception.Message, exception.StackTrace));
-                OnError(new RErrorEventArgs(exception.Message, exception.StackTrace));
+                Events.OnError(new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
+                OnError(new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
                 throw exception;
             }
 
@@ -185,8 +185,8 @@ namespace RIS.Configuration
             catch (Exception)
             {
                 var exception = new ConfigurationErrorsException("Не удалось сохранить файл конфигурации");
-                Events.OnError(new RErrorEventArgs(exception.Message, exception.StackTrace));
-                OnError(new RErrorEventArgs(exception.Message, exception.StackTrace));
+                Events.OnError(new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
+                OnError(new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
                 throw exception;
             }
         }
@@ -205,8 +205,8 @@ namespace RIS.Configuration
             catch (Exception)
             {
                 var exception = new XmlException("Не удалось найти указанный xml элемент");
-                Events.OnError(new RErrorEventArgs(exception.Message, exception.StackTrace));
-                OnError(new RErrorEventArgs(exception.Message, exception.StackTrace));
+                Events.OnError(new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
+                OnError(new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
                 throw exception;
             }
 

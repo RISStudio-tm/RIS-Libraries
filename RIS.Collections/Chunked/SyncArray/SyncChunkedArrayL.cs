@@ -57,8 +57,8 @@ namespace RIS.Collections.Chunked
                 if (Length > int.MaxValue)
                 {
                     var exception = new Exception("Количество элементов коллекции больше int.MaxValue и не может быть возвращено свойством Count");
-                    Events.OnError(this, new RErrorEventArgs(exception.Message, exception.StackTrace));
-                    OnError(new RErrorEventArgs(exception.Message, exception.StackTrace));
+                    Events.OnError(this, new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
+                    OnError(new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
                     throw exception;
                 }
 
@@ -106,8 +106,8 @@ namespace RIS.Collections.Chunked
                     if (_index == 0 || _index == _list.Length + 1)
                     {
                         var exception = new InvalidOperationException("Перечисление не может выполниться");
-                        Events.OnError(this, new RErrorEventArgs(exception.Message, exception.StackTrace));
-                        _list.OnError(new RErrorEventArgs(exception.Message, exception.StackTrace));
+                        Events.OnError(this, new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
+                        _list.OnError(new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
                         throw exception;
                     }
                     return (object)Current;
@@ -127,8 +127,8 @@ namespace RIS.Collections.Chunked
             if (ChunkSize < 1)
             {
                 var exception = new Exception("Размер чанка не может быть меньше 1");
-                Events.OnError(this, new RErrorEventArgs(exception.Message, exception.StackTrace));
-                OnError(new RErrorEventArgs(exception.Message, exception.StackTrace));
+                Events.OnError(this, new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
+                OnError(new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
                 throw exception;
             }
 
@@ -150,15 +150,15 @@ namespace RIS.Collections.Chunked
             if (ChunkSize < 1)
             {
                 var exception = new Exception("Размер чанка не может быть меньше 1");
-                Events.OnError(this, new RErrorEventArgs(exception.Message, exception.StackTrace));
-                OnError(new RErrorEventArgs(exception.Message, exception.StackTrace));
+                Events.OnError(this, new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
+                OnError(new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
                 throw exception;
             }
             if (length < 0)
             {
                 var exception = new ArgumentOutOfRangeException(nameof(length), "Длина массива не может быть меньше 0");
-                Events.OnError(this, new RErrorEventArgs(exception.Message, exception.StackTrace));
-                OnError(new RErrorEventArgs(exception.Message, exception.StackTrace));
+                Events.OnError(this, new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
+                OnError(new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
                 throw exception;
             }
 
@@ -185,15 +185,15 @@ namespace RIS.Collections.Chunked
             if (ChunkSize < 1)
             {
                 var exception = new Exception("Размер чанка не может быть меньше 1");
-                Events.OnError(this, new RErrorEventArgs(exception.Message, exception.StackTrace));
-                OnError(new RErrorEventArgs(exception.Message, exception.StackTrace));
+                Events.OnError(this, new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
+                OnError(new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
                 throw exception;
             }
             if (length < 0)
             {
                 var exception = new ArgumentOutOfRangeException(nameof(length), "Длина массива не может быть меньше 0");
-                Events.OnError(this, new RErrorEventArgs(exception.Message, exception.StackTrace));
-                OnError(new RErrorEventArgs(exception.Message, exception.StackTrace));
+                Events.OnError(this, new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
+                OnError(new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
                 throw exception;
             }
 
@@ -247,15 +247,15 @@ namespace RIS.Collections.Chunked
             if (index < 0)
             {
                 var exception = new IndexOutOfRangeException("Индекс не может быть меньше 0");
-                Events.OnError(this, new RErrorEventArgs(exception.Message, exception.StackTrace));
-                OnError(new RErrorEventArgs(exception.Message, exception.StackTrace));
+                Events.OnError(this, new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
+                OnError(new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
                 throw exception;
             }
             else if (index > Length - 1L)
             {
                 var exception = new IndexOutOfRangeException("Индекс не может быть больше длины коллекции");
-                Events.OnError(this, new RErrorEventArgs(exception.Message, exception.StackTrace));
-                OnError(new RErrorEventArgs(exception.Message, exception.StackTrace));
+                Events.OnError(this, new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
+                OnError(new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
                 throw exception;
             }
 
@@ -272,29 +272,29 @@ namespace RIS.Collections.Chunked
             if (chunkIndex < 0)
             {
                 var exception = new IndexOutOfRangeException("Индекс чанка не может быть меньше 0");
-                Events.OnError(this, new RErrorEventArgs(exception.Message, exception.StackTrace));
-                OnError(new RErrorEventArgs(exception.Message, exception.StackTrace));
+                Events.OnError(this, new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
+                OnError(new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
                 throw exception;
             }
             else if (chunkIndex > ChunksCount - 1)
             {
                 var exception = new IndexOutOfRangeException("Индекс чанка не может быть больше количества чанков");
-                Events.OnError(this, new RErrorEventArgs(exception.Message, exception.StackTrace));
-                OnError(new RErrorEventArgs(exception.Message, exception.StackTrace));
+                Events.OnError(this, new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
+                OnError(new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
                 throw exception;
             }
             else if (valueIndex > ChunkSize - 1u)
             {
                 var exception = new IndexOutOfRangeException("Индекс значения не может быть больше размера чанка");
-                Events.OnError(this, new RErrorEventArgs(exception.Message, exception.StackTrace));
-                OnError(new RErrorEventArgs(exception.Message, exception.StackTrace));
+                Events.OnError(this, new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
+                OnError(new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
                 throw exception;
             }
             else if (chunkIndex == ChunksCount - 1 && valueIndex > Length - ChunkSize * (ChunksCount - 1) - 1L)
             {
                 var exception = new IndexOutOfRangeException("Индекс значения в последнем чанке не может быть больше длины последнего чанка");
-                Events.OnError(this, new RErrorEventArgs(exception.Message, exception.StackTrace));
-                OnError(new RErrorEventArgs(exception.Message, exception.StackTrace));
+                Events.OnError(this, new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
+                OnError(new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
                 throw exception;
             }
 
@@ -309,15 +309,15 @@ namespace RIS.Collections.Chunked
             if (index < 0)
             {
                 var exception = new IndexOutOfRangeException("Индекс не может быть меньше 0");
-                Events.OnError(this, new RErrorEventArgs(exception.Message, exception.StackTrace));
-                OnError(new RErrorEventArgs(exception.Message, exception.StackTrace));
+                Events.OnError(this, new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
+                OnError(new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
                 throw exception;
             }
             else if (index > Length - 1L)
             {
                 var exception = new IndexOutOfRangeException("Индекс не может быть больше длины коллекции");
-                Events.OnError(this, new RErrorEventArgs(exception.Message, exception.StackTrace));
-                OnError(new RErrorEventArgs(exception.Message, exception.StackTrace));
+                Events.OnError(this, new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
+                OnError(new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
                 throw exception;
             }
 
@@ -334,29 +334,29 @@ namespace RIS.Collections.Chunked
             if (chunkIndex < 0)
             {
                 var exception = new IndexOutOfRangeException("Индекс чанка не может быть меньше 0");
-                Events.OnError(this, new RErrorEventArgs(exception.Message, exception.StackTrace));
-                OnError(new RErrorEventArgs(exception.Message, exception.StackTrace));
+                Events.OnError(this, new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
+                OnError(new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
                 throw exception;
             }
             else if (chunkIndex > ChunksCount - 1)
             {
                 var exception = new IndexOutOfRangeException("Индекс чанка не может быть больше количества чанков");
-                Events.OnError(this, new RErrorEventArgs(exception.Message, exception.StackTrace));
-                OnError(new RErrorEventArgs(exception.Message, exception.StackTrace));
+                Events.OnError(this, new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
+                OnError(new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
                 throw exception;
             }
             else if (valueIndex > ChunkSize - 1u)
             {
                 var exception = new IndexOutOfRangeException("Индекс значения не может быть больше размера чанка");
-                Events.OnError(this, new RErrorEventArgs(exception.Message, exception.StackTrace));
-                OnError(new RErrorEventArgs(exception.Message, exception.StackTrace));
+                Events.OnError(this, new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
+                OnError(new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
                 throw exception;
             }
             else if (chunkIndex == ChunksCount - 1 && valueIndex > Length - ChunkSize * (ChunksCount - 1) - 1L)
             {
                 var exception = new IndexOutOfRangeException("Индекс значения в последнем чанке не может быть больше длины последнего чанка");
-                Events.OnError(this, new RErrorEventArgs(exception.Message, exception.StackTrace));
-                OnError(new RErrorEventArgs(exception.Message, exception.StackTrace));
+                Events.OnError(this, new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
+                OnError(new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
                 throw exception;
             }
 
@@ -371,15 +371,15 @@ namespace RIS.Collections.Chunked
             if (index < 0)
             {
                 var exception = new IndexOutOfRangeException("Индекс не может быть меньше 0");
-                Events.OnError(this, new RErrorEventArgs(exception.Message, exception.StackTrace));
-                OnError(new RErrorEventArgs(exception.Message, exception.StackTrace));
+                Events.OnError(this, new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
+                OnError(new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
                 throw exception;
             }
             else if (index > Length - 1L)
             {
                 var exception = new IndexOutOfRangeException("Индекс не может быть больше длины коллекции");
-                Events.OnError(this, new RErrorEventArgs(exception.Message, exception.StackTrace));
-                OnError(new RErrorEventArgs(exception.Message, exception.StackTrace));
+                Events.OnError(this, new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
+                OnError(new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
                 throw exception;
             }
 
@@ -396,29 +396,29 @@ namespace RIS.Collections.Chunked
             if (chunkIndex < 0)
             {
                 var exception = new IndexOutOfRangeException("Индекс чанка не может быть меньше 0");
-                Events.OnError(this, new RErrorEventArgs(exception.Message, exception.StackTrace));
-                OnError(new RErrorEventArgs(exception.Message, exception.StackTrace));
+                Events.OnError(this, new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
+                OnError(new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
                 throw exception;
             }
             else if (chunkIndex > ChunksCount - 1)
             {
                 var exception = new IndexOutOfRangeException("Индекс чанка не может быть больше количества чанков");
-                Events.OnError(this, new RErrorEventArgs(exception.Message, exception.StackTrace));
-                OnError(new RErrorEventArgs(exception.Message, exception.StackTrace));
+                Events.OnError(this, new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
+                OnError(new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
                 throw exception;
             }
             else if (valueIndex > ChunkSize - 1u)
             {
                 var exception = new IndexOutOfRangeException("Индекс значения не может быть больше размера чанка");
-                Events.OnError(this, new RErrorEventArgs(exception.Message, exception.StackTrace));
-                OnError(new RErrorEventArgs(exception.Message, exception.StackTrace));
+                Events.OnError(this, new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
+                OnError(new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
                 throw exception;
             }
             else if (chunkIndex == ChunksCount - 1 && valueIndex > Length - ChunkSize * (ChunksCount - 1) - 1L)
             {
                 var exception = new IndexOutOfRangeException("Индекс значения в последнем чанке не может быть больше длины последнего чанка");
-                Events.OnError(this, new RErrorEventArgs(exception.Message, exception.StackTrace));
-                OnError(new RErrorEventArgs(exception.Message, exception.StackTrace));
+                Events.OnError(this, new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
+                OnError(new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
                 throw exception;
             }
 
@@ -438,8 +438,8 @@ namespace RIS.Collections.Chunked
                     {
                         var exception =
                             new Exception("Нельзя добавить чанк, так как коллекция уже содержит максимальное их количество");
-                        Events.OnError(this, new RErrorEventArgs(exception.Message, exception.StackTrace));
-                        OnError(new RErrorEventArgs(exception.Message, exception.StackTrace));
+                        Events.OnError(this, new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
+                        OnError(new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
                         throw exception;
                     }
 
@@ -453,8 +453,8 @@ namespace RIS.Collections.Chunked
                 {
                     var exception =
                         new Exception("Нельзя добавить чанк, так как коллекция уже содержит максимальное их количество");
-                    Events.OnError(this, new RErrorEventArgs(exception.Message, exception.StackTrace));
-                    OnError(new RErrorEventArgs(exception.Message, exception.StackTrace));
+                    Events.OnError(this, new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
+                    OnError(new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
                     throw exception;
                 }
 
@@ -492,8 +492,8 @@ namespace RIS.Collections.Chunked
                     if (Chunks.Count == 0)
                     {
                         var exception = new IndexOutOfRangeException("Нельзя удалить чанк, так как массив пуст");
-                        Events.OnError(this, new RErrorEventArgs(exception.Message, exception.StackTrace));
-                        OnError(new RErrorEventArgs(exception.Message, exception.StackTrace));
+                        Events.OnError(this, new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
+                        OnError(new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
                         throw exception;
                     }
 
@@ -506,8 +506,8 @@ namespace RIS.Collections.Chunked
                 if (Chunks.Count == 0)
                 {
                     var exception = new IndexOutOfRangeException("Нельзя удалить чанк, так как массив пуст");
-                    Events.OnError(this, new RErrorEventArgs(exception.Message, exception.StackTrace));
-                    OnError(new RErrorEventArgs(exception.Message, exception.StackTrace));
+                    Events.OnError(this, new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
+                    OnError(new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
                     throw exception;
                 }
 
@@ -538,15 +538,15 @@ namespace RIS.Collections.Chunked
             if (index < 0)
             {
                 var exception = new IndexOutOfRangeException("Индекс не может быть меньше 0");
-                Events.OnError(this, new RErrorEventArgs(exception.Message, exception.StackTrace));
-                OnError(new RErrorEventArgs(exception.Message, exception.StackTrace));
+                Events.OnError(this, new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
+                OnError(new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
                 throw exception;
             }
             else if (index > Length - 1L)
             {
                 var exception = new IndexOutOfRangeException("Индекс не может быть больше длины коллекции");
-                Events.OnError(this, new RErrorEventArgs(exception.Message, exception.StackTrace));
-                OnError(new RErrorEventArgs(exception.Message, exception.StackTrace));
+                Events.OnError(this, new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
+                OnError(new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
                 throw exception;
             }
 
@@ -559,15 +559,15 @@ namespace RIS.Collections.Chunked
             if (chunkIndex < 0)
             {
                 var exception = new IndexOutOfRangeException("Индекс чанка не может быть меньше 0");
-                Events.OnError(this, new RErrorEventArgs(exception.Message, exception.StackTrace));
-                OnError(new RErrorEventArgs(exception.Message, exception.StackTrace));
+                Events.OnError(this, new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
+                OnError(new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
                 throw exception;
             }
             else if (chunkIndex > ChunksCount - 1)
             {
                 var exception = new IndexOutOfRangeException("Индекс чанка не может быть больше количества чанков");
-                Events.OnError(this, new RErrorEventArgs(exception.Message, exception.StackTrace));
-                OnError(new RErrorEventArgs(exception.Message, exception.StackTrace));
+                Events.OnError(this, new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
+                OnError(new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
                 throw exception;
             }
 
@@ -594,8 +594,8 @@ namespace RIS.Collections.Chunked
                 if (Length == long.MaxValue)
                 {
                     var exception = new Exception("Нельзя добавить элемент, так как коллекция уже содержит максимальное их количество");
-                    Events.OnError(this, new RErrorEventArgs(exception.Message, exception.StackTrace));
-                    OnError(new RErrorEventArgs(exception.Message, exception.StackTrace));
+                    Events.OnError(this, new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
+                    OnError(new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
                     throw exception;
                 }
 
@@ -621,8 +621,8 @@ namespace RIS.Collections.Chunked
                 if (Length < 1)
                 {
                     var exception = new Exception("Нельзя удалить элемент, так как коллекция уже пустая");
-                    Events.OnError(this, new RErrorEventArgs(exception.Message, exception.StackTrace));
-                    OnError(new RErrorEventArgs(exception.Message, exception.StackTrace));
+                    Events.OnError(this, new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
+                    OnError(new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
                     throw exception;
                 }
 
@@ -658,29 +658,29 @@ namespace RIS.Collections.Chunked
                 if (Length < 1)
                 {
                     var exception = new Exception("Нельзя скопировать пустую коллекцию");
-                    Events.OnError(this, new RErrorEventArgs(exception.Message, exception.StackTrace));
-                    OnError(new RErrorEventArgs(exception.Message, exception.StackTrace));
+                    Events.OnError(this, new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
+                    OnError(new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
                     throw exception;
                 }
                 else if (array != null && array.Rank != 1)
                 {
                     var exception = new RankException("Копирование в многомерные массивы не поддерживается");
-                    Events.OnError(this, new RErrorEventArgs(exception.Message, exception.StackTrace));
-                    OnError(new RErrorEventArgs(exception.Message, exception.StackTrace));
+                    Events.OnError(this, new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
+                    OnError(new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
                     throw exception;
                 }
                 else if ((long)array.Length - index < Length)
                 {
                     var exception = new Exception("Для копирования длина целевого массива, начиная с указанного индекса, не может быть меньше длины текущей коллекции");
-                    Events.OnError(this, new RErrorEventArgs(exception.Message, exception.StackTrace));
-                    OnError(new RErrorEventArgs(exception.Message, exception.StackTrace));
+                    Events.OnError(this, new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
+                    OnError(new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
                     throw exception;
                 }
                 else if (array.GetValue(0).GetType() != typeof(T))
                 {
                     var exception = new ArrayTypeMismatchException("Для копирования тип целевого массива не может отличаться от типа текущей коллекции");
-                    Events.OnError(this, new RErrorEventArgs(exception.Message, exception.StackTrace));
-                    OnError(new RErrorEventArgs(exception.Message, exception.StackTrace));
+                    Events.OnError(this, new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
+                    OnError(new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
                     throw exception;
                 }
 
@@ -713,8 +713,8 @@ namespace RIS.Collections.Chunked
             if (collection == null)
             {
                 var exception = new ArgumentNullException(nameof(collection), "Целевая коллекция не может быть равна null");
-                Events.OnError(this, new RErrorEventArgs(exception.Message, exception.StackTrace));
-                OnError(new RErrorEventArgs(exception.Message, exception.StackTrace));
+                Events.OnError(this, new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
+                OnError(new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
                 throw exception;
             }
 
@@ -723,15 +723,15 @@ namespace RIS.Collections.Chunked
                 if (Length < 1)
                 {
                     var exception = new Exception("Нельзя скопировать пустую коллекцию");
-                    Events.OnError(this, new RErrorEventArgs(exception.Message, exception.StackTrace));
-                    OnError(new RErrorEventArgs(exception.Message, exception.StackTrace));
+                    Events.OnError(this, new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
+                    OnError(new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
                     throw exception;
                 }
                 else if (collection.Length < Length)
                 {
                     var exception = new Exception("Для копирования длина целевой коллекции не может быть меньше длины текущей");
-                    Events.OnError(this, new RErrorEventArgs(exception.Message, exception.StackTrace));
-                    OnError(new RErrorEventArgs(exception.Message, exception.StackTrace));
+                    Events.OnError(this, new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
+                    OnError(new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
                     throw exception;
                 }
 
@@ -796,8 +796,8 @@ namespace RIS.Collections.Chunked
             if (collection == null)
             {
                 var exception = new ArgumentNullException(nameof(collection), "Целевая коллекция не может быть равна null");
-                Events.OnError(this, new RErrorEventArgs(exception.Message, exception.StackTrace));
-                OnError(new RErrorEventArgs(exception.Message, exception.StackTrace));
+                Events.OnError(this, new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
+                OnError(new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
                 throw exception;
             }
 
@@ -808,15 +808,15 @@ namespace RIS.Collections.Chunked
                     if (Length < 1)
                     {
                         var exception = new Exception("Нельзя скопировать пустую коллекцию");
-                        Events.OnError(this, new RErrorEventArgs(exception.Message, exception.StackTrace));
-                        OnError(new RErrorEventArgs(exception.Message, exception.StackTrace));
+                        Events.OnError(this, new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
+                        OnError(new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
                         throw exception;
                     }
                     else if (collection.Length < Length)
                     {
                         var exception = new Exception("Для копирования длина целевой коллекции не может быть меньше длины текущей");
-                        Events.OnError(this, new RErrorEventArgs(exception.Message, exception.StackTrace));
-                        OnError(new RErrorEventArgs(exception.Message, exception.StackTrace));
+                        Events.OnError(this, new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
+                        OnError(new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
                         throw exception;
                     }
 
@@ -894,8 +894,8 @@ namespace RIS.Collections.Chunked
             if (collection == null)
             {
                 var exception = new ArgumentNullException(nameof(collection), "Целевая коллекция не может быть равна null");
-                Events.OnError(this, new RErrorEventArgs(exception.Message, exception.StackTrace));
-                OnError(new RErrorEventArgs(exception.Message, exception.StackTrace));
+                Events.OnError(this, new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
+                OnError(new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
                 throw exception;
             }
 
@@ -904,15 +904,15 @@ namespace RIS.Collections.Chunked
                 if (Length < 1)
                 {
                     var exception = new Exception("Нельзя скопировать пустую коллекцию");
-                    Events.OnError(this, new RErrorEventArgs(exception.Message, exception.StackTrace));
-                    OnError(new RErrorEventArgs(exception.Message, exception.StackTrace));
+                    Events.OnError(this, new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
+                    OnError(new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
                     throw exception;
                 }
                 else if (collection.Count < Length)
                 {
                     var exception = new Exception("Для копирования длина целевой коллекции не может быть меньше длины текущей");
-                    Events.OnError(this, new RErrorEventArgs(exception.Message, exception.StackTrace));
-                    OnError(new RErrorEventArgs(exception.Message, exception.StackTrace));
+                    Events.OnError(this, new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
+                    OnError(new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
                     throw exception;
                 }
 

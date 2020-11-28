@@ -69,7 +69,7 @@ namespace RIS.Connection.MySQL
             {
                 var exception = new ArgumentNullException(nameof(connection), $"{nameof(connection)} cannot be null");
                 Events.OnError(this,
-                    new RErrorEventArgs(exception.Message, exception.StackTrace));
+                    new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
                 throw exception;
             }
 
@@ -106,9 +106,9 @@ namespace RIS.Connection.MySQL
             {
                 var exception = new Exception("Failed to cancel all requests");
                 Events.OnError(this,
-                    new RErrorEventArgs(exception.Message, exception.StackTrace));
+                    new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
                 CurrentMySQLConnection.OnError(this,
-                    new RErrorEventArgs(exception.Message, exception.StackTrace));
+                    new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
                 throw exception;
             }
         }

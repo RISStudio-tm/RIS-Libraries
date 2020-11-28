@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace RIS.Wrappers
 {
@@ -77,8 +78,8 @@ namespace RIS.Wrappers
             if (!_values.ContainsKey(key))
             {
                 var exception = new KeyNotFoundException("Коллекция не содержит элемент с указанным ключом");
-                Events.OnError(this, new RErrorEventArgs(exception.Message, exception.StackTrace));
-                OnError(new RErrorEventArgs(exception.Message, exception.StackTrace));
+                Events.OnError(this, new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
+                OnError(new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
                 throw exception;
             }
 
@@ -86,25 +87,85 @@ namespace RIS.Wrappers
         }
         public T Get<T>(string key)
         {
-            if (!_values.ContainsKey(key))
-            {
-                var exception = new KeyNotFoundException("Коллекция не содержит элемент с указанным ключом");
-                Events.OnError(this, new RErrorEventArgs(exception.Message, exception.StackTrace));
-                OnError(new RErrorEventArgs(exception.Message, exception.StackTrace));
-                throw exception;
-            }
-
-            object value = _values[key];
+            object value = Get(key);
 
             if (!(value is T))
             {
                 var exception = new Exception($"Значение элемента с ключом {key} невозможно привести к типу {typeof(T)}");
-                Events.OnError(this, new RErrorEventArgs(exception.Message, exception.StackTrace));
-                OnError(new RErrorEventArgs(exception.Message, exception.StackTrace));
+                Events.OnError(this, new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
+                OnError(new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
                 throw exception;
             }
 
             return (T)value;
+        }
+
+        public string GetKey(int index)
+        {
+            if (index < 0)
+            {
+                var exception = new IndexOutOfRangeException("Индекс не может быть меньше 0");
+                Events.OnError(this, new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
+                OnError(new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
+                throw exception;
+            }
+            else if (index > _values.Count - 1)
+            {
+                var exception = new IndexOutOfRangeException("Индекс не может быть больше длины коллекции");
+                Events.OnError(this, new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
+                OnError(new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
+                throw exception;
+            }
+
+            return _values.Keys.ToArray()[index];
+        }
+
+        public object GetValue(int index)
+        {
+            if (index < 0)
+            {
+                var exception = new IndexOutOfRangeException("Индекс не может быть меньше 0");
+                Events.OnError(this, new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
+                OnError(new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
+                throw exception;
+            }
+            else if (index > _values.Count - 1)
+            {
+                var exception = new IndexOutOfRangeException("Индекс не может быть больше длины коллекции");
+                Events.OnError(this, new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
+                OnError(new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
+                throw exception;
+            }
+
+            return _values.Values.ToArray()[index];
+        }
+        public T GetValue<T>(int index)
+        {
+            object value = GetValue(index);
+
+            if (!(value is T))
+            {
+                var exception = new Exception($"Значение элемента с индексом {index} невозможно привести к типу {typeof(T)}");
+                Events.OnError(this, new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
+                OnError(new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
+                throw exception;
+            }
+
+            return (T)value;
+        }
+
+        public IEnumerable<string> EnumerateKeys()
+        {
+            return _values.Keys;
+        }
+
+        public IEnumerable<object> EnumerateValues()
+        {
+            return _values.Values;
+        }
+        public IEnumerable<T> EnumerateValues<T>()
+        {
+            return EnumerateValues().OfType<T>();
         }
     }
 }
