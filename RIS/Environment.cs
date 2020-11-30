@@ -11,6 +11,7 @@ using System.Threading.Tasks;
 #if NETFRAMEWORK
 using System.Xml;
 #elif NETCOREAPP
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 #endif
 using RIS.Configuration;
@@ -40,6 +41,11 @@ namespace RIS
         public static string ExecProcessAssemblyFileNameWithoutExtension { get; }
         public static bool IsStandalone { get; }
         public static bool IsSingleFile { get; }
+#if NETCOREAPP
+        public static string RuntimeName { get; }
+        public static string RuntimeVersion { get; }
+        public static string RuntimeIdentifier { get; }
+#endif
         public static int PlatformWordSize { get; }
         public static int PlatformWordSizeBits { get; }
 
@@ -132,6 +138,12 @@ namespace RIS
 
 #endif
 
+#if NETCOREAPP
+
+            (RuntimeName, RuntimeVersion, RuntimeIdentifier) = GetRuntimeInfo();
+
+#endif
+
             PlatformWordSize = IntPtr.Size;
             PlatformWordSizeBits = PlatformWordSize * 8;
 
@@ -218,6 +230,65 @@ namespace RIS
 
             return path;
         }
+
+#if NETCOREAPP
+
+        private static (string RuntimeName, string RuntimeVersion, string RuntimeIdentifier) GetRuntimeInfo()
+        {
+            string path = Path.Combine(ExecAppDirectoryName,
+                $"{ExecAppFileNameWithoutExtension}.deps.json");
+
+            if (!File.Exists(path))
+                return ("unknown", "unknown", "unknown");
+
+            JObject config;
+
+            using (StreamReader reader = File.OpenText(path))
+            {
+                config = (JObject)JToken.ReadFrom(new JsonTextReader(reader));
+            }
+
+            foreach (JToken token in config.Root.Children())
+            {
+                string tokenJsonPath = $"${token.Path}";
+                string tokenName;
+
+                if (tokenJsonPath[tokenJsonPath.Length - 1] == ']')
+                {
+                    tokenName = tokenJsonPath.Substring(tokenJsonPath.LastIndexOf('[') + 2,
+                        tokenJsonPath.Length - tokenJsonPath.LastIndexOf('[') - 4);
+                }
+                else
+                {
+                    tokenName = tokenJsonPath.Substring(tokenJsonPath.LastIndexOfAny(new[] { '.', '$' }) + 1);
+                }
+
+                if (tokenName != "runtimeTarget")
+                    continue;
+
+                JToken runtimeFullName = token.First?.Value<string>("name");
+
+                if (runtimeFullName == null)
+                    return ("unknown", "unknown", "unknown");
+
+                string[] runtimeFullNameComponents = runtimeFullName.Value<string>().Split('/');
+                string[] runtimeNameComponents = runtimeFullNameComponents[0].Split(',');
+
+                string runtimeName = runtimeNameComponents[0];
+                string runtimeVersion = runtimeNameComponents[1].Substring(8);
+
+                if (runtimeFullNameComponents.Length < 2)
+                    return (runtimeName, runtimeVersion, "any");
+
+                string runtimeIdentifier = runtimeFullNameComponents[1];
+
+                return (runtimeName, runtimeVersion, runtimeIdentifier);
+            }
+
+            return ("unknown", "unknown", "unknown");
+        }
+
+#endif
 
         public static void SetGCLOHThresholdSize(uint sizeInBytes)
         {
