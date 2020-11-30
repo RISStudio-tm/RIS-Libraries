@@ -236,7 +236,7 @@ namespace RIS
         private static (string RuntimeName, string RuntimeVersion, string RuntimeIdentifier) GetRuntimeInfo()
         {
             string path = Path.Combine(ExecAppDirectoryName,
-                $"{ExecAppFileNameWithoutExtension}.deps.json");
+                $"{ExecAppAssemblyFileNameWithoutExtension}.deps.json");
 
             if (!File.Exists(path))
                 return ("unknown", "unknown", "unknown");
