@@ -85,16 +85,16 @@ namespace RIS
                 Path.GetDirectoryName(execAppAssembly?.Location));
             ExecAppFilePath = ValidateFilePath(
                 Path.ChangeExtension(execAppAssembly?.Location, "exe"));
-            ExecAppFileName = ValidateFilePath(
+            ExecAppFileName = ValidateFileName(
                 Path.ChangeExtension(Path.GetFileName(ExecAppFilePath), "exe"));
-            ExecAppFileNameWithoutExtension =
-                Path.GetFileNameWithoutExtension(ExecAppFileName);
+            ExecAppFileNameWithoutExtension = ValidateFileName(
+                Path.GetFileNameWithoutExtension(ExecAppFileName));
             ExecAppAssemblyFilePath = ValidateFilePath(
                 Path.ChangeExtension(execAppAssembly?.Location, "dll"));
-            ExecAppAssemblyFileName = ValidateFilePath(
+            ExecAppAssemblyFileName = ValidateFileName(
                 Path.ChangeExtension(Path.GetFileName(ExecAppAssemblyFilePath), "dll"));
-            ExecAppAssemblyFileNameWithoutExtension =
-                Path.GetFileNameWithoutExtension(ExecAppAssemblyFileName);
+            ExecAppAssemblyFileNameWithoutExtension = ValidateFileName(
+                Path.GetFileNameWithoutExtension(ExecAppAssemblyFileName));
 
             Process = Process.GetCurrentProcess();
 
@@ -102,16 +102,16 @@ namespace RIS
                 Path.GetDirectoryName(Process.MainModule?.FileName));
             ExecProcessFilePath = ValidateFilePath(
                 Path.ChangeExtension(Process.MainModule?.FileName, "exe"));
-            ExecProcessFileName = ValidateFilePath(
+            ExecProcessFileName = ValidateFileName(
                 Path.ChangeExtension(Path.GetFileName(ExecProcessFilePath), "exe"));
-            ExecProcessFileNameWithoutExtension =
-                Path.GetFileNameWithoutExtension(ExecProcessFileName);
+            ExecProcessFileNameWithoutExtension = ValidateFileName(
+                Path.GetFileNameWithoutExtension(ExecProcessFileName));
             ExecProcessAssemblyFilePath = ValidateFilePath(
                 Path.ChangeExtension(Process.MainModule?.FileName, "dll"));
-            ExecProcessAssemblyFileName = ValidateFilePath(
+            ExecProcessAssemblyFileName = ValidateFileName(
                 Path.ChangeExtension(Path.GetFileName(ExecProcessAssemblyFilePath), "dll"));
-            ExecProcessAssemblyFileNameWithoutExtension =
-                Path.GetFileNameWithoutExtension(ExecProcessAssemblyFileName);
+            ExecProcessAssemblyFileNameWithoutExtension = ValidateFileName(
+                Path.GetFileNameWithoutExtension(ExecProcessAssemblyFileName));
 
 #if NETFRAMEWORK
 
@@ -229,6 +229,17 @@ namespace RIS
                 return "Unknown";
 
             return path;
+        }
+
+        private static string ValidateFileName(string name)
+        {
+            if (string.IsNullOrWhiteSpace(name)
+                || Path.GetFileNameWithoutExtension(name) == "Unknown")
+            {
+                return "Unknown";
+            }
+
+            return name;
         }
 
 #if NETCOREAPP
