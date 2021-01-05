@@ -49,28 +49,34 @@ namespace RIS.Settings
             {
                 case null:
                     return string.Empty;
-                case byte[] array:
+                case byte[] arrayValue:
                 {
                     NestableArrayCAL<byte> nestableArray = new NestableArrayCAL<byte>();
 
-                    for (int i = 0; i < array.Length; ++i)
+                    for (int i = 0; i < arrayValue.Length; ++i)
                     {
-                        nestableArray.Add(array[i]);
+                        nestableArray.Add(arrayValue[i]);
                     }
 
                     return nestableArray.ToStringRepresent();
                 }
-                case string[] array:
+                case string[] arrayValue:
                 {
                     NestableArrayCAL<string> nestableArray = new NestableArrayCAL<string>();
 
-                    for (int i = 0; i < array.Length; ++i)
+                    for (int i = 0; i < arrayValue.Length; ++i)
                     {
-                        nestableArray.Add(array[i]);
+                        nestableArray.Add(arrayValue[i]);
                     }
 
                     return nestableArray.ToStringRepresent();
                 }
+                case float floatValue:
+                    return floatValue.ToString(CultureInfo.InvariantCulture);
+                case double doubleValue:
+                    return doubleValue.ToString(CultureInfo.InvariantCulture);
+                case decimal decimalValue:
+                    return decimalValue.ToString(CultureInfo.InvariantCulture);
                 default:
                     return value.ToString();
             }
@@ -83,7 +89,8 @@ namespace RIS.Settings
 
             try
             {
-                _propertyInfo.SetValue(_settingsBase, Convert.ChangeType(value, Type, CultureInfo.InvariantCulture));
+                _propertyInfo.SetValue(_settingsBase,
+                    Convert.ChangeType(value, Type, CultureInfo.InvariantCulture));
             }
             catch (Exception ex)
             {

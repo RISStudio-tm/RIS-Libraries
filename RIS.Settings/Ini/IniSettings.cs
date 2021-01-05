@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 
 namespace RIS.Settings.Ini
 {
@@ -14,7 +15,16 @@ namespace RIS.Settings.Ini
         [ExcludedSetting]
         public IniFile SettingsFile { get; }
 
-        protected IniSettings(string path)
+        protected IniSettings(string path,
+            string defaultSectionName = "General", char commentCharacter = ';',
+            StringComparer comparer = null, IniBoolOptions boolOptions = null)
+            : this(path, null, defaultSectionName, commentCharacter, comparer, boolOptions)
+        {
+
+        }
+        protected IniSettings(string path, Encoding encoding,
+            string defaultSectionName = "General", char commentCharacter = ';',
+            StringComparer comparer = null, IniBoolOptions boolOptions = null)
         {
             if (string.IsNullOrWhiteSpace(path))
             {
@@ -25,10 +35,13 @@ namespace RIS.Settings.Ini
             }
 
             SettingsFilePath = path;
-            SettingsFile = new IniFile();
+            SettingsFile = new IniFile(path, encoding,
+                defaultSectionName, commentCharacter,
+                comparer, boolOptions);
         }
 
-        protected override void OnLoadSettings(IEnumerable<Setting> settings, SettingsLoadOptions options = SettingsLoadOptions.None)
+        protected override void OnLoadSettings(IEnumerable<Setting> settings,
+            SettingsLoadOptions options = SettingsLoadOptions.None)
         {
             SettingsFile.Load(SettingsFilePath);
 

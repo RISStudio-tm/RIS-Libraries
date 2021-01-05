@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 
 namespace RIS.Settings.Ini
@@ -15,9 +16,10 @@ namespace RIS.Settings.Ini
 
         public bool NonZeroNumbersAreTrue { get; }
 
-        public IniBoolOptions(bool nonZeroNumbersAreTrue = true, StringComparer comparer = null)
+        public IniBoolOptions(bool nonZeroNumbersAreTrue = true,
+            StringComparer comparer = null)
         {
-            _boolStringMap = new Dictionary<string, bool>(comparer ?? StringComparer.OrdinalIgnoreCase)
+            _boolStringMap = new Dictionary<string, bool>(comparer ?? StringComparer.InvariantCultureIgnoreCase)
             {
                 [_trueString] = true,
                 [_falseString] = false,
@@ -66,7 +68,9 @@ namespace RIS.Settings.Ini
 
         public string ToString(bool value)
         {
-            return value ? _trueString : _falseString;
+            return value
+                ? _trueString
+                : _falseString;
         }
 
         public bool TryParse(string s, out bool value)
@@ -80,7 +84,9 @@ namespace RIS.Settings.Ini
                     return true;
                 }
 
-                if (NonZeroNumbersAreTrue && int.TryParse(s, out int i))
+                if (NonZeroNumbersAreTrue && int.TryParse(s,
+                    NumberStyles.Integer,
+                    CultureInfo.InvariantCulture, out int i))
                 {
                     value = (i != 0);
 

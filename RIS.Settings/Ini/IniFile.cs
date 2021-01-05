@@ -34,7 +34,7 @@ namespace RIS.Settings.Ini
         public IniFile(string defaultSectionName = "General", char commentCharacter = ';',
             StringComparer comparer = null, IniBoolOptions boolOptions = null)
         {
-            _comparer = comparer ?? StringComparer.OrdinalIgnoreCase;
+            _comparer = comparer ?? StringComparer.InvariantCultureIgnoreCase;
             _boolOptions = boolOptions ?? new IniBoolOptions(true, _comparer);
             _sections = new Dictionary<string, IniSection>(_comparer);
 
@@ -53,6 +53,9 @@ namespace RIS.Settings.Ini
             StringComparer comparer = null, IniBoolOptions boolOptions = null)
             : this(defaultSectionName, commentCharacter, comparer, boolOptions)
         {
+            if (encoding == null)
+                encoding = DefaultEncoding;
+
             Load(path, encoding);
         }
 
@@ -85,7 +88,7 @@ namespace RIS.Settings.Ini
 
         public void Create(string path)
         {
-            Create(path, DefaultEncoding);
+            Create(path, Encoding ?? DefaultEncoding);
         }
         public void Create(string path, Encoding encoding)
         {
@@ -114,7 +117,7 @@ namespace RIS.Settings.Ini
 
         public void Load(string path)
         {
-            Load(path, DefaultEncoding);
+            Load(path, Encoding ?? DefaultEncoding);
         }
         public void Load(string path, Encoding encoding)
         {
@@ -143,11 +146,14 @@ namespace RIS.Settings.Ini
                 Load(reader);
             }
         }
-        public void Load(string path, bool detectEncodingFromByteOrderMarks)
+        public void Load(string path,
+            bool detectEncodingFromByteOrderMarks)
         {
-            Load(path, DefaultEncoding, detectEncodingFromByteOrderMarks);
+            Load(path, Encoding ?? DefaultEncoding,
+                detectEncodingFromByteOrderMarks);
         }
-        public void Load(string path, Encoding encoding, bool detectEncodingFromByteOrderMarks)
+        public void Load(string path, Encoding encoding,
+            bool detectEncodingFromByteOrderMarks)
         {
             if (path == null)
             {
@@ -169,7 +175,8 @@ namespace RIS.Settings.Ini
             FullPath = path;
             Encoding = encoding;
 
-            using (StreamReader reader = new StreamReader(path, encoding, detectEncodingFromByteOrderMarks))
+            using (StreamReader reader = new StreamReader(path, encoding,
+                detectEncodingFromByteOrderMarks))
             {
                 Load(reader);
             }
@@ -262,7 +269,12 @@ namespace RIS.Settings.Ini
 
         public void Save()
         {
-            using (StreamWriter writer = new StreamWriter(FullPath, false))
+            Save(Encoding ?? DefaultEncoding);
+        }
+        public void Save(Encoding encoding)
+        {
+            using (StreamWriter writer = new StreamWriter(FullPath, false,
+                encoding))
             {
                 Save(writer);
             }
@@ -363,67 +375,89 @@ namespace RIS.Settings.Ini
         }
         public sbyte GetSbyte(string sectionName, string settingName, sbyte defaultValue = 0)
         {
-            return sbyte.TryParse(GetString(sectionName, settingName), out sbyte value)
+            return sbyte.TryParse(GetString(sectionName, settingName),
+                NumberStyles.Integer,
+                CultureInfo.InvariantCulture, out sbyte value)
                 ? value
                 : defaultValue;
         }
         public byte GetByte(string sectionName, string settingName, byte defaultValue = 0)
         {
-            return byte.TryParse(GetString(sectionName, settingName), out byte value)
+            return byte.TryParse(GetString(sectionName, settingName),
+                NumberStyles.Integer,
+                CultureInfo.InvariantCulture, out byte value)
                 ? value
                 : defaultValue;
         }
         public short GetShort(string sectionName, string settingName, short defaultValue = 0)
         {
-            return short.TryParse(GetString(sectionName, settingName), out short value)
+            return short.TryParse(GetString(sectionName, settingName),
+                NumberStyles.Integer,
+                CultureInfo.InvariantCulture, out short value)
                 ? value
                 : defaultValue;
         }
         public ushort GetUShort(string sectionName, string settingName, ushort defaultValue = 0)
         {
-            return ushort.TryParse(GetString(sectionName, settingName), out ushort value)
+            return ushort.TryParse(GetString(sectionName, settingName),
+                NumberStyles.Integer,
+                CultureInfo.InvariantCulture, out ushort value)
                 ? value
                 : defaultValue;
         }
         public int GetInt(string sectionName, string settingName, int defaultValue = 0)
         {
-            return int.TryParse(GetString(sectionName, settingName), out int value)
+            return int.TryParse(GetString(sectionName, settingName),
+                NumberStyles.Integer,
+                CultureInfo.InvariantCulture, out int value)
                 ? value
                 : defaultValue;
         }
         public uint GetUInt(string sectionName, string settingName, uint defaultValue = 0U)
         {
-            return uint.TryParse(GetString(sectionName, settingName), out uint value)
+            return uint.TryParse(GetString(sectionName, settingName),
+                NumberStyles.Integer,
+                CultureInfo.InvariantCulture, out uint value)
                 ? value
                 : defaultValue;
         }
         public long GetLong(string sectionName, string settingName, long defaultValue = 0L)
         {
-            return long.TryParse(GetString(sectionName, settingName), out long value)
+            return long.TryParse(GetString(sectionName, settingName),
+                NumberStyles.Integer,
+                CultureInfo.InvariantCulture, out long value)
                 ? value
                 : defaultValue;
         }
         public ulong GetULong(string sectionName, string settingName, ulong defaultValue = 0UL)
         {
-            return ulong.TryParse(GetString(sectionName, settingName), out ulong value)
+            return ulong.TryParse(GetString(sectionName, settingName),
+                NumberStyles.Integer,
+                CultureInfo.InvariantCulture, out ulong value)
                 ? value
                 : defaultValue;
         }
         public float GetFloat(string sectionName, string settingName, float defaultValue = 0.0F)
         {
-            return float.TryParse(GetString(sectionName, settingName), out float value)
+            return float.TryParse(GetString(sectionName, settingName),
+                NumberStyles.Float | NumberStyles.AllowThousands,
+                CultureInfo.InvariantCulture, out float value)
                 ? value
                 : defaultValue;
         }
         public double GetDouble(string sectionName, string settingName, double defaultValue = 0.0)
         {
-            return double.TryParse(GetString(sectionName, settingName), out double value)
+            return double.TryParse(GetString(sectionName, settingName),
+                NumberStyles.Float | NumberStyles.AllowThousands,
+                CultureInfo.InvariantCulture, out double value)
                 ? value
                 : defaultValue;
         }
         public decimal GetDecimal(string sectionName, string settingName, decimal defaultValue = decimal.Zero)
         {
-            return decimal.TryParse(GetString(sectionName, settingName), out decimal value)
+            return decimal.TryParse(GetString(sectionName, settingName),
+                NumberStyles.Number,
+                CultureInfo.InvariantCulture, out decimal value)
                 ? value
                 : defaultValue;
         }
@@ -465,35 +499,35 @@ namespace RIS.Settings.Ini
         }
         public void Set(string sectionName, string settingName, sbyte value)
         {
-            Set(sectionName, settingName, value.ToString());
+            Set(sectionName, settingName, value.ToString(CultureInfo.InvariantCulture));
         }
         public void Set(string sectionName, string settingName, byte value)
         {
-            Set(sectionName, settingName, value.ToString());
+            Set(sectionName, settingName, value.ToString(CultureInfo.InvariantCulture));
         }
         public void Set(string sectionName, string settingName, short value)
         {
-            Set(sectionName, settingName, value.ToString());
+            Set(sectionName, settingName, value.ToString(CultureInfo.InvariantCulture));
         }
         public void Set(string sectionName, string settingName, ushort value)
         {
-            Set(sectionName, settingName, value.ToString());
+            Set(sectionName, settingName, value.ToString(CultureInfo.InvariantCulture));
         }
         public void Set(string sectionName, string settingName, int value)
         {
-            Set(sectionName, settingName, value.ToString());
+            Set(sectionName, settingName, value.ToString(CultureInfo.InvariantCulture));
         }
         public void Set(string sectionName, string settingName, uint value)
         {
-            Set(sectionName, settingName, value.ToString());
+            Set(sectionName, settingName, value.ToString(CultureInfo.InvariantCulture));
         }
         public void Set(string sectionName, string settingName, long value)
         {
-            Set(sectionName, settingName, value.ToString());
+            Set(sectionName, settingName, value.ToString(CultureInfo.InvariantCulture));
         }
         public void Set(string sectionName, string settingName, ulong value)
         {
-            Set(sectionName, settingName, value.ToString());
+            Set(sectionName, settingName, value.ToString(CultureInfo.InvariantCulture));
         }
         public void Set(string sectionName, string settingName, float value)
         {
@@ -509,7 +543,7 @@ namespace RIS.Settings.Ini
         }
         public void Set(string sectionName, string settingName, char value)
         {
-            Set(sectionName, settingName, value.ToString());
+            Set(sectionName, settingName, value.ToString(CultureInfo.InvariantCulture));
         }
         public void Set(string sectionName, string settingName, string value)
         {

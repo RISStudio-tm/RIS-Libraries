@@ -14,7 +14,7 @@ namespace RIS.Settings.Ini
         public IniSection(string name, StringComparer comparer = null)
         {
             Name = name;
-            Settings = new Dictionary<string, IniSetting>(comparer ?? StringComparer.OrdinalIgnoreCase);
+            Settings = new Dictionary<string, IniSetting>(comparer ?? StringComparer.InvariantCultureIgnoreCase);
         }
     }
 }
