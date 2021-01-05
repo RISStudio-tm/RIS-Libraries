@@ -2,6 +2,7 @@
 // Licensed under the Apache License, Version 2.0. See LICENSE file in the project root for license information. 
 
 using System;
+using System.Globalization;
 using System.Reflection;
 using RIS.Collections.Nestable;
 
@@ -82,7 +83,7 @@ namespace RIS.Settings
 
             try
             {
-                _propertyInfo.SetValue(_settingsBase, Convert.ChangeType(value, Type));
+                _propertyInfo.SetValue(_settingsBase, Convert.ChangeType(value, Type, CultureInfo.InvariantCulture));
             }
             catch (Exception ex)
             {
