@@ -66,14 +66,11 @@ namespace RIS
             }
             private set
             {
-                _originalGCLOHThresholdSize = value;
+                if (value < 85000)
+                    value = 85000;
 
-                if (value > 16)
-                    _modifiedGCLOHThresholdSize = value - 16;
-                else if (value > 1)
-                    _modifiedGCLOHThresholdSize = value - 1;
-                else
-                    _modifiedGCLOHThresholdSize = 1;
+                _originalGCLOHThresholdSize = value;
+                _modifiedGCLOHThresholdSize = value - 64;
             }
         }
 
@@ -303,6 +300,9 @@ namespace RIS
 
         public static void SetGCLOHThresholdSize(uint sizeInBytes)
         {
+            if (sizeInBytes < 85000)
+                sizeInBytes = 85000;
+
 #if NETFRAMEWORK
 
             if (AppConfig.ConfigIsLoaded)
