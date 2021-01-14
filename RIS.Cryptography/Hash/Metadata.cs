@@ -45,7 +45,7 @@ namespace RIS.Cryptography.Hash
             }
             catch (global::BCrypt.Net.HashInformationException)
             {
-                var exception = new FormatException($"Invalid hash format in metadata[{ this.GetType().FullName }]");
+                var exception = new FormatException($"Invalid hash format in metadata[{ GetType().FullName }]");
                 Events.OnError(this, new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
                 OnError(new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
                 throw exception;
@@ -140,7 +140,7 @@ namespace RIS.Cryptography.Hash
                 }
                 catch (FormatException)
                 {
-                    _salt = Convert.FromBase64String(Convert.ToBase64String(HashMethods.TextEncoding.GetBytes(value)));
+                    _salt = Convert.FromBase64String(Convert.ToBase64String(Utils.SecureUTF8.GetBytes(value)));
                 }
             }
         }
@@ -170,7 +170,7 @@ namespace RIS.Cryptography.Hash
                 }
                 catch (FormatException)
                 {
-                    _hash = Convert.FromBase64String(Convert.ToBase64String(HashMethods.TextEncoding.GetBytes(value)));
+                    _hash = Convert.FromBase64String(Convert.ToBase64String(Utils.SecureUTF8.GetBytes(value)));
                 }
             }
         }
@@ -226,7 +226,7 @@ namespace RIS.Cryptography.Hash
 
             if (!hashInfo.Success)
             {
-                var exception = new FormatException($"Invalid hash format in metadata[{ this.GetType().FullName }]");
+                var exception = new FormatException($"Invalid hash format in metadata[{ GetType().FullName }]");
                 Events.OnError(this, new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
                 OnError(new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
                 throw exception;

@@ -68,7 +68,7 @@ namespace RIS.Cryptography.Hash
         }
         public string GetHash(string plainText, ushort saltLength, out string hashSalt)
         {
-            hashSalt = HashMethods.GenSalt(saltLength);
+            hashSalt = HashMethodsUtilities.GenerateSalt(saltLength);
             return HashMethod.GetHash(hashSalt + plainText + hashSalt);
         }
 
