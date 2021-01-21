@@ -523,7 +523,7 @@ _tools/UpdatePackageReference/*.dict
 .git/
 .vs/
 .idea/
-_packages/
+_packages/*.nupkg
 
 ##################################### Project #####################################
 
