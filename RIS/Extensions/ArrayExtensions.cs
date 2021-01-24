@@ -5,9 +5,9 @@ using System;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
-namespace RIS.Buffers
+namespace RIS.Extensions
 {
-    public static class Buffer
+    public static class ArrayExtensions
     {
         private const int BufferBlockCopyThreshold = 1024;
         private const int UnmanagedThreshold = 128;
@@ -29,12 +29,14 @@ namespace RIS.Buffers
             src.DeepCopy(0, dst, 0, length);
         }
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void CopyBytes(this byte[] src, int srcOffset, byte[] dst, int dstOffset, int length)
+        public static void CopyBytes(this byte[] src, int srcOffset,
+            byte[] dst, int dstOffset, int length)
         {
             src.DeepCopy(srcOffset, dst, dstOffset, length);
         }
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void CopyBytesNoChecks(this byte[] src, int srcOffset, byte[] dst, int dstOffset, int length)
+        public static void CopyBytesNoChecks(this byte[] src, int srcOffset,
+            byte[] dst, int dstOffset, int length)
         {
             src.DeepCopyNoChecks(srcOffset, dst, dstOffset, length);
         }
@@ -60,20 +62,22 @@ namespace RIS.Buffers
             DeepCopyNoChecks(src, 0, dst, 0, src.Length);
         }
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void DeepCopy<T>(this T[] src, int srcOffset, T[] dst, int dstOffset, int length)
+        public static void DeepCopy<T>(this T[] src, int srcOffset,
+            T[] dst, int dstOffset, int length)
             where T : struct
         {
             ThrowOnInvalidArgument(src, dst, length, srcOffset, dstOffset);
             DeepCopyNoChecks(src, srcOffset, dst, dstOffset, length);
         }
-        public static void DeepCopyNoChecks<T>(this T[] src, int srcOffset, T[] dst, int dstOffset, int length)
+        public static void DeepCopyNoChecks<T>(this T[] src, int srcOffset,
+            T[] dst, int dstOffset, int length)
             where T : struct
         {
             int sizeT = (int) Environment.GetSize<T>();
 
             int unmanagedLimit = UnmanagedThreshold / sizeT;
 
-            if (length >= unmanagedLimit)
+            if (length <= unmanagedLimit)
             {
                 unsafe
                 {
@@ -97,9 +101,9 @@ namespace RIS.Buffers
             {
                 int bufferBlockCopyLimit = BufferBlockCopyThreshold / sizeT;
 
-                if (length >= bufferBlockCopyLimit)
+                if (length <= bufferBlockCopyLimit)
                 {
-                    System.Buffer.BlockCopy(src, srcOffset, dst, dstOffset, length * sizeT);
+                    Buffer.BlockCopy(src, srcOffset, dst, dstOffset, length * sizeT);
                 }
                 else
                 {
@@ -127,18 +131,23 @@ namespace RIS.Buffers
             DeepCopyNoChecks(src, 0, dst, 0, src.Length);
         }
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void DeepCopy(this sbyte[] src, int srcOffset, sbyte[] dst, int dstOffset, int length)
+        public static void DeepCopy(this sbyte[] src, int srcOffset,
+            sbyte[] dst, int dstOffset, int length)
         {
             ThrowOnInvalidArgument(src, dst, length, srcOffset, dstOffset);
             DeepCopyNoChecks(src, srcOffset, dst, dstOffset, length);
         }
-        public static void DeepCopyNoChecks(this sbyte[] src, int srcOffset, sbyte[] dst, int dstOffset, int length)
+        public static void DeepCopyNoChecks(this sbyte[] src, int srcOffset,
+            sbyte[] dst, int dstOffset, int length)
         {
-            if (length >= UnmanagedThreshold)
+            if (length <= UnmanagedThreshold)
             {
-                unsafe {
-                    fixed (sbyte* srcPtr = &src[srcOffset]) {
-                        fixed (sbyte* dstPtr = &dst[dstOffset]) {
+                unsafe
+                {
+                    fixed (sbyte* srcPtr = &src[srcOffset])
+                    {
+                        fixed (sbyte* dstPtr = &dst[dstOffset])
+                        {
                             CopyMemory((byte*) srcPtr, (byte*) dstPtr, length);
                         }
                     }
@@ -146,9 +155,9 @@ namespace RIS.Buffers
             }
             else
             {
-                if (length >= BufferBlockCopyThreshold)
+                if (length <= BufferBlockCopyThreshold)
                 {
-                    System.Buffer.BlockCopy(src, srcOffset, dst, dstOffset, length);
+                    Buffer.BlockCopy(src, srcOffset, dst, dstOffset, length);
                 }
                 else
                 {
@@ -176,17 +185,23 @@ namespace RIS.Buffers
             DeepCopyNoChecks(src, 0, dst, 0, src.Length);
         }
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void DeepCopy(this byte[] src, int srcOffset, byte[] dst, int dstOffset, int length)
+        public static void DeepCopy(this byte[] src, int srcOffset,
+            byte[] dst, int dstOffset, int length)
         {
             ThrowOnInvalidArgument(src, dst, length, srcOffset, dstOffset);
             DeepCopyNoChecks(src, srcOffset, dst, dstOffset, length);
         }
-        public static void DeepCopyNoChecks(this byte[] src, int srcOffset, byte[] dst, int dstOffset, int length)
+        public static void DeepCopyNoChecks(this byte[] src, int srcOffset,
+            byte[] dst, int dstOffset, int length)
         {
-            if (length >= UnmanagedThreshold) {
-                unsafe {
-                    fixed (byte* srcPtr = &src[srcOffset]) {
-                        fixed (byte* dstPtr = &dst[dstOffset]) {
+            if (length <= UnmanagedThreshold)
+            {
+                unsafe
+                {
+                    fixed (byte* srcPtr = &src[srcOffset])
+                    {
+                        fixed (byte* dstPtr = &dst[dstOffset])
+                        {
                             CopyMemory(srcPtr, dstPtr, length);
                         }
                     }
@@ -194,9 +209,9 @@ namespace RIS.Buffers
             }
             else
             {
-                if (length >= BufferBlockCopyThreshold)
+                if (length <= BufferBlockCopyThreshold)
                 {
-                    System.Buffer.BlockCopy(src, srcOffset, dst, dstOffset, length);
+                    Buffer.BlockCopy(src, srcOffset, dst, dstOffset, length);
                 }
                 else
                 {
@@ -224,19 +239,25 @@ namespace RIS.Buffers
             DeepCopyNoChecks(src, 0, dst, 0, src.Length);
         }
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void DeepCopy(this char[] src, int srcOffset, char[] dst, int dstOffset, int length)
+        public static void DeepCopy(this char[] src, int srcOffset,
+            char[] dst, int dstOffset, int length)
         {
             ThrowOnInvalidArgument(src, dst, length, srcOffset, dstOffset);
             DeepCopyNoChecks(src, srcOffset, dst, dstOffset, length);
         }
-        public static void DeepCopyNoChecks(this char[] src, int srcOffset, char[] dst, int dstOffset, int length)
+        public static void DeepCopyNoChecks(this char[] src, int srcOffset,
+            char[] dst, int dstOffset, int length)
         {
             const int unmanagedLimit = UnmanagedThreshold / sizeof(char);
 
-            if (length >= unmanagedLimit) {
-                unsafe {
-                    fixed (char* srcPtr = &src[srcOffset]) {
-                        fixed (char* dstPtr = &dst[dstOffset]) {
+            if (length <= unmanagedLimit)
+            {
+                unsafe
+                {
+                    fixed (char* srcPtr = &src[srcOffset])
+                    {
+                        fixed (char* dstPtr = &dst[dstOffset])
+                        {
                             CopyMemory((byte*) srcPtr, (byte*) dstPtr, length * sizeof(char));
                         }
                     }
@@ -246,9 +267,9 @@ namespace RIS.Buffers
             {
                 const int bufferBlockCopyLimit = BufferBlockCopyThreshold / sizeof(char);
 
-                if (length >= bufferBlockCopyLimit)
+                if (length <= bufferBlockCopyLimit)
                 {
-                    System.Buffer.BlockCopy(src, srcOffset, dst, dstOffset, length * sizeof(char));
+                    Buffer.BlockCopy(src, srcOffset, dst, dstOffset, length * sizeof(char));
                 }
                 else
                 {
@@ -276,19 +297,25 @@ namespace RIS.Buffers
             DeepCopyNoChecks(src, 0, dst, 0, src.Length);
         }
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void DeepCopy(this short[] src, int srcOffset, short[] dst, int dstOffset, int length)
+        public static void DeepCopy(this short[] src, int srcOffset,
+            short[] dst, int dstOffset, int length)
         {
             ThrowOnInvalidArgument(src, dst, length, srcOffset, dstOffset);
             DeepCopyNoChecks(src, srcOffset, dst, dstOffset, length);
         }
-        public static void DeepCopyNoChecks(this short[] src, int srcOffset, short[] dst, int dstOffset, int length)
+        public static void DeepCopyNoChecks(this short[] src, int srcOffset,
+            short[] dst, int dstOffset, int length)
         {
             const int unmanagedLimit = UnmanagedThreshold / sizeof(short);
 
-            if (length >= unmanagedLimit) {
-                unsafe {
-                    fixed (short* srcPtr = &src[srcOffset]) {
-                        fixed (short* dstPtr = &dst[dstOffset]) {
+            if (length <= unmanagedLimit)
+            {
+                unsafe
+                {
+                    fixed (short* srcPtr = &src[srcOffset])
+                    {
+                        fixed (short* dstPtr = &dst[dstOffset])
+                        {
                             CopyMemory((byte*) srcPtr, (byte*) dstPtr, length * sizeof(short));
                         }
                     }
@@ -298,9 +325,9 @@ namespace RIS.Buffers
             {
                 const int bufferBlockCopyLimit = BufferBlockCopyThreshold / sizeof(short);
 
-                if (length >= bufferBlockCopyLimit)
+                if (length <= bufferBlockCopyLimit)
                 {
-                    System.Buffer.BlockCopy(src, srcOffset, dst, dstOffset, length * sizeof(short));
+                    Buffer.BlockCopy(src, srcOffset, dst, dstOffset, length * sizeof(short));
                 }
                 else
                 {
@@ -328,19 +355,25 @@ namespace RIS.Buffers
             DeepCopyNoChecks(src, 0, dst, 0, src.Length);
         }
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void DeepCopy(this ushort[] src, int srcOffset, ushort[] dst, int dstOffset, int length)
+        public static void DeepCopy(this ushort[] src, int srcOffset,
+            ushort[] dst, int dstOffset, int length)
         {
             ThrowOnInvalidArgument(src, dst, length, srcOffset, dstOffset);
             DeepCopyNoChecks(src, srcOffset, dst, dstOffset, length);
         }
-        public static void DeepCopyNoChecks(this ushort[] src, int srcOffset, ushort[] dst, int dstOffset, int length)
+        public static void DeepCopyNoChecks(this ushort[] src, int srcOffset,
+            ushort[] dst, int dstOffset, int length)
         {
             const int unmanagedLimit = UnmanagedThreshold / sizeof(uint);
 
-            if (length >= unmanagedLimit) {
-                unsafe {
-                    fixed (ushort* srcPtr = &src[srcOffset]) {
-                        fixed (ushort* dstPtr = &dst[dstOffset]) {
+            if (length <= unmanagedLimit)
+            {
+                unsafe
+                {
+                    fixed (ushort* srcPtr = &src[srcOffset])
+                    {
+                        fixed (ushort* dstPtr = &dst[dstOffset])
+                        {
                             CopyMemory((byte*) srcPtr, (byte*) dstPtr, length * sizeof(ushort));
                         }
                     }
@@ -350,9 +383,9 @@ namespace RIS.Buffers
             {
                 const int bufferBlockCopyLimit = BufferBlockCopyThreshold / sizeof(ushort);
 
-                if (length >= bufferBlockCopyLimit)
+                if (length <= bufferBlockCopyLimit)
                 {
-                    System.Buffer.BlockCopy(src, srcOffset, dst, dstOffset, length * sizeof(ushort));
+                    Buffer.BlockCopy(src, srcOffset, dst, dstOffset, length * sizeof(ushort));
                 }
                 else
                 {
@@ -380,19 +413,25 @@ namespace RIS.Buffers
             DeepCopyNoChecks(src, 0, dst, 0, src.Length);
         }
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void DeepCopy(this int[] src, int srcOffset, int[] dst, int dstOffset, int length)
+        public static void DeepCopy(this int[] src, int srcOffset,
+            int[] dst, int dstOffset, int length)
         {
             ThrowOnInvalidArgument(src, dst, length, srcOffset, dstOffset);
             DeepCopyNoChecks(src, srcOffset, dst, dstOffset, length);
         }
-        public static void DeepCopyNoChecks(this int[] src, int srcOffset, int[] dst, int dstOffset, int length)
+        public static void DeepCopyNoChecks(this int[] src, int srcOffset,
+            int[] dst, int dstOffset, int length)
         {
             const int unmanagedLimit = UnmanagedThreshold / sizeof(int);
 
-            if (length >= unmanagedLimit) {
-                unsafe {
-                    fixed (int* srcPtr = &src[srcOffset]) {
-                        fixed (int* dstPtr = &dst[dstOffset]) {
+            if (length <= unmanagedLimit)
+            {
+                unsafe
+                {
+                    fixed (int* srcPtr = &src[srcOffset])
+                    {
+                        fixed (int* dstPtr = &dst[dstOffset])
+                        {
                             CopyMemory((byte*) srcPtr, (byte*) dstPtr, length * sizeof(int));
                         }
                     }
@@ -402,9 +441,9 @@ namespace RIS.Buffers
             {
                 const int bufferBlockCopyLimit = BufferBlockCopyThreshold / sizeof(int);
 
-                if (length >= bufferBlockCopyLimit)
+                if (length <= bufferBlockCopyLimit)
                 {
-                    System.Buffer.BlockCopy(src, srcOffset, dst, dstOffset, length * sizeof(int));
+                    Buffer.BlockCopy(src, srcOffset, dst, dstOffset, length * sizeof(int));
                 }
                 else
                 {
@@ -432,19 +471,25 @@ namespace RIS.Buffers
             DeepCopyNoChecks(src, 0, dst, 0, src.Length);
         }
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void DeepCopy(this uint[] src, int srcOffset, uint[] dst, int dstOffset, int length)
+        public static void DeepCopy(this uint[] src, int srcOffset,
+            uint[] dst, int dstOffset, int length)
         {
             ThrowOnInvalidArgument(src, dst, length, srcOffset, dstOffset);
             DeepCopyNoChecks(src, srcOffset, dst, dstOffset, length);
         }
-        public static void DeepCopyNoChecks(this uint[] src, int srcOffset, uint[] dst, int dstOffset, int length)
+        public static void DeepCopyNoChecks(this uint[] src, int srcOffset,
+            uint[] dst, int dstOffset, int length)
         {
             const int unmanagedLimit = UnmanagedThreshold / sizeof(uint);
 
-            if (length >= unmanagedLimit) {
-                unsafe {
-                    fixed (uint* srcPtr = &src[srcOffset]) {
-                        fixed (uint* dstPtr = &dst[dstOffset]) {
+            if (length <= unmanagedLimit)
+            {
+                unsafe
+                {
+                    fixed (uint* srcPtr = &src[srcOffset])
+                    {
+                        fixed (uint* dstPtr = &dst[dstOffset])
+                        {
                             CopyMemory((byte*) srcPtr, (byte*) dstPtr, length * sizeof(uint));
                         }
                     }
@@ -454,9 +499,9 @@ namespace RIS.Buffers
             {
                 const int bufferBlockCopyLimit = BufferBlockCopyThreshold / sizeof(uint);
 
-                if (length >= bufferBlockCopyLimit)
+                if (length <= bufferBlockCopyLimit)
                 {
-                    System.Buffer.BlockCopy(src, srcOffset, dst, dstOffset, length * sizeof(uint));
+                    Buffer.BlockCopy(src, srcOffset, dst, dstOffset, length * sizeof(uint));
                 }
                 else
                 {
@@ -484,19 +529,25 @@ namespace RIS.Buffers
             DeepCopyNoChecks(src, 0, dst, 0, src.Length);
         }
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void DeepCopy(this long[] src, int srcOffset, long[] dst, int dstOffset, int length)
+        public static void DeepCopy(this long[] src, int srcOffset,
+            long[] dst, int dstOffset, int length)
         {
             ThrowOnInvalidArgument(src, dst, length, srcOffset, dstOffset);
             DeepCopyNoChecks(src, srcOffset, dst, dstOffset, length);
         }
-        public static void DeepCopyNoChecks(this long[] src, int srcOffset, long[] dst, int dstOffset, int length)
+        public static void DeepCopyNoChecks(this long[] src, int srcOffset,
+            long[] dst, int dstOffset, int length)
         {
             const int unmanagedLimit = UnmanagedThreshold / sizeof(long);
 
-            if (length >= unmanagedLimit) {
-                unsafe {
-                    fixed (long* srcPtr = &src[srcOffset]) {
-                        fixed (long* dstPtr = &dst[dstOffset]) {
+            if (length <= unmanagedLimit)
+            {
+                unsafe
+                {
+                    fixed (long* srcPtr = &src[srcOffset])
+                    {
+                        fixed (long* dstPtr = &dst[dstOffset])
+                        {
                             CopyMemory((byte*) srcPtr, (byte*) dstPtr, length * sizeof(long));
                         }
                     }
@@ -506,9 +557,9 @@ namespace RIS.Buffers
             {
                 const int bufferBlockCopyLimit = BufferBlockCopyThreshold / sizeof(long);
 
-                if (length >= bufferBlockCopyLimit)
+                if (length <= bufferBlockCopyLimit)
                 {
-                    System.Buffer.BlockCopy(src, srcOffset, dst, dstOffset, length * sizeof(long));
+                    Buffer.BlockCopy(src, srcOffset, dst, dstOffset, length * sizeof(long));
                 }
                 else
                 {
@@ -536,19 +587,25 @@ namespace RIS.Buffers
             DeepCopyNoChecks(src, 0, dst, 0, src.Length);
         }
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void DeepCopy(this ulong[] src, int srcOffset, ulong[] dst, int dstOffset, int length)
+        public static void DeepCopy(this ulong[] src, int srcOffset,
+            ulong[] dst, int dstOffset, int length)
         {
             ThrowOnInvalidArgument(src, dst, length, srcOffset, dstOffset);
             DeepCopyNoChecks(src, srcOffset, dst, dstOffset, length);
         }
-        public static void DeepCopyNoChecks(this ulong[] src, int srcOffset, ulong[] dst, int dstOffset, int length)
+        public static void DeepCopyNoChecks(this ulong[] src, int srcOffset,
+            ulong[] dst, int dstOffset, int length)
         {
             const int unmanagedLimit = UnmanagedThreshold / sizeof(ulong);
 
-            if (length >= unmanagedLimit) {
-                unsafe {
-                    fixed (ulong* srcPtr = &src[srcOffset]) {
-                        fixed (ulong* dstPtr = &dst[dstOffset]) {
+            if (length <= unmanagedLimit)
+            {
+                unsafe
+                {
+                    fixed (ulong* srcPtr = &src[srcOffset])
+                    {
+                        fixed (ulong* dstPtr = &dst[dstOffset])
+                        {
                             CopyMemory((byte*) srcPtr, (byte*) dstPtr, length * sizeof(ulong));
                         }
                     }
@@ -558,9 +615,9 @@ namespace RIS.Buffers
             {
                 const int bufferBlockCopyLimit = BufferBlockCopyThreshold / sizeof(ulong);
 
-                if (length >= bufferBlockCopyLimit)
+                if (length <= bufferBlockCopyLimit)
                 {
-                    System.Buffer.BlockCopy(src, srcOffset, dst, dstOffset, length * sizeof(ulong));
+                    Buffer.BlockCopy(src, srcOffset, dst, dstOffset, length * sizeof(ulong));
                 }
                 else
                 {
@@ -570,16 +627,20 @@ namespace RIS.Buffers
         }
 
 
-        public static unsafe void CopyMemory(byte* srcPtr, byte* dstPtr, int length)
+        public static unsafe void CopyMemory(byte* srcPtr,
+            byte* dstPtr, int length)
         {
             const int u32Size = sizeof(uint);
             const int u64Size = sizeof(ulong);
 
             byte* srcEndPtr = srcPtr + length;
 
-            if (Environment.PlatformWordSize == u32Size) {
+            if (Environment.PlatformWordSize == u32Size)
+            {
                 // 32-bit
-                while (srcPtr + u64Size <= srcEndPtr) {
+
+                while (srcPtr + u64Size <= srcEndPtr)
+                {
                     *(uint*) dstPtr = *(uint*) srcPtr;
                     dstPtr += u32Size;
                     srcPtr += u32Size;
@@ -587,10 +648,15 @@ namespace RIS.Buffers
                     dstPtr += u32Size;
                     srcPtr += u32Size;
                 }
-            } else if (Environment.PlatformWordSize == u64Size) {
-                // 64-bit            
+            }
+            else if (Environment.PlatformWordSize == u64Size)
+            {
+                // 64-bit
+
                 const int u128Size = sizeof(ulong) * 2;
-                while (srcPtr + u128Size <= srcEndPtr) {
+
+                while (srcPtr + u128Size <= srcEndPtr)
+                {
                     *(ulong*) dstPtr = *(ulong*) srcPtr;
                     dstPtr += u64Size;
                     srcPtr += u64Size;
@@ -598,33 +664,40 @@ namespace RIS.Buffers
                     dstPtr += u64Size;
                     srcPtr += u64Size;
                 }
-                if (srcPtr + u64Size <= srcEndPtr) {
+
+                if (srcPtr + u64Size <= srcEndPtr)
+                {
                     *(ulong*) dstPtr ^= *(ulong*) srcPtr;
                     dstPtr += u64Size;
                     srcPtr += u64Size;
                 }
             }
 
-            if (srcPtr + u32Size <= srcEndPtr) {
+            if (srcPtr + u32Size <= srcEndPtr)
+            {
                 *(uint*) dstPtr = *(uint*) srcPtr;
                 dstPtr += u32Size;
                 srcPtr += u32Size;
             }
 
-            if (srcPtr + sizeof(ushort) <= srcEndPtr) {
+            if (srcPtr + sizeof(ushort) <= srcEndPtr)
+            {
                 *(ushort*) dstPtr = *(ushort*) srcPtr;
                 dstPtr += sizeof(ushort);
                 srcPtr += sizeof(ushort);
             }
 
-            if (srcPtr + 1 <= srcEndPtr) {
+            if (srcPtr + 1 <= srcEndPtr)
+            {
                 *dstPtr = *srcPtr;
             }
         }
 
+
         internal static void ThrowOnInvalidArgument<T>(
             T[] src, T[] dst, int length, int srcOffset = 0, int dstOffset = 0,
-            string srcName = null, string dstName = null, string lengthName = null, string srcOffsetName = null, string dstOffsetName = null)
+            string srcName = null, string dstName = null, string lengthName = null,
+            string srcOffsetName = null, string dstOffsetName = null)
             where T : struct
         {
             if (src == null)
