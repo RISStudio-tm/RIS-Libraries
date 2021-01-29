@@ -175,16 +175,25 @@ namespace RIS.Text.Encoding.Base
 
         public static bool IsBase64(string data)
         {
+            if (string.IsNullOrWhiteSpace(data))
+                return false;
+
             return Base64FormatRegex.Match(data).Success;
         }
 
         public static bool IsBase64WithoutPadding(string data)
         {
+            if (string.IsNullOrWhiteSpace(data))
+                return false;
+
             return Base64WithoutPaddingFormatRegex.Match(data).Success;
         }
 
         public static string RemovePadding(string encodedString)
         {
+            if (string.IsNullOrWhiteSpace(encodedString))
+                return encodedString;
+
             if (!IsBase64(encodedString))
             {
                 var exception = new FormatException("Invalid base64 string format");
@@ -197,6 +206,9 @@ namespace RIS.Text.Encoding.Base
 
         public static string RestorePadding(string encodedString)
         {
+            if (string.IsNullOrWhiteSpace(encodedString))
+                return encodedString;
+
             if (!IsBase64WithoutPadding(encodedString))
             {
                 var exception = new FormatException("Invalid base64 without padding string format");
