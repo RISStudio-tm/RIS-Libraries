@@ -3,22 +3,16 @@
 
 using System;
 
-namespace RIS.Cryptography
+namespace RIS.Cryptography.Cipher
 {
     public interface ICipherMethod
     {
         bool Initialized { get; }
 
         string Encrypt(string plainText);
+        byte[] Encrypt(byte[] plainText);
+
         string Decrypt(string cipherText);
-    }
-
-    public interface IHashMethod
-    {
-        bool Initialized { get; }
-
-        string GetHash(string plainText);
-        string GetHash(byte[] data);
-        bool VerifyHash(string plainText, string hashText);
+        byte[] Decrypt(byte[] cipherText);
     }
 }

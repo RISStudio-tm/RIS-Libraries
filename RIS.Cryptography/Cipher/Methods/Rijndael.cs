@@ -2,6 +2,7 @@
 // Licensed under the Apache License, Version 2.0. See LICENSE file in the project root for license information. 
 
 using System;
+using System.Linq;
 using System.Security.Cryptography;
 
 namespace RIS.Cryptography.Cipher.Methods
@@ -11,13 +12,6 @@ namespace RIS.Cryptography.Cipher.Methods
         public event EventHandler<RInformationEventArgs> Information;
         public event EventHandler<RWarningEventArgs> Warning;
         public event EventHandler<RErrorEventArgs> Error;
-
-        public enum CipherKeySizes
-        {
-            L128Bit = 128,
-            L192Bit = 192,
-            L256Bit = 256
-        }
 
         private RijndaelManaged RijndaelService { get; }
 
@@ -110,6 +104,11 @@ namespace RIS.Cryptography.Cipher.Methods
 
         public bool Initialized { get; }
 
+        public Rijndael()
+            : this(RijndaelKeySize.L256Bit)
+        {
+
+        }
         public Rijndael(int keySize)
         {
             try
@@ -169,7 +168,7 @@ namespace RIS.Cryptography.Cipher.Methods
                 throw;
             }
         }
-        public Rijndael(CipherKeySizes keySize)
+        public Rijndael(RijndaelKeySize keySize)
         {
             try
             {
@@ -196,7 +195,7 @@ namespace RIS.Cryptography.Cipher.Methods
                 throw;
             }
         }
-        public Rijndael(string key, bool keyInBase64, int keySize)
+        public Rijndael(string key, int keySize)
         {
             try
             {
@@ -243,13 +242,13 @@ namespace RIS.Cryptography.Cipher.Methods
                     KeySize = keySize
                 };
 
-                if (keyInBase64)
+                try
                 {
                     RijndaelService.Key = Convert.FromBase64String(key);
                 }
-                else
+                catch (FormatException)
                 {
-                    RijndaelService.Key = Convert.FromBase64String(Convert.ToBase64String(Utils.SecureUTF8.GetBytes(key)));
+                    RijndaelService.Key = Convert.FromBase64String(Convert.ToBase64String(Utils.GetBytes(key)));
                 }
 
                 GenIVAfterEncrypt = true;
@@ -267,7 +266,7 @@ namespace RIS.Cryptography.Cipher.Methods
                 throw;
             }
         }
-        public Rijndael(string key, bool keyInBase64, CipherKeySizes keySize)
+        public Rijndael(string key, RijndaelKeySize keySize)
         {
             try
             {
@@ -282,13 +281,13 @@ namespace RIS.Cryptography.Cipher.Methods
                     KeySize = (int)keySize
                 };
 
-                if (keyInBase64)
+                try
                 {
                     RijndaelService.Key = Convert.FromBase64String(key);
                 }
-                else
+                catch (FormatException)
                 {
-                    RijndaelService.Key = Convert.FromBase64String(Convert.ToBase64String(Utils.SecureUTF8.GetBytes(key)));
+                    RijndaelService.Key = Convert.FromBase64String(Convert.ToBase64String(Utils.GetBytes(key)));
                 }
 
                 GenIVAfterEncrypt = true;
@@ -306,7 +305,7 @@ namespace RIS.Cryptography.Cipher.Methods
                 throw;
             }
         }
-        public Rijndael(string key, bool keyInBase64, int keySize, string iv, bool ivInBase64)
+        public Rijndael(string key, int keySize, string iv)
         {
             try
             {
@@ -353,22 +352,22 @@ namespace RIS.Cryptography.Cipher.Methods
                     KeySize = keySize
                 };
 
-                if (keyInBase64)
+                try
                 {
                     RijndaelService.Key = Convert.FromBase64String(key);
                 }
-                else
+                catch (FormatException)
                 {
-                    RijndaelService.Key = Convert.FromBase64String(Convert.ToBase64String(Utils.SecureUTF8.GetBytes(key)));
+                    RijndaelService.Key = Convert.FromBase64String(Convert.ToBase64String(Utils.GetBytes(key)));
                 }
 
-                if (ivInBase64)
+                try
                 {
                     RijndaelService.IV = Convert.FromBase64String(iv);
                 }
-                else
+                catch (FormatException)
                 {
-                    RijndaelService.IV = Convert.FromBase64String(Convert.ToBase64String(Utils.SecureUTF8.GetBytes(iv)));
+                    RijndaelService.IV = Convert.FromBase64String(Convert.ToBase64String(Utils.GetBytes(iv)));
                 }
 
                 GenIVAfterEncrypt = true;
@@ -386,7 +385,7 @@ namespace RIS.Cryptography.Cipher.Methods
                 throw;
             }
         }
-        public Rijndael(string key, bool keyInBase64, CipherKeySizes keySize, string iv, bool ivInBase64)
+        public Rijndael(string key, RijndaelKeySize keySize, string iv)
         {
             try
             {
@@ -401,22 +400,22 @@ namespace RIS.Cryptography.Cipher.Methods
                     KeySize = (int)keySize
                 };
 
-                if (keyInBase64)
+                try
                 {
                     RijndaelService.Key = Convert.FromBase64String(key);
                 }
-                else
+                catch (FormatException)
                 {
-                    RijndaelService.Key = Convert.FromBase64String(Convert.ToBase64String(Utils.SecureUTF8.GetBytes(key)));
+                    RijndaelService.Key = Convert.FromBase64String(Convert.ToBase64String(Utils.GetBytes(key)));
                 }
 
-                if (ivInBase64)
+                try
                 {
                     RijndaelService.IV = Convert.FromBase64String(iv);
                 }
-                else
+                catch (FormatException)
                 {
-                    RijndaelService.IV = Convert.FromBase64String(Convert.ToBase64String(Utils.SecureUTF8.GetBytes(iv)));
+                    RijndaelService.IV = Convert.FromBase64String(Convert.ToBase64String(Utils.GetBytes(iv)));
                 }
 
                 GenIVAfterEncrypt = true;
@@ -464,37 +463,43 @@ namespace RIS.Cryptography.Cipher.Methods
 
         public string Encrypt(string plainText)
         {
-            return EncryptWithWriteIV(plainText);
+            byte[] data = Utils.GetBytes(plainText);
+
+            return Convert.ToBase64String(
+                EncryptWithWriteIV(data));
         }
-        private string EncryptWithWriteIV(string plainText)
+        public byte[] Encrypt(byte[] data)
+        {
+            return EncryptWithWriteIV(data);
+        }
+        private byte[] EncryptWithWriteIV(byte[] data)
         {
             try
             {
                 byte[] encryptedData;
                 byte[] iv;
 
-                if (plainText.Length == 0)
-                    return string.Empty;
-
-                byte[] data = Utils.SecureUTF8.GetBytes(plainText);
+                if (data.Length == 0)
+                    return Array.Empty<byte>();
 
                 iv = RijndaelService.IV;
+
+                if (GenIVAfterEncrypt)
+                    RijndaelService.GenerateIV();
+
                 ICryptoTransform transform = RijndaelService.CreateEncryptor(RijndaelService.Key, iv);
 
                 encryptedData = transform.TransformFinalBlock(data, 0, data.Length);
 
-                if (GenIVAfterEncrypt)
-                {
-                    RijndaelService.GenerateIV();
-                }
-
-                return Convert.ToBase64String(iv) + Convert.ToBase64String(encryptedData);
+                return iv
+                    .Concat(encryptedData)
+                    .ToArray();
             }
             catch (ArgumentNullException ex)
             {
                 Events.OnError(this, new RErrorEventArgs(ex, ex.Message, ex.StackTrace));
                 OnError(new RErrorEventArgs(ex, ex.Message, ex.StackTrace));
-                return string.Empty;
+                return Array.Empty<byte>();
             }
             catch (Exception ex)
             {
@@ -506,33 +511,43 @@ namespace RIS.Cryptography.Cipher.Methods
 
         public string Decrypt(string cipherText)
         {
-            return DecryptWithReadIV(cipherText);
+            byte[] data = Convert.FromBase64String(cipherText);
+
+            return Utils.GetString(
+                DecryptWithReadIV(data));
         }
-        private string DecryptWithReadIV(string cipherTextWithIV)
+        public byte[] Decrypt(byte[] data)
+        {
+            return DecryptWithReadIV(data);
+        }
+        private byte[] DecryptWithReadIV(byte[] dataWithIV)
         {
             try
             {
                 byte[] decryptedData;
 
-                if (cipherTextWithIV.Length == 0)
-                    return string.Empty;
+                if (dataWithIV.Length == 0)
+                    return Array.Empty<byte>();
 
-                int ivLength = Convert.ToBase64String(RijndaelService.IV).Length;
-                byte[] iv = Convert.FromBase64String(cipherTextWithIV.Substring(0, ivLength));
-                string cipherText = cipherTextWithIV.Substring(ivLength);
-                byte[] data = Convert.FromBase64String(cipherText);
+                int ivLength = RijndaelService.IV.Length;
+                byte[] iv = dataWithIV
+                    .Take(ivLength)
+                    .ToArray();
+                byte[] data = dataWithIV
+                    .Skip(ivLength)
+                    .ToArray();
 
                 ICryptoTransform transform = RijndaelService.CreateDecryptor(RijndaelService.Key, iv);
 
                 decryptedData = transform.TransformFinalBlock(data, 0, data.Length);
 
-                return Utils.SecureUTF8.GetString(decryptedData);
+                return decryptedData;
             }
             catch (ArgumentNullException ex)
             {
                 Events.OnError(this, new RErrorEventArgs(ex, ex.Message, ex.StackTrace));
                 OnError(new RErrorEventArgs(ex, ex.Message, ex.StackTrace));
-                return string.Empty;
+                return Array.Empty<byte>();
             }
             catch (Exception ex)
             {

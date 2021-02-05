@@ -2,6 +2,7 @@
 // Licensed under the Apache License, Version 2.0. See LICENSE file in the project root for license information. 
 
 using System;
+using System.Globalization;
 using System.Runtime.CompilerServices;
 using System.Text;
 
@@ -16,24 +17,30 @@ namespace RIS.Cryptography
             SecureUTF8 = new UTF8Encoding(false, true);
         }
 
-        [MethodImpl(MethodImplOptions.NoInlining | MethodImplOptions.NoOptimization)]
-        public static bool SecureEquals(string left, string right, bool ignoreCase = false, bool invariantCulture = true)
+        public static byte[] GetBytes(string text)
         {
+            return SecureUTF8.GetBytes(text);
+        }
+
+        public static string GetString(byte[] text)
+        {
+            return SecureUTF8.GetString(text);
+        }
+
+        [MethodImpl(MethodImplOptions.NoInlining | MethodImplOptions.NoOptimization)]
+        public static bool SecureEquals(string left, string right,
+            bool ignoreCase = false, CultureInfo culture = null)
+        {
+            if (culture == null)
+                culture = CultureInfo.InvariantCulture;
+
             if (ignoreCase)
             {
-                if (invariantCulture)
-                {
-                    left = left.ToLowerInvariant();
-                    right = right.ToLowerInvariant();
-                }
-                else
-                {
-                    left = left.ToLower();
-                    right = right.ToLower();
-                }
+                left = left.ToLower(culture);
+                right = right.ToLower(culture);
             }
 
-            return SecureEquals(SecureUTF8.GetBytes(left), SecureUTF8.GetBytes(right));
+            return SecureEquals(GetBytes(left), GetBytes(right));
         }
         [MethodImpl(MethodImplOptions.NoInlining | MethodImplOptions.NoOptimization)]
         public static bool SecureEquals(byte[] left, byte[] right)

@@ -110,7 +110,7 @@ namespace RIS.Cryptography.Hash.Methods
                 }
                 catch (FormatException)
                 {
-                    _associatedData = Convert.FromBase64String(Convert.ToBase64String(Utils.SecureUTF8.GetBytes(value)));
+                    _associatedData = Convert.FromBase64String(Convert.ToBase64String(Utils.GetBytes(value)));
                 }
             }
         }
@@ -140,7 +140,7 @@ namespace RIS.Cryptography.Hash.Methods
                 }
                 catch (FormatException)
                 {
-                    _knownSecret = Convert.FromBase64String(Convert.ToBase64String(Utils.SecureUTF8.GetBytes(value)));
+                    _knownSecret = Convert.FromBase64String(Convert.ToBase64String(Utils.GetBytes(value)));
                 }
             }
         }
@@ -165,13 +165,13 @@ namespace RIS.Cryptography.Hash.Methods
 
         public string GetHash(string plainText)
         {
-            byte[] data = Utils.SecureUTF8.GetBytes(plainText);
+            byte[] data = Utils.GetBytes(plainText);
 
             return GetHash(data);
         }
         public string GetHash(byte[] data)
         {
-            byte[] hashSalt = Convert.FromBase64String(HashMethodsUtilities.GenerateSalt(SaltLength));
+            byte[] hashSalt = HashMethodsUtils.GenerateSaltBytes(SaltLength);
 
             Konscious.Security.Cryptography.Argon2i argon2Service = new Konscious.Security.Cryptography.Argon2i(data)
             {
@@ -191,14 +191,14 @@ namespace RIS.Cryptography.Hash.Methods
                 hashText.Append(hashBytes[i].ToString("x2", CultureInfo.InvariantCulture));
             }
 
-            string hashString = Convert.ToBase64String(hashSalt) + "=/" + Convert.ToBase64String(Utils.SecureUTF8.GetBytes(hashText.ToString()));
-            hashString = Convert.ToBase64String(Utils.SecureUTF8.GetBytes(hashString));
+            string hashString = Convert.ToBase64String(hashSalt) + "=/" + Convert.ToBase64String(Utils.GetBytes(hashText.ToString()));
+            hashString = Convert.ToBase64String(Utils.GetBytes(hashString));
 
             return hashString;
         }
         public string GetHash(string plainText, string salt)
         {
-            byte[] data = Utils.SecureUTF8.GetBytes(plainText);
+            byte[] data = Utils.GetBytes(plainText);
 
             return GetHash(data, salt);
         }
@@ -211,7 +211,7 @@ namespace RIS.Cryptography.Hash.Methods
             }
             catch (FormatException)
             {
-                hashSalt = Convert.FromBase64String(Convert.ToBase64String(Utils.SecureUTF8.GetBytes(salt)));
+                hashSalt = Convert.FromBase64String(Convert.ToBase64String(Utils.GetBytes(salt)));
             }
 
             Konscious.Security.Cryptography.Argon2i argon2Service = new Konscious.Security.Cryptography.Argon2i(data)
@@ -232,25 +232,34 @@ namespace RIS.Cryptography.Hash.Methods
                 hashText.Append(hashBytes[i].ToString("x2", CultureInfo.InvariantCulture));
             }
 
-            string hashString = Convert.ToBase64String(hashSalt) + "=/" + Convert.ToBase64String(Utils.SecureUTF8.GetBytes(hashText.ToString()));
-            hashString = Convert.ToBase64String(Utils.SecureUTF8.GetBytes(hashString));
+            string hashString = Convert.ToBase64String(hashSalt) + "=/" + Convert.ToBase64String(Utils.GetBytes(hashText.ToString()));
+            hashString = Convert.ToBase64String(Utils.GetBytes(hashString));
 
             return hashString;
         }
 
         public bool VerifyHash(string plainText, string hashText)
         {
-            string hashTextSub = Utils.SecureUTF8.GetString(Convert.FromBase64String(hashText));
+            byte[] data = Utils.GetBytes(plainText);
 
-            string hashSalt = hashTextSub.Substring(0, hashTextSub.IndexOf('='));
+            return VerifyHash(data, hashText);
+        }
+        public bool VerifyHash(byte[] data, string hashText)
+        {
+            string hashTextSub = Utils.GetString(
+                Convert.FromBase64String(hashText));
+
+            string hashSalt = hashTextSub.Substring(
+                0, hashTextSub.IndexOf('='));
             if (hashTextSub.Contains("===/"))
                 hashSalt += "==";
             else if (hashTextSub.Contains("==/"))
                 hashSalt += "=";
 
-            var plainTextHash = GetHash(plainText, hashSalt);
+            var plainTextHash = GetHash(data, hashSalt);
 
-            return Utils.SecureEquals(plainTextHash, hashText, true, true);
+            return Utils.SecureEquals(plainTextHash, hashText,
+                false, null);
         }
     }
 }

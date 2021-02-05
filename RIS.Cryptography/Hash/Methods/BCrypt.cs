@@ -2,6 +2,7 @@
 // Licensed under the Apache License, Version 2.0. See LICENSE file in the project root for license information. 
 
 using System;
+using RIS.Cryptography.Hash.Metadata;
 
 namespace RIS.Cryptography.Hash.Methods
 {
@@ -55,7 +56,7 @@ namespace RIS.Cryptography.Hash.Methods
 
         public BCrypt()
         {
-            HashMethod = BCryptHashType.SHA512;
+            HashMethod = BCryptHashType.SHA384;
             UseEnhancedAlgorithm = true;
             WorkFactor = 14;
 
@@ -69,43 +70,61 @@ namespace RIS.Cryptography.Hash.Methods
 
         public string GetHash(string plainText)
         {
-            string hashText;
-
-            if (UseEnhancedAlgorithm)
-                hashText = global::BCrypt.Net.BCrypt.EnhancedHashPassword(plainText, HashMethodOriginal, WorkFactor);
-            else
-                hashText = global::BCrypt.Net.BCrypt.HashPassword(plainText, global::BCrypt.Net.BCrypt.GenerateSalt(WorkFactor), false, HashMethodOriginal);
-
-            return hashText;
+            return global::BCrypt.Net.BCrypt.HashPassword(
+                plainText,
+                global::BCrypt.Net.BCrypt.GenerateSalt(WorkFactor),
+                UseEnhancedAlgorithm,
+                HashMethodOriginal);
         }
         public string GetHash(byte[] data)
         {
-            string plainText = Utils.SecureUTF8.GetString(data);
+            string plainText = Utils.GetString(data);
 
             return GetHash(plainText);
         }
+
         public bool VerifyHash(string plainText, string hashText)
         {
-            if (UseEnhancedAlgorithm)
-                return global::BCrypt.Net.BCrypt.EnhancedVerify(plainText, hashText, HashMethodOriginal);
-            else
-                return global::BCrypt.Net.BCrypt.Verify(plainText, hashText, false, HashMethodOriginal);
+            BCryptMetadata metadata = GetMetadata(hashText);
+
+            var plainTextHash = global::BCrypt.Net.BCrypt.HashPassword(
+                plainText,
+                hashText,
+                UseEnhancedAlgorithm,
+                HashMethodOriginal);
+
+            return Utils.SecureEquals(plainTextHash, hashText,
+                false, null);
+        }
+        public bool VerifyHash(byte[] data, string hashText)
+        {
+            string plainText = Utils.GetString(data);
+
+            return VerifyHash(plainText, hashText);
         }
 
-        public bool VerifyAndUpdateHash(string plainText, string hashText, out bool isUpdated, out string newHashText)
+        public bool VerifyAndUpdateHash(string plainText, string hashText,
+            out bool isUpdated, out string newHashText)
         {
-            return VerifyAndUpdateHash(plainText, hashText, WorkFactor, out isUpdated, out newHashText);
+            return VerifyAndUpdateHash(plainText, hashText,
+                WorkFactor, out isUpdated, out newHashText);
         }
-        public bool VerifyAndUpdateHash(string plainText, string hashText, int newWorkFactor, out bool isUpdated, out string newHashText)
+        public bool VerifyAndUpdateHash(byte[] data, string hashText,
+            out bool isUpdated, out string newHashText)
+        {
+            string plainText = Utils.GetString(data);
+
+            return VerifyAndUpdateHash(plainText, hashText,
+               out isUpdated, out newHashText);
+        }
+        public bool VerifyAndUpdateHash(string plainText, string hashText,
+            int newWorkFactor, out bool isUpdated, out string newHashText)
         {
             bool result;
             isUpdated = false;
             newHashText = hashText;
 
-            if (UseEnhancedAlgorithm)
-                result = global::BCrypt.Net.BCrypt.EnhancedVerify(plainText, hashText, HashMethodOriginal);
-            else
-                result = global::BCrypt.Net.BCrypt.Verify(plainText, hashText, false, HashMethodOriginal);
+            result = VerifyHash(plainText, hashText);
 
             if (!result)
                 return false;
@@ -121,21 +140,11 @@ namespace RIS.Cryptography.Hash.Methods
 
             if (isUpdated)
             {
-                if (UseEnhancedAlgorithm)
-                {
-                    newHashText = global::BCrypt.Net.BCrypt.EnhancedHashPassword(
-                        plainText,
-                        HashMethodOriginal,
-                        newWorkFactor);
-                }
-                else
-                {
-                    newHashText = global::BCrypt.Net.BCrypt.HashPassword(
-                        plainText,
-                        global::BCrypt.Net.BCrypt.GenerateSalt(newWorkFactor),
-                        false,
-                        HashMethodOriginal);
-                }
+                newHashText = global::BCrypt.Net.BCrypt.HashPassword(
+                    plainText,
+                    global::BCrypt.Net.BCrypt.GenerateSalt(newWorkFactor),
+                    UseEnhancedAlgorithm,
+                    HashMethodOriginal);
             }
             else
             {
@@ -143,6 +152,14 @@ namespace RIS.Cryptography.Hash.Methods
             }
 
             return true;
+        }
+        public bool VerifyAndUpdateHash(byte[] data, string hashText,
+            int newWorkFactor, out bool isUpdated, out string newHashText)
+        {
+            string plainText = Utils.GetString(data);
+
+            return VerifyAndUpdateHash(plainText, hashText,
+                newWorkFactor, out isUpdated, out newHashText);
         }
     }
 }

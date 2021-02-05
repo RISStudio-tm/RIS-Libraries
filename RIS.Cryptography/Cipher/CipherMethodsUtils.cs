@@ -8,11 +8,11 @@ using System.Linq;
 
 namespace RIS.Cryptography.Cipher
 {
-    public static class CipherMethodsUtilities
+    public static class CipherMethodsUtils
     {
         public static ReadOnlyDictionary<string, Type> CipherMethods { get; }
 
-        static CipherMethodsUtilities()
+        static CipherMethodsUtils()
         {
             var cipherMethodsTypes = GetCipherMethods();
             var cipherMethods = new Dictionary<string, Type>(
@@ -20,9 +20,8 @@ namespace RIS.Cryptography.Cipher
 
             foreach (var cipherMethodType in cipherMethodsTypes)
             {
-                cipherMethods.Add(
-                    cipherMethodType.Name,
-                    cipherMethodType);
+                cipherMethods[cipherMethodType.Name] =
+                    cipherMethodType;
             }
 
             CipherMethods = new ReadOnlyDictionary<string, Type>(
@@ -69,6 +68,16 @@ namespace RIS.Cryptography.Cipher
         public static int GetCount()
         {
             return CipherMethods.Count;
+        }
+
+        public static ICipherMethod Create(DefaultCipherMethod method)
+        {
+            return Create(method.ToString());
+        }
+        public static ICipherMethod Create(string methodName)
+        {
+            return (ICipherMethod)Activator.CreateInstance(
+                CipherMethods[methodName]);
         }
     }
 }

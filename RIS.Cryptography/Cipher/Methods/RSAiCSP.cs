@@ -12,16 +12,6 @@ namespace RIS.Cryptography.Cipher.Methods
         public event EventHandler<RWarningEventArgs> Warning;
         public event EventHandler<RErrorEventArgs> Error;
 
-        public enum CipherKeySizes
-        {
-            L512Bit = 512,
-            L1024Bit = 1024,
-            L2048Bit = 2048,
-            L4096Bit = 4096,
-            L8192Bit = 8192,
-            L16384Bit = 16384
-        }
-
         private RSACryptoServiceProvider RSAServiceEncryptor { get; }
         private RSACryptoServiceProvider RSAServiceDecryptor { get; }
 
@@ -58,6 +48,11 @@ namespace RIS.Cryptography.Cipher.Methods
 
         public bool Initialized { get; }
 
+        public RSAiCSP()
+            : this(RSAKeySize.L2048Bit)
+        {
+
+        }
         public RSAiCSP(int publicKeySize)
         {
             try
@@ -200,7 +195,7 @@ namespace RIS.Cryptography.Cipher.Methods
                 throw;
             }
         }
-        public RSAiCSP(CipherKeySizes publicKeySize)
+        public RSAiCSP(RSAKeySize publicKeySize)
         {
             try
             {
@@ -222,7 +217,7 @@ namespace RIS.Cryptography.Cipher.Methods
                 throw;
             }
         }
-        public RSAiCSP(CipherKeySizes publicKeySize, CipherKeySizes privateKeySize)
+        public RSAiCSP(RSAKeySize publicKeySize, RSAKeySize privateKeySize)
         {
             try
             {
@@ -391,7 +386,7 @@ namespace RIS.Cryptography.Cipher.Methods
                 throw;
             }
         }
-        public RSAiCSP(string xmlPublicKey, CipherKeySizes publicKeySize)
+        public RSAiCSP(string xmlPublicKey, RSAKeySize publicKeySize)
         {
             try
             {
@@ -417,7 +412,7 @@ namespace RIS.Cryptography.Cipher.Methods
                 throw;
             }
         }
-        public RSAiCSP(string xmlPublicKey, string xmlPrivateKey, CipherKeySizes publicKeySize, CipherKeySizes privateKeySize)
+        public RSAiCSP(string xmlPublicKey, string xmlPrivateKey, RSAKeySize publicKeySize, RSAKeySize privateKeySize)
         {
             try
             {
@@ -475,27 +470,32 @@ namespace RIS.Cryptography.Cipher.Methods
 
         public string Encrypt(string plainText)
         {
+            byte[] data = Utils.GetBytes(plainText);
+
+            return Convert.ToBase64String(
+                Encrypt(data));
+        }
+        public byte[] Encrypt(byte[] data)
+        {
             try
             {
                 byte[] encryptedData;
 
-                if (plainText.Length == 0)
-                    return string.Empty;
-
-                byte[] data = Utils.SecureUTF8.GetBytes(plainText);
+                if (data.Length == 0)
+                    return Array.Empty<byte>();
 
                 encryptedData = RSAServiceEncryptor.Encrypt(data, Padding);
 
                 if (ReverseBytes)
                     Array.Reverse(encryptedData);
 
-                return Convert.ToBase64String(encryptedData);
+                return encryptedData;
             }
             catch (ArgumentNullException ex)
             {
                 Events.OnError(this, new RErrorEventArgs(ex, ex.Message, ex.StackTrace));
                 OnError(new RErrorEventArgs(ex, ex.Message, ex.StackTrace));
-                return string.Empty;
+                return Array.Empty<byte>();
             }
             catch (Exception ex)
             {
@@ -506,6 +506,13 @@ namespace RIS.Cryptography.Cipher.Methods
         }
 
         public string Decrypt(string cipherText)
+        {
+            byte[] data = Convert.FromBase64String(cipherText);
+
+            return Utils.GetString(
+                Decrypt(data));
+        }
+        public byte[] Decrypt(byte[] data)
         {
             try
             {
@@ -520,23 +527,21 @@ namespace RIS.Cryptography.Cipher.Methods
                     throw exception;
                 }
 
-                if (cipherText.Length == 0)
-                    return string.Empty;
-
-                byte[] data = Convert.FromBase64String(cipherText);
+                if (data.Length == 0)
+                    return Array.Empty<byte>();
 
                 if (ReverseBytes)
                     Array.Reverse(data);
 
                 decryptedData = RSAServiceDecryptor.Decrypt(data, Padding);
 
-                return Utils.SecureUTF8.GetString(decryptedData);
+                return decryptedData;
             }
             catch (ArgumentNullException ex)
             {
                 Events.OnError(this, new RErrorEventArgs(ex, ex.Message, ex.StackTrace));
                 OnError(new RErrorEventArgs(ex, ex.Message, ex.StackTrace));
-                return string.Empty;
+                return Array.Empty<byte>();
             }
             catch (Exception ex)
             {
@@ -546,11 +551,21 @@ namespace RIS.Cryptography.Cipher.Methods
             }
         }
 
+        public string GetPublicKey()
+        {
+            return RSAServiceEncryptor.ToXmlString(false);
+        }
+
+        public string GetPrivateKey()
+        {
+            return RSAServiceDecryptor.ToXmlString(true);
+        }
+
         public bool SetPublicKey(string xmlPublicKey)
         {
             try
             {
-                if (xmlPublicKey.Length == 0)
+                if (string.IsNullOrEmpty(xmlPublicKey))
                     return false;
 
                 RSAServiceEncryptor.FromXmlString(xmlPublicKey);
@@ -568,7 +583,7 @@ namespace RIS.Cryptography.Cipher.Methods
         {
             try
             {
-                if (xmlPrivateKey.Length == 0)
+                if (string.IsNullOrEmpty(xmlPrivateKey))
                     return false;
 
                 RSAServiceDecryptor.FromXmlString(xmlPrivateKey);

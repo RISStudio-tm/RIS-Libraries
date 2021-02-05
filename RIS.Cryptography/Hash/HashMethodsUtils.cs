@@ -5,36 +5,36 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
-using System.Security.Cryptography;
+using RIS.Randomizing;
+using RIS.Text.Generating;
 
 namespace RIS.Cryptography.Hash
 {
-    public static class HashMethodsUtilities
+    public static class HashMethodsUtils
     {
-        private static RNGCryptoServiceProvider RNGProvider { get; }
+        private static readonly FastSecureRandom RandomGenerator;
 
         public static ReadOnlyDictionary<string, Type> HashMethods { get; }
 
-        static HashMethodsUtilities()
+        static HashMethodsUtils()
         {
-            RNGProvider = new RNGCryptoServiceProvider();
+            RandomGenerator = new FastSecureRandom();
 
-            var cipherMethodsTypes = GetCipherMethods();
-            var cipherMethods = new Dictionary<string, Type>(
-                cipherMethodsTypes.Length);
+            var hashMethodsTypes = GetHashMethods();
+            var hashMethods = new Dictionary<string, Type>(
+                hashMethodsTypes.Length);
 
-            foreach (var cipherMethodType in cipherMethodsTypes)
+            foreach (var hashMethodType in hashMethodsTypes)
             {
-                cipherMethods.Add(
-                    cipherMethodType.Name,
-                    cipherMethodType);
+                hashMethods[hashMethodType.Name] =
+                    hashMethodType;
             }
 
             HashMethods = new ReadOnlyDictionary<string, Type>(
-                cipherMethods);
+                hashMethods);
         }
 
-        private static Type[] GetCipherMethods()
+        private static Type[] GetHashMethods()
         {
             try
             {
@@ -76,19 +76,38 @@ namespace RIS.Cryptography.Hash
             return HashMethods.Count;
         }
 
+        public static IHashMethod Create(DefaultHashMethod method)
+        {
+            return Create(method.ToString());
+        }
+        public static IHashMethod Create(string methodName)
+        {
+            return (IHashMethod)Activator.CreateInstance(
+                HashMethods[methodName]);
+        }
+
+
+
         public static string GenerateSalt(ushort length)
         {
             if (length < 1)
             {
-                var exception = new ArgumentOutOfRangeException(nameof(length), "Salt length cannot be less than 1");
-                Events.OnError(new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
+                var exception = new ArgumentOutOfRangeException(nameof(length),
+                    "Salt length cannot be less than 1");
+                Events.OnError(new RErrorEventArgs(exception,
+                    exception.Message, exception.StackTrace));
                 throw exception;
             }
 
+            return StringGenerator.GenerateString(length);
+        }
+        public static byte[] GenerateSaltBytes(ushort length)
+        {
             byte[] salt = new byte[length];
-            RNGProvider.GetBytes(salt);
 
-            return Convert.ToBase64String(salt);
+            RandomGenerator.GetBytes(salt);
+
+            return salt;
         }
     }
 }

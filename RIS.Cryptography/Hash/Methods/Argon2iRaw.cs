@@ -41,10 +41,10 @@ namespace RIS.Cryptography.Hash.Methods
                 }
                 catch (FormatException)
                 {
-                    if (Convert.FromBase64String(Convert.ToBase64String(Utils.SecureUTF8.GetBytes(value))).Length < 8)
+                    if (Convert.FromBase64String(Convert.ToBase64String(Utils.GetBytes(value))).Length < 8)
                         value = Convert.ToBase64String(new byte[8]);
 
-                    _salt = Convert.FromBase64String(Convert.ToBase64String(Utils.SecureUTF8.GetBytes(value)));
+                    _salt = Convert.FromBase64String(Convert.ToBase64String(Utils.GetBytes(value)));
                 }
             }
         }
@@ -134,7 +134,7 @@ namespace RIS.Cryptography.Hash.Methods
                 }
                 catch (FormatException)
                 {
-                    _associatedData = Convert.FromBase64String(Convert.ToBase64String(Utils.SecureUTF8.GetBytes(value)));
+                    _associatedData = Convert.FromBase64String(Convert.ToBase64String(Utils.GetBytes(value)));
                 }
             }
         }
@@ -164,7 +164,7 @@ namespace RIS.Cryptography.Hash.Methods
                 }
                 catch (FormatException)
                 {
-                    _knownSecret = Convert.FromBase64String(Convert.ToBase64String(Utils.SecureUTF8.GetBytes(value)));
+                    _knownSecret = Convert.FromBase64String(Convert.ToBase64String(Utils.GetBytes(value)));
                 }
             }
         }
@@ -189,7 +189,7 @@ namespace RIS.Cryptography.Hash.Methods
 
         public string GetHash(string plainText)
         {
-            byte[] data = Utils.SecureUTF8.GetBytes(plainText);
+            byte[] data = Utils.GetBytes(plainText);
 
             return GetHash(data);
         }
@@ -215,11 +215,19 @@ namespace RIS.Cryptography.Hash.Methods
 
             return hashText.ToString();
         }
+
         public bool VerifyHash(string plainText, string hashText)
         {
-            var plainTextHash = GetHash(plainText);
+            byte[] data = Utils.GetBytes(plainText);
 
-            return Utils.SecureEquals(plainTextHash, hashText, true, true);
+            return VerifyHash(data, hashText);
+        }
+        public bool VerifyHash(byte[] data, string hashText)
+        {
+            var plainTextHash = GetHash(data);
+
+            return Utils.SecureEquals(plainTextHash, hashText,
+                true, null);
         }
     }
 }

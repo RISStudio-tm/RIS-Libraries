@@ -22,21 +22,31 @@ namespace RIS.Cryptography.Hash.Methods
 
         public string GetHash(string plainText)
         {
-            byte[] data = Utils.SecureUTF8.GetBytes(plainText);
+            byte[] data = Utils.GetBytes(plainText);
 
             return GetHash(data);
         }
         public string GetHash(byte[] data)
         {
-            uint hashValue = BitConverter.ToUInt32(CRCService.ComputeHash(data), 0);
+            uint hashValue = BitConverter.ToUInt32(
+                CRCService.ComputeHash(data), 0);
 
-            return hashValue.ToString("x2", CultureInfo.InvariantCulture);
+            return hashValue.ToString(
+                "x2", CultureInfo.InvariantCulture);
         }
+
         public bool VerifyHash(string plainText, string hashText)
         {
-            var plainTextHash = GetHash(plainText);
+            byte[] data = Utils.GetBytes(plainText);
 
-            return Utils.SecureEquals(plainTextHash, hashText, true, true);
+            return VerifyHash(data, hashText);
+        }
+        public bool VerifyHash(byte[] data, string hashText)
+        {
+            var plainTextHash = GetHash(data);
+
+            return Utils.SecureEquals(plainTextHash, hashText,
+                true, null);
         }
     }
 }

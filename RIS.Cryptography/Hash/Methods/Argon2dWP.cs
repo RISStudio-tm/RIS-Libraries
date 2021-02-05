@@ -4,6 +4,7 @@
 using System;
 using System.Globalization;
 using System.Text;
+using RIS.Cryptography.Hash.Metadata;
 using RIS.Text.Encoding.Base;
 
 namespace RIS.Cryptography.Hash.Methods
@@ -111,7 +112,7 @@ namespace RIS.Cryptography.Hash.Methods
                 }
                 catch (FormatException)
                 {
-                    _associatedData = Convert.FromBase64String(Convert.ToBase64String(Utils.SecureUTF8.GetBytes(value)));
+                    _associatedData = Convert.FromBase64String(Convert.ToBase64String(Utils.GetBytes(value)));
                 }
             }
         }
@@ -141,7 +142,7 @@ namespace RIS.Cryptography.Hash.Methods
                 }
                 catch (FormatException)
                 {
-                    _knownSecret = Convert.FromBase64String(Convert.ToBase64String(Utils.SecureUTF8.GetBytes(value)));
+                    _knownSecret = Convert.FromBase64String(Convert.ToBase64String(Utils.GetBytes(value)));
                 }
             }
         }
@@ -201,7 +202,7 @@ namespace RIS.Cryptography.Hash.Methods
         public string GetHash(string plainText, int memorySize, int iterations,
             int degreeOfParallelism, string associatedData, string knownSecret)
         {
-            byte[] data = Utils.SecureUTF8.GetBytes(plainText);
+            byte[] data = Utils.GetBytes(plainText);
 
             return GetHash(data, memorySize, iterations,
                 degreeOfParallelism, associatedData, knownSecret);
@@ -238,7 +239,7 @@ namespace RIS.Cryptography.Hash.Methods
         public string GetHash(string plainText, string salt, int memorySize, int iterations,
             int degreeOfParallelism, string associatedData, string knownSecret)
         {
-            byte[] data = Utils.SecureUTF8.GetBytes(plainText);
+            byte[] data = Utils.GetBytes(plainText);
 
             return GetHash(data, salt, memorySize, iterations,
                 degreeOfParallelism, associatedData, knownSecret);
@@ -276,7 +277,7 @@ namespace RIS.Cryptography.Hash.Methods
         public string GetHash(byte[] data, int memorySize, int iterations,
             int degreeOfParallelism, string associatedData, string knownSecret)
         {
-            byte[] hashSalt = Convert.FromBase64String(HashMethodsUtilities.GenerateSalt(SaltLength));
+            byte[] hashSalt = HashMethodsUtils.GenerateSaltBytes(SaltLength);
 
             if (memorySize < 8)
                 memorySize = 8;
@@ -294,7 +295,7 @@ namespace RIS.Cryptography.Hash.Methods
             }
             catch (FormatException)
             {
-                associatedDataBytes = Convert.FromBase64String(Convert.ToBase64String(Utils.SecureUTF8.GetBytes(associatedData)));
+                associatedDataBytes = Convert.FromBase64String(Convert.ToBase64String(Utils.GetBytes(associatedData)));
             }
 
             byte[] knownSecretBytes;
@@ -304,7 +305,7 @@ namespace RIS.Cryptography.Hash.Methods
             }
             catch (FormatException)
             {
-                knownSecretBytes = Convert.FromBase64String(Convert.ToBase64String(Utils.SecureUTF8.GetBytes(knownSecret)));
+                knownSecretBytes = Convert.FromBase64String(Convert.ToBase64String(Utils.GetBytes(knownSecret)));
             }
 
             Konscious.Security.Cryptography.Argon2d argon2Service = new Konscious.Security.Cryptography.Argon2d(data)
@@ -325,7 +326,7 @@ namespace RIS.Cryptography.Hash.Methods
                 hashText.Append(hashBytes[i].ToString("x2", CultureInfo.InvariantCulture));
             }
 
-            return $"${Enum.GetName(typeof(Argon2Type), Argon2Type.Argon2d)?.ToLower()}$v=19$m={memorySize},t={iterations},p={degreeOfParallelism}${Base64.RemovePadding(Convert.ToBase64String(hashSalt))}${Base64.RemovePadding(Convert.ToBase64String(Utils.SecureUTF8.GetBytes(hashText.ToString())))}";
+            return $"${Enum.GetName(typeof(Argon2Type), Argon2Type.Argon2d)?.ToLower()}$v=19$m={memorySize},t={iterations},p={degreeOfParallelism}${Base64.RemovePadding(Convert.ToBase64String(hashSalt))}${Base64.RemovePadding(Convert.ToBase64String(Utils.GetBytes(hashText.ToString())))}";
         }
         public string GetHash(byte[] data, string salt)
         {
@@ -366,7 +367,7 @@ namespace RIS.Cryptography.Hash.Methods
             }
             catch (FormatException)
             {
-                hashSalt = Convert.FromBase64String(Convert.ToBase64String(Utils.SecureUTF8.GetBytes(salt)));
+                hashSalt = Convert.FromBase64String(Convert.ToBase64String(Utils.GetBytes(salt)));
             }
 
             if (memorySize < 8)
@@ -385,7 +386,7 @@ namespace RIS.Cryptography.Hash.Methods
             }
             catch (FormatException)
             {
-                associatedDataBytes = Convert.FromBase64String(Convert.ToBase64String(Utils.SecureUTF8.GetBytes(associatedData)));
+                associatedDataBytes = Convert.FromBase64String(Convert.ToBase64String(Utils.GetBytes(associatedData)));
             }
 
             byte[] knownSecretBytes;
@@ -395,7 +396,7 @@ namespace RIS.Cryptography.Hash.Methods
             }
             catch (FormatException)
             {
-                knownSecretBytes = Convert.FromBase64String(Convert.ToBase64String(Utils.SecureUTF8.GetBytes(knownSecret)));
+                knownSecretBytes = Convert.FromBase64String(Convert.ToBase64String(Utils.GetBytes(knownSecret)));
             }
 
             Konscious.Security.Cryptography.Argon2d argon2Service = new Konscious.Security.Cryptography.Argon2d(data)
@@ -416,7 +417,7 @@ namespace RIS.Cryptography.Hash.Methods
                 hashText.Append(hashBytes[i].ToString("x2", CultureInfo.InvariantCulture));
             }
 
-            return $"${Enum.GetName(typeof(Argon2Type), Argon2Type.Argon2d)?.ToLower()}$v=19$m={memorySize},t={iterations},p={degreeOfParallelism}${Base64.RemovePadding(Convert.ToBase64String(hashSalt))}${Base64.RemovePadding(Convert.ToBase64String(Utils.SecureUTF8.GetBytes(hashText.ToString())))}";
+            return $"${Enum.GetName(typeof(Argon2Type), Argon2Type.Argon2d)?.ToLower()}$v=19$m={memorySize},t={iterations},p={degreeOfParallelism}${Base64.RemovePadding(Convert.ToBase64String(hashSalt))}${Base64.RemovePadding(Convert.ToBase64String(Utils.GetBytes(hashText.ToString())))}";
         }
 
         public bool VerifyHash(string plainText, string hashText)
@@ -446,7 +447,37 @@ namespace RIS.Cryptography.Hash.Methods
             var plainTextHash = GetHash(plainText, metadata.Salt, metadata.MemorySize, metadata.Iterations,
                 metadata.DegreeOfParallelism, associatedData, knownSecret);
 
-            return Utils.SecureEquals(plainTextHash, hashText, true, true);
+            return Utils.SecureEquals(plainTextHash, hashText, false, null);
+        }
+
+        public bool VerifyHash(byte[] data, string hashText)
+        {
+            return VerifyHash(data, hashText, AssociatedData,
+                KnownSecret);
+        }
+        public bool VerifyHash(byte[] data, string hashText, byte[] associatedData)
+        {
+            return VerifyHash(data, hashText, Convert.ToBase64String(associatedData),
+                KnownSecret);
+        }
+        public bool VerifyHash(byte[] data, string hashText, string associatedData)
+        {
+            return VerifyHash(data, hashText, associatedData,
+                KnownSecret);
+        }
+        public bool VerifyHash(byte[] data, string hashText, byte[] associatedData, byte[] knownSecret)
+        {
+            return VerifyHash(data, hashText, Convert.ToBase64String(associatedData),
+                Convert.ToBase64String(knownSecret));
+        }
+        public bool VerifyHash(byte[] data, string hashText, string associatedData, string knownSecret)
+        {
+            Argon2Metadata metadata = GetMetadata(hashText);
+
+            var plainTextHash = GetHash(data, metadata.Salt, metadata.MemorySize, metadata.Iterations,
+                metadata.DegreeOfParallelism, associatedData, knownSecret);
+
+            return Utils.SecureEquals(plainTextHash, hashText, false, null);
         }
 
         public bool VerifyAndUpdateHash(string plainText, string hashText, out bool isUpdated, out string newHashText)
@@ -498,6 +529,61 @@ namespace RIS.Cryptography.Hash.Methods
 
             if (isUpdated)
                 newHashText = GetHash(plainText, newMemorySize, newIterations, newDegreeOfParallelism, associatedData, knownSecret);
+            else
+                newHashText = hashText;
+
+            return true;
+        }
+
+        public bool VerifyAndUpdateHash(byte[] data, string hashText, out bool isUpdated, out string newHashText)
+        {
+            return VerifyAndUpdateHash(data, hashText, MemorySize, Iterations,
+                DegreeOfParallelism, AssociatedData, KnownSecret, out isUpdated, out newHashText);
+        }
+        public bool VerifyAndUpdateHash(byte[] data, string hashText, int newMemorySize, int newIterations,
+            int newDegreeOfParallelism, out bool isUpdated, out string newHashText)
+        {
+            return VerifyAndUpdateHash(data, hashText, newMemorySize, newIterations,
+                newDegreeOfParallelism, AssociatedData, KnownSecret, out isUpdated, out newHashText);
+        }
+        public bool VerifyAndUpdateHash(byte[] data, string hashText, int newMemorySize, int newIterations,
+            int newDegreeOfParallelism, byte[] associatedData, out bool isUpdated, out string newHashText)
+        {
+            return VerifyAndUpdateHash(data, hashText, newMemorySize, newIterations,
+                newDegreeOfParallelism, Convert.ToBase64String(associatedData), KnownSecret,
+                out isUpdated, out newHashText);
+        }
+        public bool VerifyAndUpdateHash(byte[] data, string hashText, int newMemorySize, int newIterations,
+            int newDegreeOfParallelism, string associatedData, out bool isUpdated, out string newHashText)
+        {
+            return VerifyAndUpdateHash(data, hashText, newMemorySize, newIterations,
+                newDegreeOfParallelism, associatedData, KnownSecret, out isUpdated, out newHashText);
+        }
+        public bool VerifyAndUpdateHash(byte[] data, string hashText, int newMemorySize, int newIterations,
+            int newDegreeOfParallelism, byte[] associatedData, byte[] knownSecret, out bool isUpdated, out string newHashText)
+        {
+            return VerifyAndUpdateHash(data, hashText, newMemorySize, newIterations,
+                newDegreeOfParallelism, Convert.ToBase64String(associatedData), Convert.ToBase64String(knownSecret),
+                out isUpdated, out newHashText);
+        }
+        public bool VerifyAndUpdateHash(byte[] data, string hashText, int newMemorySize, int newIterations,
+            int newDegreeOfParallelism, string associatedData, string knownSecret, out bool isUpdated, out string newHashText)
+        {
+            bool result;
+            isUpdated = false;
+            newHashText = hashText;
+
+            result = VerifyHash(data, hashText, associatedData, knownSecret);
+
+            if (!result)
+                return false;
+
+            Argon2Metadata metadata = GetMetadata(hashText);
+
+            isUpdated = metadata.MemorySize != newMemorySize || metadata.Iterations != newIterations || metadata.DegreeOfParallelism != newDegreeOfParallelism;
+
+            if (isUpdated)
+                newHashText = GetHash(data, newMemorySize, newIterations, newDegreeOfParallelism, associatedData, knownSecret);
             else
                 newHashText = hashText;
 
