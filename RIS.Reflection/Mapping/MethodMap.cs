@@ -81,7 +81,9 @@ namespace RIS.Reflection.Mapping
 
         private void CreateMapping()
         {
-            foreach (MethodInfo method in _instanceType.GetMethods())
+            foreach (MethodInfo method in _instanceType.GetMethods(BindingFlags.NonPublic
+                                                                   | BindingFlags.Public | BindingFlags.Instance
+                                                                   | BindingFlags.Static))
             {
                 var mappedAttribute = method.GetCustomAttribute<MappedMethodAttribute>();
 
