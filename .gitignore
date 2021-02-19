@@ -513,6 +513,7 @@ MigrationBackup/
 
 # Files
 
+RIS-Libraries-test.sln
 *.lnk
 _tools/PublishPackages/*.ini
 _tools/PublishPackages/*.log
