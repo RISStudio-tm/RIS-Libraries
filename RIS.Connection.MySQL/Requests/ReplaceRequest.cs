@@ -15,7 +15,7 @@ namespace RIS.Connection.MySQL.Requests
     /// <summary>
     ///     Представляет запрос к MySQL базе данных. Этот класс не может быть унаследован.
     /// </summary>
-    public sealed class InsertRequest : IQueryRequest<long>
+    public sealed class ReplaceRequest : IQueryRequest<long>
     {
         /// <summary>
         ///     Позволяет получать экземпляр сервиса <see cref="RIS.Connection.MySQL.IRequestEngine"/>, с помощью которого будет выполняться запрос.
@@ -26,7 +26,7 @@ namespace RIS.Connection.MySQL.Requests
         /// </summary>
         public string[] Values { get; set; }
         /// <summary>
-        ///     Позволяет получать или устанавливать таблицу, для которой будет вызван INSERT.
+        ///     Позволяет получать или устанавливать таблицу, для которой будет вызван REPLACE.
         /// </summary>
         public string Table { get; set; }
         /// <summary>
@@ -42,13 +42,13 @@ namespace RIS.Connection.MySQL.Requests
         /// </summary>
         public CancellationTokenSource RequestCancellationToken { get; }
 
-        private InsertRequest(IRequestEngine engine, InsertRequest request)
+        private ReplaceRequest(IRequestEngine engine, ReplaceRequest request)
             : this(engine, request.Values, request.Table, request.Timeout, request.IsolationLevel)
         {
 
         }
         /// <summary>
-        ///     Инициализирует новый экземпляр класса <see cref="RIS.Connection.MySQL.Requests.InsertRequest"/>.
+        ///     Инициализирует новый экземпляр класса <see cref="RIS.Connection.MySQL.Requests.ReplaceRequest"/>.
         /// </summary>
         /// <param name="engine">
         ///     Экземпляр сервиса <see cref="RIS.Connection.MySQL.IRequestEngine"/>, с помощью которого будет выполняться запрос.
@@ -57,19 +57,19 @@ namespace RIS.Connection.MySQL.Requests
         ///     Массив значений столбцов по порядку их следования в таблице <paramref name="table"/>. Передайте пустой массив, чтобы использовать значения по умолчанию для всех столбцов.
         /// </param>
         /// <param name="table">
-        ///     Таблица, для которой будет вызван INSERT.
+        ///     Таблица, для которой будет вызван REPLACE.
         /// </param>
         /// <param name="isolationLevel">
         ///     Уровень изоляции транзакции.
         /// </param>
-        public InsertRequest(IRequestEngine engine, string[] values, string table,
+        public ReplaceRequest(IRequestEngine engine, string[] values, string table,
             IsolationLevel isolationLevel = IsolationLevel.ReadCommitted)
             : this(engine, values, table, engine.CommandTimeout, isolationLevel)
         {
 
         }
         /// <summary>
-        ///     Инициализирует новый экземпляр класса <see cref="RIS.Connection.MySQL.Requests.InsertRequest"/>.
+        ///     Инициализирует новый экземпляр класса <see cref="RIS.Connection.MySQL.Requests.ReplaceRequest"/>.
         /// </summary>
         /// <param name="engine">
         ///     Экземпляр сервиса <see cref="RIS.Connection.MySQL.IRequestEngine"/>, с помощью которого будет выполняться запрос.
@@ -78,7 +78,7 @@ namespace RIS.Connection.MySQL.Requests
         ///     Массив значений столбцов по порядку их следования в таблице <paramref name="table"/>. Передайте пустой массив, чтобы использовать значения по умолчанию для всех столбцов.
         /// </param>
         /// <param name="table">
-        ///     Таблица, для которой будет вызван INSERT.
+        ///     Таблица, для которой будет вызван REPLACE.
         /// </param>
         /// <param name="timeout">
         ///     Время ожидания ответа от сервера.
@@ -86,7 +86,7 @@ namespace RIS.Connection.MySQL.Requests
         /// <param name="isolationLevel">
         ///     Уровень изоляции транзакции.
         /// </param>
-        public InsertRequest(IRequestEngine engine, string[] values, string table,
+        public ReplaceRequest(IRequestEngine engine, string[] values, string table,
             TimeSpan timeout, IsolationLevel isolationLevel = IsolationLevel.ReadCommitted)
         {
             if (engine == null)
@@ -169,7 +169,7 @@ namespace RIS.Connection.MySQL.Requests
                         CommandTimeout = (int)Timeout.TotalSeconds + 3
                     };
 
-                    sqlBuilder.Append("INSERT INTO ").Append(Table).Append(" VALUES (");
+                    sqlBuilder.Append("REPLACE INTO ").Append(Table).Append(" VALUES (");
 
                     if (Values.Length != 0)
                     {
@@ -320,7 +320,7 @@ namespace RIS.Connection.MySQL.Requests
         /// <summary>
         ///     Создаёт копию запроса.
         /// </summary>
-        public InsertRequest Copy()
+        public ReplaceRequest Copy()
         {
             return Copy(Engine);
         }
@@ -330,9 +330,9 @@ namespace RIS.Connection.MySQL.Requests
         /// <param name="engine">
         ///     Экземпляр сервиса <see cref="RIS.Connection.MySQL.IRequestEngine"/>, с помощью которого будет выполняться запрос.
         /// </param>
-        public InsertRequest Copy(IRequestEngine engine)
+        public ReplaceRequest Copy(IRequestEngine engine)
         {
-            return new InsertRequest(engine, this);
+            return new ReplaceRequest(engine, this);
         }
 
 
@@ -347,7 +347,7 @@ namespace RIS.Connection.MySQL.Requests
         ///     Массив значений столбцов по порядку их следования в таблице <paramref name="table"/>. Передайте пустой массив, чтобы использовать значения по умолчанию для всех столбцов.
         /// </param>
         /// <param name="table">
-        ///     Таблица, для которой будет вызван INSERT.
+        ///     Таблица, для которой будет вызван REPLACE.
         /// </param>
         /// <param name="isolationLevel">
         ///     Уровень изоляции транзакции.
@@ -375,7 +375,7 @@ namespace RIS.Connection.MySQL.Requests
         ///     Массив значений столбцов по порядку их следования в таблице <paramref name="table"/>. Передайте пустой массив, чтобы использовать значения по умолчанию для всех столбцов.
         /// </param>
         /// <param name="table">
-        ///     Таблица, для которой будет вызван INSERT.
+        ///     Таблица, для которой будет вызван REPLACE.
         /// </param>
         /// <param name="timeout">
         ///     Время ожидания ответа от сервера.
@@ -394,7 +394,7 @@ namespace RIS.Connection.MySQL.Requests
         public static long Execute(IRequestEngine engine, string[] values, string table,
             TimeSpan timeout, IsolationLevel isolationLevel = IsolationLevel.ReadCommitted)
         {
-            return new InsertRequest(engine, values, table,
+            return new ReplaceRequest(engine, values, table,
                 timeout, isolationLevel).Execute();
         }
         /// <summary>
@@ -407,7 +407,7 @@ namespace RIS.Connection.MySQL.Requests
         ///     Массив значений столбцов по порядку их следования в таблице <paramref name="table"/>. Передайте пустой массив, чтобы использовать значения по умолчанию для всех столбцов.
         /// </param>
         /// <param name="table">
-        ///     Таблица, для которой будет вызван INSERT.
+        ///     Таблица, для которой будет вызван REPLACE.
         /// </param>
         /// <param name="isolationLevel">
         ///     Уровень изоляции транзакции.
@@ -435,7 +435,7 @@ namespace RIS.Connection.MySQL.Requests
         ///     Массив значений столбцов по порядку их следования в таблице <paramref name="table"/>. Передайте пустой массив, чтобы использовать значения по умолчанию для всех столбцов.
         /// </param>
         /// <param name="table">
-        ///     Таблица, для которой будет вызван INSERT.
+        ///     Таблица, для которой будет вызван REPLACE.
         /// </param>
         /// <param name="timeout">
         ///     Время ожидания ответа от сервера.
@@ -454,7 +454,7 @@ namespace RIS.Connection.MySQL.Requests
         public static Task<long> ExecuteAsync(IRequestEngine engine, string[] values, string table,
             TimeSpan timeout, IsolationLevel isolationLevel = IsolationLevel.ReadCommitted)
         {
-            return new InsertRequest(engine, values, table,
+            return new ReplaceRequest(engine, values, table,
                 timeout, isolationLevel).ExecuteAsync();
         }
     }
