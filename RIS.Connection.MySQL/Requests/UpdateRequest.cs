@@ -8,6 +8,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using MySqlConnector;
+using RIS.Connection.MySQL.Builders;
 using RIS.Extensions;
 
 namespace RIS.Connection.MySQL.Requests
@@ -33,12 +34,28 @@ namespace RIS.Connection.MySQL.Requests
         ///     Позволяет получать или устанавливать таблицу, для которой будет вызван UPDATE.
         /// </summary>
         public string Table { get; set; }
+        private MySQLConditionBuilder _conditions;
         /// <summary>
-        ///     Позволяет получать или устанавливать массив условий для запроса. Передайте пустой массив, чтобы не использовать условия.
-        ///     Name - название столбца.
-        ///     Value - значение столбца.
+        ///     Позволяет получать или устанавливать экземпляр класса <see cref="RIS.Connection.MySQL.Builders.MySQLConditionBuilder"/>, который используется для формирования условий для запроса. Передайте пустой или null, чтобы не использовать условия.
         /// </summary>
-        public (string Name, string Value)[] Conditions { get; set; }
+        public MySQLConditionBuilder Conditions
+        {
+            get
+            {
+                if (_conditions == null
+                    || _conditions == MySQLConditionBuilder.Empty)
+                {
+                    _conditions = MySQLConditionBuilder.Empty
+                        .Copy();
+                }
+
+                return _conditions;
+            }
+            set
+            {
+                _conditions = value;
+            }
+        }
         /// <summary>
         ///     Позволяет получать или устанавливать время ожидания ответа от сервера.
         /// </summary>
@@ -74,15 +91,13 @@ namespace RIS.Connection.MySQL.Requests
         ///     Таблица, для которой будет вызван UPDATE.
         /// </param>
         /// <param name="conditions">
-        ///     Массив условий для запроса. Передайте пустой массив, чтобы не использовать условия.
-        ///     Name - название столбца.
-        ///     Value - значение столбца.
+        ///     Экземпляр класса <see cref="RIS.Connection.MySQL.Builders.MySQLConditionBuilder"/>, который используется для формирования условий для запроса. Передайте пустой или null, чтобы не использовать условия.
         /// </param>
         /// <param name="isolationLevel">
         ///     Уровень изоляции транзакции.
         /// </param>
         public UpdateRequest(IRequestEngine engine, string columnName,
-            string columnValue, string table, (string Name, string Value)[] conditions,
+            string columnValue, string table, MySQLConditionBuilder conditions,
             IsolationLevel isolationLevel = IsolationLevel.ReadCommitted)
             : this(engine, columnName, columnValue, table,
                 conditions, engine.CommandTimeout, isolationLevel)
@@ -105,9 +120,7 @@ namespace RIS.Connection.MySQL.Requests
         ///     Таблица, для которой будет вызван UPDATE.
         /// </param>
         /// <param name="conditions">
-        ///     Массив условий для запроса. Передайте пустой массив, чтобы не использовать условия.
-        ///     Name - название столбца.
-        ///     Value - значение столбца.
+        ///     Экземпляр класса <see cref="RIS.Connection.MySQL.Builders.MySQLConditionBuilder"/>, который используется для формирования условий для запроса. Передайте пустой или null, чтобы не использовать условия.
         /// </param>
         /// <param name="timeout">
         ///     Время ожидания ответа от сервера.
@@ -116,7 +129,7 @@ namespace RIS.Connection.MySQL.Requests
         ///     Уровень изоляции транзакции.
         /// </param>
         public UpdateRequest(IRequestEngine engine, string columnName,
-            string columnValue, string table, (string Name, string Value)[] conditions,
+            string columnValue, string table, MySQLConditionBuilder conditions,
             TimeSpan timeout, IsolationLevel isolationLevel = IsolationLevel.ReadCommitted)
         {
             if (engine == null)
@@ -184,6 +197,8 @@ namespace RIS.Connection.MySQL.Requests
                 throw exception;
             }
 
+            var constructedConditions = Conditions.Build();
+
             CancellationTokenSource cancellationToken = CancellationTokenSource.CreateLinkedTokenSource(RequestCancellationToken.Token, Engine.GlobalCancellationToken.Token);
             Task<Task> request = Task.Run(async () =>
             {
@@ -207,26 +222,13 @@ namespace RIS.Connection.MySQL.Requests
                     RequestEngineHelper.ReplaceFunctionParameterValue(ColumnValue, ref command,
                         command.Parameters[0].ParameterName, ref sqlBuilder);
 
-                    if (Conditions.Length != 0)
+                    if (!Conditions.IsEmpty())
                     {
-                        sqlBuilder.Append(" WHERE ");
+                        sqlBuilder.Append(constructedConditions.Sql);
 
-                        sqlBuilder.Append(Conditions[0].Name).Append(" = @param1");
-                        command.Parameters.AddWithValue("@param1", Conditions[0].Value);
-
-                        RequestEngineHelper.ReplaceDBNullParameterValue(Conditions[0].Value, ref command,
-                            command.Parameters[1].ParameterName);
-
-                        for (int i = 2; i < Conditions.Length + 1; ++i)
+                        foreach (var parameter in constructedConditions.Parameters)
                         {
-                            int arrayIndex = i - 1;
-
-                            sqlBuilder.Append(" AND ").Append(Conditions[arrayIndex].Name).Append(" = @param")
-                                .Append(i);
-                            command.Parameters.AddWithValue($"@param{i}", Conditions[arrayIndex].Value);
-
-                            RequestEngineHelper.ReplaceDBNullParameterValue(Conditions[arrayIndex].Value, ref command,
-                                command.Parameters[i].ParameterName);
+                            command.Parameters.AddWithValue(parameter.Name, parameter.Value);
                         }
                     }
 
@@ -399,7 +401,7 @@ namespace RIS.Connection.MySQL.Requests
             IsolationLevel isolationLevel = IsolationLevel.ReadCommitted)
         {
             Execute(engine, columnName, columnValue, table,
-                Array.Empty<(string name, string Value)>(),
+                MySQLConditionBuilder.Empty,
                 engine.CommandTimeout, isolationLevel);
         }
         /// <summary>
@@ -436,7 +438,7 @@ namespace RIS.Connection.MySQL.Requests
             IsolationLevel isolationLevel = IsolationLevel.ReadCommitted)
         {
             Execute(engine, columnName, columnValue, table,
-                Array.Empty<(string name, string Value)>(),
+                MySQLConditionBuilder.Empty,
                 timeout, isolationLevel);
         }
         /// <summary>
@@ -470,7 +472,7 @@ namespace RIS.Connection.MySQL.Requests
             IsolationLevel isolationLevel = IsolationLevel.ReadCommitted)
         {
             return ExecuteAsync(engine, columnName, columnValue, table,
-                Array.Empty<(string name, string Value)>(),
+                MySQLConditionBuilder.Empty,
                 engine.CommandTimeout, isolationLevel);
         }
         /// <summary>
@@ -507,174 +509,7 @@ namespace RIS.Connection.MySQL.Requests
             IsolationLevel isolationLevel = IsolationLevel.ReadCommitted)
         {
             return ExecuteAsync(engine, columnName, columnValue, table,
-                Array.Empty<(string name, string Value)>(),
-                timeout, isolationLevel);
-        }
-
-        /// <summary>
-        ///     (Синхронно) Вызывает выполнение запроса с заданными параметрами.
-        /// </summary>
-        /// <param name="engine">
-        ///     Экземпляр сервиса <see cref="RIS.Connection.MySQL.IRequestEngine"/>, с помощью которого будет выполняться запрос.
-        /// </param>
-        /// <param name="columnName">
-        ///     Название столбца, значение которого надо изменить.
-        /// </param>
-        /// <param name="columnValue">
-        ///     Новое значение для столбца <paramref name="columnName"/>.
-        /// </param>
-        /// <param name="table">
-        ///     Таблица, для которой будет вызван UPDATE.
-        /// </param>
-        /// <param name="conditionName">
-        ///     Название столбца для условия.
-        /// </param>
-        /// <param name="conditionValue">
-        ///     Значение столбца для условия.
-        /// </param>
-        /// <param name="isolationLevel">
-        ///     Уровень изоляции транзакции.
-        /// </param>
-        /// <returns>
-        ///     Имеет возвращаемый тип <see langword="void"/>.
-        /// </returns>
-        /// <exception cref="DbException"></exception>
-        /// <exception cref="MySqlConnector.MySqlException"></exception>
-        /// <exception cref="InvalidOperationException"></exception>
-        /// <exception cref="TimeoutException"></exception>
-        /// <exception cref="AggregateException"></exception>
-        public static void Execute(IRequestEngine engine, string columnName,
-            string columnValue, string table, string conditionName, string conditionValue,
-            IsolationLevel isolationLevel = IsolationLevel.ReadCommitted)
-        {
-            Execute(engine, columnName, columnValue, table,
-                new (string Name, string Value)[] { (conditionName, conditionValue) },
-                engine.CommandTimeout, isolationLevel);
-        }
-        /// <summary>
-        ///     (Синхронно) Вызывает выполнение запроса с заданными параметрами.
-        /// </summary>
-        /// <param name="engine">
-        ///     Экземпляр сервиса <see cref="RIS.Connection.MySQL.IRequestEngine"/>, с помощью которого будет выполняться запрос.
-        /// </param>
-        /// <param name="columnName">
-        ///     Название столбца, значение которого надо изменить.
-        /// </param>
-        /// <param name="columnValue">
-        ///     Новое значение для столбца <paramref name="columnName"/>.
-        /// </param>
-        /// <param name="table">
-        ///     Таблица, для которой будет вызван UPDATE.
-        /// </param>
-        /// <param name="conditionName">
-        ///     Название столбца для условия.
-        /// </param>
-        /// <param name="conditionValue">
-        ///     Значение столбца для условия.
-        /// </param>
-        /// <param name="timeout">
-        ///     Время ожидания ответа от сервера.
-        /// </param>
-        /// <param name="isolationLevel">
-        ///     Уровень изоляции транзакции.
-        /// </param>
-        /// <returns>
-        ///     Имеет возвращаемый тип <see langword="void"/>.
-        /// </returns>
-        /// <exception cref="DbException"></exception>
-        /// <exception cref="MySqlConnector.MySqlException"></exception>
-        /// <exception cref="InvalidOperationException"></exception>
-        /// <exception cref="TimeoutException"></exception>
-        /// <exception cref="AggregateException"></exception>
-        public static void Execute(IRequestEngine engine, string columnName,
-            string columnValue, string table, string conditionName, string conditionValue,
-            TimeSpan timeout, IsolationLevel isolationLevel = IsolationLevel.ReadCommitted)
-        {
-            Execute(engine, columnName, columnValue, table,
-                new (string Name, string Value)[] { (conditionName, conditionValue) },
-                timeout, isolationLevel);
-        }
-        /// <summary>
-        ///     (Асинхронно) Вызывает выполнение запроса с заданными параметрами.
-        /// </summary>
-        /// <param name="engine">
-        ///     Экземпляр сервиса <see cref="RIS.Connection.MySQL.IRequestEngine"/>, с помощью которого будет выполняться запрос.
-        /// </param>
-        /// <param name="columnName">
-        ///     Название столбца, значение которого надо изменить.
-        /// </param>
-        /// <param name="columnValue">
-        ///     Новое значение для столбца <paramref name="columnName"/>.
-        /// </param>
-        /// <param name="table">
-        ///     Таблица, для которой будет вызван UPDATE.
-        /// </param>
-        /// <param name="conditionName">
-        ///     Название столбца для условия.
-        /// </param>
-        /// <param name="conditionValue">
-        ///     Значение столбца для условия.
-        /// </param>
-        /// <param name="isolationLevel">
-        ///     Уровень изоляции транзакции.
-        /// </param>
-        /// <returns>
-        ///     Имеет возвращаемый тип <see langword="void"/>.
-        /// </returns>
-        /// <exception cref="DbException"></exception>
-        /// <exception cref="MySqlConnector.MySqlException"></exception>
-        /// <exception cref="InvalidOperationException"></exception>
-        /// <exception cref="TimeoutException"></exception>
-        /// <exception cref="AggregateException"></exception>
-        public static Task ExecuteAsync(IRequestEngine engine, string columnName,
-            string columnValue, string table, string conditionName, string conditionValue,
-            IsolationLevel isolationLevel = IsolationLevel.ReadCommitted)
-        {
-            return ExecuteAsync(engine, columnName, columnValue, table,
-                new (string Name, string Value)[] { (conditionName, conditionValue) },
-                engine.CommandTimeout, isolationLevel);
-        }
-        /// <summary>
-        ///     (Асинхронно) Вызывает выполнение запроса с заданными параметрами.
-        /// </summary>
-        /// <param name="engine">
-        ///     Экземпляр сервиса <see cref="RIS.Connection.MySQL.IRequestEngine"/>, с помощью которого будет выполняться запрос.
-        /// </param>
-        /// <param name="columnName">
-        ///     Название столбца, значение которого надо изменить.
-        /// </param>
-        /// <param name="columnValue">
-        ///     Новое значение для столбца <paramref name="columnName"/>.
-        /// </param>
-        /// <param name="table">
-        ///     Таблица, для которой будет вызван UPDATE.
-        /// </param>
-        /// <param name="conditionName">
-        ///     Название столбца для условия.
-        /// </param>
-        /// <param name="conditionValue">
-        ///     Значение столбца для условия.
-        /// </param>
-        /// <param name="timeout">
-        ///     Время ожидания ответа от сервера.
-        /// </param>
-        /// <param name="isolationLevel">
-        ///     Уровень изоляции транзакции.
-        /// </param>
-        /// <returns>
-        ///     Имеет возвращаемый тип <see langword="void"/>.
-        /// </returns>
-        /// <exception cref="DbException"></exception>
-        /// <exception cref="MySqlConnector.MySqlException"></exception>
-        /// <exception cref="InvalidOperationException"></exception>
-        /// <exception cref="TimeoutException"></exception>
-        /// <exception cref="AggregateException"></exception>
-        public static Task ExecuteAsync(IRequestEngine engine, string columnName,
-            string columnValue, string table, string conditionName, string conditionValue,
-            TimeSpan timeout, IsolationLevel isolationLevel = IsolationLevel.ReadCommitted)
-        {
-            return ExecuteAsync(engine, columnName, columnValue, table,
-                new (string Name, string Value)[] { (conditionName, conditionValue) },
+                MySQLConditionBuilder.Empty,
                 timeout, isolationLevel);
         }
 
@@ -694,9 +529,7 @@ namespace RIS.Connection.MySQL.Requests
         ///     Таблица, для которой будет вызван UPDATE.
         /// </param>
         /// <param name="conditions">
-        ///     Массив условий для запроса. Передайте пустой массив, чтобы не использовать условия.
-        ///     Name - название столбца.
-        ///     Value - значение столбца.
+        ///     Экземпляр класса <see cref="RIS.Connection.MySQL.Builders.MySQLConditionBuilder"/>, который используется для формирования условий для запроса. Передайте пустой или null, чтобы не использовать условия.
         /// </param>
         /// <param name="isolationLevel">
         ///     Уровень изоляции транзакции.
@@ -710,7 +543,7 @@ namespace RIS.Connection.MySQL.Requests
         /// <exception cref="TimeoutException"></exception>
         /// <exception cref="AggregateException"></exception>
         public static void Execute(IRequestEngine engine, string columnName,
-            string columnValue, string table, (string Name, string Value)[] conditions,
+            string columnValue, string table, MySQLConditionBuilder conditions,
             IsolationLevel isolationLevel = IsolationLevel.ReadCommitted)
         {
             Execute(engine, columnName, columnValue, table,
@@ -732,9 +565,7 @@ namespace RIS.Connection.MySQL.Requests
         ///     Таблица, для которой будет вызван UPDATE.
         /// </param>
         /// <param name="conditions">
-        ///     Массив условий для запроса. Передайте пустой массив, чтобы не использовать условия.
-        ///     Name - название столбца.
-        ///     Value - значение столбца.
+        ///     Экземпляр класса <see cref="RIS.Connection.MySQL.Builders.MySQLConditionBuilder"/>, который используется для формирования условий для запроса. Передайте пустой или null, чтобы не использовать условия.
         /// </param>
         /// <param name="timeout">
         ///     Время ожидания ответа от сервера.
@@ -751,7 +582,7 @@ namespace RIS.Connection.MySQL.Requests
         /// <exception cref="TimeoutException"></exception>
         /// <exception cref="AggregateException"></exception>
         public static void Execute(IRequestEngine engine, string columnName,
-            string columnValue, string table, (string Name, string Value)[] conditions,
+            string columnValue, string table, MySQLConditionBuilder conditions,
             TimeSpan timeout, IsolationLevel isolationLevel = IsolationLevel.ReadCommitted)
         {
             new UpdateRequest(engine, columnName, columnValue, table,
@@ -773,9 +604,7 @@ namespace RIS.Connection.MySQL.Requests
         ///     Таблица, для которой будет вызван UPDATE.
         /// </param>
         /// <param name="conditions">
-        ///     Массив условий для запроса. Передайте пустой массив, чтобы не использовать условия.
-        ///     Name - название столбца.
-        ///     Value - значение столбца.
+        ///    Экземпляр класса <see cref="RIS.Connection.MySQL.Builders.MySQLConditionBuilder"/>, который используется для формирования условий для запроса. Передайте пустой или null, чтобы не использовать условия.
         /// </param>
         /// <param name="isolationLevel">
         ///     Уровень изоляции транзакции.
@@ -789,7 +618,7 @@ namespace RIS.Connection.MySQL.Requests
         /// <exception cref="TimeoutException"></exception>
         /// <exception cref="AggregateException"></exception>
         public static Task ExecuteAsync(IRequestEngine engine, string columnName,
-            string columnValue, string table, (string Name, string Value)[] conditions,
+            string columnValue, string table, MySQLConditionBuilder conditions,
             IsolationLevel isolationLevel = IsolationLevel.ReadCommitted)
         {
             return ExecuteAsync(engine, columnName, columnValue, table,
@@ -811,9 +640,7 @@ namespace RIS.Connection.MySQL.Requests
         ///     Таблица, для которой будет вызван UPDATE.
         /// </param>
         /// <param name="conditions">
-        ///     Массив условий для запроса. Передайте пустой массив, чтобы не использовать условия.
-        ///     Name - название столбца.
-        ///     Value - значение столбца.
+        ///     Экземпляр класса <see cref="RIS.Connection.MySQL.Builders.MySQLConditionBuilder"/>, который используется для формирования условий для запроса. Передайте пустой или null, чтобы не использовать условия.
         /// </param>
         /// <param name="timeout">
         ///     Время ожидания ответа от сервера.
@@ -830,7 +657,7 @@ namespace RIS.Connection.MySQL.Requests
         /// <exception cref="TimeoutException"></exception>
         /// <exception cref="AggregateException"></exception>
         public static Task ExecuteAsync(IRequestEngine engine, string columnName,
-            string columnValue, string table, (string Name, string Value)[] conditions,
+            string columnValue, string table, MySQLConditionBuilder conditions,
             TimeSpan timeout, IsolationLevel isolationLevel = IsolationLevel.ReadCommitted)
         {
             return new UpdateRequest(engine, columnName, columnValue, table,

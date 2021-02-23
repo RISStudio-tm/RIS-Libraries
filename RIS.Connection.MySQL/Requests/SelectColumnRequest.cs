@@ -8,6 +8,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using MySqlConnector;
+using RIS.Connection.MySQL.Builders;
 using RIS.Extensions;
 
 namespace RIS.Connection.MySQL.Requests
@@ -29,12 +30,28 @@ namespace RIS.Connection.MySQL.Requests
         ///     Позволяет получать или устанавливать таблицу, для которой будет вызван SELECT.
         /// </summary>
         public string Table { get; set; }
+        private MySQLConditionBuilder _conditions;
         /// <summary>
-        ///     Позволяет получать или устанавливать массив условий для запроса. Передайте пустой массив, чтобы не использовать условия.
-        ///     Name - название столбца.
-        ///     Value - значение столбца.
+        ///     Позволяет получать или устанавливать экземпляр класса <see cref="RIS.Connection.MySQL.Builders.MySQLConditionBuilder"/>, который используется для формирования условий для запроса. Передайте пустой или null, чтобы не использовать условия.
         /// </summary>
-        public (string Name, string Value)[] Conditions { get; set; }
+        public MySQLConditionBuilder Conditions
+        {
+            get
+            {
+                if (_conditions == null
+                    || _conditions == MySQLConditionBuilder.Empty)
+                {
+                    _conditions = MySQLConditionBuilder.Empty
+                        .Copy();
+                }
+
+                return _conditions;
+            }
+            set
+            {
+                _conditions = value;
+            }
+        }
         /// <summary>
         ///     Позволяет получать или устанавливать номер строки, с которой начинается считывание (все строки до этой будут пропущены). Передайте 0 или 1, чтобы начать с первой строки.
         /// </summary>
@@ -75,9 +92,7 @@ namespace RIS.Connection.MySQL.Requests
         ///     Таблица, для которой будет вызван SELECT.
         /// </param>
         /// <param name="conditions">
-        ///     Массив условий для запроса. Передайте пустой массив, чтобы не использовать условия.
-        ///     Name - название столбца.
-        ///     Value - значение столбца.
+        ///     Экземпляр класса <see cref="RIS.Connection.MySQL.Builders.MySQLConditionBuilder"/>, который используется для формирования условий для запроса. Передайте пустой или null, чтобы не использовать условия.
         /// </param>
         /// <param name="numberStartRow">
         ///     Номер строки, с которой начинается считывание (все строки до этой будут пропущены). Передайте 0 или 1, чтобы начать с первой строки.
@@ -89,7 +104,7 @@ namespace RIS.Connection.MySQL.Requests
         ///     Уровень изоляции транзакции.
         /// </param>
         public SelectColumnRequest(IRequestEngine engine, string columnName,
-            string table, (string Name, string Value)[] conditions,
+            string table, MySQLConditionBuilder conditions,
             ulong numberStartRow, ulong countRows,
             IsolationLevel isolationLevel = IsolationLevel.ReadCommitted)
             : this(engine, columnName, table, conditions, numberStartRow,
@@ -110,9 +125,7 @@ namespace RIS.Connection.MySQL.Requests
         ///     Таблица, для которой будет вызван SELECT.
         /// </param>
         /// <param name="conditions">
-        ///     Массив условий для запроса. Передайте пустой массив, чтобы не использовать условия.
-        ///     Name - название столбца.
-        ///     Value - значение столбца.
+        ///     Экземпляр класса <see cref="RIS.Connection.MySQL.Builders.MySQLConditionBuilder"/>, который используется для формирования условий для запроса. Передайте пустой или null, чтобы не использовать условия.
         /// </param>
         /// <param name="numberStartRow">
         ///     Номер строки, с которой начинается считывание (все строки до этой будут пропущены). Передайте 0 или 1, чтобы начать с первой строки.
@@ -127,7 +140,7 @@ namespace RIS.Connection.MySQL.Requests
         ///     Уровень изоляции транзакции.
         /// </param>
         public SelectColumnRequest(IRequestEngine engine, string columnName,
-            string table, (string Name, string Value)[] conditions,
+            string table, MySQLConditionBuilder conditions,
             ulong numberStartRow, ulong countRows, TimeSpan timeout,
             IsolationLevel isolationLevel = IsolationLevel.ReadCommitted)
         {
@@ -200,6 +213,8 @@ namespace RIS.Connection.MySQL.Requests
                 throw exception;
             }
 
+            var constructedConditions = Conditions.Build();
+
             CancellationTokenSource cancellationToken = CancellationTokenSource.CreateLinkedTokenSource(RequestCancellationToken.Token, Engine.GlobalCancellationToken.Token);
             Task<Task> request = Task.Run(async () =>
             {
@@ -218,23 +233,13 @@ namespace RIS.Connection.MySQL.Requests
 
                     sqlBuilder.Append("SELECT ").Append(ColumnName).Append(" FROM ").Append(Table);
 
-                    if (Conditions.Length != 0)
+                    if (!Conditions.IsEmpty())
                     {
-                        sqlBuilder.Append(" WHERE ");
+                        sqlBuilder.Append(constructedConditions.Sql);
 
-                        sqlBuilder.Append(Conditions[0].Name).Append(" = @param0");
-                        adapter.SelectCommand.Parameters.AddWithValue("@param0", Conditions[0].Value);
-
-                        RequestEngineHelper.ReplaceDBNullParameterValue(Conditions[0].Value, ref adapter,
-                            adapter.SelectCommand.Parameters[0].ParameterName);
-
-                        for (int i = 1; i < Conditions.Length; ++i)
+                        foreach (var parameter in constructedConditions.Parameters)
                         {
-                            sqlBuilder.Append(" AND ").Append(Conditions[i].Name).Append(" = @param").Append(i);
-                            adapter.SelectCommand.Parameters.AddWithValue($"@param{i}", Conditions[i].Value);
-
-                            RequestEngineHelper.ReplaceDBNullParameterValue(Conditions[i].Value, ref adapter,
-                                adapter.SelectCommand.Parameters[i].ParameterName);
+                            adapter.SelectCommand.Parameters.AddWithValue(parameter.Name, parameter.Value);
                         }
                     }
 
@@ -425,7 +430,7 @@ namespace RIS.Connection.MySQL.Requests
             IsolationLevel isolationLevel = IsolationLevel.ReadCommitted)
         {
             return Execute(engine, columnName, table,
-                Array.Empty<(string Name, string Value)>(),
+                MySQLConditionBuilder.Empty,
                 numberStartRow, countRows, engine.CommandTimeout, isolationLevel);
         }
         /// <summary>
@@ -465,7 +470,7 @@ namespace RIS.Connection.MySQL.Requests
             IsolationLevel isolationLevel = IsolationLevel.ReadCommitted)
         {
             return Execute(engine, columnName, table,
-                Array.Empty<(string Name, string Value)>(),
+                MySQLConditionBuilder.Empty,
                 numberStartRow, countRows, timeout, isolationLevel);
         }
         /// <summary>
@@ -502,7 +507,7 @@ namespace RIS.Connection.MySQL.Requests
             IsolationLevel isolationLevel = IsolationLevel.ReadCommitted)
         {
             return ExecuteAsync(engine, columnName, table,
-                Array.Empty<(string Name, string Value)>(),
+                MySQLConditionBuilder.Empty,
                 numberStartRow, countRows, engine.CommandTimeout, isolationLevel);
         }
         /// <summary>
@@ -542,186 +547,7 @@ namespace RIS.Connection.MySQL.Requests
             IsolationLevel isolationLevel = IsolationLevel.ReadCommitted)
         {
             return ExecuteAsync(engine, columnName, table,
-                Array.Empty<(string Name, string Value)>(),
-                numberStartRow, countRows, timeout, isolationLevel);
-        }
-
-        /// <summary>
-        ///     (Синхронно) Вызывает выполнение запроса с заданными параметрами.
-        /// </summary>
-        /// <param name="engine">
-        ///     Экземпляр сервиса <see cref="RIS.Connection.MySQL.IRequestEngine"/>, с помощью которого будет выполняться запрос.
-        /// </param>
-        /// <param name="columnName">
-        ///     Название столбца, значения которого надо получить.
-        /// </param>
-        /// <param name="table">
-        ///     Таблица, для которой будет вызван SELECT.
-        /// </param>
-        /// <param name="conditionName">
-        ///     Название столбца для условия.
-        /// </param>
-        /// <param name="conditionValue">
-        ///     Значение столбца для условия.
-        /// </param>
-        /// <param name="numberStartRow">
-        ///     Номер строки, с которой начинается считывание (все строки до этой будут пропущены). Передайте 0 или 1, чтобы начать с первой строки.
-        /// </param>
-        /// <param name="countRows">
-        ///     Количество строк, которые будут считаны. Передайте 0, чтобы считать все строки, начиная с начальной строки <paramref name="numberStartRow"/>.
-        /// </param>
-        /// <param name="isolationLevel">
-        ///     Уровень изоляции транзакции.
-        /// </param>
-        /// <returns>
-        ///     Массив типа <see cref="string"/>, который содержит ответ сервера.
-        /// </returns>
-        /// <exception cref="DbException"></exception>
-        /// <exception cref="MySqlConnector.MySqlException"></exception>
-        /// <exception cref="InvalidOperationException"></exception>
-        /// <exception cref="TimeoutException"></exception>
-        /// <exception cref="AggregateException"></exception>
-        public static string[] Execute(IRequestEngine engine, string columnName,
-            string table, string conditionName, string conditionValue, ulong numberStartRow,
-            ulong countRows, IsolationLevel isolationLevel = IsolationLevel.ReadCommitted)
-        {
-            return Execute(engine, columnName, table,
-                new (string Name, string Value)[] { (conditionName, conditionValue) },
-                numberStartRow, countRows, engine.CommandTimeout, isolationLevel);
-        }
-        /// <summary>
-        ///     (Синхронно) Вызывает выполнение запроса с заданными параметрами.
-        /// </summary>
-        /// <param name="engine">
-        ///     Экземпляр сервиса <see cref="RIS.Connection.MySQL.IRequestEngine"/>, с помощью которого будет выполняться запрос.
-        /// </param>
-        /// <param name="columnName">
-        ///     Название столбца, значения которого надо получить.
-        /// </param>
-        /// <param name="table">
-        ///     Таблица, для которой будет вызван SELECT.
-        /// </param>
-        /// <param name="conditionName">
-        ///     Название столбца для условия.
-        /// </param>
-        /// <param name="conditionValue">
-        ///     Значение столбца для условия.
-        /// </param>
-        /// <param name="numberStartRow">
-        ///     Номер строки, с которой начинается считывание (все строки до этой будут пропущены). Передайте 0 или 1, чтобы начать с первой строки.
-        /// </param>
-        /// <param name="countRows">
-        ///     Количество строк, которые будут считаны. Передайте 0, чтобы считать все строки, начиная с начальной строки <paramref name="numberStartRow"/>.
-        /// </param>
-        /// <param name="timeout">
-        ///     Время ожидания ответа от сервера.
-        /// </param>
-        /// <param name="isolationLevel">
-        ///     Уровень изоляции транзакции.
-        /// </param>
-        /// <returns>
-        ///     Массив типа <see cref="string"/>, который содержит ответ сервера.
-        /// </returns>
-        /// <exception cref="DbException"></exception>
-        /// <exception cref="MySqlConnector.MySqlException"></exception>
-        /// <exception cref="InvalidOperationException"></exception>
-        /// <exception cref="TimeoutException"></exception>
-        /// <exception cref="AggregateException"></exception>
-        public static string[] Execute(IRequestEngine engine, string columnName,
-            string table, string conditionName, string conditionValue, ulong numberStartRow,
-            ulong countRows, TimeSpan timeout, IsolationLevel isolationLevel = IsolationLevel.ReadCommitted)
-        {
-            return Execute(engine, columnName, table,
-                new (string Name, string Value)[] { (conditionName, conditionValue) },
-                numberStartRow, countRows, timeout, isolationLevel);
-        }
-        /// <summary>
-        ///     (Асинхронно) Вызывает выполнение запроса с заданными параметрами.
-        /// </summary>
-        /// <param name="engine">
-        ///     Экземпляр сервиса <see cref="RIS.Connection.MySQL.IRequestEngine"/>, с помощью которого будет выполняться запрос.
-        /// </param>
-        /// <param name="columnName">
-        ///     Название столбца, значения которого надо получить.
-        /// </param>
-        /// <param name="table">
-        ///     Таблица, для которой будет вызван SELECT.
-        /// </param>
-        /// <param name="conditionName">
-        ///     Название столбца для условия.
-        /// </param>
-        /// <param name="conditionValue">
-        ///     Значение столбца для условия.
-        /// </param>
-        /// <param name="numberStartRow">
-        ///     Номер строки, с которой начинается считывание (все строки до этой будут пропущены). Передайте 0 или 1, чтобы начать с первой строки.
-        /// </param>
-        /// <param name="countRows">
-        ///     Количество строк, которые будут считаны. Передайте 0, чтобы считать все строки, начиная с начальной строки <paramref name="numberStartRow"/>.
-        /// </param>
-        /// <param name="isolationLevel">
-        ///     Уровень изоляции транзакции.
-        /// </param>
-        /// <returns>
-        ///     Массив типа <see cref="string"/>, который содержит ответ сервера.
-        /// </returns>
-        /// <exception cref="DbException"></exception>
-        /// <exception cref="MySqlConnector.MySqlException"></exception>
-        /// <exception cref="InvalidOperationException"></exception>
-        /// <exception cref="TimeoutException"></exception>
-        /// <exception cref="AggregateException"></exception>
-        public static Task<string[]> ExecuteAsync(IRequestEngine engine, string columnName,
-            string table, string conditionName, string conditionValue, ulong numberStartRow,
-            ulong countRows, IsolationLevel isolationLevel = IsolationLevel.ReadCommitted)
-        {
-            return ExecuteAsync(engine, columnName, table,
-                new (string Name, string Value)[] { (conditionName, conditionValue) },
-                numberStartRow, countRows, engine.CommandTimeout, isolationLevel);
-        }
-        /// <summary>
-        ///     (Асинхронно) Вызывает выполнение запроса с заданными параметрами.
-        /// </summary>
-        /// <param name="engine">
-        ///     Экземпляр сервиса <see cref="RIS.Connection.MySQL.IRequestEngine"/>, с помощью которого будет выполняться запрос.
-        /// </param>
-        /// <param name="columnName">
-        ///     Название столбца, значения которого надо получить.
-        /// </param>
-        /// <param name="table">
-        ///     Таблица, для которой будет вызван SELECT.
-        /// </param>
-        /// <param name="conditionName">
-        ///     Название столбца для условия.
-        /// </param>
-        /// <param name="conditionValue">
-        ///     Значение столбца для условия.
-        /// </param>
-        /// <param name="numberStartRow">
-        ///     Номер строки, с которой начинается считывание (все строки до этой будут пропущены). Передайте 0 или 1, чтобы начать с первой строки.
-        /// </param>
-        /// <param name="countRows">
-        ///     Количество строк, которые будут считаны. Передайте 0, чтобы считать все строки, начиная с начальной строки <paramref name="numberStartRow"/>.
-        /// </param>
-        /// <param name="timeout">
-        ///     Время ожидания ответа от сервера.
-        /// </param>
-        /// <param name="isolationLevel">
-        ///     Уровень изоляции транзакции.
-        /// </param>
-        /// <returns>
-        ///     Массив типа <see cref="string"/>, который содержит ответ сервера.
-        /// </returns>
-        /// <exception cref="DbException"></exception>
-        /// <exception cref="MySqlConnector.MySqlException"></exception>
-        /// <exception cref="InvalidOperationException"></exception>
-        /// <exception cref="TimeoutException"></exception>
-        /// <exception cref="AggregateException"></exception>
-        public static Task<string[]> ExecuteAsync(IRequestEngine engine, string columnName,
-            string table, string conditionName, string conditionValue, ulong numberStartRow,
-            ulong countRows, TimeSpan timeout, IsolationLevel isolationLevel = IsolationLevel.ReadCommitted)
-        {
-            return ExecuteAsync(engine, columnName, table,
-                new (string Name, string Value)[] { (conditionName, conditionValue) },
+                MySQLConditionBuilder.Empty,
                 numberStartRow, countRows, timeout, isolationLevel);
         }
 
@@ -738,9 +564,7 @@ namespace RIS.Connection.MySQL.Requests
         ///     Таблица, для которой будет вызван SELECT.
         /// </param>
         /// <param name="conditions">
-        ///     Массив условий для запроса. Передайте пустой массив, чтобы не использовать условия.
-        ///     Name - название столбца.
-        ///     Value - значение столбца.
+        ///     Экземпляр класса <see cref="RIS.Connection.MySQL.Builders.MySQLConditionBuilder"/>, который используется для формирования условий для запроса. Передайте пустой или null, чтобы не использовать условия.
         /// </param>
         /// <param name="numberStartRow">
         ///     Номер строки, с которой начинается считывание (все строки до этой будут пропущены). Передайте 0 или 1, чтобы начать с первой строки.
@@ -760,7 +584,7 @@ namespace RIS.Connection.MySQL.Requests
         /// <exception cref="TimeoutException"></exception>
         /// <exception cref="AggregateException"></exception>
         public static string[] Execute(IRequestEngine engine, string columnName,
-            string table, (string Name, string Value)[] conditions, ulong numberStartRow,
+            string table, MySQLConditionBuilder conditions, ulong numberStartRow,
             ulong countRows, IsolationLevel isolationLevel = IsolationLevel.ReadCommitted)
         {
             return Execute(engine, columnName, table, conditions, numberStartRow, countRows,
@@ -779,9 +603,7 @@ namespace RIS.Connection.MySQL.Requests
         ///     Таблица, для которой будет вызван SELECT.
         /// </param>
         /// <param name="conditions">
-        ///     Массив условий для запроса. Передайте пустой массив, чтобы не использовать условия.
-        ///     Name - название столбца.
-        ///     Value - значение столбца.
+        ///     Экземпляр класса <see cref="RIS.Connection.MySQL.Builders.MySQLConditionBuilder"/>, который используется для формирования условий для запроса. Передайте пустой или null, чтобы не использовать условия.
         /// </param>
         /// <param name="numberStartRow">
         ///     Номер строки, с которой начинается считывание (все строки до этой будут пропущены). Передайте 0 или 1, чтобы начать с первой строки.
@@ -804,7 +626,7 @@ namespace RIS.Connection.MySQL.Requests
         /// <exception cref="TimeoutException"></exception>
         /// <exception cref="AggregateException"></exception>
         public static string[] Execute(IRequestEngine engine, string columnName,
-            string table, (string Name, string Value)[] conditions, ulong numberStartRow,
+            string table, MySQLConditionBuilder conditions, ulong numberStartRow,
             ulong countRows, TimeSpan timeout, IsolationLevel isolationLevel = IsolationLevel.ReadCommitted)
         {
             return new SelectColumnRequest(engine, columnName, table, conditions, numberStartRow,
@@ -823,9 +645,7 @@ namespace RIS.Connection.MySQL.Requests
         ///     Таблица, для которой будет вызван SELECT.
         /// </param>
         /// <param name="conditions">
-        ///     Массив условий для запроса. Передайте пустой массив, чтобы не использовать условия.
-        ///     Name - название столбца.
-        ///     Value - значение столбца.
+        ///     Экземпляр класса <see cref="RIS.Connection.MySQL.Builders.MySQLConditionBuilder"/>, который используется для формирования условий для запроса. Передайте пустой или null, чтобы не использовать условия.
         /// </param>
         /// <param name="numberStartRow">
         ///     Номер строки, с которой начинается считывание (все строки до этой будут пропущены). Передайте 0 или 1, чтобы начать с первой строки.
@@ -845,7 +665,7 @@ namespace RIS.Connection.MySQL.Requests
         /// <exception cref="TimeoutException"></exception>
         /// <exception cref="AggregateException"></exception>
         public static Task<string[]> ExecuteAsync(IRequestEngine engine, string columnName,
-            string table, (string Name, string Value)[] conditions, ulong numberStartRow,
+            string table, MySQLConditionBuilder conditions, ulong numberStartRow,
             ulong countRows, IsolationLevel isolationLevel = IsolationLevel.ReadCommitted)
         {
             return ExecuteAsync(engine, columnName, table, conditions, numberStartRow, countRows,
@@ -864,9 +684,7 @@ namespace RIS.Connection.MySQL.Requests
         ///     Таблица, для которой будет вызван SELECT.
         /// </param>
         /// <param name="conditions">
-        ///     Массив условий для запроса. Передайте пустой массив, чтобы не использовать условия.
-        ///     Name - название столбца.
-        ///     Value - значение столбца.
+        ///     Экземпляр класса <see cref="RIS.Connection.MySQL.Builders.MySQLConditionBuilder"/>, который используется для формирования условий для запроса. Передайте пустой или null, чтобы не использовать условия.
         /// </param>
         /// <param name="numberStartRow">
         ///     Номер строки, с которой начинается считывание (все строки до этой будут пропущены). Передайте 0 или 1, чтобы начать с первой строки.
@@ -889,7 +707,7 @@ namespace RIS.Connection.MySQL.Requests
         /// <exception cref="TimeoutException"></exception>
         /// <exception cref="AggregateException"></exception>
         public static Task<string[]> ExecuteAsync(IRequestEngine engine, string columnName,
-            string table, (string Name, string Value)[] conditions, ulong numberStartRow,
+            string table, MySQLConditionBuilder conditions, ulong numberStartRow,
             ulong countRows, TimeSpan timeout, IsolationLevel isolationLevel = IsolationLevel.ReadCommitted)
         {
             return new SelectColumnRequest(engine, columnName, table, conditions, numberStartRow,

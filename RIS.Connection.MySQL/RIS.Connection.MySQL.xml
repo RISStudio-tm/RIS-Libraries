@@ -4,6 +4,51 @@
         <name>RIS.Connection.MySQL</name>
     </assembly>
     <members>
+        <member name="T:RIS.Connection.MySQL.Builders.ComparisonModeType">
+            <summary>
+            Представляет режим сравнения значений, используемый для логических выражений.
+            </summary>
+        </member>
+        <member name="F:RIS.Connection.MySQL.Builders.ComparisonModeType.Equal">
+            <summary>
+                =
+            </summary>
+        </member>
+        <member name="F:RIS.Connection.MySQL.Builders.ComparisonModeType.EqualNullSafe">
+            <summary>
+                &lt;=&gt;
+            </summary>
+        </member>
+        <member name="F:RIS.Connection.MySQL.Builders.ComparisonModeType.NotEqual">
+            <summary>
+            &lt;&gt;
+            </summary>
+        </member>
+        <member name="F:RIS.Connection.MySQL.Builders.ComparisonModeType.NotEqualNullSafe">
+            <summary>
+            NOT (&lt;=&gt;)
+            </summary>
+        </member>
+        <member name="F:RIS.Connection.MySQL.Builders.ComparisonModeType.GreaterThan">
+            <summary>
+            &gt;
+            </summary>
+        </member>
+        <member name="F:RIS.Connection.MySQL.Builders.ComparisonModeType.GreaterThanOrEqual">
+            <summary>
+            &gt;=
+            </summary>
+        </member>
+        <member name="F:RIS.Connection.MySQL.Builders.ComparisonModeType.LessThan">
+            <summary>
+            &lt;
+            </summary>
+        </member>
+        <member name="F:RIS.Connection.MySQL.Builders.ComparisonModeType.LessThanOrEqual">
+            <summary>
+            &lt;=
+            </summary>
+        </member>
         <member name="T:RIS.Connection.MySQL.DefaultRequestEngine">
             <summary>
                 Представляет сервис для выполнения запросов к MySQL базе данных. Этот класс не может быть унаследован.
@@ -1201,9 +1246,7 @@
         </member>
         <member name="P:RIS.Connection.MySQL.Requests.DeleteRequest.Conditions">
             <summary>
-                Позволяет получать или устанавливать массив условий для запроса. Передайте пустой массив, чтобы не использовать условия.
-                Name - название столбца.
-                Value - значение столбца.
+                Позволяет получать или устанавливать экземпляр класса <see cref="T:RIS.Connection.MySQL.Builders.MySQLConditionBuilder"/>, который используется для формирования условий для запроса. Передайте пустой или null, чтобы не использовать условия.
             </summary>
         </member>
         <member name="P:RIS.Connection.MySQL.Requests.DeleteRequest.Timeout">
@@ -1221,7 +1264,7 @@
                 Позволяет получать токен отмены запроса.
             </summary>
         </member>
-        <member name="M:RIS.Connection.MySQL.Requests.DeleteRequest.#ctor(RIS.Connection.MySQL.IRequestEngine,System.String,System.ValueTuple{System.String,System.String}[],System.Data.IsolationLevel)">
+        <member name="M:RIS.Connection.MySQL.Requests.DeleteRequest.#ctor(RIS.Connection.MySQL.IRequestEngine,System.String,RIS.Connection.MySQL.Builders.MySQLConditionBuilder,System.Data.IsolationLevel)">
             <summary>
                 Инициализирует новый экземпляр класса <see cref="T:RIS.Connection.MySQL.Requests.DeleteRequest"/>.
             </summary>
@@ -1232,15 +1275,13 @@
                 Таблица, для которой будет вызван DELETE.
             </param>
             <param name="conditions">
-                Массив условий для запроса. Передайте пустой массив, чтобы не использовать условия.
-                Name - название столбца.
-                Value - значение столбца.
+                Экземпляр класса <see cref="T:RIS.Connection.MySQL.Builders.MySQLConditionBuilder"/>, который используется для формирования условий для запроса. Передайте пустой или null, чтобы не использовать условия.
             </param>
             <param name="isolationLevel">
                 Уровень изоляции транзакции.
             </param>
         </member>
-        <member name="M:RIS.Connection.MySQL.Requests.DeleteRequest.#ctor(RIS.Connection.MySQL.IRequestEngine,System.String,System.ValueTuple{System.String,System.String}[],System.TimeSpan,System.Data.IsolationLevel)">
+        <member name="M:RIS.Connection.MySQL.Requests.DeleteRequest.#ctor(RIS.Connection.MySQL.IRequestEngine,System.String,RIS.Connection.MySQL.Builders.MySQLConditionBuilder,System.TimeSpan,System.Data.IsolationLevel)">
             <summary>
                 Инициализирует новый экземпляр класса <see cref="T:RIS.Connection.MySQL.Requests.DeleteRequest"/>.
             </summary>
@@ -1251,9 +1292,7 @@
                 Таблица, для которой будет вызван DELETE.
             </param>
             <param name="conditions">
-                Массив условий для запроса. Передайте пустой массив, чтобы не использовать условия.
-                Name - название столбца.
-                Value - значение столбца.
+                Экземпляр класса <see cref="T:RIS.Connection.MySQL.Builders.MySQLConditionBuilder"/>, который используется для формирования условий для запроса. Передайте пустой или null, чтобы не использовать условия.
             </param>
             <param name="timeout">
                 Время ожидания ответа от сервера.
@@ -1427,7 +1466,7 @@
             <exception cref="T:System.TimeoutException"></exception>
             <exception cref="T:System.AggregateException"></exception>
         </member>
-        <member name="M:RIS.Connection.MySQL.Requests.DeleteRequest.Execute(RIS.Connection.MySQL.IRequestEngine,System.String,System.String,System.String,System.Data.IsolationLevel)">
+        <member name="M:RIS.Connection.MySQL.Requests.DeleteRequest.Execute(RIS.Connection.MySQL.IRequestEngine,System.String,RIS.Connection.MySQL.Builders.MySQLConditionBuilder,System.Data.IsolationLevel)">
             <summary>
                 (Синхронно) Вызывает выполнение запроса с заданными параметрами.
             </summary>
@@ -1437,11 +1476,8 @@
             <param name="table">
                 Таблица, для которой будет вызван DELETE.
             </param>
-            <param name="conditionName">
-                Название столбца для условия.
-            </param>
-            <param name="conditionValue">
-                Значение столбца для условия.
+            <param name="conditions">
+                Экземпляр класса <see cref="T:RIS.Connection.MySQL.Builders.MySQLConditionBuilder"/>, который используется для формирования условий для запроса. Передайте пустой или null, чтобы не использовать условия.
             </param>
             <param name="isolationLevel">
                 Уровень изоляции транзакции.
@@ -1455,7 +1491,7 @@
             <exception cref="T:System.TimeoutException"></exception>
             <exception cref="T:System.AggregateException"></exception>
         </member>
-        <member name="M:RIS.Connection.MySQL.Requests.DeleteRequest.Execute(RIS.Connection.MySQL.IRequestEngine,System.String,System.String,System.String,System.TimeSpan,System.Data.IsolationLevel)">
+        <member name="M:RIS.Connection.MySQL.Requests.DeleteRequest.Execute(RIS.Connection.MySQL.IRequestEngine,System.String,RIS.Connection.MySQL.Builders.MySQLConditionBuilder,System.TimeSpan,System.Data.IsolationLevel)">
             <summary>
                 (Синхронно) Вызывает выполнение запроса с заданными параметрами.
             </summary>
@@ -1465,11 +1501,8 @@
             <param name="table">
                 Таблица, для которой будет вызван DELETE.
             </param>
-            <param name="conditionName">
-                Название столбца для условия.
-            </param>
-            <param name="conditionValue">
-                Значение столбца для условия.
+            <param name="conditions">
+                Экземпляр класса <see cref="T:RIS.Connection.MySQL.Builders.MySQLConditionBuilder"/>, который используется для формирования условий для запроса. Передайте пустой или null, чтобы не использовать условия.
             </param>
             <param name="timeout">
                 Время ожидания ответа от сервера.
@@ -1486,123 +1519,7 @@
             <exception cref="T:System.TimeoutException"></exception>
             <exception cref="T:System.AggregateException"></exception>
         </member>
-        <member name="M:RIS.Connection.MySQL.Requests.DeleteRequest.ExecuteAsync(RIS.Connection.MySQL.IRequestEngine,System.String,System.String,System.String,System.Data.IsolationLevel)">
-            <summary>
-                (Асинхронно) Вызывает выполнение запроса с заданными параметрами.
-            </summary>
-            <param name="engine">
-                Экземпляр сервиса <see cref="T:RIS.Connection.MySQL.IRequestEngine"/>, с помощью которого будет выполняться запрос.
-            </param>
-            <param name="table">
-                Таблица, для которой будет вызван DELETE.
-            </param>
-            <param name="conditionName">
-                Название столбца для условия.
-            </param>
-            <param name="conditionValue">
-                Значение столбца для условия.
-            </param>
-            <param name="isolationLevel">
-                Уровень изоляции транзакции.
-            </param>
-            <returns>
-                Имеет возвращаемый тип <see langword="void"/>.
-            </returns>
-            <exception cref="T:System.Data.Common.DbException"></exception>
-            <exception cref="T:MySqlConnector.MySqlException"></exception>
-            <exception cref="T:System.InvalidOperationException"></exception>
-            <exception cref="T:System.TimeoutException"></exception>
-            <exception cref="T:System.AggregateException"></exception>
-        </member>
-        <member name="M:RIS.Connection.MySQL.Requests.DeleteRequest.ExecuteAsync(RIS.Connection.MySQL.IRequestEngine,System.String,System.String,System.String,System.TimeSpan,System.Data.IsolationLevel)">
-            <summary>
-                (Асинхронно) Вызывает выполнение запроса с заданными параметрами.
-            </summary>
-            <param name="engine">
-                Экземпляр сервиса <see cref="T:RIS.Connection.MySQL.IRequestEngine"/>, с помощью которого будет выполняться запрос.
-            </param>
-            <param name="table">
-                Таблица, для которой будет вызван DELETE.
-            </param>
-            <param name="conditionName">
-                Название столбца для условия.
-            </param>
-            <param name="conditionValue">
-                Значение столбца для условия.
-            </param>
-            <param name="timeout">
-                Время ожидания ответа от сервера.
-            </param>
-            <param name="isolationLevel">
-                Уровень изоляции транзакции.
-            </param>
-            <returns>
-                Имеет возвращаемый тип <see langword="void"/>.
-            </returns>
-            <exception cref="T:System.Data.Common.DbException"></exception>
-            <exception cref="T:MySqlConnector.MySqlException"></exception>
-            <exception cref="T:System.InvalidOperationException"></exception>
-            <exception cref="T:System.TimeoutException"></exception>
-            <exception cref="T:System.AggregateException"></exception>
-        </member>
-        <member name="M:RIS.Connection.MySQL.Requests.DeleteRequest.Execute(RIS.Connection.MySQL.IRequestEngine,System.String,System.ValueTuple{System.String,System.String}[],System.Data.IsolationLevel)">
-            <summary>
-                (Синхронно) Вызывает выполнение запроса с заданными параметрами.
-            </summary>
-            <param name="engine">
-                Экземпляр сервиса <see cref="T:RIS.Connection.MySQL.IRequestEngine"/>, с помощью которого будет выполняться запрос.
-            </param>
-            <param name="table">
-                Таблица, для которой будет вызван DELETE.
-            </param>
-            <param name="conditions">
-                Массив условий для запроса. Передайте пустой массив, чтобы не использовать условия.
-                Name - название столбца.
-                Value - значение столбца.
-            </param>
-            <param name="isolationLevel">
-                Уровень изоляции транзакции.
-            </param>
-            <returns>
-                Имеет возвращаемый тип <see langword="void"/>.
-            </returns>
-            <exception cref="T:System.Data.Common.DbException"></exception>
-            <exception cref="T:MySqlConnector.MySqlException"></exception>
-            <exception cref="T:System.InvalidOperationException"></exception>
-            <exception cref="T:System.TimeoutException"></exception>
-            <exception cref="T:System.AggregateException"></exception>
-        </member>
-        <member name="M:RIS.Connection.MySQL.Requests.DeleteRequest.Execute(RIS.Connection.MySQL.IRequestEngine,System.String,System.ValueTuple{System.String,System.String}[],System.TimeSpan,System.Data.IsolationLevel)">
-            <summary>
-                (Синхронно) Вызывает выполнение запроса с заданными параметрами.
-            </summary>
-            <param name="engine">
-                Экземпляр сервиса <see cref="T:RIS.Connection.MySQL.IRequestEngine"/>, с помощью которого будет выполняться запрос.
-            </param>
-            <param name="table">
-                Таблица, для которой будет вызван DELETE.
-            </param>
-            <param name="conditions">
-                Массив условий для запроса. Передайте пустой массив, чтобы не использовать условия.
-                Name - название столбца.
-                Value - значение столбца.
-            </param>
-            <param name="timeout">
-                Время ожидания ответа от сервера.
-            </param>
-            <param name="isolationLevel">
-                Уровень изоляции транзакции.
-            </param>
-            <returns>
-                Имеет возвращаемый тип <see langword="void"/>.
-            </returns>
-            <exception cref="T:System.Data.Common.DbException"></exception>
-            <exception cref="T:MySqlConnector.MySqlException"></exception>
-            <exception cref="T:System.InvalidOperationException"></exception>
-            <exception cref="T:System.TimeoutException"></exception>
-            <exception cref="T:System.AggregateException"></exception>
-        </member>
-        <member name="M:RIS.Connection.MySQL.Requests.DeleteRequest.ExecuteAsync(RIS.Connection.MySQL.IRequestEngine,System.String,System.ValueTuple{System.String,System.String}[],System.Data.IsolationLevel)">
+        <member name="M:RIS.Connection.MySQL.Requests.DeleteRequest.ExecuteAsync(RIS.Connection.MySQL.IRequestEngine,System.String,RIS.Connection.MySQL.Builders.MySQLConditionBuilder,System.Data.IsolationLevel)">
             <summary>
                 (Асинхронно) Вызывает выполнение запроса с заданными параметрами.
             </summary>
@@ -1613,9 +1530,7 @@
                 Таблица, для которой будет вызван DELETE.
             </param>
             <param name="conditions">
-                Массив условий для запроса. Передайте пустой массив, чтобы не использовать условия.
-                Name - название столбца.
-                Value - значение столбца.
+                Экземпляр класса <see cref="T:RIS.Connection.MySQL.Builders.MySQLConditionBuilder"/>, который используется для формирования условий для запроса. Передайте пустой или null, чтобы не использовать условия.
             </param>
             <param name="isolationLevel">
                 Уровень изоляции транзакции.
@@ -1629,7 +1544,7 @@
             <exception cref="T:System.TimeoutException"></exception>
             <exception cref="T:System.AggregateException"></exception>
         </member>
-        <member name="M:RIS.Connection.MySQL.Requests.DeleteRequest.ExecuteAsync(RIS.Connection.MySQL.IRequestEngine,System.String,System.ValueTuple{System.String,System.String}[],System.TimeSpan,System.Data.IsolationLevel)">
+        <member name="M:RIS.Connection.MySQL.Requests.DeleteRequest.ExecuteAsync(RIS.Connection.MySQL.IRequestEngine,System.String,RIS.Connection.MySQL.Builders.MySQLConditionBuilder,System.TimeSpan,System.Data.IsolationLevel)">
             <summary>
                 (Асинхронно) Вызывает выполнение запроса с заданными параметрами.
             </summary>
@@ -1640,9 +1555,7 @@
                 Таблица, для которой будет вызван DELETE.
             </param>
             <param name="conditions">
-                Массив условий для запроса. Передайте пустой массив, чтобы не использовать условия.
-                Name - название столбца.
-                Value - значение столбца.
+                Экземпляр класса <see cref="T:RIS.Connection.MySQL.Builders.MySQLConditionBuilder"/>, который используется для формирования условий для запроса. Передайте пустой или null, чтобы не использовать условия.
             </param>
             <param name="timeout">
                 Время ожидания ответа от сервера.
@@ -1736,7 +1649,7 @@
                 (Синхронно) Вызывает выполнение запроса с текущими параметрами.
             </summary>
             <returns>
-                Значение типа <see cref="T:System.Data.DataSet"/>, которое содержит ответ сервера.
+                Значение типа <see cref="T:System.Int64"/>, которое содержит номер (id) вставленной строки.
             </returns>
             <exception cref="T:System.Data.Common.DbException"></exception>
             <exception cref="T:MySqlConnector.MySqlException"></exception>
@@ -1749,7 +1662,7 @@
                 (Асинхронно) Вызывает выполнение запроса с текущими параметрами.
             </summary>
             <returns>
-                Значение типа <see cref="T:System.Data.DataSet"/>, которое содержит ответ сервера.
+                Значение типа <see cref="T:System.Int64"/>, которое содержит номер (id) вставленной строки.
             </returns>
             <exception cref="T:System.Data.Common.DbException"></exception>
             <exception cref="T:MySqlConnector.MySqlException"></exception>
@@ -1802,7 +1715,7 @@
                 Экземпляр сервиса <see cref="T:RIS.Connection.MySQL.IRequestEngine"/>, с помощью которого будет выполняться запрос.
             </param>
         </member>
-        <member name="M:RIS.Connection.MySQL.Requests.InsertRequest.Insert(RIS.Connection.MySQL.IRequestEngine,System.String[],System.String,System.Data.IsolationLevel)">
+        <member name="M:RIS.Connection.MySQL.Requests.InsertRequest.Execute(RIS.Connection.MySQL.IRequestEngine,System.String[],System.String,System.Data.IsolationLevel)">
             <summary>
                 (Синхронно) Вызывает выполнение запроса с заданными параметрами.
             </summary>
@@ -1819,7 +1732,7 @@
                 Уровень изоляции транзакции.
             </param>
             <returns>
-                Имеет возвращаемый тип <see langword="void"/>.
+                Значение типа <see cref="T:System.Int64"/>, которое содержит номер (id) вставленной строки.
             </returns>
             <exception cref="T:System.Data.Common.DbException"></exception>
             <exception cref="T:MySqlConnector.MySqlException"></exception>
@@ -1827,7 +1740,7 @@
             <exception cref="T:System.TimeoutException"></exception>
             <exception cref="T:System.AggregateException"></exception>
         </member>
-        <member name="M:RIS.Connection.MySQL.Requests.InsertRequest.Insert(RIS.Connection.MySQL.IRequestEngine,System.String[],System.String,System.TimeSpan,System.Data.IsolationLevel)">
+        <member name="M:RIS.Connection.MySQL.Requests.InsertRequest.Execute(RIS.Connection.MySQL.IRequestEngine,System.String[],System.String,System.TimeSpan,System.Data.IsolationLevel)">
             <summary>
                 (Синхронно) Вызывает выполнение запроса с заданными параметрами.
             </summary>
@@ -1847,7 +1760,7 @@
                 Уровень изоляции транзакции.
             </param>
             <returns>
-                Имеет возвращаемый тип <see langword="void"/>.
+                Значение типа <see cref="T:System.Int64"/>, которое содержит номер (id) вставленной строки.
             </returns>
             <exception cref="T:System.Data.Common.DbException"></exception>
             <exception cref="T:MySqlConnector.MySqlException"></exception>
@@ -1855,7 +1768,7 @@
             <exception cref="T:System.TimeoutException"></exception>
             <exception cref="T:System.AggregateException"></exception>
         </member>
-        <member name="M:RIS.Connection.MySQL.Requests.InsertRequest.InsertAsync(RIS.Connection.MySQL.IRequestEngine,System.String[],System.String,System.Data.IsolationLevel)">
+        <member name="M:RIS.Connection.MySQL.Requests.InsertRequest.ExecuteAsync(RIS.Connection.MySQL.IRequestEngine,System.String[],System.String,System.Data.IsolationLevel)">
             <summary>
                 (Асинхронно) Вызывает выполнение запроса с заданными параметрами.
             </summary>
@@ -1872,7 +1785,7 @@
                 Уровень изоляции транзакции.
             </param>
             <returns>
-                Имеет возвращаемый тип <see langword="void"/>.
+                Значение типа <see cref="T:System.Int64"/>, которое содержит номер (id) вставленной строки.
             </returns>
             <exception cref="T:System.Data.Common.DbException"></exception>
             <exception cref="T:MySqlConnector.MySqlException"></exception>
@@ -1880,7 +1793,7 @@
             <exception cref="T:System.TimeoutException"></exception>
             <exception cref="T:System.AggregateException"></exception>
         </member>
-        <member name="M:RIS.Connection.MySQL.Requests.InsertRequest.InsertAsync(RIS.Connection.MySQL.IRequestEngine,System.String[],System.String,System.TimeSpan,System.Data.IsolationLevel)">
+        <member name="M:RIS.Connection.MySQL.Requests.InsertRequest.ExecuteAsync(RIS.Connection.MySQL.IRequestEngine,System.String[],System.String,System.TimeSpan,System.Data.IsolationLevel)">
             <summary>
                 (Асинхронно) Вызывает выполнение запроса с заданными параметрами.
             </summary>
@@ -1900,7 +1813,7 @@
                 Уровень изоляции транзакции.
             </param>
             <returns>
-                Имеет возвращаемый тип <see langword="void"/>.
+                Значение типа <see cref="T:System.Int64"/>, которое содержит номер (id) вставленной строки.
             </returns>
             <exception cref="T:System.Data.Common.DbException"></exception>
             <exception cref="T:MySqlConnector.MySqlException"></exception>
@@ -2043,6 +1956,255 @@
                 Экземпляр сервиса <see cref="T:RIS.Connection.MySQL.IRequestEngine"/>, с помощью которого будет выполняться запрос.
             </param>
         </member>
+        <member name="T:RIS.Connection.MySQL.Requests.ReplaceRequest">
+            <summary>
+                Представляет запрос к MySQL базе данных. Этот класс не может быть унаследован.
+            </summary>
+        </member>
+        <member name="P:RIS.Connection.MySQL.Requests.ReplaceRequest.Engine">
+            <summary>
+                Позволяет получать экземпляр сервиса <see cref="T:RIS.Connection.MySQL.IRequestEngine"/>, с помощью которого будет выполняться запрос.
+            </summary>
+        </member>
+        <member name="P:RIS.Connection.MySQL.Requests.ReplaceRequest.Values">
+            <summary>
+                Позволяет получать или устанавливать массив значений столбцов по порядку их следования в таблице <see cref="P:RIS.Connection.MySQL.Requests.ReplaceRequest.Table"/>. Передайте пустой массив, чтобы использовать значения по умолчанию для всех столбцов.
+            </summary>
+        </member>
+        <member name="P:RIS.Connection.MySQL.Requests.ReplaceRequest.Table">
+            <summary>
+                Позволяет получать или устанавливать таблицу, для которой будет вызван REPLACE.
+            </summary>
+        </member>
+        <member name="P:RIS.Connection.MySQL.Requests.ReplaceRequest.Timeout">
+            <summary>
+                Позволяет получать или устанавливать время ожидания ответа от сервера.
+            </summary>
+        </member>
+        <member name="P:RIS.Connection.MySQL.Requests.ReplaceRequest.IsolationLevel">
+            <summary>
+                Позволяет получать или устанавливать уровень изоляции транзакции.
+            </summary>
+        </member>
+        <member name="P:RIS.Connection.MySQL.Requests.ReplaceRequest.RequestCancellationToken">
+            <summary>
+                Позволяет получать токен отмены запроса.
+            </summary>
+        </member>
+        <member name="M:RIS.Connection.MySQL.Requests.ReplaceRequest.#ctor(RIS.Connection.MySQL.IRequestEngine,System.String[],System.String,System.Data.IsolationLevel)">
+            <summary>
+                Инициализирует новый экземпляр класса <see cref="T:RIS.Connection.MySQL.Requests.ReplaceRequest"/>.
+            </summary>
+            <param name="engine">
+                Экземпляр сервиса <see cref="T:RIS.Connection.MySQL.IRequestEngine"/>, с помощью которого будет выполняться запрос.
+            </param>
+            <param name="values">
+                Массив значений столбцов по порядку их следования в таблице <paramref name="table"/>. Передайте пустой массив, чтобы использовать значения по умолчанию для всех столбцов.
+            </param>
+            <param name="table">
+                Таблица, для которой будет вызван REPLACE.
+            </param>
+            <param name="isolationLevel">
+                Уровень изоляции транзакции.
+            </param>
+        </member>
+        <member name="M:RIS.Connection.MySQL.Requests.ReplaceRequest.#ctor(RIS.Connection.MySQL.IRequestEngine,System.String[],System.String,System.TimeSpan,System.Data.IsolationLevel)">
+            <summary>
+                Инициализирует новый экземпляр класса <see cref="T:RIS.Connection.MySQL.Requests.ReplaceRequest"/>.
+            </summary>
+            <param name="engine">
+                Экземпляр сервиса <see cref="T:RIS.Connection.MySQL.IRequestEngine"/>, с помощью которого будет выполняться запрос.
+            </param>
+            <param name="values">
+                Массив значений столбцов по порядку их следования в таблице <paramref name="table"/>. Передайте пустой массив, чтобы использовать значения по умолчанию для всех столбцов.
+            </param>
+            <param name="table">
+                Таблица, для которой будет вызван REPLACE.
+            </param>
+            <param name="timeout">
+                Время ожидания ответа от сервера.
+            </param>
+            <param name="isolationLevel">
+                Уровень изоляции транзакции.
+            </param>
+        </member>
+        <member name="M:RIS.Connection.MySQL.Requests.ReplaceRequest.Execute">
+            <summary>
+                (Синхронно) Вызывает выполнение запроса с текущими параметрами.
+            </summary>
+            <returns>
+                Значение типа <see cref="T:System.Int64"/>, которое содержит номер (id) вставленной строки.
+            </returns>
+            <exception cref="T:System.Data.Common.DbException"></exception>
+            <exception cref="T:MySqlConnector.MySqlException"></exception>
+            <exception cref="T:System.InvalidOperationException"></exception>
+            <exception cref="T:System.TimeoutException"></exception>
+            <exception cref="T:System.AggregateException"></exception>
+        </member>
+        <member name="M:RIS.Connection.MySQL.Requests.ReplaceRequest.ExecuteAsync">
+            <summary>
+                (Асинхронно) Вызывает выполнение запроса с текущими параметрами.
+            </summary>
+            <returns>
+                Значение типа <see cref="T:System.Int64"/>, которое содержит номер (id) вставленной строки.
+            </returns>
+            <exception cref="T:System.Data.Common.DbException"></exception>
+            <exception cref="T:MySqlConnector.MySqlException"></exception>
+            <exception cref="T:System.InvalidOperationException"></exception>
+            <exception cref="T:System.TimeoutException"></exception>
+            <exception cref="T:System.AggregateException"></exception>
+        </member>
+        <member name="M:RIS.Connection.MySQL.Requests.ReplaceRequest.Cancel">
+            <summary>
+                Вызывает отмену запроса.
+            </summary>
+            <exception cref="T:System.AggregateException"></exception>
+        </member>
+        <member name="M:RIS.Connection.MySQL.Requests.ReplaceRequest.RIS#Connection#MySQL#Requests#IRequest#Copy">
+            <summary>
+                Создаёт копию запроса.
+            </summary>
+        </member>
+        <member name="M:RIS.Connection.MySQL.Requests.ReplaceRequest.RIS#Connection#MySQL#Requests#IRequest#Copy(RIS.Connection.MySQL.IRequestEngine)">
+            <summary>
+                Создаёт копию запроса.
+            </summary>
+            /// <param name="engine">
+                Экземпляр сервиса <see cref="T:RIS.Connection.MySQL.IRequestEngine"/>, с помощью которого будет выполняться запрос.
+            </param>
+        </member>
+        <member name="M:RIS.Connection.MySQL.Requests.ReplaceRequest.RIS#Connection#MySQL#Requests#IQueryRequest{System#Int64}#Copy">
+            <summary>
+                Создаёт копию запроса.
+            </summary>
+        </member>
+        <member name="M:RIS.Connection.MySQL.Requests.ReplaceRequest.RIS#Connection#MySQL#Requests#IQueryRequest{System#Int64}#Copy(RIS.Connection.MySQL.IRequestEngine)">
+            <summary>
+                Создаёт копию запроса.
+            </summary>
+            /// <param name="engine">
+                Экземпляр сервиса <see cref="T:RIS.Connection.MySQL.IRequestEngine"/>, с помощью которого будет выполняться запрос.
+            </param>
+        </member>
+        <member name="M:RIS.Connection.MySQL.Requests.ReplaceRequest.Copy">
+            <summary>
+                Создаёт копию запроса.
+            </summary>
+        </member>
+        <member name="M:RIS.Connection.MySQL.Requests.ReplaceRequest.Copy(RIS.Connection.MySQL.IRequestEngine)">
+            <summary>
+                Создаёт копию запроса.
+            </summary>
+            <param name="engine">
+                Экземпляр сервиса <see cref="T:RIS.Connection.MySQL.IRequestEngine"/>, с помощью которого будет выполняться запрос.
+            </param>
+        </member>
+        <member name="M:RIS.Connection.MySQL.Requests.ReplaceRequest.Execute(RIS.Connection.MySQL.IRequestEngine,System.String[],System.String,System.Data.IsolationLevel)">
+            <summary>
+                (Синхронно) Вызывает выполнение запроса с заданными параметрами.
+            </summary>
+            <param name="engine">
+                Экземпляр сервиса <see cref="T:RIS.Connection.MySQL.IRequestEngine"/>, с помощью которого будет выполняться запрос.
+            </param>
+            <param name="values">
+                Массив значений столбцов по порядку их следования в таблице <paramref name="table"/>. Передайте пустой массив, чтобы использовать значения по умолчанию для всех столбцов.
+            </param>
+            <param name="table">
+                Таблица, для которой будет вызван REPLACE.
+            </param>
+            <param name="isolationLevel">
+                Уровень изоляции транзакции.
+            </param>
+            <returns>
+                Значение типа <see cref="T:System.Int64"/>, которое содержит номер (id) вставленной строки.
+            </returns>
+            <exception cref="T:System.Data.Common.DbException"></exception>
+            <exception cref="T:MySqlConnector.MySqlException"></exception>
+            <exception cref="T:System.InvalidOperationException"></exception>
+            <exception cref="T:System.TimeoutException"></exception>
+            <exception cref="T:System.AggregateException"></exception>
+        </member>
+        <member name="M:RIS.Connection.MySQL.Requests.ReplaceRequest.Execute(RIS.Connection.MySQL.IRequestEngine,System.String[],System.String,System.TimeSpan,System.Data.IsolationLevel)">
+            <summary>
+                (Синхронно) Вызывает выполнение запроса с заданными параметрами.
+            </summary>
+            <param name="engine">
+                Экземпляр сервиса <see cref="T:RIS.Connection.MySQL.IRequestEngine"/>, с помощью которого будет выполняться запрос.
+            </param>
+            <param name="values">
+                Массив значений столбцов по порядку их следования в таблице <paramref name="table"/>. Передайте пустой массив, чтобы использовать значения по умолчанию для всех столбцов.
+            </param>
+            <param name="table">
+                Таблица, для которой будет вызван REPLACE.
+            </param>
+            <param name="timeout">
+                Время ожидания ответа от сервера.
+            </param>
+            <param name="isolationLevel">
+                Уровень изоляции транзакции.
+            </param>
+            <returns>
+                Значение типа <see cref="T:System.Int64"/>, которое содержит номер (id) вставленной строки.
+            </returns>
+            <exception cref="T:System.Data.Common.DbException"></exception>
+            <exception cref="T:MySqlConnector.MySqlException"></exception>
+            <exception cref="T:System.InvalidOperationException"></exception>
+            <exception cref="T:System.TimeoutException"></exception>
+            <exception cref="T:System.AggregateException"></exception>
+        </member>
+        <member name="M:RIS.Connection.MySQL.Requests.ReplaceRequest.ExecuteAsync(RIS.Connection.MySQL.IRequestEngine,System.String[],System.String,System.Data.IsolationLevel)">
+            <summary>
+                (Асинхронно) Вызывает выполнение запроса с заданными параметрами.
+            </summary>
+            <param name="engine">
+                Экземпляр сервиса <see cref="T:RIS.Connection.MySQL.IRequestEngine"/>, с помощью которого будет выполняться запрос.
+            </param>
+            <param name="values">
+                Массив значений столбцов по порядку их следования в таблице <paramref name="table"/>. Передайте пустой массив, чтобы использовать значения по умолчанию для всех столбцов.
+            </param>
+            <param name="table">
+                Таблица, для которой будет вызван REPLACE.
+            </param>
+            <param name="isolationLevel">
+                Уровень изоляции транзакции.
+            </param>
+            <returns>
+                Значение типа <see cref="T:System.Int64"/>, которое содержит номер (id) вставленной строки.
+            </returns>
+            <exception cref="T:System.Data.Common.DbException"></exception>
+            <exception cref="T:MySqlConnector.MySqlException"></exception>
+            <exception cref="T:System.InvalidOperationException"></exception>
+            <exception cref="T:System.TimeoutException"></exception>
+            <exception cref="T:System.AggregateException"></exception>
+        </member>
+        <member name="M:RIS.Connection.MySQL.Requests.ReplaceRequest.ExecuteAsync(RIS.Connection.MySQL.IRequestEngine,System.String[],System.String,System.TimeSpan,System.Data.IsolationLevel)">
+            <summary>
+                (Асинхронно) Вызывает выполнение запроса с заданными параметрами.
+            </summary>
+            <param name="engine">
+                Экземпляр сервиса <see cref="T:RIS.Connection.MySQL.IRequestEngine"/>, с помощью которого будет выполняться запрос.
+            </param>
+            <param name="values">
+                Массив значений столбцов по порядку их следования в таблице <paramref name="table"/>. Передайте пустой массив, чтобы использовать значения по умолчанию для всех столбцов.
+            </param>
+            <param name="table">
+                Таблица, для которой будет вызван REPLACE.
+            </param>
+            <param name="timeout">
+                Время ожидания ответа от сервера.
+            </param>
+            <param name="isolationLevel">
+                Уровень изоляции транзакции.
+            </param>
+            <returns>
+                Значение типа <see cref="T:System.Int64"/>, которое содержит номер (id) вставленной строки.
+            </returns>
+            <exception cref="T:System.Data.Common.DbException"></exception>
+            <exception cref="T:MySqlConnector.MySqlException"></exception>
+            <exception cref="T:System.InvalidOperationException"></exception>
+            <exception cref="T:System.TimeoutException"></exception>
+            <exception cref="T:System.AggregateException"></exception>
+        </member>
         <member name="T:RIS.Connection.MySQL.Requests.SelectColumnRequest">
             <summary>
                 Представляет запрос к MySQL базе данных. Этот класс не может быть унаследован.
@@ -2065,9 +2227,7 @@
         </member>
         <member name="P:RIS.Connection.MySQL.Requests.SelectColumnRequest.Conditions">
             <summary>
-                Позволяет получать или устанавливать массив условий для запроса. Передайте пустой массив, чтобы не использовать условия.
-                Name - название столбца.
-                Value - значение столбца.
+                Позволяет получать или устанавливать экземпляр класса <see cref="T:RIS.Connection.MySQL.Builders.MySQLConditionBuilder"/>, который используется для формирования условий для запроса. Передайте пустой или null, чтобы не использовать условия.
             </summary>
         </member>
         <member name="P:RIS.Connection.MySQL.Requests.SelectColumnRequest.NumberStartRow">
@@ -2095,7 +2255,7 @@
                 Позволяет получать токен отмены запроса.
             </summary>
         </member>
-        <member name="M:RIS.Connection.MySQL.Requests.SelectColumnRequest.#ctor(RIS.Connection.MySQL.IRequestEngine,System.String,System.String,System.ValueTuple{System.String,System.String}[],System.UInt64,System.UInt64,System.Data.IsolationLevel)">
+        <member name="M:RIS.Connection.MySQL.Requests.SelectColumnRequest.#ctor(RIS.Connection.MySQL.IRequestEngine,System.String,System.String,RIS.Connection.MySQL.Builders.MySQLConditionBuilder,System.UInt64,System.UInt64,System.Data.IsolationLevel)">
             <summary>
                 Инициализирует новый экземпляр класса <see cref="T:RIS.Connection.MySQL.Requests.SelectColumnRequest"/>.
             </summary>
@@ -2109,9 +2269,7 @@
                 Таблица, для которой будет вызван SELECT.
             </param>
             <param name="conditions">
-                Массив условий для запроса. Передайте пустой массив, чтобы не использовать условия.
-                Name - название столбца.
-                Value - значение столбца.
+                Экземпляр класса <see cref="T:RIS.Connection.MySQL.Builders.MySQLConditionBuilder"/>, который используется для формирования условий для запроса. Передайте пустой или null, чтобы не использовать условия.
             </param>
             <param name="numberStartRow">
                 Номер строки, с которой начинается считывание (все строки до этой будут пропущены). Передайте 0 или 1, чтобы начать с первой строки.
@@ -2123,7 +2281,7 @@
                 Уровень изоляции транзакции.
             </param>
         </member>
-        <member name="M:RIS.Connection.MySQL.Requests.SelectColumnRequest.#ctor(RIS.Connection.MySQL.IRequestEngine,System.String,System.String,System.ValueTuple{System.String,System.String}[],System.UInt64,System.UInt64,System.TimeSpan,System.Data.IsolationLevel)">
+        <member name="M:RIS.Connection.MySQL.Requests.SelectColumnRequest.#ctor(RIS.Connection.MySQL.IRequestEngine,System.String,System.String,RIS.Connection.MySQL.Builders.MySQLConditionBuilder,System.UInt64,System.UInt64,System.TimeSpan,System.Data.IsolationLevel)">
             <summary>
                 Инициализирует новый экземпляр класса <see cref="T:RIS.Connection.MySQL.Requests.SelectColumnRequest"/>.
             </summary>
@@ -2137,9 +2295,7 @@
                 Таблица, для которой будет вызван SELECT.
             </param>
             <param name="conditions">
-                Массив условий для запроса. Передайте пустой массив, чтобы не использовать условия.
-                Name - название столбца.
-                Value - значение столбца.
+                Экземпляр класса <see cref="T:RIS.Connection.MySQL.Builders.MySQLConditionBuilder"/>, который используется для формирования условий для запроса. Передайте пустой или null, чтобы не использовать условия.
             </param>
             <param name="numberStartRow">
                 Номер строки, с которой начинается считывание (все строки до этой будут пропущены). Передайте 0 или 1, чтобы начать с первой строки.
@@ -2355,7 +2511,7 @@
             <exception cref="T:System.TimeoutException"></exception>
             <exception cref="T:System.AggregateException"></exception>
         </member>
-        <member name="M:RIS.Connection.MySQL.Requests.SelectColumnRequest.Execute(RIS.Connection.MySQL.IRequestEngine,System.String,System.String,System.String,System.String,System.UInt64,System.UInt64,System.Data.IsolationLevel)">
+        <member name="M:RIS.Connection.MySQL.Requests.SelectColumnRequest.Execute(RIS.Connection.MySQL.IRequestEngine,System.String,System.String,RIS.Connection.MySQL.Builders.MySQLConditionBuilder,System.UInt64,System.UInt64,System.Data.IsolationLevel)">
             <summary>
                 (Синхронно) Вызывает выполнение запроса с заданными параметрами.
             </summary>
@@ -2368,11 +2524,8 @@
             <param name="table">
                 Таблица, для которой будет вызван SELECT.
             </param>
-            <param name="conditionName">
-                Название столбца для условия.
-            </param>
-            <param name="conditionValue">
-                Значение столбца для условия.
+            <param name="conditions">
+                Экземпляр класса <see cref="T:RIS.Connection.MySQL.Builders.MySQLConditionBuilder"/>, который используется для формирования условий для запроса. Передайте пустой или null, чтобы не использовать условия.
             </param>
             <param name="numberStartRow">
                 Номер строки, с которой начинается считывание (все строки до этой будут пропущены). Передайте 0 или 1, чтобы начать с первой строки.
@@ -2392,7 +2545,7 @@
             <exception cref="T:System.TimeoutException"></exception>
             <exception cref="T:System.AggregateException"></exception>
         </member>
-        <member name="M:RIS.Connection.MySQL.Requests.SelectColumnRequest.Execute(RIS.Connection.MySQL.IRequestEngine,System.String,System.String,System.String,System.String,System.UInt64,System.UInt64,System.TimeSpan,System.Data.IsolationLevel)">
+        <member name="M:RIS.Connection.MySQL.Requests.SelectColumnRequest.Execute(RIS.Connection.MySQL.IRequestEngine,System.String,System.String,RIS.Connection.MySQL.Builders.MySQLConditionBuilder,System.UInt64,System.UInt64,System.TimeSpan,System.Data.IsolationLevel)">
             <summary>
                 (Синхронно) Вызывает выполнение запроса с заданными параметрами.
             </summary>
@@ -2405,11 +2558,8 @@
             <param name="table">
                 Таблица, для которой будет вызван SELECT.
             </param>
-            <param name="conditionName">
-                Название столбца для условия.
-            </param>
-            <param name="conditionValue">
-                Значение столбца для условия.
+            <param name="conditions">
+                Экземпляр класса <see cref="T:RIS.Connection.MySQL.Builders.MySQLConditionBuilder"/>, который используется для формирования условий для запроса. Передайте пустой или null, чтобы не использовать условия.
             </param>
             <param name="numberStartRow">
                 Номер строки, с которой начинается считывание (все строки до этой будут пропущены). Передайте 0 или 1, чтобы начать с первой строки.
@@ -2432,159 +2582,7 @@
             <exception cref="T:System.TimeoutException"></exception>
             <exception cref="T:System.AggregateException"></exception>
         </member>
-        <member name="M:RIS.Connection.MySQL.Requests.SelectColumnRequest.ExecuteAsync(RIS.Connection.MySQL.IRequestEngine,System.String,System.String,System.String,System.String,System.UInt64,System.UInt64,System.Data.IsolationLevel)">
-            <summary>
-                (Асинхронно) Вызывает выполнение запроса с заданными параметрами.
-            </summary>
-            <param name="engine">
-                Экземпляр сервиса <see cref="T:RIS.Connection.MySQL.IRequestEngine"/>, с помощью которого будет выполняться запрос.
-            </param>
-            <param name="columnName">
-                Название столбца, значения которого надо получить.
-            </param>
-            <param name="table">
-                Таблица, для которой будет вызван SELECT.
-            </param>
-            <param name="conditionName">
-                Название столбца для условия.
-            </param>
-            <param name="conditionValue">
-                Значение столбца для условия.
-            </param>
-            <param name="numberStartRow">
-                Номер строки, с которой начинается считывание (все строки до этой будут пропущены). Передайте 0 или 1, чтобы начать с первой строки.
-            </param>
-            <param name="countRows">
-                Количество строк, которые будут считаны. Передайте 0, чтобы считать все строки, начиная с начальной строки <paramref name="numberStartRow"/>.
-            </param>
-            <param name="isolationLevel">
-                Уровень изоляции транзакции.
-            </param>
-            <returns>
-                Массив типа <see cref="T:System.String"/>, который содержит ответ сервера.
-            </returns>
-            <exception cref="T:System.Data.Common.DbException"></exception>
-            <exception cref="T:MySqlConnector.MySqlException"></exception>
-            <exception cref="T:System.InvalidOperationException"></exception>
-            <exception cref="T:System.TimeoutException"></exception>
-            <exception cref="T:System.AggregateException"></exception>
-        </member>
-        <member name="M:RIS.Connection.MySQL.Requests.SelectColumnRequest.ExecuteAsync(RIS.Connection.MySQL.IRequestEngine,System.String,System.String,System.String,System.String,System.UInt64,System.UInt64,System.TimeSpan,System.Data.IsolationLevel)">
-            <summary>
-                (Асинхронно) Вызывает выполнение запроса с заданными параметрами.
-            </summary>
-            <param name="engine">
-                Экземпляр сервиса <see cref="T:RIS.Connection.MySQL.IRequestEngine"/>, с помощью которого будет выполняться запрос.
-            </param>
-            <param name="columnName">
-                Название столбца, значения которого надо получить.
-            </param>
-            <param name="table">
-                Таблица, для которой будет вызван SELECT.
-            </param>
-            <param name="conditionName">
-                Название столбца для условия.
-            </param>
-            <param name="conditionValue">
-                Значение столбца для условия.
-            </param>
-            <param name="numberStartRow">
-                Номер строки, с которой начинается считывание (все строки до этой будут пропущены). Передайте 0 или 1, чтобы начать с первой строки.
-            </param>
-            <param name="countRows">
-                Количество строк, которые будут считаны. Передайте 0, чтобы считать все строки, начиная с начальной строки <paramref name="numberStartRow"/>.
-            </param>
-            <param name="timeout">
-                Время ожидания ответа от сервера.
-            </param>
-            <param name="isolationLevel">
-                Уровень изоляции транзакции.
-            </param>
-            <returns>
-                Массив типа <see cref="T:System.String"/>, который содержит ответ сервера.
-            </returns>
-            <exception cref="T:System.Data.Common.DbException"></exception>
-            <exception cref="T:MySqlConnector.MySqlException"></exception>
-            <exception cref="T:System.InvalidOperationException"></exception>
-            <exception cref="T:System.TimeoutException"></exception>
-            <exception cref="T:System.AggregateException"></exception>
-        </member>
-        <member name="M:RIS.Connection.MySQL.Requests.SelectColumnRequest.Execute(RIS.Connection.MySQL.IRequestEngine,System.String,System.String,System.ValueTuple{System.String,System.String}[],System.UInt64,System.UInt64,System.Data.IsolationLevel)">
-            <summary>
-                (Синхронно) Вызывает выполнение запроса с заданными параметрами.
-            </summary>
-            <param name="engine">
-                Экземпляр сервиса <see cref="T:RIS.Connection.MySQL.IRequestEngine"/>, с помощью которого будет выполняться запрос.
-            </param>
-            <param name="columnName">
-                Название столбца, значения которого надо получить.
-            </param>
-            <param name="table">
-                Таблица, для которой будет вызван SELECT.
-            </param>
-            <param name="conditions">
-                Массив условий для запроса. Передайте пустой массив, чтобы не использовать условия.
-                Name - название столбца.
-                Value - значение столбца.
-            </param>
-            <param name="numberStartRow">
-                Номер строки, с которой начинается считывание (все строки до этой будут пропущены). Передайте 0 или 1, чтобы начать с первой строки.
-            </param>
-            <param name="countRows">
-                Количество строк, которые будут считаны. Передайте 0, чтобы считать все строки, начиная с начальной строки <paramref name="numberStartRow"/>.
-            </param>
-            <param name="isolationLevel">
-                Уровень изоляции транзакции.
-            </param>
-            <returns>
-                Массив типа <see cref="T:System.String"/>, который содержит ответ сервера.
-            </returns>
-            <exception cref="T:System.Data.Common.DbException"></exception>
-            <exception cref="T:MySqlConnector.MySqlException"></exception>
-            <exception cref="T:System.InvalidOperationException"></exception>
-            <exception cref="T:System.TimeoutException"></exception>
-            <exception cref="T:System.AggregateException"></exception>
-        </member>
-        <member name="M:RIS.Connection.MySQL.Requests.SelectColumnRequest.Execute(RIS.Connection.MySQL.IRequestEngine,System.String,System.String,System.ValueTuple{System.String,System.String}[],System.UInt64,System.UInt64,System.TimeSpan,System.Data.IsolationLevel)">
-            <summary>
-                (Синхронно) Вызывает выполнение запроса с заданными параметрами.
-            </summary>
-            <param name="engine">
-                Экземпляр сервиса <see cref="T:RIS.Connection.MySQL.IRequestEngine"/>, с помощью которого будет выполняться запрос.
-            </param>
-            <param name="columnName">
-                Название столбца, значения которого надо получить.
-            </param>
-            <param name="table">
-                Таблица, для которой будет вызван SELECT.
-            </param>
-            <param name="conditions">
-                Массив условий для запроса. Передайте пустой массив, чтобы не использовать условия.
-                Name - название столбца.
-                Value - значение столбца.
-            </param>
-            <param name="numberStartRow">
-                Номер строки, с которой начинается считывание (все строки до этой будут пропущены). Передайте 0 или 1, чтобы начать с первой строки.
-            </param>
-            <param name="countRows">
-                Количество строк, которые будут считаны. Передайте 0, чтобы считать все строки, начиная с начальной строки <paramref name="numberStartRow"/>.
-            </param>
-            <param name="timeout">
-                Время ожидания ответа от сервера.
-            </param>
-            <param name="isolationLevel">
-                Уровень изоляции транзакции.
-            </param>
-            <returns>
-                Массив типа <see cref="T:System.String"/>, который содержит ответ сервера.
-            </returns>
-            <exception cref="T:System.Data.Common.DbException"></exception>
-            <exception cref="T:MySqlConnector.MySqlException"></exception>
-            <exception cref="T:System.InvalidOperationException"></exception>
-            <exception cref="T:System.TimeoutException"></exception>
-            <exception cref="T:System.AggregateException"></exception>
-        </member>
-        <member name="M:RIS.Connection.MySQL.Requests.SelectColumnRequest.ExecuteAsync(RIS.Connection.MySQL.IRequestEngine,System.String,System.String,System.ValueTuple{System.String,System.String}[],System.UInt64,System.UInt64,System.Data.IsolationLevel)">
+        <member name="M:RIS.Connection.MySQL.Requests.SelectColumnRequest.ExecuteAsync(RIS.Connection.MySQL.IRequestEngine,System.String,System.String,RIS.Connection.MySQL.Builders.MySQLConditionBuilder,System.UInt64,System.UInt64,System.Data.IsolationLevel)">
             <summary>
                 (Асинхронно) Вызывает выполнение запроса с заданными параметрами.
             </summary>
@@ -2598,9 +2596,7 @@
                 Таблица, для которой будет вызван SELECT.
             </param>
             <param name="conditions">
-                Массив условий для запроса. Передайте пустой массив, чтобы не использовать условия.
-                Name - название столбца.
-                Value - значение столбца.
+                Экземпляр класса <see cref="T:RIS.Connection.MySQL.Builders.MySQLConditionBuilder"/>, который используется для формирования условий для запроса. Передайте пустой или null, чтобы не использовать условия.
             </param>
             <param name="numberStartRow">
                 Номер строки, с которой начинается считывание (все строки до этой будут пропущены). Передайте 0 или 1, чтобы начать с первой строки.
@@ -2620,7 +2616,7 @@
             <exception cref="T:System.TimeoutException"></exception>
             <exception cref="T:System.AggregateException"></exception>
         </member>
-        <member name="M:RIS.Connection.MySQL.Requests.SelectColumnRequest.ExecuteAsync(RIS.Connection.MySQL.IRequestEngine,System.String,System.String,System.ValueTuple{System.String,System.String}[],System.UInt64,System.UInt64,System.TimeSpan,System.Data.IsolationLevel)">
+        <member name="M:RIS.Connection.MySQL.Requests.SelectColumnRequest.ExecuteAsync(RIS.Connection.MySQL.IRequestEngine,System.String,System.String,RIS.Connection.MySQL.Builders.MySQLConditionBuilder,System.UInt64,System.UInt64,System.TimeSpan,System.Data.IsolationLevel)">
             <summary>
                 (Асинхронно) Вызывает выполнение запроса с заданными параметрами.
             </summary>
@@ -2634,9 +2630,7 @@
                 Таблица, для которой будет вызван SELECT.
             </param>
             <param name="conditions">
-                Массив условий для запроса. Передайте пустой массив, чтобы не использовать условия.
-                Name - название столбца.
-                Value - значение столбца.
+                Экземпляр класса <see cref="T:RIS.Connection.MySQL.Builders.MySQLConditionBuilder"/>, который используется для формирования условий для запроса. Передайте пустой или null, чтобы не использовать условия.
             </param>
             <param name="numberStartRow">
                 Номер строки, с которой начинается считывание (все строки до этой будут пропущены). Передайте 0 или 1, чтобы начать с первой строки.
@@ -3808,9 +3802,7 @@
         </member>
         <member name="P:RIS.Connection.MySQL.Requests.SelectRequest.Conditions">
             <summary>
-                Позволяет получать или устанавливать массив условий для запроса. Передайте пустой массив, чтобы не использовать условия.
-                Name - название столбца.
-                Value - значение столбца.
+                Позволяет получать или устанавливать экземпляр класса <see cref="T:RIS.Connection.MySQL.Builders.MySQLConditionBuilder"/>, который используется для формирования условий для запроса. Передайте пустой или null, чтобы не использовать условия.
             </summary>
         </member>
         <member name="P:RIS.Connection.MySQL.Requests.SelectRequest.Timeout">
@@ -3828,7 +3820,7 @@
                 Позволяет получать токен отмены запроса.
             </summary>
         </member>
-        <member name="M:RIS.Connection.MySQL.Requests.SelectRequest.#ctor(RIS.Connection.MySQL.IRequestEngine,System.String[],System.String,System.ValueTuple{System.String,System.String}[],System.Data.IsolationLevel)">
+        <member name="M:RIS.Connection.MySQL.Requests.SelectRequest.#ctor(RIS.Connection.MySQL.IRequestEngine,System.String[],System.String,RIS.Connection.MySQL.Builders.MySQLConditionBuilder,System.Data.IsolationLevel)">
             <summary>
                 Инициализирует новый экземпляр класса <see cref="T:RIS.Connection.MySQL.Requests.SelectRequest"/>.
             </summary>
@@ -3842,15 +3834,13 @@
                 Таблица, для которой будет вызван SELECT.
             </param>
             <param name="conditions">
-                Массив условий для запроса. Передайте пустой массив, чтобы не использовать условия.
-                Name - название столбца.
-                Value - значение столбца.
+                Экземпляр класса <see cref="T:RIS.Connection.MySQL.Builders.MySQLConditionBuilder"/>, который используется для формирования условий для запроса. Передайте пустой или null, чтобы не использовать условия.
             </param>
             <param name="isolationLevel">
                 Уровень изоляции транзакции.
             </param>
         </member>
-        <member name="M:RIS.Connection.MySQL.Requests.SelectRequest.#ctor(RIS.Connection.MySQL.IRequestEngine,System.String[],System.String,System.ValueTuple{System.String,System.String}[],System.TimeSpan,System.Data.IsolationLevel)">
+        <member name="M:RIS.Connection.MySQL.Requests.SelectRequest.#ctor(RIS.Connection.MySQL.IRequestEngine,System.String[],System.String,RIS.Connection.MySQL.Builders.MySQLConditionBuilder,System.TimeSpan,System.Data.IsolationLevel)">
             <summary>
                 Инициализирует новый экземпляр класса <see cref="T:RIS.Connection.MySQL.Requests.SelectRequest"/>.
             </summary>
@@ -3864,9 +3854,7 @@
                 Таблица, для которой будет вызван SELECT.
             </param>
             <param name="conditions">
-                Массив условий для запроса. Передайте пустой массив, чтобы не использовать условия.
-                Name - название столбца.
-                Value - значение столбца.
+                Экземпляр класса <see cref="T:RIS.Connection.MySQL.Builders.MySQLConditionBuilder"/>, который используется для формирования условий для запроса. Передайте пустой или null, чтобы не использовать условия.
             </param>
             <param name="timeout">
                 Время ожидания ответа от сервера.
@@ -4052,7 +4040,7 @@
             <exception cref="T:System.TimeoutException"></exception>
             <exception cref="T:System.AggregateException"></exception>
         </member>
-        <member name="M:RIS.Connection.MySQL.Requests.SelectRequest.Execute(RIS.Connection.MySQL.IRequestEngine,System.String[],System.String,System.String,System.String,System.Data.IsolationLevel)">
+        <member name="M:RIS.Connection.MySQL.Requests.SelectRequest.Execute(RIS.Connection.MySQL.IRequestEngine,System.String[],System.String,RIS.Connection.MySQL.Builders.MySQLConditionBuilder,System.Data.IsolationLevel)">
             <summary>
                 (Синхронно) Вызывает выполнение запроса с заданными параметрами.
             </summary>
@@ -4065,11 +4053,8 @@
             <param name="table">
                 Таблица, для которой будет вызван SELECT.
             </param>
-            <param name="conditionName">
-                Название столбца для условия.
-            </param>
-            <param name="conditionValue">
-                Значение столбца для условия.
+            <param name="conditions">
+                Экземпляр класса <see cref="T:RIS.Connection.MySQL.Builders.MySQLConditionBuilder"/>, который используется для формирования условий для запроса. Передайте пустой или null, чтобы не использовать условия.
             </param>
             <param name="isolationLevel">
                 Уровень изоляции транзакции.
@@ -4083,7 +4068,7 @@
             <exception cref="T:System.TimeoutException"></exception>
             <exception cref="T:System.AggregateException"></exception>
         </member>
-        <member name="M:RIS.Connection.MySQL.Requests.SelectRequest.Execute(RIS.Connection.MySQL.IRequestEngine,System.String[],System.String,System.String,System.String,System.TimeSpan,System.Data.IsolationLevel)">
+        <member name="M:RIS.Connection.MySQL.Requests.SelectRequest.Execute(RIS.Connection.MySQL.IRequestEngine,System.String[],System.String,RIS.Connection.MySQL.Builders.MySQLConditionBuilder,System.TimeSpan,System.Data.IsolationLevel)">
             <summary>
                 (Синхронно) Вызывает выполнение запроса с заданными параметрами.
             </summary>
@@ -4096,11 +4081,8 @@
             <param name="table">
                 Таблица, для которой будет вызван SELECT.
             </param>
-            <param name="conditionName">
-                Название столбца для условия.
-            </param>
-            <param name="conditionValue">
-                Значение столбца для условия.
+            <param name="conditions">
+                Экземпляр класса <see cref="T:RIS.Connection.MySQL.Builders.MySQLConditionBuilder"/>, который используется для формирования условий для запроса. Передайте пустой или null, чтобы не использовать условия.
             </param>
             <param name="timeout">
                 Время ожидания ответа от сервера.
@@ -4117,135 +4099,7 @@
             <exception cref="T:System.TimeoutException"></exception>
             <exception cref="T:System.AggregateException"></exception>
         </member>
-        <member name="M:RIS.Connection.MySQL.Requests.SelectRequest.ExecuteAsync(RIS.Connection.MySQL.IRequestEngine,System.String[],System.String,System.String,System.String,System.Data.IsolationLevel)">
-            <summary>
-                (Асинхронно) Вызывает выполнение запроса с заданными параметрами.
-            </summary>
-            <param name="engine">
-                Экземпляр сервиса <see cref="T:RIS.Connection.MySQL.IRequestEngine"/>, с помощью которого будет выполняться запрос.
-            </param>
-            <param name="fieldsNames">
-                Массив названий полей, значения которых надо получить.
-            </param>
-            <param name="table">
-                Таблица, для которой будет вызван SELECT.
-            </param>
-            <param name="conditionName">
-                Название столбца для условия.
-            </param>
-            <param name="conditionValue">
-                Значение столбца для условия.
-            </param>
-            <param name="isolationLevel">
-                Уровень изоляции транзакции.
-            </param>
-            <returns>
-                Массив типа <see cref="T:System.String"/>, который содержит ответ сервера.
-            </returns>
-            <exception cref="T:System.Data.Common.DbException"></exception>
-            <exception cref="T:MySqlConnector.MySqlException"></exception>
-            <exception cref="T:System.InvalidOperationException"></exception>
-            <exception cref="T:System.TimeoutException"></exception>
-            <exception cref="T:System.AggregateException"></exception>
-        </member>
-        <member name="M:RIS.Connection.MySQL.Requests.SelectRequest.ExecuteAsync(RIS.Connection.MySQL.IRequestEngine,System.String[],System.String,System.String,System.String,System.TimeSpan,System.Data.IsolationLevel)">
-            <summary>
-                (Асинхронно) Вызывает выполнение запроса с заданными параметрами.
-            </summary>
-            <param name="engine">
-                Экземпляр сервиса <see cref="T:RIS.Connection.MySQL.IRequestEngine"/>, с помощью которого будет выполняться запрос.
-            </param>
-            <param name="fieldsNames">
-                Массив названий полей, значения которых надо получить.
-            </param>
-            <param name="table">
-                Таблица, для которой будет вызван SELECT.
-            </param>
-            <param name="conditionName">
-                Название столбца для условия.
-            </param>
-            <param name="conditionValue">
-                Значение столбца для условия.
-            </param>
-            <param name="timeout">
-                Время ожидания ответа от сервера.
-            </param>
-            <param name="isolationLevel">
-                Уровень изоляции транзакции.
-            </param>
-            <returns>
-                Массив типа <see cref="T:System.String"/>, который содержит ответ сервера.
-            </returns>
-            <exception cref="T:System.Data.Common.DbException"></exception>
-            <exception cref="T:MySqlConnector.MySqlException"></exception>
-            <exception cref="T:System.InvalidOperationException"></exception>
-            <exception cref="T:System.TimeoutException"></exception>
-            <exception cref="T:System.AggregateException"></exception>
-        </member>
-        <member name="M:RIS.Connection.MySQL.Requests.SelectRequest.Execute(RIS.Connection.MySQL.IRequestEngine,System.String[],System.String,System.ValueTuple{System.String,System.String}[],System.Data.IsolationLevel)">
-            <summary>
-                (Синхронно) Вызывает выполнение запроса с заданными параметрами.
-            </summary>
-            <param name="engine">
-                Экземпляр сервиса <see cref="T:RIS.Connection.MySQL.IRequestEngine"/>, с помощью которого будет выполняться запрос.
-            </param>
-            <param name="fieldsNames">
-                Массив названий полей, значения которых надо получить.
-            </param>
-            <param name="table">
-                Таблица, для которой будет вызван SELECT.
-            </param>
-            <param name="conditions">
-                Массив условий для запроса. Передайте пустой массив, чтобы не использовать условия.
-                Name - название столбца.
-                Value - значение столбца.
-            </param>
-            <param name="isolationLevel">
-                Уровень изоляции транзакции.
-            </param>
-            <returns>
-                Массив типа <see cref="T:System.String"/>, который содержит ответ сервера.
-            </returns>
-            <exception cref="T:System.Data.Common.DbException"></exception>
-            <exception cref="T:MySqlConnector.MySqlException"></exception>
-            <exception cref="T:System.InvalidOperationException"></exception>
-            <exception cref="T:System.TimeoutException"></exception>
-            <exception cref="T:System.AggregateException"></exception>
-        </member>
-        <member name="M:RIS.Connection.MySQL.Requests.SelectRequest.Execute(RIS.Connection.MySQL.IRequestEngine,System.String[],System.String,System.ValueTuple{System.String,System.String}[],System.TimeSpan,System.Data.IsolationLevel)">
-            <summary>
-                (Синхронно) Вызывает выполнение запроса с заданными параметрами.
-            </summary>
-            <param name="engine">
-                Экземпляр сервиса <see cref="T:RIS.Connection.MySQL.IRequestEngine"/>, с помощью которого будет выполняться запрос.
-            </param>
-            <param name="fieldsNames">
-                Массив названий полей, значения которых надо получить.
-            </param>
-            <param name="table">
-                Таблица, для которой будет вызван SELECT.
-            </param>
-            <param name="conditions">
-                Массив условий для запроса. Передайте пустой массив, чтобы не использовать условия.
-                Name - название столбца.
-                Value - значение столбца.
-            </param>
-            <param name="timeout">
-                Время ожидания ответа от сервера.
-            </param>
-            <param name="isolationLevel">
-                Уровень изоляции транзакции.
-            </param>
-            <returns>
-                Массив типа <see cref="T:System.String"/>, который содержит ответ сервера.
-            </returns>
-            <exception cref="T:System.Data.Common.DbException"></exception>
-            <exception cref="T:MySqlConnector.MySqlException"></exception>
-            <exception cref="T:System.InvalidOperationException"></exception>
-            <exception cref="T:System.TimeoutException"></exception>
-            <exception cref="T:System.AggregateException"></exception>
-        </member>
-        <member name="M:RIS.Connection.MySQL.Requests.SelectRequest.ExecuteAsync(RIS.Connection.MySQL.IRequestEngine,System.String[],System.String,System.ValueTuple{System.String,System.String}[],System.Data.IsolationLevel)">
+        <member name="M:RIS.Connection.MySQL.Requests.SelectRequest.ExecuteAsync(RIS.Connection.MySQL.IRequestEngine,System.String[],System.String,RIS.Connection.MySQL.Builders.MySQLConditionBuilder,System.Data.IsolationLevel)">
             <summary>
                 (Асинхронно) Вызывает выполнение запроса с заданными параметрами.
             </summary>
@@ -4259,9 +4113,7 @@
                 Таблица, для которой будет вызван SELECT.
             </param>
             <param name="conditions">
-                Массив условий для запроса. Передайте пустой массив, чтобы не использовать условия.
-                Name - название столбца.
-                Value - значение столбца.
+                Экземпляр класса <see cref="T:RIS.Connection.MySQL.Builders.MySQLConditionBuilder"/>, который используется для формирования условий для запроса. Передайте пустой или null, чтобы не использовать условия.
             </param>
             <param name="isolationLevel">
                 Уровень изоляции транзакции.
@@ -4275,7 +4127,7 @@
             <exception cref="T:System.TimeoutException"></exception>
             <exception cref="T:System.AggregateException"></exception>
         </member>
-        <member name="M:RIS.Connection.MySQL.Requests.SelectRequest.ExecuteAsync(RIS.Connection.MySQL.IRequestEngine,System.String[],System.String,System.ValueTuple{System.String,System.String}[],System.TimeSpan,System.Data.IsolationLevel)">
+        <member name="M:RIS.Connection.MySQL.Requests.SelectRequest.ExecuteAsync(RIS.Connection.MySQL.IRequestEngine,System.String[],System.String,RIS.Connection.MySQL.Builders.MySQLConditionBuilder,System.TimeSpan,System.Data.IsolationLevel)">
             <summary>
                 (Асинхронно) Вызывает выполнение запроса с заданными параметрами.
             </summary>
@@ -4289,9 +4141,7 @@
                 Таблица, для которой будет вызван SELECT.
             </param>
             <param name="conditions">
-                Массив условий для запроса. Передайте пустой массив, чтобы не использовать условия.
-                Name - название столбца.
-                Value - значение столбца.
+                Экземпляр класса <see cref="T:RIS.Connection.MySQL.Builders.MySQLConditionBuilder"/>, который используется для формирования условий для запроса. Передайте пустой или null, чтобы не использовать условия.
             </param>
             <param name="timeout">
                 Время ожидания ответа от сервера.
@@ -6457,9 +6307,7 @@
         </member>
         <member name="P:RIS.Connection.MySQL.Requests.UpdateRequest.Conditions">
             <summary>
-                Позволяет получать или устанавливать массив условий для запроса. Передайте пустой массив, чтобы не использовать условия.
-                Name - название столбца.
-                Value - значение столбца.
+                Позволяет получать или устанавливать экземпляр класса <see cref="T:RIS.Connection.MySQL.Builders.MySQLConditionBuilder"/>, который используется для формирования условий для запроса. Передайте пустой или null, чтобы не использовать условия.
             </summary>
         </member>
         <member name="P:RIS.Connection.MySQL.Requests.UpdateRequest.Timeout">
@@ -6477,7 +6325,7 @@
                 Позволяет получать токен отмены запроса.
             </summary>
         </member>
-        <member name="M:RIS.Connection.MySQL.Requests.UpdateRequest.#ctor(RIS.Connection.MySQL.IRequestEngine,System.String,System.String,System.String,System.ValueTuple{System.String,System.String}[],System.Data.IsolationLevel)">
+        <member name="M:RIS.Connection.MySQL.Requests.UpdateRequest.#ctor(RIS.Connection.MySQL.IRequestEngine,System.String,System.String,System.String,RIS.Connection.MySQL.Builders.MySQLConditionBuilder,System.Data.IsolationLevel)">
             <summary>
                 Инициализирует новый экземпляр класса <see cref="T:RIS.Connection.MySQL.Requests.UpdateRequest"/>.
             </summary>
@@ -6494,15 +6342,13 @@
                 Таблица, для которой будет вызван UPDATE.
             </param>
             <param name="conditions">
-                Массив условий для запроса. Передайте пустой массив, чтобы не использовать условия.
-                Name - название столбца.
-                Value - значение столбца.
+                Экземпляр класса <see cref="T:RIS.Connection.MySQL.Builders.MySQLConditionBuilder"/>, который используется для формирования условий для запроса. Передайте пустой или null, чтобы не использовать условия.
             </param>
             <param name="isolationLevel">
                 Уровень изоляции транзакции.
             </param>
         </member>
-        <member name="M:RIS.Connection.MySQL.Requests.UpdateRequest.#ctor(RIS.Connection.MySQL.IRequestEngine,System.String,System.String,System.String,System.ValueTuple{System.String,System.String}[],System.TimeSpan,System.Data.IsolationLevel)">
+        <member name="M:RIS.Connection.MySQL.Requests.UpdateRequest.#ctor(RIS.Connection.MySQL.IRequestEngine,System.String,System.String,System.String,RIS.Connection.MySQL.Builders.MySQLConditionBuilder,System.TimeSpan,System.Data.IsolationLevel)">
             <summary>
                 Инициализирует новый экземпляр класса <see cref="T:RIS.Connection.MySQL.Requests.UpdateRequest"/>.
             </summary>
@@ -6519,9 +6365,7 @@
                 Таблица, для которой будет вызван UPDATE.
             </param>
             <param name="conditions">
-                Массив условий для запроса. Передайте пустой массив, чтобы не использовать условия.
-                Name - название столбца.
-                Value - значение столбца.
+                Экземпляр класса <see cref="T:RIS.Connection.MySQL.Builders.MySQLConditionBuilder"/>, который используется для формирования условий для запроса. Передайте пустой или null, чтобы не использовать условия.
             </param>
             <param name="timeout">
                 Время ожидания ответа от сервера.
@@ -6719,7 +6563,7 @@
             <exception cref="T:System.TimeoutException"></exception>
             <exception cref="T:System.AggregateException"></exception>
         </member>
-        <member name="M:RIS.Connection.MySQL.Requests.UpdateRequest.Execute(RIS.Connection.MySQL.IRequestEngine,System.String,System.String,System.String,System.String,System.String,System.Data.IsolationLevel)">
+        <member name="M:RIS.Connection.MySQL.Requests.UpdateRequest.Execute(RIS.Connection.MySQL.IRequestEngine,System.String,System.String,System.String,RIS.Connection.MySQL.Builders.MySQLConditionBuilder,System.Data.IsolationLevel)">
             <summary>
                 (Синхронно) Вызывает выполнение запроса с заданными параметрами.
             </summary>
@@ -6735,11 +6579,8 @@
             <param name="table">
                 Таблица, для которой будет вызван UPDATE.
             </param>
-            <param name="conditionName">
-                Название столбца для условия.
-            </param>
-            <param name="conditionValue">
-                Значение столбца для условия.
+            <param name="conditions">
+                Экземпляр класса <see cref="T:RIS.Connection.MySQL.Builders.MySQLConditionBuilder"/>, который используется для формирования условий для запроса. Передайте пустой или null, чтобы не использовать условия.
             </param>
             <param name="isolationLevel">
                 Уровень изоляции транзакции.
@@ -6753,7 +6594,7 @@
             <exception cref="T:System.TimeoutException"></exception>
             <exception cref="T:System.AggregateException"></exception>
         </member>
-        <member name="M:RIS.Connection.MySQL.Requests.UpdateRequest.Execute(RIS.Connection.MySQL.IRequestEngine,System.String,System.String,System.String,System.String,System.String,System.TimeSpan,System.Data.IsolationLevel)">
+        <member name="M:RIS.Connection.MySQL.Requests.UpdateRequest.Execute(RIS.Connection.MySQL.IRequestEngine,System.String,System.String,System.String,RIS.Connection.MySQL.Builders.MySQLConditionBuilder,System.TimeSpan,System.Data.IsolationLevel)">
             <summary>
                 (Синхронно) Вызывает выполнение запроса с заданными параметрами.
             </summary>
@@ -6769,11 +6610,8 @@
             <param name="table">
                 Таблица, для которой будет вызван UPDATE.
             </param>
-            <param name="conditionName">
-                Название столбца для условия.
-            </param>
-            <param name="conditionValue">
-                Значение столбца для условия.
+            <param name="conditions">
+                Экземпляр класса <see cref="T:RIS.Connection.MySQL.Builders.MySQLConditionBuilder"/>, который используется для формирования условий для запроса. Передайте пустой или null, чтобы не использовать условия.
             </param>
             <param name="timeout">
                 Время ожидания ответа от сервера.
@@ -6790,147 +6628,7 @@
             <exception cref="T:System.TimeoutException"></exception>
             <exception cref="T:System.AggregateException"></exception>
         </member>
-        <member name="M:RIS.Connection.MySQL.Requests.UpdateRequest.ExecuteAsync(RIS.Connection.MySQL.IRequestEngine,System.String,System.String,System.String,System.String,System.String,System.Data.IsolationLevel)">
-            <summary>
-                (Асинхронно) Вызывает выполнение запроса с заданными параметрами.
-            </summary>
-            <param name="engine">
-                Экземпляр сервиса <see cref="T:RIS.Connection.MySQL.IRequestEngine"/>, с помощью которого будет выполняться запрос.
-            </param>
-            <param name="columnName">
-                Название столбца, значение которого надо изменить.
-            </param>
-            <param name="columnValue">
-                Новое значение для столбца <paramref name="columnName"/>.
-            </param>
-            <param name="table">
-                Таблица, для которой будет вызван UPDATE.
-            </param>
-            <param name="conditionName">
-                Название столбца для условия.
-            </param>
-            <param name="conditionValue">
-                Значение столбца для условия.
-            </param>
-            <param name="isolationLevel">
-                Уровень изоляции транзакции.
-            </param>
-            <returns>
-                Имеет возвращаемый тип <see langword="void"/>.
-            </returns>
-            <exception cref="T:System.Data.Common.DbException"></exception>
-            <exception cref="T:MySqlConnector.MySqlException"></exception>
-            <exception cref="T:System.InvalidOperationException"></exception>
-            <exception cref="T:System.TimeoutException"></exception>
-            <exception cref="T:System.AggregateException"></exception>
-        </member>
-        <member name="M:RIS.Connection.MySQL.Requests.UpdateRequest.ExecuteAsync(RIS.Connection.MySQL.IRequestEngine,System.String,System.String,System.String,System.String,System.String,System.TimeSpan,System.Data.IsolationLevel)">
-            <summary>
-                (Асинхронно) Вызывает выполнение запроса с заданными параметрами.
-            </summary>
-            <param name="engine">
-                Экземпляр сервиса <see cref="T:RIS.Connection.MySQL.IRequestEngine"/>, с помощью которого будет выполняться запрос.
-            </param>
-            <param name="columnName">
-                Название столбца, значение которого надо изменить.
-            </param>
-            <param name="columnValue">
-                Новое значение для столбца <paramref name="columnName"/>.
-            </param>
-            <param name="table">
-                Таблица, для которой будет вызван UPDATE.
-            </param>
-            <param name="conditionName">
-                Название столбца для условия.
-            </param>
-            <param name="conditionValue">
-                Значение столбца для условия.
-            </param>
-            <param name="timeout">
-                Время ожидания ответа от сервера.
-            </param>
-            <param name="isolationLevel">
-                Уровень изоляции транзакции.
-            </param>
-            <returns>
-                Имеет возвращаемый тип <see langword="void"/>.
-            </returns>
-            <exception cref="T:System.Data.Common.DbException"></exception>
-            <exception cref="T:MySqlConnector.MySqlException"></exception>
-            <exception cref="T:System.InvalidOperationException"></exception>
-            <exception cref="T:System.TimeoutException"></exception>
-            <exception cref="T:System.AggregateException"></exception>
-        </member>
-        <member name="M:RIS.Connection.MySQL.Requests.UpdateRequest.Execute(RIS.Connection.MySQL.IRequestEngine,System.String,System.String,System.String,System.ValueTuple{System.String,System.String}[],System.Data.IsolationLevel)">
-            <summary>
-                (Синхронно) Вызывает выполнение запроса с заданными параметрами.
-            </summary>
-            <param name="engine">
-                Экземпляр сервиса <see cref="T:RIS.Connection.MySQL.IRequestEngine"/>, с помощью которого будет выполняться запрос.
-            </param>
-            <param name="columnName">
-                Название столбца, значение которого надо изменить.
-            </param>
-            <param name="columnValue">
-                Новое значение для столбца <paramref name="columnName"/>.
-            </param>
-            <param name="table">
-                Таблица, для которой будет вызван UPDATE.
-            </param>
-            <param name="conditions">
-                Массив условий для запроса. Передайте пустой массив, чтобы не использовать условия.
-                Name - название столбца.
-                Value - значение столбца.
-            </param>
-            <param name="isolationLevel">
-                Уровень изоляции транзакции.
-            </param>
-            <returns>
-                Имеет возвращаемый тип <see langword="void"/>.
-            </returns>
-            <exception cref="T:System.Data.Common.DbException"></exception>
-            <exception cref="T:MySqlConnector.MySqlException"></exception>
-            <exception cref="T:System.InvalidOperationException"></exception>
-            <exception cref="T:System.TimeoutException"></exception>
-            <exception cref="T:System.AggregateException"></exception>
-        </member>
-        <member name="M:RIS.Connection.MySQL.Requests.UpdateRequest.Execute(RIS.Connection.MySQL.IRequestEngine,System.String,System.String,System.String,System.ValueTuple{System.String,System.String}[],System.TimeSpan,System.Data.IsolationLevel)">
-            <summary>
-                (Синхронно) Вызывает выполнение запроса с заданными параметрами.
-            </summary>
-            <param name="engine">
-                Экземпляр сервиса <see cref="T:RIS.Connection.MySQL.IRequestEngine"/>, с помощью которого будет выполняться запрос.
-            </param>
-            <param name="columnName">
-                Название столбца, значение которого надо изменить.
-            </param>
-            <param name="columnValue">
-                Новое значение для столбца <paramref name="columnName"/>.
-            </param>
-            <param name="table">
-                Таблица, для которой будет вызван UPDATE.
-            </param>
-            <param name="conditions">
-                Массив условий для запроса. Передайте пустой массив, чтобы не использовать условия.
-                Name - название столбца.
-                Value - значение столбца.
-            </param>
-            <param name="timeout">
-                Время ожидания ответа от сервера.
-            </param>
-            <param name="isolationLevel">
-                Уровень изоляции транзакции.
-            </param>
-            <returns>
-                Имеет возвращаемый тип <see langword="void"/>.
-            </returns>
-            <exception cref="T:System.Data.Common.DbException"></exception>
-            <exception cref="T:MySqlConnector.MySqlException"></exception>
-            <exception cref="T:System.InvalidOperationException"></exception>
-            <exception cref="T:System.TimeoutException"></exception>
-            <exception cref="T:System.AggregateException"></exception>
-        </member>
-        <member name="M:RIS.Connection.MySQL.Requests.UpdateRequest.ExecuteAsync(RIS.Connection.MySQL.IRequestEngine,System.String,System.String,System.String,System.ValueTuple{System.String,System.String}[],System.Data.IsolationLevel)">
+        <member name="M:RIS.Connection.MySQL.Requests.UpdateRequest.ExecuteAsync(RIS.Connection.MySQL.IRequestEngine,System.String,System.String,System.String,RIS.Connection.MySQL.Builders.MySQLConditionBuilder,System.Data.IsolationLevel)">
             <summary>
                 (Асинхронно) Вызывает выполнение запроса с заданными параметрами.
             </summary>
@@ -6947,9 +6645,7 @@
                 Таблица, для которой будет вызван UPDATE.
             </param>
             <param name="conditions">
-                Массив условий для запроса. Передайте пустой массив, чтобы не использовать условия.
-                Name - название столбца.
-                Value - значение столбца.
+               Экземпляр класса <see cref="T:RIS.Connection.MySQL.Builders.MySQLConditionBuilder"/>, который используется для формирования условий для запроса. Передайте пустой или null, чтобы не использовать условия.
             </param>
             <param name="isolationLevel">
                 Уровень изоляции транзакции.
@@ -6963,7 +6659,7 @@
             <exception cref="T:System.TimeoutException"></exception>
             <exception cref="T:System.AggregateException"></exception>
         </member>
-        <member name="M:RIS.Connection.MySQL.Requests.UpdateRequest.ExecuteAsync(RIS.Connection.MySQL.IRequestEngine,System.String,System.String,System.String,System.ValueTuple{System.String,System.String}[],System.TimeSpan,System.Data.IsolationLevel)">
+        <member name="M:RIS.Connection.MySQL.Requests.UpdateRequest.ExecuteAsync(RIS.Connection.MySQL.IRequestEngine,System.String,System.String,System.String,RIS.Connection.MySQL.Builders.MySQLConditionBuilder,System.TimeSpan,System.Data.IsolationLevel)">
             <summary>
                 (Асинхронно) Вызывает выполнение запроса с заданными параметрами.
             </summary>
@@ -6980,9 +6676,7 @@
                 Таблица, для которой будет вызван UPDATE.
             </param>
             <param name="conditions">
-                Массив условий для запроса. Передайте пустой массив, чтобы не использовать условия.
-                Name - название столбца.
-                Value - значение столбца.
+                Экземпляр класса <see cref="T:RIS.Connection.MySQL.Builders.MySQLConditionBuilder"/>, который используется для формирования условий для запроса. Передайте пустой или null, чтобы не использовать условия.
             </param>
             <param name="timeout">
                 Время ожидания ответа от сервера.

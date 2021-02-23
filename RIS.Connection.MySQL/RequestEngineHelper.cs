@@ -2,7 +2,6 @@
 // Licensed under the Apache License, Version 2.0. See LICENSE file in the project root for license information. 
 
 using System;
-using System.Collections.Generic;
 using System.Text;
 using MySqlConnector;
 
@@ -13,17 +12,17 @@ namespace RIS.Connection.MySQL
         internal static void ReplaceDBNullParameterValue(string value, ref MySqlCommand command,
             string parameterName)
         {
-            if (value == "NULL" || value == null)
+            if (command != null && (value == "NULL" || value == null))
                 command.Parameters[parameterName].Value = DBNull.Value;
-            if (value == "'NULL'")
+            if (command != null && (value == "'NULL'"))
                 command.Parameters[parameterName].Value = "NULL";
         }
         internal static void ReplaceDBNullParameterValue(string value, ref MySqlDataAdapter adapter,
             string parameterName)
         {
-            if (value == "NULL" || value == null)
+            if (adapter?.SelectCommand != null && (value == "NULL" || value == null))
                 adapter.SelectCommand.Parameters[parameterName].Value = DBNull.Value;
-            if (value == "'NULL'")
+            if (adapter?.SelectCommand != null && (value == "'NULL'"))
                 adapter.SelectCommand.Parameters[parameterName].Value = "NULL";
         }
 
@@ -32,7 +31,7 @@ namespace RIS.Connection.MySQL
         {
             if (value == "CURRENT_TIMESTAMP")
                 sql = sql.Replace(parameterName, "CURRENT_TIMESTAMP");
-            if (value == "'CURRENT_TIMESTAMP'")
+            if (command != null && (value == "'CURRENT_TIMESTAMP'"))
                 command.Parameters[parameterName].Value = "CURRENT_TIMESTAMP";
         }
         internal static void ReplaceFunctionParameterValue(string value, ref MySqlCommand command,
@@ -40,7 +39,7 @@ namespace RIS.Connection.MySQL
         {
             if (value == "CURRENT_TIMESTAMP")
                 sqlBuilder = sqlBuilder.Replace(parameterName, "CURRENT_TIMESTAMP");
-            if (value == "'CURRENT_TIMESTAMP'")
+            if (command != null && (value == "'CURRENT_TIMESTAMP'"))
                 command.Parameters[parameterName].Value = "CURRENT_TIMESTAMP";
         }
         internal static void ReplaceFunctionParameterValue(string value, ref MySqlDataAdapter adapter,
@@ -48,7 +47,7 @@ namespace RIS.Connection.MySQL
         {
             if (value == "CURRENT_TIMESTAMP")
                 sql = sql.Replace(parameterName, "CURRENT_TIMESTAMP");
-            if (value == "'CURRENT_TIMESTAMP'")
+            if (adapter?.SelectCommand != null && (value == "'CURRENT_TIMESTAMP'"))
                 adapter.SelectCommand.Parameters[parameterName].Value = "CURRENT_TIMESTAMP";
         }
         internal static void ReplaceFunctionParameterValue(string value, ref MySqlDataAdapter adapter,
@@ -56,7 +55,7 @@ namespace RIS.Connection.MySQL
         {
             if (value == "CURRENT_TIMESTAMP")
                 sqlBuilder = sqlBuilder.Replace(parameterName, "CURRENT_TIMESTAMP");
-            if (value == "'CURRENT_TIMESTAMP'")
+            if (adapter?.SelectCommand != null && (value == "'CURRENT_TIMESTAMP'"))
                 adapter.SelectCommand.Parameters[parameterName].Value = "CURRENT_TIMESTAMP";
         }
     }
