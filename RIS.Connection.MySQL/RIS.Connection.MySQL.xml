@@ -4,47 +4,47 @@
         <name>RIS.Connection.MySQL</name>
     </assembly>
     <members>
-        <member name="T:RIS.Connection.MySQL.Builders.ComparisonModeType">
+        <member name="T:RIS.Connection.MySQL.Builders.MySQLComparisonModeType">
             <summary>
             Представляет режим сравнения значений, используемый для логических выражений.
             </summary>
         </member>
-        <member name="F:RIS.Connection.MySQL.Builders.ComparisonModeType.Equal">
+        <member name="F:RIS.Connection.MySQL.Builders.MySQLComparisonModeType.Equal">
             <summary>
                 =
             </summary>
         </member>
-        <member name="F:RIS.Connection.MySQL.Builders.ComparisonModeType.EqualNullSafe">
+        <member name="F:RIS.Connection.MySQL.Builders.MySQLComparisonModeType.EqualNullSafe">
             <summary>
                 &lt;=&gt;
             </summary>
         </member>
-        <member name="F:RIS.Connection.MySQL.Builders.ComparisonModeType.NotEqual">
+        <member name="F:RIS.Connection.MySQL.Builders.MySQLComparisonModeType.NotEqual">
             <summary>
             &lt;&gt;
             </summary>
         </member>
-        <member name="F:RIS.Connection.MySQL.Builders.ComparisonModeType.NotEqualNullSafe">
+        <member name="F:RIS.Connection.MySQL.Builders.MySQLComparisonModeType.NotEqualNullSafe">
             <summary>
             NOT (&lt;=&gt;)
             </summary>
         </member>
-        <member name="F:RIS.Connection.MySQL.Builders.ComparisonModeType.GreaterThan">
+        <member name="F:RIS.Connection.MySQL.Builders.MySQLComparisonModeType.GreaterThan">
             <summary>
             &gt;
             </summary>
         </member>
-        <member name="F:RIS.Connection.MySQL.Builders.ComparisonModeType.GreaterThanOrEqual">
+        <member name="F:RIS.Connection.MySQL.Builders.MySQLComparisonModeType.GreaterThanOrEqual">
             <summary>
             &gt;=
             </summary>
         </member>
-        <member name="F:RIS.Connection.MySQL.Builders.ComparisonModeType.LessThan">
+        <member name="F:RIS.Connection.MySQL.Builders.MySQLComparisonModeType.LessThan">
             <summary>
             &lt;
             </summary>
         </member>
-        <member name="F:RIS.Connection.MySQL.Builders.ComparisonModeType.LessThanOrEqual">
+        <member name="F:RIS.Connection.MySQL.Builders.MySQLComparisonModeType.LessThanOrEqual">
             <summary>
             &lt;=
             </summary>

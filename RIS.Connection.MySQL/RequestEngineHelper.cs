@@ -12,51 +12,69 @@ namespace RIS.Connection.MySQL
         internal static void ReplaceDBNullParameterValue(string value, ref MySqlCommand command,
             string parameterName)
         {
-            if (command != null && (value == "NULL" || value == null))
+            if (command == null)
+                return;
+
+            if (string.Equals(value, "NULL", StringComparison.OrdinalIgnoreCase) || value == null)
                 command.Parameters[parameterName].Value = DBNull.Value;
-            if (command != null && (value == "'NULL'"))
-                command.Parameters[parameterName].Value = "NULL";
+            else if (string.Equals(value, "'NULL'", StringComparison.OrdinalIgnoreCase))
+                command.Parameters[parameterName].Value = value.Substring(1, value.Length - 2);
         }
         internal static void ReplaceDBNullParameterValue(string value, ref MySqlDataAdapter adapter,
             string parameterName)
         {
-            if (adapter?.SelectCommand != null && (value == "NULL" || value == null))
+            if (adapter?.SelectCommand == null)
+                return;
+
+            if (string.Equals(value, "NULL", StringComparison.OrdinalIgnoreCase) || value == null)
                 adapter.SelectCommand.Parameters[parameterName].Value = DBNull.Value;
-            if (adapter?.SelectCommand != null && (value == "'NULL'"))
-                adapter.SelectCommand.Parameters[parameterName].Value = "NULL";
+            else if (string.Equals(value, "'NULL'", StringComparison.OrdinalIgnoreCase))
+                adapter.SelectCommand.Parameters[parameterName].Value = value.Substring(1, value.Length - 2);
         }
 
         internal static void ReplaceFunctionParameterValue(string value, ref MySqlCommand command,
             string parameterName, ref string sql)
         {
-            if (value == "CURRENT_TIMESTAMP")
+            if (command == null)
+                return;
+
+            if (string.Equals(value, "CURRENT_TIMESTAMP", StringComparison.OrdinalIgnoreCase))
                 sql = sql.Replace(parameterName, "CURRENT_TIMESTAMP");
-            if (command != null && (value == "'CURRENT_TIMESTAMP'"))
-                command.Parameters[parameterName].Value = "CURRENT_TIMESTAMP";
+            else if (string.Equals(value, "'CURRENT_TIMESTAMP'", StringComparison.OrdinalIgnoreCase))
+                command.Parameters[parameterName].Value = value.Substring(1, value.Length - 2);
         }
         internal static void ReplaceFunctionParameterValue(string value, ref MySqlCommand command,
             string parameterName, ref StringBuilder sqlBuilder)
         {
-            if (value == "CURRENT_TIMESTAMP")
+            if (command == null)
+                return;
+
+            if (string.Equals(value, "CURRENT_TIMESTAMP", StringComparison.OrdinalIgnoreCase))
                 sqlBuilder = sqlBuilder.Replace(parameterName, "CURRENT_TIMESTAMP");
-            if (command != null && (value == "'CURRENT_TIMESTAMP'"))
-                command.Parameters[parameterName].Value = "CURRENT_TIMESTAMP";
+            else if (string.Equals(value, "'CURRENT_TIMESTAMP'", StringComparison.OrdinalIgnoreCase))
+                command.Parameters[parameterName].Value = value.Substring(1, value.Length - 2);
         }
         internal static void ReplaceFunctionParameterValue(string value, ref MySqlDataAdapter adapter,
             string parameterName, ref string sql)
         {
-            if (value == "CURRENT_TIMESTAMP")
+            if (adapter?.SelectCommand == null)
+                return;
+
+            if (string.Equals(value, "CURRENT_TIMESTAMP", StringComparison.OrdinalIgnoreCase))
                 sql = sql.Replace(parameterName, "CURRENT_TIMESTAMP");
-            if (adapter?.SelectCommand != null && (value == "'CURRENT_TIMESTAMP'"))
-                adapter.SelectCommand.Parameters[parameterName].Value = "CURRENT_TIMESTAMP";
+            else if (string.Equals(value, "'CURRENT_TIMESTAMP'", StringComparison.OrdinalIgnoreCase))
+                adapter.SelectCommand.Parameters[parameterName].Value = value.Substring(1, value.Length - 2);
         }
         internal static void ReplaceFunctionParameterValue(string value, ref MySqlDataAdapter adapter,
             string parameterName, ref StringBuilder sqlBuilder)
         {
-            if (value == "CURRENT_TIMESTAMP")
+            if (adapter?.SelectCommand == null)
+                return;
+
+            if (string.Equals(value, "CURRENT_TIMESTAMP", StringComparison.OrdinalIgnoreCase))
                 sqlBuilder = sqlBuilder.Replace(parameterName, "CURRENT_TIMESTAMP");
-            if (adapter?.SelectCommand != null && (value == "'CURRENT_TIMESTAMP'"))
-                adapter.SelectCommand.Parameters[parameterName].Value = "CURRENT_TIMESTAMP";
+            else if (string.Equals(value, "'CURRENT_TIMESTAMP'", StringComparison.OrdinalIgnoreCase))
+                adapter.SelectCommand.Parameters[parameterName].Value = value.Substring(1, value.Length - 2);
         }
     }
 }

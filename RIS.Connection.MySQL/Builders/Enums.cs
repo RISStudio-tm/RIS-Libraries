@@ -8,7 +8,7 @@ namespace RIS.Connection.MySQL.Builders
     /// <summary>
     /// Представляет режим сравнения значений, используемый для логических выражений.
     /// </summary>
-    public enum ComparisonModeType : byte
+    public enum MySQLComparisonModeType : byte
     {
         /// <summary>
         ///     =
