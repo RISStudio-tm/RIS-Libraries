@@ -29,18 +29,21 @@ namespace RIS.Collections.Nestable
         private List<NestedElementNode<T>> ValuesCollection { get; }
 
         public int Length { get; private set; }
+        public NestableCollectionType CollectionType { get; }
         public object SyncRoot { get; }
         public bool IsSynchronized { get; }
-        public NestableCollectionType CollectionType { get; }
+        int ICollection.Count
+        {
+            get
+            {
+                return Length;
+            }
+        }
 
         public NestableListL()
+            : this(0)
         {
-            SyncRoot = new object();
-            IsSynchronized = false;
-            CollectionType = NestableCollectionHelper.GetCollectionType(GetType().Name);
 
-            Length = 0;
-            ValuesCollection = new List<NestedElementNode<T>>();
         }
         public NestableListL(int length)
         {
@@ -54,9 +57,10 @@ namespace RIS.Collections.Nestable
 
             SyncRoot = new object();
             IsSynchronized = false;
-            CollectionType = NestableCollectionHelper.GetCollectionType(GetType().Name);
 
             Length = length;
+            CollectionType = NestableCollectionHelper.GetCollectionType(GetType().Name);
+
             ValuesCollection = new List<NestedElementNode<T>>(length);
 
             for (int i = 0; i < Length; ++i)
@@ -240,14 +244,6 @@ namespace RIS.Collections.Nestable
             foreach (var element in value)
             {
                 yield return element;
-            }
-        }
-
-        int ICollection.Count
-        {
-            get
-            {
-                return Length;
             }
         }
 

@@ -5,12 +5,12 @@
     <Configurations>Debug;Release;Release Nuget</Configurations>
     <RootNamespace>RIS.Collections</RootNamespace>
     <AssemblyName>RIS.Collections</AssemblyName>
-    <AssemblyVersion>4.5.95.0</AssemblyVersion>
-    <FileVersion>4.5.95.0</FileVersion>
+    <AssemblyVersion>4.6.1.0</AssemblyVersion>
+    <FileVersion>4.6.1.0</FileVersion>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <PackageId>RIS.Collections</PackageId>
     <Product>RIS.Collections</Product>
-    <Version>4.5.95</Version>
+    <Version>4.6.1</Version>
     <Description>A library designed for various types of tasks. Part of the RIS "ecosystem".</Description>
     <PackageTags>dotnet, dotnetcore, netframework, netcore, library</PackageTags>
     <Authors>Dmitry Ponomarev</Authors>

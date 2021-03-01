@@ -39,7 +39,7 @@ namespace RIS.Collections.Nestable
 
         private List<(string Key, NestedElementNode<T> Node)> ValuesCollection { get; }
         private Dictionary<string, (int Index, NestedElementNode<T> Node)> KeysCollection { get; }
-        private long _nextRandomKey;
+        private ulong _nextRandomKey;
         private string NextRandomKey
         {
             get
@@ -51,8 +51,6 @@ namespace RIS.Collections.Nestable
         }
 
         public int Length { get; private set; }
-        public object SyncRoot { get; }
-        public bool IsSynchronized { get; }
         public NestableCollectionType CollectionType { get; }
         private string _key;
         public string Key
@@ -63,7 +61,7 @@ namespace RIS.Collections.Nestable
             }
             set
             {
-                if (string.IsNullOrEmpty(value) || string.IsNullOrWhiteSpace(value))
+                if (string.IsNullOrWhiteSpace(value))
                 {
                     _key = NextRandomKey;
                     return;
@@ -72,19 +70,32 @@ namespace RIS.Collections.Nestable
                 _key = value;
             }
         }
+        public object SyncRoot { get; }
+        public bool IsSynchronized { get; }
+        int ICollection.Count
+        {
+            get
+            {
+                return Length;
+            }
+        }
 
         public NestableDictionaryL()
+            : this(0)
         {
-            SyncRoot = new object();
-            IsSynchronized = false;
-            CollectionType = NestableCollectionHelper.GetCollectionType(GetType().Name);
-            Key = NextRandomKey;
 
-            Length = 0;
-            ValuesCollection = new List<(string Key, NestedElementNode<T> Element)>();
-            KeysCollection = new Dictionary<string, (int Index, NestedElementNode<T> Element)>();
+        }
+        public NestableDictionaryL(string key)
+            : this(key, 0)
+        {
+
         }
         public NestableDictionaryL(int length)
+            : this(null, length)
+        {
+
+        }
+        public NestableDictionaryL(string key, int length)
         {
             if (length < 0)
             {
@@ -96,20 +107,21 @@ namespace RIS.Collections.Nestable
 
             SyncRoot = new object();
             IsSynchronized = false;
-            CollectionType = NestableCollectionHelper.GetCollectionType(GetType().Name);
-            Key = NextRandomKey;
 
             Length = length;
+            CollectionType = NestableCollectionHelper.GetCollectionType(GetType().Name);
+            Key = key;
+
             ValuesCollection = new List<(string Key, NestedElementNode<T> Element)>(length);
             KeysCollection = new Dictionary<string, (int Index, NestedElementNode<T> Element)>(length);
 
             for (int i = 0; i < Length; ++i)
             {
-                string key = NextRandomKey;
+                string nodeKey = NextRandomKey;
                 NestedElementNode<T> node = new NestedElementNode<T>(new NestedElement<T>());
 
-                ValuesCollection.Add((key, node));
-                KeysCollection.Add(key, (i, node));
+                ValuesCollection.Add((nodeKey, node));
+                KeysCollection.Add(nodeKey, (i, node));
             }
         }
 
@@ -532,14 +544,6 @@ namespace RIS.Collections.Nestable
             foreach (var element in value)
             {
                 yield return element;
-            }
-        }
-
-        int ICollection.Count
-        {
-            get
-            {
-                return Length;
             }
         }
 

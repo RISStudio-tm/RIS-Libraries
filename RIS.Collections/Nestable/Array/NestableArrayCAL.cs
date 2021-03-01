@@ -41,18 +41,21 @@ namespace RIS.Collections.Nestable
         private ChunkedArrayL<NestedElement<T>> ValuesCollection { get; }
 
         public int Length { get; private set; }
+        public NestableCollectionType CollectionType { get; }
         public object SyncRoot { get; }
         public bool IsSynchronized { get; }
-        public NestableCollectionType CollectionType { get; }
+        int ICollection.Count
+        {
+            get
+            {
+                return Length;
+            }
+        }
 
         public NestableArrayCAL()
+            : this(0)
         {
-            SyncRoot = new object();
-            IsSynchronized = false;
-            CollectionType = NestableCollectionHelper.GetCollectionType(GetType().Name);
 
-            Length = 0;
-            ValuesCollection = new ChunkedArrayL<NestedElement<T>>();
         }
         public NestableArrayCAL(int length)
         {
@@ -66,9 +69,10 @@ namespace RIS.Collections.Nestable
 
             SyncRoot = new object();
             IsSynchronized = false;
-            CollectionType = NestableCollectionHelper.GetCollectionType(GetType().Name);
 
             Length = length;
+            CollectionType = NestableCollectionHelper.GetCollectionType(GetType().Name);
+
             ValuesCollection = new ChunkedArrayL<NestedElement<T>>(length);
         }
 
@@ -181,14 +185,6 @@ namespace RIS.Collections.Nestable
             foreach (var element in value)
             {
                 yield return element;
-            }
-        }
-
-        int ICollection.Count
-        {
-            get
-            {
-                return Length;
             }
         }
 

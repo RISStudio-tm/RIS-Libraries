@@ -362,7 +362,7 @@ namespace RIS.Collections.Queues
             if (Capacity < min)
             {
                 var newCapacity = Capacity == 0 ? DefaulTCapacity : Capacity*2;
-                newCapacity = System.Math.Max(newCapacity, min);
+                newCapacity = Math.Max(newCapacity, min);
                 Capacity = newCapacity;
             }
         }

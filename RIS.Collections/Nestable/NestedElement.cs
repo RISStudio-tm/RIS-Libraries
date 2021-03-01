@@ -12,38 +12,34 @@ namespace RIS.Collections.Nestable
         {
             get
             {
-                //if (_value == null)
-                //{
-                //    var exception =
-                //        new Exception("Поле Value в [NestedElement] содержит значение null, которое не может быть возвращено");
-                //    Events.OnError(this, new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
-                //    throw exception;
-                //}
-
                 return _value;
             }
             private set
             {
                 if (value == null)
                 {
-                    var exception =
-                        new Exception("Поле Value в [NestedElement] не может содержать значение null");
-                    Events.OnError(this, new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
-                    throw exception;
+                    Type = NestedType.Element;
+                    _value = null;
+
+                    return;
                 }
 
-                if (value is T)
-                    Type = NestedType.Element;
-                else if (value is T[])
-                    Type = NestedType.Array;
-                else if (value is INestableCollection<T>)
-                    Type = NestedType.NestableCollection;
-                else
+                switch (value)
                 {
-                    var exception =
-                        new Exception("Поле Value в [NestedElement] не может содержать значение переданного типа");
-                    Events.OnError(this, new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
-                    throw exception;
+                    case T _:
+                        Type = NestedType.Element;
+                        break;
+                    case T[] _:
+                        Type = NestedType.Array;
+                        break;
+                    case INestableCollection<T> _:
+                        Type = NestedType.NestableCollection;
+                        break;
+                    default:
+                        var exception =
+                            new Exception("Поле Value в [NestedElement] не может содержать значение переданного типа");
+                        Events.OnError(this, new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
+                        throw exception;
                 }
 
                 _value = value;
@@ -54,17 +50,14 @@ namespace RIS.Collections.Nestable
         public NestedElement(T value) : this()
         {
             Value = value;
-            Type = NestedType.Element;
         }
         public NestedElement(T[] value) : this()
         {
             Value = value;
-            Type = NestedType.Array;
         }
         public NestedElement(INestableCollection<T> value) : this()
         {
             Value = value;
-            Type = NestedType.NestableCollection;
         }
 
         public void Set(NestedElement<T> value)
@@ -87,6 +80,9 @@ namespace RIS.Collections.Nestable
 
         public T GetElement()
         {
+            if (Value == null)
+                return default;
+
             if (Type != NestedType.Element)
             {
                 var exception =
@@ -99,6 +95,9 @@ namespace RIS.Collections.Nestable
         }
         public T[] GetArray()
         {
+            if (Value == null)
+                return null;
+
             if (Type != NestedType.Array)
             {
                 var exception =
@@ -111,6 +110,9 @@ namespace RIS.Collections.Nestable
         }
         public INestableCollection<T> GetNestableCollection()
         {
+            if (Value == null)
+                return null;
+
             if (Type != NestedType.NestableCollection)
             {
                 var exception =
@@ -139,11 +141,14 @@ namespace RIS.Collections.Nestable
             }
 
             NestedElement<T> nestedElement = (NestedElement<T>)element;
-            return Equals(_value, nestedElement._value) && Type == nestedElement.Type;
+
+            return Type == nestedElement.Type
+                   &&_value.Equals(nestedElement._value);
         }
         public bool Equals(NestedElement<T> nestedElement)
         {
-            return Equals(_value, nestedElement._value) && Type == nestedElement.Type;
+            return Type == nestedElement.Type
+                   && _value.Equals(nestedElement._value);
         }
 
         public override int GetHashCode()
@@ -151,24 +156,24 @@ namespace RIS.Collections.Nestable
             return Value.GetHashCode();
         }
 
+        public override string ToString()
+        {
+            return NestableCollectionHelper.ToStringRepresent(this);
+        }
+
         public static bool operator ==(NestedElement<T> element1, NestedElement<T> element2)
         {
-            return element1.Value == element2.Value;
+            return element1.Equals(element2);
         }
         public static bool operator !=(NestedElement<T> element1, NestedElement<T> element2)
         {
-            return element1.Value != element2.Value;
+            return !element1.Equals(element2);
         }
 
         public static explicit operator T(NestedElement<T> param)
         {
             if (param.Value == null)
-            {
-                var exception =
-                    new Exception("Невозможно преобразовать [NestedElement] к типу Element, так как поле Value равно null");
-                Events.OnError(new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
-                throw exception;
-            }
+                return default;
 
             if (param.Type != NestedType.Element)
             {
@@ -183,12 +188,7 @@ namespace RIS.Collections.Nestable
         public static explicit operator T[](NestedElement<T> param)
         {
             if (param.Value == null)
-            {
-                var exception =
-                    new Exception("Невозможно преобразовать [NestedElement] к типу Array, так как поле Value равно null");
-                Events.OnError(new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
-                throw exception;
-            }
+                return null;
 
             if (param.Type != NestedType.Array)
             {

@@ -121,69 +121,20 @@ namespace RIS.Collections.Chunked
         }
 
         public ChunkedArrayLog2L()
+            : this(0)
         {
-            ChunkSize = RIS.Environment.GCLOHThresholdSize / RIS.Environment.GetSize<T>();
-            if (ChunkSize < 1)
-            {
-                var exception = new Exception("Размер чанка не может быть меньше 1");
-                Events.OnError(this, new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
-                OnError(new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
-                throw exception;
-            }
 
-            if (default(T) is double)
-                if (ChunkSize > 999)
-                    ChunkSize = 999;
-
-            SyncRoot = new object();
-            IsSynchronized = false;
-
-            Offset = (byte)System.Math.Log(ChunkSize, 2);
-            ChunkSize = (uint)System.Math.Pow(2, Offset);
-            Length = 0;
-            Chunks = new List<T[]>();
         }
         public ChunkedArrayLog2L(long length)
+            : this(length, Environment.GCLOHThresholdSize / Environment.GetSize<T>())
         {
-            ChunkSize = RIS.Environment.GCLOHThresholdSize / RIS.Environment.GetSize<T>();
-            if (ChunkSize < 1)
-            {
-                var exception = new Exception("Размер чанка не может быть меньше 1");
-                Events.OnError(this, new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
-                OnError(new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
-                throw exception;
-            }
-            if (length < 0)
-            {
-                var exception = new ArgumentOutOfRangeException(nameof(length), "Длина массива не может быть меньше 0");
-                Events.OnError(this, new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
-                OnError(new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
-                throw exception;
-            }
 
-            if (default(T) is double)
-                if (ChunkSize > 999)
-                    ChunkSize = 999;
-
-            SyncRoot = new object();
-            IsSynchronized = false;
-
-            Offset = (byte)System.Math.Log(ChunkSize, 2);
-            ChunkSize = (uint)System.Math.Pow(2, Offset);
-            Length = length;
-            Chunks = new List<T[]>();
-            int chunksCount = (int)(length / ChunkSize);
-            if (length % ChunkSize != 0)
-                chunksCount += 1;
-
-            AddChunk(chunksCount);
         }
         public ChunkedArrayLog2L(long length, uint chunkSize)
         {
-            ChunkSize = chunkSize;
-            if (ChunkSize < 1)
+            if (chunkSize < 1)
             {
-                var exception = new Exception("Размер чанка не может быть меньше 1");
+                var exception = new ArgumentOutOfRangeException(nameof(chunkSize), "Размер чанка не может быть меньше 1");
                 Events.OnError(this, new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
                 OnError(new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
                 throw exception;
@@ -196,20 +147,22 @@ namespace RIS.Collections.Chunked
                 throw exception;
             }
 
-            if (default(T) is double)
-                if (ChunkSize > 999)
-                    ChunkSize = 999;
+            if (default(T) is double && chunkSize > 999)
+                chunkSize = 999;
 
             SyncRoot = new object();
             IsSynchronized = false;
 
-            Offset = (byte)System.Math.Log(ChunkSize, 2);
-            ChunkSize = (uint)System.Math.Pow(2, Offset);
             Length = length;
-            Chunks = new List<T[]>();
-            int chunksCount = (int)(length / ChunkSize);
-            if (length % ChunkSize != 0)
-                chunksCount += 1;
+            Offset = (byte)Math.Log(chunkSize, 2);
+            ChunkSize = (uint)Math.Pow(2, Offset);
+
+            int chunksCount = (int)(length / chunkSize);
+
+            if (length % chunkSize != 0)
+                ++chunksCount;
+
+            Chunks = new List<T[]>(chunksCount);
 
             AddChunk(chunksCount);
         }

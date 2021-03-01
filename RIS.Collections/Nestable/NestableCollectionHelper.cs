@@ -184,12 +184,20 @@ namespace RIS.Collections.Nestable
         public static string ToStringRepresent<TValue>(TValue value)
         {
             if (value == null)
-                return string.Empty;
+                return "null";
+
+            if (ReferenceEquals(value, DBNull.Value)
+                || value.ToString() == "db_null")
+            {
+                return "db_null";
+            }
 
             string valueString = value.ToString()?
+                .Replace("null", "/null/")
                 .Replace("|", "/|/")
                 .Replace(":", "/:/")
                 .Replace("\"", "/\"/")
+                .Replace(",", "/,/")
                 .Replace("[", "/[/")
                 .Replace("]", "/]/")
                 .Replace("{", "/{/")
@@ -433,16 +441,33 @@ namespace RIS.Collections.Nestable
 
         public static TValue FromStringRepresent<TValue>(string represent, ref TValue value)
         {
-            //if (represent == string.Empty)
-            //{
-            //    value = default(TValue);
-            //    return value;
-            //}
+            if (represent == "null")
+            {
+                value = default;
+
+                return value;
+            }
+
+            if (represent == "db_null")
+            {
+                if (typeof(TValue) == typeof(string))
+                {
+                    value = (TValue)Convert.ChangeType("db_null", typeof(TValue));
+
+                    return value;
+                }
+
+                value = (TValue)Convert.ChangeType(DBNull.Value, typeof(TValue));
+
+                return value;
+            }
 
             string valueString = represent
+                .Replace("/null/", "null")
                 .Replace("/|/", "|")
                 .Replace("/:/", ":")
                 .Replace("/\"/", "\"")
+                .Replace("/,/", ",")
                 .Replace("/[/", "[")
                 .Replace("/]/", "]")
                 .Replace("/{/", "{")
@@ -473,7 +498,6 @@ namespace RIS.Collections.Nestable
 
             value = Array.ConvertAll(values, new Converter<string, TValue>((string stringValue) =>
             {
-                //return (TValue)Convert.ChangeType(stringValue, typeof(TValue));
                 TValue result = default(TValue);
                 return FromStringRepresent(stringValue, ref result);
             }));
@@ -869,6 +893,12 @@ namespace RIS.Collections.Nestable
                             yield return element;
                         }
                         break;
+                    default:
+                        var exception =
+                            new Exception("Недопустимое значение поля Type в [NestedElement]");
+                        Events.OnError(new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
+                        OnError(new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
+                        throw exception;
                 }
             }
         }

@@ -122,69 +122,20 @@ namespace RIS.Collections.Chunked
         }
 
         public SyncChunkedArrayL()
+            : this(0)
         {
-            ChunkSize = RIS.Environment.GCLOHThresholdSize / RIS.Environment.GetSize<T>();
-            if (ChunkSize < 1)
-            {
-                var exception = new Exception("Размер чанка не может быть меньше 1");
-                Events.OnError(this, new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
-                OnError(new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
-                throw exception;
-            }
 
-            if (default(T) is double)
-                if (ChunkSize > 999)
-                    ChunkSize = 999;
-
-            SyncRoot = new object();
-            IsSynchronized = true;
-
-            Length = 0;
-            Chunks = new List<T[]>();
-
-            ChunksSyncRoots = new ChunkedArrayD<object>();
         }
         public SyncChunkedArrayL(long length)
+            : this(length, Environment.GCLOHThresholdSize / Environment.GetSize<T>())
         {
-            ChunkSize = RIS.Environment.GCLOHThresholdSize / RIS.Environment.GetSize<T>();
-            if (ChunkSize < 1)
-            {
-                var exception = new Exception("Размер чанка не может быть меньше 1");
-                Events.OnError(this, new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
-                OnError(new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
-                throw exception;
-            }
-            if (length < 0)
-            {
-                var exception = new ArgumentOutOfRangeException(nameof(length), "Длина массива не может быть меньше 0");
-                Events.OnError(this, new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
-                OnError(new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
-                throw exception;
-            }
 
-            if (default(T) is double)
-                if (ChunkSize > 999)
-                    ChunkSize = 999;
-
-            SyncRoot = new object();
-            IsSynchronized = true;
-
-            Length = length;
-            Chunks = new List<T[]>();
-            int chunksCount = (int)(length / ChunkSize);
-            if (length % ChunkSize != 0)
-                chunksCount += 1;
-
-            ChunksSyncRoots = new ChunkedArrayD<object>();
-
-            AddChunk(chunksCount, true);
         }
         public SyncChunkedArrayL(long length, uint chunkSize)
         {
-            ChunkSize = chunkSize;
-            if (ChunkSize < 1)
+            if (chunkSize < 1)
             {
-                var exception = new Exception("Размер чанка не может быть меньше 1");
+                var exception = new ArgumentOutOfRangeException(nameof(chunkSize), "Размер чанка не может быть меньше 1");
                 Events.OnError(this, new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
                 OnError(new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
                 throw exception;
@@ -197,22 +148,24 @@ namespace RIS.Collections.Chunked
                 throw exception;
             }
 
-            if (default(T) is double)
-                if (ChunkSize > 999)
-                    ChunkSize = 999;
+            if (default(T) is double && chunkSize > 999)
+                chunkSize = 999;
 
             SyncRoot = new object();
             IsSynchronized = true;
 
             Length = length;
-            Chunks = new List<T[]>();
-            int chunksCount = (int)(length / ChunkSize);
-            if (length % ChunkSize != 0)
-                chunksCount += 1;
+            ChunkSize = chunkSize;
 
+            int chunksCount = (int)(length / chunkSize);
+
+            if (length % chunkSize != 0)
+                ++chunksCount;
+
+            Chunks = new List<T[]>(chunksCount);
             ChunksSyncRoots = new ChunkedArrayD<object>();
 
-            AddChunk(chunksCount, true);
+            AddChunkInternal(chunksCount);
         }
 
         public void OnInformation(RInformationEventArgs e)
@@ -428,108 +381,74 @@ namespace RIS.Collections.Chunked
             }
         }
 
-        private void AddChunk(bool synchronize = true)
+        private void AddChunk()
         {
-            if (synchronize)
+            lock (SyncRoot)
             {
-                lock (SyncRoot)
-                {
-                    if (Chunks.Count == int.MaxValue)
-                    {
-                        var exception =
-                            new Exception("Нельзя добавить чанк, так как коллекция уже содержит максимальное их количество");
-                        Events.OnError(this, new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
-                        OnError(new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
-                        throw exception;
-                    }
-
-                    Chunks.Add(new T[ChunkSize]);
-                    ChunksSyncRoots.Add(new object());
-                }
-            }
-            else
-            {
-                if (Chunks.Count == int.MaxValue)
-                {
-                    var exception =
-                        new Exception("Нельзя добавить чанк, так как коллекция уже содержит максимальное их количество");
-                    Events.OnError(this, new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
-                    OnError(new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
-                    throw exception;
-                }
-
-                Chunks.Add(new T[ChunkSize]);
-                ChunksSyncRoots.Add(new object());
+                AddChunkInternal();
             }
         }
-        private void AddChunk(int count, bool synchronize = true)
+        private void AddChunkInternal()
         {
-            if (synchronize)
+            if (Chunks.Count == int.MaxValue)
             {
-                lock (SyncRoot)
-                {
-                    for (int i = 0; i < count; ++i)
-                    {
-                        AddChunk(false);
-                    }
-                }
+                var exception =
+                    new Exception("Нельзя добавить чанк, так как коллекция уже содержит максимальное их количество");
+                Events.OnError(this, new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
+                OnError(new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
+                throw exception;
             }
-            else
+
+            Chunks.Add(new T[ChunkSize]);
+            ChunksSyncRoots.Add(new object());
+        }
+        private void AddChunk(int count)
+        {
+            lock (SyncRoot)
             {
-                for (int i = 0; i < count; ++i)
-                {
-                    AddChunk(false);
-                }
+                AddChunkInternal(count);
+            }
+        }
+        private void AddChunkInternal(int count)
+        {
+            for (int i = 0; i < count; ++i)
+            {
+                AddChunkInternal();
             }
         }
 
-        private void RemoveChunk(bool synchronize = true)
+        private void RemoveChunk()
         {
-            if (synchronize)
+            lock (SyncRoot)
             {
-                lock (SyncRoot)
-                {
-                    if (Chunks.Count == 0)
-                    {
-                        var exception = new IndexOutOfRangeException("Нельзя удалить чанк, так как массив пуст");
-                        Events.OnError(this, new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
-                        OnError(new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
-                        throw exception;
-                    }
-
-                    Chunks.RemoveAt(ChunksCount - 1);
-                    ChunksSyncRoots.Remove();
-                }
-            }
-            else
-            {
-                if (Chunks.Count == 0)
-                {
-                    var exception = new IndexOutOfRangeException("Нельзя удалить чанк, так как массив пуст");
-                    Events.OnError(this, new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
-                    OnError(new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
-                    throw exception;
-                }
-
-                Chunks.RemoveAt(ChunksCount - 1);
-                ChunksSyncRoots.Remove();
+                RemoveChunkInternal();
             }
         }
-        private void RemoveChunk(int count, bool synchronize = true)
+        private void RemoveChunkInternal()
         {
-            if (synchronize)
+            if (Chunks.Count == 0)
             {
-                for (int i = 0; i < count; ++i)
-                {
-                    RemoveChunk(false);
-                }
+                var exception = new IndexOutOfRangeException("Нельзя удалить чанк, так как массив пуст");
+                Events.OnError(this, new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
+                OnError(new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
+                throw exception;
             }
-            else
+
+            Chunks.RemoveAt(ChunksCount - 1);
+            ChunksSyncRoots.Remove();
+        }
+        private void RemoveChunk(int count)
+        {
+            lock (SyncRoot)
             {
-                for (int i = 0; i < count; ++i)
-                {
-                    RemoveChunk(false);
-                }
+                RemoveChunkInternal(count);
+            }
+        }
+        private void RemoveChunkInternal(int count)
+        {
+            for (int i = 0; i < count; ++i)
+            {
+                RemoveChunkInternal();
             }
         }
 
@@ -606,7 +525,7 @@ namespace RIS.Collections.Chunked
                     ++needChunksCount;
 
                 if (ChunksCount < needChunksCount)
-                    AddChunk(false);
+                    AddChunkInternal();
 
                 Set(value, Length - 1);
             }
@@ -635,7 +554,7 @@ namespace RIS.Collections.Chunked
                     ++needChunksCount;
 
                 if (ChunksCount > needChunksCount)
-                    RemoveChunk(false);
+                    RemoveChunkInternal();
             }
 
             return true;
