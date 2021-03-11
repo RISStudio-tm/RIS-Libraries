@@ -61,8 +61,8 @@ namespace RIS.Collections.Concurrent
                 {
                     var exception = new InvalidOperationException(
                             "The current node is the dummy head or dummy tail node of the current List, so it may not store any value.");
-                    Events.OnError(this, new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
-                    OnError(new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
+                    Events.OnError(this, new RErrorEventArgs(exception, exception.Message));
+                    OnError(new RErrorEventArgs(exception, exception.Message));
                     throw exception;
                 }
 
@@ -80,8 +80,8 @@ namespace RIS.Collections.Concurrent
                 {
                     var exception = new InvalidOperationException(
                         "The current node is the dummy head or dummy tail node of the current List, so it may not store any value.");
-                    Events.OnError(this, new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
-                    OnError(new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
+                    Events.OnError(this, new RErrorEventArgs(exception, exception.Message));
+                    OnError(new RErrorEventArgs(exception, exception.Message));
                     throw exception;
                 }
 

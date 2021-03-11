@@ -75,7 +75,7 @@ namespace RIS.Connection.MySQL.Builders
             var exception =
                 new InvalidOperationException($"The current MySQLConditionBuilder[{_sql}] instance is locked");
             Events.OnError(this,
-                new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
+                new RErrorEventArgs(exception, exception.Message));
 
             throw exception;
         }
@@ -152,7 +152,7 @@ namespace RIS.Connection.MySQL.Builders
                 var exception =
                     new FormatException($"Parentheses are not closed in MySQL condition string [{sql}] at start indexes [{string.Join(", ", _parentheses.Select((value => value.Index)).ToArray())}]");
                 Events.OnError(this,
-                    new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
+                    new RErrorEventArgs(exception, exception.Message));
 
                 throw exception;
             }
@@ -224,7 +224,7 @@ namespace RIS.Connection.MySQL.Builders
                 var exception =
                     new FormatException($"An error occurred during the MySQL condition string build because the result string [{sql}] had an incorrect format or was invalid");
                 Events.OnError(this,
-                    new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
+                    new RErrorEventArgs(exception, exception.Message));
 
                 throw exception;
             }
@@ -294,7 +294,7 @@ namespace RIS.Connection.MySQL.Builders
                     var exception =
                         new InvalidOperationException($"Free open parenthesis of this type for its closing was not found in MySQL condition string [{sql}] at start index [{sql.Length - 1}]");
                     Events.OnError(this,
-                        new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
+                        new RErrorEventArgs(exception, exception.Message));
 
                     throw exception;
                 }
@@ -347,7 +347,7 @@ namespace RIS.Connection.MySQL.Builders
                 var exception =
                     new ArgumentNullException(nameof(name), $"{nameof(name)} cannot be null for inserting a condition {nameof(IsTrue)} in MySQL condition string [{sql}]");
                 Events.OnError(this,
-                    new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
+                    new RErrorEventArgs(exception, exception.Message));
 
                 throw exception;
             }
@@ -473,7 +473,7 @@ namespace RIS.Connection.MySQL.Builders
                 var exception =
                     new ArgumentNullException(nameof(name), $"{nameof(name)} cannot be null for inserting a condition {nameof(Like)} in MySQL condition string [{sql}]");
                 Events.OnError(this,
-                    new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
+                    new RErrorEventArgs(exception, exception.Message));
 
                 throw exception;
             }

@@ -139,8 +139,8 @@ namespace RIS.Reflection.Mapping
             if (!(result is T))
             {
                 var exception = new InvalidCastException($"Result of method invocation cannot be cast to type '{typeof(T)}'");
-                Events.OnError(this, new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
-                OnError(new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
+                Events.OnError(this, new RErrorEventArgs(exception, exception.Message));
+                OnError(new RErrorEventArgs(exception, exception.Message));
                 throw exception;
             }
 
@@ -151,16 +151,16 @@ namespace RIS.Reflection.Mapping
             if (string.IsNullOrEmpty(name))
             {
                 var exception = new ArgumentException($"{nameof(name)} cannot be empty or null", nameof(name));
-                Events.OnError(this, new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
-                OnError(new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
+                Events.OnError(this, new RErrorEventArgs(exception, exception.Message));
+                OnError(new RErrorEventArgs(exception, exception.Message));
                 throw exception;
             }
 
             if (!_map.ContainsKey(name))
             {
                 var exception = new KeyNotFoundException($"Method with name '{nameof(name)}' not found");
-                Events.OnError(this, new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
-                OnError(new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
+                Events.OnError(this, new RErrorEventArgs(exception, exception.Message));
+                OnError(new RErrorEventArgs(exception, exception.Message));
                 throw exception;
             }
 

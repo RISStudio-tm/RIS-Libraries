@@ -106,8 +106,8 @@ namespace RIS.Collections.Nestable
                 default:
                     var exception =
                         new ArgumentException($"Invalid value for the {nameof(type)} parameter", nameof(type));
-                    Events.OnError(new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
-                    OnError(new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
+                    Events.OnError(new RErrorEventArgs(exception, exception.Message));
+                    OnError(new RErrorEventArgs(exception, exception.Message));
                     throw exception;
             }
         }
@@ -118,16 +118,16 @@ namespace RIS.Collections.Nestable
             {
                 var exception =
                     new ArgumentOutOfRangeException(nameof(startIndex), $"{nameof(startIndex)} cannot be null or empty");
-                Events.OnError(new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
-                OnError(new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
+                Events.OnError(new RErrorEventArgs(exception, exception.Message));
+                OnError(new RErrorEventArgs(exception, exception.Message));
                 throw exception;
             }
             if (startIndex < 0)
             {
                 var exception =
                     new ArgumentOutOfRangeException(nameof(startIndex), $"{nameof(startIndex)} cannot be less than zero");
-                Events.OnError(new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
-                OnError(new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
+                Events.OnError(new RErrorEventArgs(exception, exception.Message));
+                OnError(new RErrorEventArgs(exception, exception.Message));
                 throw exception;
             }
 
@@ -159,8 +159,8 @@ namespace RIS.Collections.Nestable
                 default:
                     var exception =
                         new ArgumentException($"{nameof(startIndex)}[{startIndex}] indicates an unknown character of the beginning of the representation", nameof(startIndex));
-                    Events.OnError(new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
-                    OnError(new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
+                    Events.OnError(new RErrorEventArgs(exception, exception.Message));
+                    OnError(new RErrorEventArgs(exception, exception.Message));
                     throw exception;
             }
 
@@ -191,8 +191,8 @@ namespace RIS.Collections.Nestable
                         {
                             var exception =
                                 new FormatException($"expected parentheses character '{chMapped}', but obtained character '{ch}'");
-                            Events.OnError(new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
-                            OnError(new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
+                            Events.OnError(new RErrorEventArgs(exception, exception.Message));
+                            OnError(new RErrorEventArgs(exception, exception.Message));
                             throw exception;
                         }
 
@@ -223,8 +223,8 @@ namespace RIS.Collections.Nestable
             {
                 var exception =
                     new Exception($"Could not find the end of the representation part at the start index {startIndex}");
-                Events.OnError(new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
-                OnError(new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
+                Events.OnError(new RErrorEventArgs(exception, exception.Message));
+                OnError(new RErrorEventArgs(exception, exception.Message));
                 throw exception;
             }
 
@@ -339,8 +339,8 @@ namespace RIS.Collections.Nestable
                 default:
                     var exception =
                         new ArgumentException("Недопустимое значение поля Type в [NestedElement] для создания строкового представления", nameof(value));
-                    Events.OnError(new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
-                    OnError(new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
+                    Events.OnError(new RErrorEventArgs(exception, exception.Message));
+                    OnError(new RErrorEventArgs(exception, exception.Message));
                     throw exception;
             }
         }
@@ -404,8 +404,8 @@ namespace RIS.Collections.Nestable
                 default:
                     var exception =
                         new ArgumentException("Недопустимое значение CollectionGeneralType у коллекции", nameof(value));
-                    Events.OnError(new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
-                    OnError(new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
+                    Events.OnError(new RErrorEventArgs(exception, exception.Message));
+                    OnError(new RErrorEventArgs(exception, exception.Message));
                     throw exception;
             }
 
@@ -511,8 +511,8 @@ namespace RIS.Collections.Nestable
                 default:
                     var exception =
                         new ArgumentException("Недопустимое значение CollectionGeneralType у коллекции", nameof(value));
-                    Events.OnError(new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
-                    OnError(new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
+                    Events.OnError(new RErrorEventArgs(exception, exception.Message));
+                    OnError(new RErrorEventArgs(exception, exception.Message));
                     throw exception;
             }
 
@@ -648,8 +648,8 @@ namespace RIS.Collections.Nestable
             {
                 var exception =
                     new ArgumentException("Неверный формат строки для преобразования в массив" + " " + represent, nameof(represent));
-                Events.OnError(new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
-                OnError(new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
+                Events.OnError(new RErrorEventArgs(exception, exception.Message));
+                OnError(new RErrorEventArgs(exception, exception.Message));
                 throw exception;
             }
 
@@ -675,8 +675,8 @@ namespace RIS.Collections.Nestable
             {
                 var exception =
                     new ArgumentException("Неверный формат строки для преобразования в коллекцию с поддержкой вложенности", nameof(represent));
-                Events.OnError(new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
-                OnError(new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
+                Events.OnError(new RErrorEventArgs(exception, exception.Message));
+                OnError(new RErrorEventArgs(exception, exception.Message));
                 throw exception;
             }
 
@@ -713,8 +713,8 @@ namespace RIS.Collections.Nestable
                 default:
                     var exception =
                         new ArgumentException("Недопустимое значение CollectionGeneralType у коллекции", nameof(value));
-                    Events.OnError(new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
-                    OnError(new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
+                    Events.OnError(new RErrorEventArgs(exception, exception.Message));
+                    OnError(new RErrorEventArgs(exception, exception.Message));
                     throw exception;
             }
 
@@ -722,8 +722,8 @@ namespace RIS.Collections.Nestable
             {
                 var exception =
                     new ArgumentException("Неверный формат строки для преобразования в коллекцию с поддержкой вложенности", nameof(represent));
-                Events.OnError(new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
-                OnError(new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
+                Events.OnError(new RErrorEventArgs(exception, exception.Message));
+                OnError(new RErrorEventArgs(exception, exception.Message));
                 throw exception;
             }
 
@@ -746,8 +746,8 @@ namespace RIS.Collections.Nestable
             {
                 var exception =
                     new ArgumentException("Тип переданной коллекции не соответствует типу коллекции из строкового представления", nameof(value));
-                Events.OnError(new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
-                OnError(new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
+                Events.OnError(new RErrorEventArgs(exception, exception.Message));
+                OnError(new RErrorEventArgs(exception, exception.Message));
                 throw exception;
             }
 
@@ -816,8 +816,8 @@ namespace RIS.Collections.Nestable
                         default:
                             var exception =
                                 new ArgumentException("Недопустимое значение CollectionGeneralType у коллекции", nameof(value));
-                            Events.OnError(new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
-                            OnError(new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
+                            Events.OnError(new RErrorEventArgs(exception, exception.Message));
+                            OnError(new RErrorEventArgs(exception, exception.Message));
                             throw exception;
                     }
 
@@ -859,8 +859,8 @@ namespace RIS.Collections.Nestable
             {
                 var exception =
                     new ArgumentException("Неверный формат строки для преобразования в коллекцию с поддержкой вложенности", nameof(represent));
-                Events.OnError(new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
-                OnError(new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
+                Events.OnError(new RErrorEventArgs(exception, exception.Message));
+                OnError(new RErrorEventArgs(exception, exception.Message));
                 throw exception;
             }
 
@@ -887,8 +887,8 @@ namespace RIS.Collections.Nestable
             {
                 var exception =
                     new ArgumentException("Тип переданной коллекции не соответствует типу коллекции из строкового представления", nameof(value));
-                Events.OnError(new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
-                OnError(new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
+                Events.OnError(new RErrorEventArgs(exception, exception.Message));
+                OnError(new RErrorEventArgs(exception, exception.Message));
                 throw exception;
             }
 
@@ -999,8 +999,8 @@ namespace RIS.Collections.Nestable
                 default:
                     var exception =
                         new ArgumentException("Недопустимое значение поля Type в [NestedElement] для старта перечисления", nameof(value));
-                    Events.OnError(new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
-                    OnError(new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
+                    Events.OnError(new RErrorEventArgs(exception, exception.Message));
+                    OnError(new RErrorEventArgs(exception, exception.Message));
                     throw exception;
             }
         }
@@ -1042,8 +1042,8 @@ namespace RIS.Collections.Nestable
                     default:
                         var exception =
                             new Exception("Недопустимое значение поля Type в [NestedElement]");
-                        Events.OnError(new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
-                        OnError(new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
+                        Events.OnError(new RErrorEventArgs(exception, exception.Message));
+                        OnError(new RErrorEventArgs(exception, exception.Message));
                         throw exception;
                 }
             }

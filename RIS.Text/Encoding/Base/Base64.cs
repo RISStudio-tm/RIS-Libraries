@@ -197,7 +197,7 @@ namespace RIS.Text.Encoding.Base
             if (!IsBase64(encodedString))
             {
                 var exception = new FormatException("Invalid base64 string format");
-                Events.OnError(new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
+                Events.OnError(new RErrorEventArgs(exception, exception.Message));
                 throw exception;
             }
 
@@ -212,7 +212,7 @@ namespace RIS.Text.Encoding.Base
             if (!IsBase64WithoutPadding(encodedString))
             {
                 var exception = new FormatException("Invalid base64 without padding string format");
-                Events.OnError(new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
+                Events.OnError(new RErrorEventArgs(exception, exception.Message));
                 throw exception;
             }
 

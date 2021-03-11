@@ -44,20 +44,31 @@ namespace RIS
     public class RErrorEventArgs : EventArgs
     {
         public Exception SourceException { get; }
-        public string Message { get; }
-        public string Stacktrace { get; }
+        private string _message;
+        public string Message
+        {
+            get
+            {
+                return _message
+                       ?? SourceException?.Message
+                       ?? string.Empty;
+            }
+            private set
+            {
+                _message = value;
+            }
+        }
 
-        public RErrorEventArgs(string message, string stacktrace)
-            : this(null, message, stacktrace)
+        public RErrorEventArgs(string message)
+            : this(null, message)
         {
 
         }
         public RErrorEventArgs(Exception sourceException,
-            string message, string stacktrace)
+            string message = null)
         {
             SourceException = sourceException;
             Message = message;
-            Stacktrace = stacktrace;
         }
     }
 }

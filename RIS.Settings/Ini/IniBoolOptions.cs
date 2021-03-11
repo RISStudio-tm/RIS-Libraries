@@ -46,7 +46,7 @@ namespace RIS.Settings.Ini
             if (boolStringTemp == null)
             {
                 var exception = new InvalidOperationException("Boolean->word list contains no entry for 'true' values.");
-                Events.OnError(this, new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
+                Events.OnError(this, new RErrorEventArgs(exception, exception.Message));
                 throw exception;
             }
 
@@ -57,7 +57,7 @@ namespace RIS.Settings.Ini
             if (boolStringTemp == null)
             {
                 var exception = new InvalidOperationException("Boolean->word list contains no entry for 'false' values.");
-                Events.OnError(this, new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
+                Events.OnError(this, new RErrorEventArgs(exception, exception.Message));
                 throw exception;
             }
 

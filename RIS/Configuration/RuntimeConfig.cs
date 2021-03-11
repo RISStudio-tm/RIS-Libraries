@@ -149,8 +149,8 @@ namespace RIS.Configuration
             if (!ConfigIsLoaded)
             {
                 var exception = new ConfigurationErrorsException("Не удалось сохранить файл конфигурации, так как он не загружен");
-                Events.OnError(new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
-                OnError(new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
+                Events.OnError(new RErrorEventArgs(exception, exception.Message));
+                OnError(new RErrorEventArgs(exception, exception.Message));
                 throw exception;
             }
 
@@ -174,8 +174,8 @@ namespace RIS.Configuration
             catch (Exception)
             {
                 var exception = new ConfigurationErrorsException("Не удалось сохранить файл конфигурации");
-                Events.OnError(new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
-                OnError(new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
+                Events.OnError(new RErrorEventArgs(exception, exception.Message));
+                OnError(new RErrorEventArgs(exception, exception.Message));
                 throw exception;
             }
         }
@@ -194,8 +194,8 @@ namespace RIS.Configuration
             catch (Exception)
             {
                 var exception = new JsonException("Не удалось найти указанный json элемент");
-                Events.OnError(new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
-                OnError(new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
+                Events.OnError(new RErrorEventArgs(exception, exception.Message));
+                OnError(new RErrorEventArgs(exception, exception.Message));
                 throw exception;
             }
 

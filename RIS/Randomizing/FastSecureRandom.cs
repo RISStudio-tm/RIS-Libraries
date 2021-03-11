@@ -116,7 +116,7 @@ namespace RIS.Randomizing
             if (maxValue == 0)
             {
                 var exception = new ArgumentOutOfRangeException(nameof(maxValue), "MaxValue cannot be equal to 0");
-                Events.OnError(new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
+                Events.OnError(new RErrorEventArgs(exception, exception.Message));
                 throw exception;
             }
 
@@ -166,7 +166,7 @@ namespace RIS.Randomizing
             if (maxValue == 0)
             {
                 var exception = new ArgumentOutOfRangeException(nameof(maxValue), "MaxValue cannot be equal to 0");
-                Events.OnError(new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
+                Events.OnError(new RErrorEventArgs(exception, exception.Message));
                 throw exception;
             }
 
@@ -201,7 +201,7 @@ namespace RIS.Randomizing
             if (maxValue == 0)
             {
                 var exception = new ArgumentOutOfRangeException(nameof(maxValue), "MaxValue cannot be equal to 0");
-                Events.OnError(new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
+                Events.OnError(new RErrorEventArgs(exception, exception.Message));
                 throw exception;
             }
 
@@ -267,7 +267,7 @@ namespace RIS.Randomizing
             if (maxValue == 0)
             {
                 var exception = new ArgumentOutOfRangeException(nameof(maxValue), "MaxValue cannot be equal to 0");
-                Events.OnError(new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
+                Events.OnError(new RErrorEventArgs(exception, exception.Message));
                 throw exception;
             }
 
@@ -319,7 +319,7 @@ namespace RIS.Randomizing
             if (maxValue == 0)
             {
                 var exception = new ArgumentOutOfRangeException(nameof(maxValue), "MaxValue cannot be equal to 0");
-                Events.OnError(new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
+                Events.OnError(new RErrorEventArgs(exception, exception.Message));
                 throw exception;
             }
 
@@ -354,7 +354,7 @@ namespace RIS.Randomizing
             if (maxValue == 0)
             {
                 var exception = new ArgumentOutOfRangeException(nameof(maxValue), "MaxValue cannot be equal to 0");
-                Events.OnError(new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
+                Events.OnError(new RErrorEventArgs(exception, exception.Message));
                 throw exception;
             }
 
@@ -420,7 +420,7 @@ namespace RIS.Randomizing
             if (maxValue == 0)
             {
                 var exception = new ArgumentOutOfRangeException(nameof(maxValue), "MaxValue cannot be equal to 0");
-                Events.OnError(new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
+                Events.OnError(new RErrorEventArgs(exception, exception.Message));
                 throw exception;
             }
 
@@ -472,7 +472,7 @@ namespace RIS.Randomizing
             if (maxValue == 0)
             {
                 var exception = new ArgumentOutOfRangeException(nameof(maxValue), "MaxValue cannot be equal to 0");
-                Events.OnError(new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
+                Events.OnError(new RErrorEventArgs(exception, exception.Message));
                 throw exception;
             }
 
@@ -507,7 +507,7 @@ namespace RIS.Randomizing
             if (maxValue == 0)
             {
                 var exception = new ArgumentOutOfRangeException(nameof(maxValue), "MaxValue cannot be equal to 0");
-                Events.OnError(new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
+                Events.OnError(new RErrorEventArgs(exception, exception.Message));
                 throw exception;
             }
 
@@ -573,7 +573,7 @@ namespace RIS.Randomizing
             if (maxValue == 0)
             {
                 var exception = new ArgumentOutOfRangeException(nameof(maxValue), "MaxValue cannot be equal to 0");
-                Events.OnError(new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
+                Events.OnError(new RErrorEventArgs(exception, exception.Message));
                 throw exception;
             }
 
@@ -625,7 +625,7 @@ namespace RIS.Randomizing
             if (maxValue == 0)
             {
                 var exception = new ArgumentOutOfRangeException(nameof(maxValue), "MaxValue cannot be equal to 0");
-                Events.OnError(new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
+                Events.OnError(new RErrorEventArgs(exception, exception.Message));
                 throw exception;
             }
 
@@ -660,7 +660,7 @@ namespace RIS.Randomizing
             if (maxValue == 0)
             {
                 var exception = new ArgumentOutOfRangeException(nameof(maxValue), "MaxValue cannot be equal to 0");
-                Events.OnError(new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
+                Events.OnError(new RErrorEventArgs(exception, exception.Message));
                 throw exception;
             }
 

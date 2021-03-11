@@ -30,7 +30,7 @@ namespace RIS.Settings.Ini
             {
                 var exception =
                     new ArgumentException($"{nameof(path)} cannot be null, empty or consist only of whitespaces", nameof(path));
-                Events.OnError(this, new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
+                Events.OnError(this, new RErrorEventArgs(exception, exception.Message));
                 throw exception;
             }
 

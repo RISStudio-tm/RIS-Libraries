@@ -70,15 +70,15 @@ namespace RIS.Wrappers
             if (index < 0)
             {
                 var exception = new IndexOutOfRangeException("Индекс не может быть меньше 0");
-                Events.OnError(this, new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
-                OnError(new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
+                Events.OnError(this, new RErrorEventArgs(exception, exception.Message));
+                OnError(new RErrorEventArgs(exception, exception.Message));
                 throw exception;
             }
             else if (index > _values.Count - 1)
             {
                 var exception = new IndexOutOfRangeException("Индекс не может быть больше длины коллекции");
-                Events.OnError(this, new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
-                OnError(new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
+                Events.OnError(this, new RErrorEventArgs(exception, exception.Message));
+                OnError(new RErrorEventArgs(exception, exception.Message));
                 throw exception;
             }
 
@@ -92,8 +92,8 @@ namespace RIS.Wrappers
             {
                 var exception =
                     new Exception($"Значение элемента с индексом {index} невозможно привести к типу {typeof(T)}");
-                Events.OnError(this, new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
-                OnError(new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
+                Events.OnError(this, new RErrorEventArgs(exception, exception.Message));
+                OnError(new RErrorEventArgs(exception, exception.Message));
                 throw exception;
             }
 

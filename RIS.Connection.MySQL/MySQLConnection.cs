@@ -300,8 +300,8 @@ namespace RIS.Connection.MySQL
                     default:
                         var exception =
                             new Exception("Недопустимое значение поля RequestEngineType в [MySQLConnection] для создания экземпляра сервиса для выполнения запросов к MySQL базе данных");
-                        Events.OnError(new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
-                        OnError(new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
+                        Events.OnError(new RErrorEventArgs(exception, exception.Message));
+                        OnError(new RErrorEventArgs(exception, exception.Message));
                         throw exception;
                 }
 
@@ -309,8 +309,8 @@ namespace RIS.Connection.MySQL
             }
             catch (Exception ex)
             {
-                Events.OnError(this, new RErrorEventArgs(ex, ex.Message, ex.StackTrace));
-                OnError(new RErrorEventArgs(ex, ex.Message, ex.StackTrace));
+                Events.OnError(this, new RErrorEventArgs(ex, ex.Message));
+                OnError(new RErrorEventArgs(ex, ex.Message));
                 throw;
             }
         }
@@ -387,16 +387,16 @@ namespace RIS.Connection.MySQL
                 {
                     ConnectionComplete = false;
 
-                    Events.OnError(this, new RErrorEventArgs(ex, ex.Message, ex.StackTrace));
-                    OnError(new RErrorEventArgs(ex, ex.Message, ex.StackTrace));
+                    Events.OnError(this, new RErrorEventArgs(ex, ex.Message));
+                    OnError(new RErrorEventArgs(ex, ex.Message));
                     throw;
                 }
                 catch (InvalidOperationException ex)
                 {
                     ConnectionComplete = false;
 
-                    Events.OnError(this, new RErrorEventArgs(ex, ex.Message, ex.StackTrace));
-                    OnError(new RErrorEventArgs(ex, ex.Message, ex.StackTrace));
+                    Events.OnError(this, new RErrorEventArgs(ex, ex.Message));
+                    OnError(new RErrorEventArgs(ex, ex.Message));
                     throw;
                 }
             }

@@ -69,8 +69,8 @@ namespace RIS.Logging
             if (!Directory.Exists(directoryPath))
             {
                 var exception = new DirectoryNotFoundException("Невозможно создать лог-файл, так как указанный каталог не существует");
-                Events.OnError(this, new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
-                OnError(new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
+                Events.OnError(this, new RErrorEventArgs(exception, exception.Message));
+                OnError(new RErrorEventArgs(exception, exception.Message));
                 throw exception;
             }
 
@@ -106,8 +106,8 @@ namespace RIS.Logging
             }
             catch (Exception ex)
             {
-                Events.OnError(this, new RErrorEventArgs(ex, ex.Message, ex.StackTrace));
-                OnError(new RErrorEventArgs(ex, ex.Message, ex.StackTrace));
+                Events.OnError(this, new RErrorEventArgs(ex, ex.Message));
+                OnError(new RErrorEventArgs(ex, ex.Message));
                 throw;
             }
         }
@@ -146,8 +146,8 @@ namespace RIS.Logging
             }
             catch (Exception ex)
             {
-                Events.OnError(this, new RErrorEventArgs(ex, ex.Message, ex.StackTrace));
-                OnError(new RErrorEventArgs(ex, ex.Message, ex.StackTrace));
+                Events.OnError(this, new RErrorEventArgs(ex, ex.Message));
+                OnError(new RErrorEventArgs(ex, ex.Message));
                 throw;
             }
         }
@@ -170,8 +170,8 @@ namespace RIS.Logging
             }
             catch (Exception ex)
             {
-                Events.OnError(this, new RErrorEventArgs(ex, ex.Message, ex.StackTrace));
-                OnError(new RErrorEventArgs(ex, ex.Message, ex.StackTrace));
+                Events.OnError(this, new RErrorEventArgs(ex, ex.Message));
+                OnError(new RErrorEventArgs(ex, ex.Message));
                 throw;
             }
         }

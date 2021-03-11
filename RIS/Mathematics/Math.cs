@@ -191,8 +191,8 @@ namespace RIS.Mathematics
             if (numberUnsigned > 64)
             {
                 var exception = new ArgumentException($"Невозможно найти следующую степень двойки для числа {number}", nameof(number));
-                Events.OnError(new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
-                OnError(new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
+                Events.OnError(new RErrorEventArgs(exception, exception.Message));
+                OnError(new RErrorEventArgs(exception, exception.Message));
                 throw exception;
             }
 
@@ -207,8 +207,8 @@ namespace RIS.Mathematics
             if (number > 128)
             {
                 var exception = new ArgumentException($"Невозможно найти следующую степень двойки для числа {number}", nameof(number));
-                Events.OnError(new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
-                OnError(new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
+                Events.OnError(new RErrorEventArgs(exception, exception.Message));
+                OnError(new RErrorEventArgs(exception, exception.Message));
                 throw exception;
             }
 
@@ -236,8 +236,8 @@ namespace RIS.Mathematics
             if (numberUnsigned > 16384)
             {
                 var exception = new ArgumentException($"Невозможно найти следующую степень двойки для числа {number}", nameof(number));
-                Events.OnError(new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
-                OnError(new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
+                Events.OnError(new RErrorEventArgs(exception, exception.Message));
+                OnError(new RErrorEventArgs(exception, exception.Message));
                 throw exception;
             }
 
@@ -252,8 +252,8 @@ namespace RIS.Mathematics
             if (number > 32768)
             {
                 var exception = new ArgumentException($"Невозможно найти следующую степень двойки для числа {number}", nameof(number));
-                Events.OnError(new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
-                OnError(new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
+                Events.OnError(new RErrorEventArgs(exception, exception.Message));
+                OnError(new RErrorEventArgs(exception, exception.Message));
                 throw exception;
             }
 
@@ -282,8 +282,8 @@ namespace RIS.Mathematics
             if (numberUnsigned > 1073741824)
             {
                 var exception = new ArgumentException($"Невозможно найти следующую степень двойки для числа {number}", nameof(number));
-                Events.OnError(new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
-                OnError(new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
+                Events.OnError(new RErrorEventArgs(exception, exception.Message));
+                OnError(new RErrorEventArgs(exception, exception.Message));
                 throw exception;
             }
 
@@ -298,8 +298,8 @@ namespace RIS.Mathematics
             if (number > 2147483648)
             {
                 var exception = new ArgumentException($"Невозможно найти следующую степень двойки для числа {number}", nameof(number));
-                Events.OnError(new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
-                OnError(new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
+                Events.OnError(new RErrorEventArgs(exception, exception.Message));
+                OnError(new RErrorEventArgs(exception, exception.Message));
                 throw exception;
             }
 
@@ -329,8 +329,8 @@ namespace RIS.Mathematics
             if (numberUnsigned > 4611686018427387904)
             {
                 var exception = new ArgumentException($"Невозможно найти следующую степень двойки для числа {number}", nameof(number));
-                Events.OnError(new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
-                OnError(new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
+                Events.OnError(new RErrorEventArgs(exception, exception.Message));
+                OnError(new RErrorEventArgs(exception, exception.Message));
                 throw exception;
             }
 
@@ -345,8 +345,8 @@ namespace RIS.Mathematics
             if (number > 9223372036854775808)
             {
                 var exception = new ArgumentException($"Невозможно найти следующую степень двойки для числа {number}", nameof(number));
-                Events.OnError(new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
-                OnError(new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
+                Events.OnError(new RErrorEventArgs(exception, exception.Message));
+                OnError(new RErrorEventArgs(exception, exception.Message));
                 throw exception;
             }
 
@@ -379,8 +379,8 @@ namespace RIS.Mathematics
             if (numberUnsigned == 0)
             {
                 var exception = new ArgumentException($"Невозможно найти предыдущую степень двойки для числа {number}", nameof(number));
-                Events.OnError(new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
-                OnError(new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
+                Events.OnError(new RErrorEventArgs(exception, exception.Message));
+                OnError(new RErrorEventArgs(exception, exception.Message));
                 throw exception;
             }
 
@@ -403,8 +403,8 @@ namespace RIS.Mathematics
             if (number == 0)
             {
                 var exception = new ArgumentException($"Невозможно найти предыдущую степень двойки для числа {number}", nameof(number));
-                Events.OnError(new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
-                OnError(new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
+                Events.OnError(new RErrorEventArgs(exception, exception.Message));
+                OnError(new RErrorEventArgs(exception, exception.Message));
                 throw exception;
             }
 
@@ -429,8 +429,8 @@ namespace RIS.Mathematics
             if (numberUnsigned == 0)
             {
                 var exception = new ArgumentException($"Невозможно найти предыдущую степень двойки для числа {number}", nameof(number));
-                Events.OnError(new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
-                OnError(new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
+                Events.OnError(new RErrorEventArgs(exception, exception.Message));
+                OnError(new RErrorEventArgs(exception, exception.Message));
                 throw exception;
             }
 
@@ -453,8 +453,8 @@ namespace RIS.Mathematics
             if (number == 0)
             {
                 var exception = new ArgumentException($"Невозможно найти предыдущую степень двойки для числа {number}", nameof(number));
-                Events.OnError(new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
-                OnError(new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
+                Events.OnError(new RErrorEventArgs(exception, exception.Message));
+                OnError(new RErrorEventArgs(exception, exception.Message));
                 throw exception;
             }
 
@@ -479,8 +479,8 @@ namespace RIS.Mathematics
             if (numberUnsigned == 0)
             {
                 var exception = new ArgumentException($"Невозможно найти предыдущую степень двойки для числа {number}", nameof(number));
-                Events.OnError(new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
-                OnError(new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
+                Events.OnError(new RErrorEventArgs(exception, exception.Message));
+                OnError(new RErrorEventArgs(exception, exception.Message));
                 throw exception;
             }
 
@@ -503,8 +503,8 @@ namespace RIS.Mathematics
             if (number == 0)
             {
                 var exception = new ArgumentException($"Невозможно найти предыдущую степень двойки для числа {number}", nameof(number));
-                Events.OnError(new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
-                OnError(new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
+                Events.OnError(new RErrorEventArgs(exception, exception.Message));
+                OnError(new RErrorEventArgs(exception, exception.Message));
                 throw exception;
             }
 
@@ -529,8 +529,8 @@ namespace RIS.Mathematics
             if (numberUnsigned == 0)
             {
                 var exception = new ArgumentException($"Невозможно найти предыдущую степень двойки для числа {number}", nameof(number));
-                Events.OnError(new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
-                OnError(new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
+                Events.OnError(new RErrorEventArgs(exception, exception.Message));
+                OnError(new RErrorEventArgs(exception, exception.Message));
                 throw exception;
             }
 
@@ -553,8 +553,8 @@ namespace RIS.Mathematics
             if (number == 0)
             {
                 var exception = new ArgumentException($"Невозможно найти предыдущую степень двойки для числа {number}", nameof(number));
-                Events.OnError(new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
-                OnError(new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
+                Events.OnError(new RErrorEventArgs(exception, exception.Message));
+                OnError(new RErrorEventArgs(exception, exception.Message));
                 throw exception;
             }
 

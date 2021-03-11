@@ -20,8 +20,8 @@ namespace RIS.Cryptography.Hash
             if (!SetHashMethod(hashMethod))
             {
                 var exception = new Exception("SetHashMethod return false. HashService is not initialized");
-                Events.OnError(this, new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
-                OnError(new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
+                Events.OnError(this, new RErrorEventArgs(exception, exception.Message));
+                OnError(new RErrorEventArgs(exception, exception.Message));
                 throw exception;
             }
         }
@@ -86,8 +86,8 @@ namespace RIS.Cryptography.Hash
             if (!File.Exists(filePath))
             {
                 var exception = new FileNotFoundException($"File at path '{filePath}' not found");
-                Events.OnError(this, new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
-                OnError(new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
+                Events.OnError(this, new RErrorEventArgs(exception, exception.Message));
+                OnError(new RErrorEventArgs(exception, exception.Message));
                 throw exception;
             }
 
@@ -99,8 +99,8 @@ namespace RIS.Cryptography.Hash
             }
             catch (Exception ex)
             {
-                Events.OnError(this, new RErrorEventArgs(ex, ex.Message, ex.StackTrace));
-                OnError(new RErrorEventArgs(ex, ex.Message, ex.StackTrace));
+                Events.OnError(this, new RErrorEventArgs(ex, ex.Message));
+                OnError(new RErrorEventArgs(ex, ex.Message));
                 throw;
             }
 
@@ -152,8 +152,8 @@ namespace RIS.Cryptography.Hash
             if (!Directory.Exists(directoryPath))
             {
                 var exception = new FileNotFoundException($"Directory at path '{directoryPath}' not found");
-                Events.OnError(this, new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
-                OnError(new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
+                Events.OnError(this, new RErrorEventArgs(exception, exception.Message));
+                OnError(new RErrorEventArgs(exception, exception.Message));
                 throw exception;
             }
 

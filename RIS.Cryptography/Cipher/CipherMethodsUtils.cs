@@ -49,7 +49,7 @@ namespace RIS.Cryptography.Cipher
             }
             catch (Exception ex)
             {
-                Events.OnError(null, new RErrorEventArgs(ex, ex.Message, ex.StackTrace));
+                Events.OnError(null, new RErrorEventArgs(ex, ex.Message));
 
                 return Array.Empty<Type>();
             }

@@ -30,7 +30,7 @@ namespace RIS.Extensions
             if (!Directory.Exists(directoryPath))
             {
                 var exception = new FileNotFoundException($"Directory at path '{directoryPath}' not found");
-                Events.OnError(new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
+                Events.OnError(new RErrorEventArgs(exception, exception.Message));
                 throw exception;
             }
 

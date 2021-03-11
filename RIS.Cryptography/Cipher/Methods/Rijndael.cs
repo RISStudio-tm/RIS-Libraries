@@ -70,8 +70,8 @@ namespace RIS.Cryptography.Cipher.Methods
                         {
                             var exception = new Exception(
                                 $"BlockSize[{value}] not supported for CipherMethod[{GetType().FullName}]");
-                            Events.OnError(this, new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
-                            OnError(new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
+                            Events.OnError(this, new RErrorEventArgs(exception, exception.Message));
+                            OnError(new RErrorEventArgs(exception, exception.Message));
                             throw exception;
                         }
                     }
@@ -136,8 +136,8 @@ namespace RIS.Cryptography.Cipher.Methods
                         {
                             var exception = new Exception(
                                 $"KeySize[{keySize}] not supported for CipherMethod[{GetType().FullName}]");
-                            Events.OnError(this, new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
-                            OnError(new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
+                            Events.OnError(this, new RErrorEventArgs(exception, exception.Message));
+                            OnError(new RErrorEventArgs(exception, exception.Message));
                             throw exception;
                         }
                     }
@@ -158,12 +158,12 @@ namespace RIS.Cryptography.Cipher.Methods
             }
             catch (Exception ex)
             {
-                Events.OnError(this, new RErrorEventArgs(ex, ex.Message, ex.StackTrace));
-                OnError(new RErrorEventArgs(ex, ex.Message, ex.StackTrace));
+                Events.OnError(this, new RErrorEventArgs(ex, ex.Message));
+                OnError(new RErrorEventArgs(ex, ex.Message));
 
                 var exception = new Exception($"CipherMethod[{ GetType().FullName }] is not initialized");
-                Events.OnError(this, new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
-                OnError(new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
+                Events.OnError(this, new RErrorEventArgs(exception, exception.Message));
+                OnError(new RErrorEventArgs(exception, exception.Message));
 
                 throw;
             }
@@ -185,12 +185,12 @@ namespace RIS.Cryptography.Cipher.Methods
             }
             catch (Exception ex)
             {
-                Events.OnError(this, new RErrorEventArgs(ex, ex.Message, ex.StackTrace));
-                OnError(new RErrorEventArgs(ex, ex.Message, ex.StackTrace));
+                Events.OnError(this, new RErrorEventArgs(ex, ex.Message));
+                OnError(new RErrorEventArgs(ex, ex.Message));
 
                 var exception = new Exception($"CipherMethod[{ GetType().FullName }] is not initialized");
-                Events.OnError(this, new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
-                OnError(new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
+                Events.OnError(this, new RErrorEventArgs(exception, exception.Message));
+                OnError(new RErrorEventArgs(exception, exception.Message));
 
                 throw;
             }
@@ -225,8 +225,8 @@ namespace RIS.Cryptography.Cipher.Methods
                         {
                             var exception = new Exception(
                                 $"KeySize[{keySize}] not supported for CipherMethod[{GetType().FullName}]");
-                            Events.OnError(this, new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
-                            OnError(new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
+                            Events.OnError(this, new RErrorEventArgs(exception, exception.Message));
+                            OnError(new RErrorEventArgs(exception, exception.Message));
                             throw exception;
                         }
                     }
@@ -256,12 +256,12 @@ namespace RIS.Cryptography.Cipher.Methods
             }
             catch (Exception ex)
             {
-                Events.OnError(this, new RErrorEventArgs(ex, ex.Message, ex.StackTrace));
-                OnError(new RErrorEventArgs(ex, ex.Message, ex.StackTrace));
+                Events.OnError(this, new RErrorEventArgs(ex, ex.Message));
+                OnError(new RErrorEventArgs(ex, ex.Message));
 
                 var exception = new Exception($"CipherMethod[{ GetType().FullName }] is not initialized");
-                Events.OnError(this, new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
-                OnError(new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
+                Events.OnError(this, new RErrorEventArgs(exception, exception.Message));
+                OnError(new RErrorEventArgs(exception, exception.Message));
 
                 throw;
             }
@@ -295,12 +295,12 @@ namespace RIS.Cryptography.Cipher.Methods
             }
             catch (Exception ex)
             {
-                Events.OnError(this, new RErrorEventArgs(ex, ex.Message, ex.StackTrace));
-                OnError(new RErrorEventArgs(ex, ex.Message, ex.StackTrace));
+                Events.OnError(this, new RErrorEventArgs(ex, ex.Message));
+                OnError(new RErrorEventArgs(ex, ex.Message));
 
                 var exception = new Exception($"CipherMethod[{ GetType().FullName }] is not initialized");
-                Events.OnError(this, new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
-                OnError(new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
+                Events.OnError(this, new RErrorEventArgs(exception, exception.Message));
+                OnError(new RErrorEventArgs(exception, exception.Message));
 
                 throw;
             }
@@ -335,8 +335,8 @@ namespace RIS.Cryptography.Cipher.Methods
                         {
                             var exception = new Exception(
                                 $"KeySize[{keySize}] not supported for CipherMethod[{GetType().FullName}]");
-                            Events.OnError(this, new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
-                            OnError(new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
+                            Events.OnError(this, new RErrorEventArgs(exception, exception.Message));
+                            OnError(new RErrorEventArgs(exception, exception.Message));
                             throw exception;
                         }
                     }
@@ -375,12 +375,12 @@ namespace RIS.Cryptography.Cipher.Methods
             }
             catch (Exception ex)
             {
-                Events.OnError(this, new RErrorEventArgs(ex, ex.Message, ex.StackTrace));
-                OnError(new RErrorEventArgs(ex, ex.Message, ex.StackTrace));
+                Events.OnError(this, new RErrorEventArgs(ex, ex.Message));
+                OnError(new RErrorEventArgs(ex, ex.Message));
 
                 var exception = new Exception($"CipherMethod[{ GetType().FullName }] is not initialized");
-                Events.OnError(this, new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
-                OnError(new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
+                Events.OnError(this, new RErrorEventArgs(exception, exception.Message));
+                OnError(new RErrorEventArgs(exception, exception.Message));
 
                 throw;
             }
@@ -423,12 +423,12 @@ namespace RIS.Cryptography.Cipher.Methods
             }
             catch (Exception ex)
             {
-                Events.OnError(this, new RErrorEventArgs(ex, ex.Message, ex.StackTrace));
-                OnError(new RErrorEventArgs(ex, ex.Message, ex.StackTrace));
+                Events.OnError(this, new RErrorEventArgs(ex, ex.Message));
+                OnError(new RErrorEventArgs(ex, ex.Message));
 
                 var exception = new Exception($"CipherMethod[{ GetType().FullName }] is not initialized");
-                Events.OnError(this, new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
-                OnError(new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
+                Events.OnError(this, new RErrorEventArgs(exception, exception.Message));
+                OnError(new RErrorEventArgs(exception, exception.Message));
 
                 throw;
             }
@@ -497,14 +497,14 @@ namespace RIS.Cryptography.Cipher.Methods
             }
             catch (ArgumentNullException ex)
             {
-                Events.OnError(this, new RErrorEventArgs(ex, ex.Message, ex.StackTrace));
-                OnError(new RErrorEventArgs(ex, ex.Message, ex.StackTrace));
+                Events.OnError(this, new RErrorEventArgs(ex, ex.Message));
+                OnError(new RErrorEventArgs(ex, ex.Message));
                 return Array.Empty<byte>();
             }
             catch (Exception ex)
             {
-                Events.OnError(this, new RErrorEventArgs(ex, ex.Message, ex.StackTrace));
-                OnError(new RErrorEventArgs(ex, ex.Message, ex.StackTrace));
+                Events.OnError(this, new RErrorEventArgs(ex, ex.Message));
+                OnError(new RErrorEventArgs(ex, ex.Message));
                 throw;
             }
         }
@@ -545,14 +545,14 @@ namespace RIS.Cryptography.Cipher.Methods
             }
             catch (ArgumentNullException ex)
             {
-                Events.OnError(this, new RErrorEventArgs(ex, ex.Message, ex.StackTrace));
-                OnError(new RErrorEventArgs(ex, ex.Message, ex.StackTrace));
+                Events.OnError(this, new RErrorEventArgs(ex, ex.Message));
+                OnError(new RErrorEventArgs(ex, ex.Message));
                 return Array.Empty<byte>();
             }
             catch (Exception ex)
             {
-                Events.OnError(this, new RErrorEventArgs(ex, ex.Message, ex.StackTrace));
-                OnError(new RErrorEventArgs(ex, ex.Message, ex.StackTrace));
+                Events.OnError(this, new RErrorEventArgs(ex, ex.Message));
+                OnError(new RErrorEventArgs(ex, ex.Message));
                 throw;
             }
         }

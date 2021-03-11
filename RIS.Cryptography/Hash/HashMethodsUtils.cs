@@ -55,7 +55,7 @@ namespace RIS.Cryptography.Hash
             }
             catch (Exception ex)
             {
-                Events.OnError(null, new RErrorEventArgs(ex, ex.Message, ex.StackTrace));
+                Events.OnError(null, new RErrorEventArgs(ex, ex.Message));
 
                 return Array.Empty<Type>();
             }
@@ -95,7 +95,7 @@ namespace RIS.Cryptography.Hash
                 var exception = new ArgumentOutOfRangeException(nameof(length),
                     "Salt length cannot be less than 1");
                 Events.OnError(new RErrorEventArgs(exception,
-                    exception.Message, exception.StackTrace));
+                    exception.Message));
                 throw exception;
             }
 

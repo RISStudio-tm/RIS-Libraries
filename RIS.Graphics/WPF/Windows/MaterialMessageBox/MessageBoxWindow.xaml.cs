@@ -39,8 +39,8 @@ namespace RIS.Graphics.WPF.Windows
                 default:
                     var exception =
                         new ArgumentException("Недопустимое значение MaterialMessageBoxButtons для создания окна MaterialMessageBox", nameof(buttons));
-                    Events.OnError(this, new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
-                    OnError(new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
+                    Events.OnError(this, new RErrorEventArgs(exception, exception.Message));
+                    OnError(new RErrorEventArgs(exception, exception.Message));
                     throw exception;
             }
         }

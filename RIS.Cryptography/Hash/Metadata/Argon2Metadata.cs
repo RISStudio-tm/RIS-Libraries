@@ -145,8 +145,8 @@ namespace RIS.Cryptography.Hash.Metadata
             if (!hashInfo.Success)
             {
                 var exception = new FormatException($"Invalid hash format in metadata[{ GetType().FullName }]");
-                Events.OnError(this, new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
-                OnError(new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
+                Events.OnError(this, new RErrorEventArgs(exception, exception.Message));
+                OnError(new RErrorEventArgs(exception, exception.Message));
                 throw exception;
             }
 

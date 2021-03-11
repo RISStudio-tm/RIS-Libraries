@@ -18,8 +18,8 @@ namespace RIS.Cryptography.Cipher
             if (!SetCipherMethod(cipherMethod))
             {
                 var exception = new Exception("SetCipherMethod return false. CipherService is not initialized");
-                Events.OnError(this, new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
-                OnError(new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
+                Events.OnError(this, new RErrorEventArgs(exception, exception.Message));
+                OnError(new RErrorEventArgs(exception, exception.Message));
                 throw exception;
             }
         }

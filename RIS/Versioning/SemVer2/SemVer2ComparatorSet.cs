@@ -58,7 +58,7 @@ namespace RIS.Versioning
                 if (position == startPosition)
                 {
                     var exception = new FormatException($"Недопустимый шаблон диапазона [{pattern}]");
-                    Events.OnError(new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
+                    Events.OnError(new RErrorEventArgs(exception, exception.Message));
                     throw exception;
                 }
             }

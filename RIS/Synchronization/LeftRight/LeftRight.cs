@@ -41,16 +41,16 @@ namespace RIS.Synchronization
             if (leftInner == null)
             {
                 var exception = new ArgumentNullException(nameof(leftInner), $"Параметр {nameof(leftInner)} равен null");
-                Events.OnError(this, new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
-                OnError(new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
+                Events.OnError(this, new RErrorEventArgs(exception, exception.Message));
+                OnError(new RErrorEventArgs(exception, exception.Message));
                 throw exception;
             }
 
             if (rightInner == null)
             {
                 var exception = new ArgumentNullException(nameof(rightInner),$"Параметр {nameof(rightInner)} равен null");
-                Events.OnError(this, new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
-                OnError(new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
+                Events.OnError(this, new RErrorEventArgs(exception, exception.Message));
+                OnError(new RErrorEventArgs(exception, exception.Message));
                 throw exception;
             }
 
@@ -95,8 +95,8 @@ namespace RIS.Synchronization
             if (reader == null)
             {
                 var exception = new ArgumentNullException(nameof(reader), $"Параметр {nameof(reader)} равен null");
-                Events.OnError(this, new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
-                OnError(new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
+                Events.OnError(this, new RErrorEventArgs(exception, exception.Message));
+                OnError(new RErrorEventArgs(exception, exception.Message));
                 throw exception;
             }
 
@@ -118,8 +118,8 @@ namespace RIS.Synchronization
             if (writer == null)
             {
                 var exception = new ArgumentNullException(nameof(writer), $"Параметр {nameof(writer)} равен null");
-                Events.OnError(this, new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
-                OnError(new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
+                Events.OnError(this, new RErrorEventArgs(exception, exception.Message));
+                OnError(new RErrorEventArgs(exception, exception.Message));
                 throw exception;
             }
 

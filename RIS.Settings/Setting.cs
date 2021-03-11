@@ -94,7 +94,7 @@ namespace RIS.Settings
             }
             catch (Exception ex)
             {
-                Events.OnError(this, new RErrorEventArgs(ex, ex.Message, ex.StackTrace));
+                Events.OnError(this, new RErrorEventArgs(ex, ex.Message));
                 throw;
             }
         }

@@ -187,7 +187,7 @@ namespace RIS.Text.Generating
             {
                 var exception =
                     new Exception("Alphabet must contain 1 or more characters");
-                Events.OnError(new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
+                Events.OnError(new RErrorEventArgs(exception, exception.Message));
                 throw exception;
             }
 
@@ -245,7 +245,7 @@ namespace RIS.Text.Generating
             {
                 var exception =
                     new Exception("Alphabet must contain 1 or more characters");
-                Events.OnError(new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
+                Events.OnError(new RErrorEventArgs(exception, exception.Message));
                 throw exception;
             }
 
@@ -316,7 +316,7 @@ namespace RIS.Text.Generating
                     default:
                         var exception =
                             new Exception($"Unknown generation type[{type}] for expression[{expression}]");
-                        Events.OnError(new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
+                        Events.OnError(new RErrorEventArgs(exception, exception.Message));
                         throw exception;
                 }
 

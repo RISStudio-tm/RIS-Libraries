@@ -18,7 +18,7 @@ namespace RIS.Extensions
             if (random == null)
             {
                 var exception = new ArgumentNullException(nameof(random));
-                Events.OnError(new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
+                Events.OnError(new RErrorEventArgs(exception, exception.Message));
                 throw exception;
             }
 
@@ -61,7 +61,7 @@ namespace RIS.Extensions
             if (min >= max)
             {
                 var exception = new ArgumentException("Invalid random range");
-                Events.OnError(new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
+                Events.OnError(new RErrorEventArgs(exception, exception.Message));
                 throw exception;
             }
 

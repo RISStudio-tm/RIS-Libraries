@@ -51,8 +51,8 @@ namespace RIS.Collections.Nestable.Serialization
             {
                 var exception =
                     new Exception("Invalid general type for the resulting collection");
-                Events.OnError(new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
-                OnError(new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
+                Events.OnError(new RErrorEventArgs(exception, exception.Message));
+                OnError(new RErrorEventArgs(exception, exception.Message));
                 throw exception;
             }
 
@@ -69,8 +69,8 @@ namespace RIS.Collections.Nestable.Serialization
             {
                 var exception =
                     new Exception("Invalid general type for the resulting collection");
-                Events.OnError(new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
-                OnError(new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
+                Events.OnError(new RErrorEventArgs(exception, exception.Message));
+                OnError(new RErrorEventArgs(exception, exception.Message));
                 throw exception;
             }
 
@@ -95,8 +95,8 @@ namespace RIS.Collections.Nestable.Serialization
             {
                 var exception =
                     new ArgumentNullException(nameof(value), $"{nameof(value)} cannot be null");
-                Events.OnError(new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
-                OnError(new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
+                Events.OnError(new RErrorEventArgs(exception, exception.Message));
+                OnError(new RErrorEventArgs(exception, exception.Message));
                 throw exception;
             }
 
@@ -618,8 +618,8 @@ namespace RIS.Collections.Nestable.Serialization
             {
                 var exception =
                     new ArgumentNullException(nameof(represent), $"{nameof(represent)} cannot be null or empty");
-                Events.OnError(new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
-                OnError(new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
+                Events.OnError(new RErrorEventArgs(exception, exception.Message));
+                OnError(new RErrorEventArgs(exception, exception.Message));
                 throw exception;
             }
 
@@ -670,8 +670,8 @@ namespace RIS.Collections.Nestable.Serialization
                 {
                     var exception =
                         new Exception($"Name of the serialized type[{serializedType}] and the resulting type[{name}] do not match");
-                    Events.OnError(new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
-                    OnError(new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
+                    Events.OnError(new RErrorEventArgs(exception, exception.Message));
+                    OnError(new RErrorEventArgs(exception, exception.Message));
                     throw exception;
                 }
             }
