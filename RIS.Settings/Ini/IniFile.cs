@@ -326,7 +326,7 @@ namespace RIS.Settings.Ini
             }
 
             return _sections.TryGetValue(sectionName, out IniSection section)
-                ? section.Settings.Values
+                ? section.Settings.Values.ToArray()
                 : Enumerable.Empty<IniSetting>();
         }
 
