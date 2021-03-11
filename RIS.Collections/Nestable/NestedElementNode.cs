@@ -54,9 +54,9 @@ namespace RIS.Collections.Nestable
         {
             return _nestedElement.GetArray();
         }
-        public INestableCollection<T> GetNestableCollection()
+        public INestableCollection<T> GetCollection()
         {
-            return _nestedElement.GetNestableCollection();
+            return _nestedElement.GetCollection();
         }
 
         public void Set(NestedElement<T> value)

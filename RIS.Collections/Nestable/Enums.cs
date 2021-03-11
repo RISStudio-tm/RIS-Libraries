@@ -9,7 +9,7 @@ namespace RIS.Collections.Nestable
     {
         Element = 1,
         Array = 2,
-        NestableCollection = 3
+        Collection = 3
     }
 
     public enum NestableCollectionType : byte

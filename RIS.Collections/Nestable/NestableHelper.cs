@@ -4,19 +4,23 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
+using RIS.Extensions;
 
 namespace RIS.Collections.Nestable
 {
-    public static class NestableCollectionHelper
+    public static class NestableHelper
     {
         public static event EventHandler<RInformationEventArgs> Information;
         public static event EventHandler<RWarningEventArgs> Warning;
         public static event EventHandler<RErrorEventArgs> Error;
 
-        private static Dictionary<string, NestableCollectionType> CollectionsTypes { get; }
-        private static Dictionary<NestableCollectionType, Type> CollectionsInfo { get; }
+        private static readonly Dictionary<string, NestableCollectionType> CollectionsTypes;
+        private static readonly Dictionary<NestableCollectionType, Type> CollectionsInfo;
+        private static readonly Dictionary<char, char> ElementParenthesesMap;
+        private static readonly Dictionary<char, char> ArrayParenthesesMap;
+        private static readonly Dictionary<char, char> CollectionParenthesesMap;
 
-        static NestableCollectionHelper()
+        static NestableHelper()
         {
             string[] names = Enum.GetNames(typeof(NestableCollectionType));
 
@@ -45,6 +49,19 @@ namespace RIS.Collections.Nestable
                     type
                     );
             }
+
+            ElementParenthesesMap = new Dictionary<char, char>
+            {
+                { '\"', '\"' }
+            };
+            ArrayParenthesesMap = new Dictionary<char, char>
+            {
+                { ']', '[' }
+            };
+            CollectionParenthesesMap = new Dictionary<char, char>
+            {
+                { '}', '{' }
+            };
         }
 
         public static void OnInformation(RInformationEventArgs e)
@@ -73,6 +90,152 @@ namespace RIS.Collections.Nestable
         {
             Error?.Invoke(sender, e);
         }
+
+
+
+        private static Dictionary<char, char> GetParenthesesMap(NestedType type)
+        {
+            switch (type)
+            {
+                case NestedType.Element:
+                    return ElementParenthesesMap;
+                case NestedType.Array:
+                    return ArrayParenthesesMap;
+                case NestedType.Collection:
+                    return CollectionParenthesesMap;
+                default:
+                    var exception =
+                        new ArgumentException($"Invalid value for the {nameof(type)} parameter", nameof(type));
+                    Events.OnError(new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
+                    OnError(new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
+                    throw exception;
+            }
+        }
+
+        private static (string Represent, int EndIndex) GetRepresentPart(string represent, int startIndex)
+        {
+            if (string.IsNullOrEmpty(represent))
+            {
+                var exception =
+                    new ArgumentOutOfRangeException(nameof(startIndex), $"{nameof(startIndex)} cannot be null or empty");
+                Events.OnError(new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
+                OnError(new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
+                throw exception;
+            }
+            if (startIndex < 0)
+            {
+                var exception =
+                    new ArgumentOutOfRangeException(nameof(startIndex), $"{nameof(startIndex)} cannot be less than zero");
+                Events.OnError(new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
+                OnError(new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
+                throw exception;
+            }
+
+            NestedType partType;
+            string[] partEndValues;
+            int partExcludedStart;
+            int partExcludedCount;
+
+            switch (represent[startIndex])
+            {
+                case '\"':
+                    partType = NestedType.Element;
+                    partEndValues = new[] { "\",", "\"}" };
+                    partExcludedStart = 1;
+                    partExcludedCount = 1;
+                    break;
+                case '[':
+                    partType = NestedType.Array;
+                    partEndValues = new[] { "],", "]}" };
+                    partExcludedStart = 0;
+                    partExcludedCount = -1;
+                    break;
+                case '{':
+                    partType = NestedType.Collection;
+                    partEndValues = new[] { "},", "}}" };
+                    partExcludedStart = 0;
+                    partExcludedCount = -1;
+                    break;
+                default:
+                    var exception =
+                        new ArgumentException($"{nameof(startIndex)}[{startIndex}] indicates an unknown character of the beginning of the representation", nameof(startIndex));
+                    Events.OnError(new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
+                    OnError(new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
+                    throw exception;
+            }
+
+            var partParenthesesMap = GetParenthesesMap(partType);
+            var skippedOccurrencesCount = 0;
+
+            if (partType == NestedType.Collection)
+            {
+                Stack<char> parentheses = new Stack<char>();
+
+                for (int i = startIndex; i < represent.Length; ++i)
+                {
+                    var ch = represent[i];
+
+                    if ((i > 0 && represent[i - 1] == '/')
+                        && (i < represent.Length && represent[i + 1] == '/'))
+                    {
+                        continue;
+                    }
+
+                    if (partParenthesesMap.ContainsValue(ch))
+                    {
+                        parentheses.Push(ch);
+                    }
+                    else if (partParenthesesMap.TryGetValue(ch, out var chMapped))
+                    {
+                        if (parentheses.Pop() != chMapped)
+                        {
+                            var exception =
+                                new FormatException($"expected parentheses character '{chMapped}', but obtained character '{ch}'");
+                            Events.OnError(new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
+                            OnError(new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
+                            throw exception;
+                        }
+
+                        if (parentheses.Count == 0)
+                            break;
+
+                        ++skippedOccurrencesCount;
+                    }
+                }
+            }
+
+            var endIndex = -1;
+            var startIndexOccurrence = startIndex;
+
+            for (int i = 0; i < 1 + skippedOccurrencesCount; ++i)
+            {
+                endIndex = represent
+                    .IndexOfAny(partEndValues, startIndexOccurrence)
+                    .Index;
+
+                if (endIndex == -1)
+                    break;
+
+                startIndexOccurrence = endIndex + 1;
+            }
+
+            if (endIndex == -1)
+            {
+                var exception =
+                    new Exception($"Could not find the end of the representation part at the start index {startIndex}");
+                Events.OnError(new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
+                OnError(new RErrorEventArgs(exception, exception.Message, exception.StackTrace));
+                throw exception;
+            }
+
+            var representPart = represent.Substring(
+                startIndex + partExcludedStart,
+                endIndex - (startIndex + partExcludedCount));
+
+            return (representPart, endIndex);
+        }
+
+
 
         public static (INestableCollection<TValue> Collection, CollectionGeneralType GeneralType) CreateCollectionByType<TValue>(
             NestableCollectionType type)
@@ -171,8 +334,8 @@ namespace RIS.Collections.Nestable
                     return ToStringRepresent(value.GetElement());
                 case NestedType.Array:
                     return ToStringRepresent(value.GetArray());
-                case NestedType.NestableCollection:
-                    return ToStringRepresent(value.GetNestableCollection());
+                case NestedType.Collection:
+                    return ToStringRepresent(value.GetCollection());
                 default:
                     var exception =
                         new ArgumentException("Недопустимое значение поля Type в [NestedElement] для создания строкового представления", nameof(value));
@@ -269,8 +432,8 @@ namespace RIS.Collections.Nestable
                         result.Append(ToStringRepresent(value[i].GetArray()));
                         result.Append(',');
                         break;
-                    case NestedType.NestableCollection:
-                        result.Append(ToStringRepresent(value[i].GetNestableCollection()));
+                    case NestedType.Collection:
+                        result.Append(ToStringRepresent(value[i].GetCollection()));
                         result.Append(',');
                         break;
                 }
@@ -287,12 +450,14 @@ namespace RIS.Collections.Nestable
         public static string ToStringRepresentDictionary<TValue>(string key)
         {
             if (key == null)
-                return string.Empty;
+                return "null";
 
             key = key?
+                .Replace("null", "/null/")
                 .Replace("|", "/|/")
                 .Replace(":", "/:/")
                 .Replace("\"", "/\"/")
+                .Replace(",", "/,/")
                 .Replace("[", "/[/")
                 .Replace("]", "/]/")
                 .Replace("{", "/{/")
@@ -377,8 +542,8 @@ namespace RIS.Collections.Nestable
                         result.Append(ToStringRepresent(value[i].GetArray()));
                         result.Append(',');
                         break;
-                    case NestedType.NestableCollection:
-                        result.Append(ToStringRepresent(value[i].GetNestableCollection()));
+                    case NestedType.Collection:
+                        result.Append(ToStringRepresent(value[i].GetCollection()));
                         result.Append(',');
                         break;
                 }
@@ -423,8 +588,8 @@ namespace RIS.Collections.Nestable
                         result.Append(ToStringRepresentDictionary(value.GetKey(i), value[i].GetArray()));
                         result.Append(',');
                         break;
-                    case NestedType.NestableCollection:
-                        result.Append(ToStringRepresentDictionary(value.GetKey(i), value[i].GetNestableCollection()));
+                    case NestedType.Collection:
+                        result.Append(ToStringRepresentDictionary(value.GetKey(i), value[i].GetCollection()));
                         result.Append(',');
                         break;
                 }
@@ -597,54 +762,42 @@ namespace RIS.Collections.Nestable
             {
                 if (represent[divideIndex + 1] == '\"')
                 {
-                    int startIndex = represent.IndexOf("\",", divideIndex + 1, StringComparison.Ordinal);
-
-                    if (startIndex == -1)
-                        startIndex = represent.IndexOf("\"}", divideIndex + 1, StringComparison.Ordinal);
-
-                    string representSub = represent.Substring(divideIndex + 2, startIndex - (divideIndex + 2));
+                    var (partRepresent, partEndIndex) = GetRepresentPart(
+                        represent, divideIndex + 1);
 
                     TValue result = default(TValue);
-                    value.Add(FromStringRepresent(representSub, ref result));
+                    value.Add(FromStringRepresent(partRepresent, ref result));
 
-                    divideIndex = represent.IndexOf("\",", divideIndex + 2, StringComparison.Ordinal);
+                    divideIndex = partEndIndex;
                 }
                 else if (represent[divideIndex + 1] == '[')
                 {
-                    int startIndex = represent.IndexOf("],", divideIndex + 1, StringComparison.Ordinal);
-
-                    if (startIndex == -1)
-                        startIndex = represent.IndexOf("]}", divideIndex + 1, StringComparison.Ordinal);
-
-                    string representSub = represent.Substring(divideIndex + 1, startIndex - divideIndex);
+                    var (partRepresent, partEndIndex) = GetRepresentPart(
+                        represent, divideIndex + 1);
 
                     TValue[] result = Array.Empty<TValue>();
-                    value.Add(FromStringRepresent(representSub, ref result));
+                    value.Add(FromStringRepresent(partRepresent, ref result));
 
-                    divideIndex = represent.IndexOf("],", divideIndex + 2, StringComparison.Ordinal);
+                    divideIndex = partEndIndex;
                 }
                 else if (represent[divideIndex + 1] == '{')
                 {
-                    int startIndex = represent.IndexOf("},", divideIndex + 1, StringComparison.Ordinal);
-
-                    if (startIndex == -1)
-                        startIndex = represent.IndexOf("}}", divideIndex + 1, StringComparison.Ordinal);
-
-                    string representSub = represent.Substring(divideIndex + 1, startIndex - divideIndex);
+                    var (partRepresent, partEndIndex) = GetRepresentPart(
+                        represent, divideIndex + 1);
 
                     int resultTypeDivide;
-                    string resultType = string.Empty;
+                    string resultType;
 
-                    if (representSub.Contains("::"))
+                    if (partRepresent.Contains("::"))
                     {
-                        int resultKeyDivide = representSub.IndexOf("::", 1, StringComparison.Ordinal);
-                        resultTypeDivide = representSub.IndexOf("||", resultKeyDivide + 2, StringComparison.Ordinal);
-                        resultType = representSub.Substring(resultKeyDivide + 2, resultTypeDivide - resultKeyDivide - 2);
+                        int resultKeyDivide = partRepresent.IndexOf("::", 1, StringComparison.Ordinal);
+                        resultTypeDivide = partRepresent.IndexOf("||", resultKeyDivide + 2, StringComparison.Ordinal);
+                        resultType = partRepresent.Substring(resultKeyDivide + 2, resultTypeDivide - resultKeyDivide - 2);
                     }
                     else
                     {
-                        resultTypeDivide = representSub.IndexOf("||", 1, StringComparison.Ordinal);
-                        resultType = representSub.Substring(1, resultTypeDivide - 1);
+                        resultTypeDivide = partRepresent.IndexOf("||", 1, StringComparison.Ordinal);
+                        resultType = partRepresent.Substring(1, resultTypeDivide - 1);
                     }
 
                     (INestableCollection<TValue> result, CollectionGeneralType generalType) =
@@ -654,10 +807,10 @@ namespace RIS.Collections.Nestable
                     {
                         case CollectionGeneralType.Array:
                         case CollectionGeneralType.List:
-                            value.Add(FromStringRepresent<TValue>(representSub, result));
+                            value.Add(FromStringRepresent<TValue>(partRepresent, result));
                             break;
                         case CollectionGeneralType.Dictionary:
-                            value.Add(FromStringRepresentDictionary<TValue>(representSub, (INestableDictionary<TValue>)result));
+                            value.Add(FromStringRepresentDictionary<TValue>(partRepresent, (INestableDictionary<TValue>)result));
                             break;
                         case CollectionGeneralType.Unknown:
                         default:
@@ -668,7 +821,7 @@ namespace RIS.Collections.Nestable
                             throw exception;
                     }
 
-                    divideIndex = represent.IndexOf("},", divideIndex + 2, StringComparison.Ordinal);
+                    divideIndex = partEndIndex;
                 }
             } while (divideIndex != -1
                      && divideIndex != represent.Length - 1
@@ -680,13 +833,19 @@ namespace RIS.Collections.Nestable
 
         public static string FromStringRepresentDictionary<TValue>(string key)
         {
-            if (key == null)
-                return string.Empty;
+            if (key == "null")
+            {
+                key = default;
+
+                return key;
+            }
 
             key = key?
+                .Replace("/null/", "null")
                 .Replace("/|/", "|")
                 .Replace("/:/", ":")
                 .Replace("/\"/", "\"")
+                .Replace("/,/", ",")
                 .Replace("/[/", "[")
                 .Replace("/]/", "]")
                 .Replace("/{/", "{")
@@ -747,94 +906,81 @@ namespace RIS.Collections.Nestable
             {
                 if (represent[divideIndex + 1] == '\"')
                 {
-                    int startIndex = represent.IndexOf("\",", divideIndex + 1, StringComparison.Ordinal);
-
-                    if (startIndex == -1)
-                        startIndex = represent.IndexOf("\"}", divideIndex + 1, StringComparison.Ordinal);
-
-                    string representSub = represent.Substring(divideIndex + 2, startIndex - (divideIndex + 2));
+                    var (partRepresent, partEndIndex) = GetRepresentPart(
+                        represent, divideIndex + 1);
 
                     TValue result = default(TValue);
 
-                    if (representSub.Contains("::"))
+                    if (partRepresent.Contains("::"))
                     {
-                        int resultKeyDivide = representSub.IndexOf("::", 0, StringComparison.Ordinal);
-                        string resultKey = FromStringRepresentDictionary<TValue>(representSub.Substring(0, resultKeyDivide));
+                        int resultKeyDivide = partRepresent.IndexOf("::", 0, StringComparison.Ordinal);
+                        string resultKey = FromStringRepresentDictionary<TValue>(partRepresent.Substring(0, resultKeyDivide));
 
-                        representSub = $"{representSub.Substring(resultKeyDivide + 2)}";
+                        partRepresent = $"{partRepresent.Substring(resultKeyDivide + 2)}";
 
-                        value.Add(resultKey, FromStringRepresent(representSub, ref result));
+                        value.Add(resultKey, FromStringRepresent(partRepresent, ref result));
                     }
                     else
                     {
-                        value.Add(FromStringRepresent(representSub, ref result));
+                        value.Add(FromStringRepresent(partRepresent, ref result));
                     }
 
-                    divideIndex = represent.IndexOf("\",", divideIndex + 2, StringComparison.Ordinal);
+                    divideIndex = partEndIndex;
                 }
                 else if (represent[divideIndex + 1] == '[')
                 {
-                    int startIndex = represent.IndexOf("],", divideIndex + 1, StringComparison.Ordinal);
-
-                    if (startIndex == -1)
-                        startIndex = represent.IndexOf("]}", divideIndex + 1, StringComparison.Ordinal);
-
-                    string representSub = represent.Substring(divideIndex + 1, startIndex - divideIndex);
+                    var (partRepresent, partEndIndex) = GetRepresentPart(
+                        represent, divideIndex + 1);
 
                     TValue[] result = Array.Empty<TValue>();
 
-                    if (representSub.Contains("::"))
+                    if (partRepresent.Contains("::"))
                     {
-                        int resultKeyDivide = representSub.IndexOf("::", 1, StringComparison.Ordinal);
-                        string resultKey = FromStringRepresentDictionary<TValue>(representSub.Substring(1, resultKeyDivide - 1));
+                        int resultKeyDivide = partRepresent.IndexOf("::", 1, StringComparison.Ordinal);
+                        string resultKey = FromStringRepresentDictionary<TValue>(partRepresent.Substring(1, resultKeyDivide - 1));
 
-                        representSub = $"[{representSub.Substring(resultKeyDivide + 2)}";
+                        partRepresent = $"[{partRepresent.Substring(resultKeyDivide + 2)}";
 
-                        value.Add(resultKey, FromStringRepresent(representSub, ref result));
+                        value.Add(resultKey, FromStringRepresent(partRepresent, ref result));
                     }
                     else
                     {
-                        value.Add(FromStringRepresent(representSub, ref result));
+                        value.Add(FromStringRepresent(partRepresent, ref result));
                     }
 
-                    divideIndex = represent.IndexOf("],", divideIndex + 2, StringComparison.Ordinal);
+                    divideIndex = partEndIndex;
                 }
                 else if (represent[divideIndex + 1] == '{')
                 {
-                    int startIndex = represent.IndexOf("},", divideIndex + 1, StringComparison.Ordinal);
+                    var (partRepresent, partEndIndex) = GetRepresentPart(
+                        represent, divideIndex + 1);
 
-                    if (startIndex == -1)
-                        startIndex = represent.IndexOf("}}", divideIndex + 1, StringComparison.Ordinal);
-
-                    string representSub = represent.Substring(divideIndex + 1, startIndex - divideIndex);
-
-                    if (representSub.Contains("::"))
+                    if (partRepresent.Contains("::"))
                     {
-                        int resultKeyDivide = representSub.IndexOf("::", 1, StringComparison.Ordinal);
-                        string resultKey = FromStringRepresentDictionary<TValue>(representSub.Substring(1, resultKeyDivide - 1));
-                        int collectionTypeDivide = representSub.IndexOf("||", resultKeyDivide + 2, StringComparison.Ordinal);
-                        string collectionType = representSub.Substring(resultKeyDivide + 2, collectionTypeDivide - resultKeyDivide - 2);
+                        int resultKeyDivide = partRepresent.IndexOf("::", 1, StringComparison.Ordinal);
+                        string resultKey = FromStringRepresentDictionary<TValue>(partRepresent.Substring(1, resultKeyDivide - 1));
+                        int resultTypeDivide = partRepresent.IndexOf("||", resultKeyDivide + 2, StringComparison.Ordinal);
+                        string resultType = partRepresent.Substring(resultKeyDivide + 2, resultTypeDivide - resultKeyDivide - 2);
 
                         (INestableCollection<TValue> result, CollectionGeneralType generalType) =
-                            CreateCollectionByType<TValue>(GetCollectionType(collectionType));
-                        value.Add(resultKey, FromStringRepresent<TValue>(representSub, result));
+                            CreateCollectionByType<TValue>(GetCollectionType(resultType));
+                        value.Add(resultKey, FromStringRepresent<TValue>(partRepresent, result));
                     }
                     else
                     {
-                        int collectionTypeDivide = representSub.IndexOf("||", 1, StringComparison.Ordinal);
-                        string collectionType = representSub.Substring(1, collectionTypeDivide - 1);
+                        int collectionTypeDivide = partRepresent.IndexOf("||", 1, StringComparison.Ordinal);
+                        string collectionType = partRepresent.Substring(1, collectionTypeDivide - 1);
 
                         (INestableCollection<TValue> result, CollectionGeneralType generalType) =
                             CreateCollectionByType<TValue>(GetCollectionType(collectionType));
-                        value.Add(FromStringRepresent<TValue>(representSub, result));
+                        value.Add(FromStringRepresent<TValue>(partRepresent, result));
                     }
 
-                    divideIndex = represent.IndexOf("},", divideIndex + 2, StringComparison.Ordinal);
+                    divideIndex = partEndIndex;
                 }
             } while (divideIndex != -1
                      && divideIndex != represent.Length - 1
-                     && (divideIndex = represent.IndexOf(',', divideIndex + 1)) != -1
-                     );
+                     && (divideIndex = represent.IndexOf(',', divideIndex + 1)) != -1);
 
             return value;
         }
@@ -848,8 +994,8 @@ namespace RIS.Collections.Nestable
                     return Enumerate(value.GetElement());
                 case NestedType.Array:
                     return Enumerate(value.GetArray());
-                case NestedType.NestableCollection:
-                    return Enumerate(value.GetNestableCollection());
+                case NestedType.Collection:
+                    return Enumerate(value.GetCollection());
                 default:
                     var exception =
                         new ArgumentException("Недопустимое значение поля Type в [NestedElement] для старта перечисления", nameof(value));
@@ -887,8 +1033,8 @@ namespace RIS.Collections.Nestable
                             yield return element;
                         }
                         break;
-                    case NestedType.NestableCollection:
-                        foreach (var element in Enumerate(value[i].GetNestableCollection()))
+                    case NestedType.Collection:
+                        foreach (var element in Enumerate(value[i].GetCollection()))
                         {
                             yield return element;
                         }

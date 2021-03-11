@@ -109,7 +109,7 @@ namespace RIS.Collections.Nestable
             IsSynchronized = false;
 
             Length = length;
-            CollectionType = NestableCollectionHelper.GetCollectionType(GetType().Name);
+            CollectionType = NestableHelper.GetCollectionType(GetType().Name);
             Key = key;
 
             ValuesCollection = new List<(string Key, NestedElementNode<T> Element)>(length);
@@ -270,12 +270,12 @@ namespace RIS.Collections.Nestable
 
             node.Set(value);
 
-            if (value.Type != NestedType.NestableCollection)
+            if (value.Type != NestedType.Collection)
                 return;
 
-            INestableCollection<T> valueCollection = value.GetNestableCollection();
+            INestableCollection<T> valueCollection = value.GetCollection();
 
-            switch (NestableCollectionHelper.GetGeneralType(valueCollection))
+            switch (NestableHelper.GetGeneralType(valueCollection))
             {
                 case CollectionGeneralType.Array:
                 case CollectionGeneralType.List:
@@ -304,12 +304,12 @@ namespace RIS.Collections.Nestable
 
             KeysCollection[key].Node.Set(value);
 
-            if (value.Type != NestedType.NestableCollection)
+            if (value.Type != NestedType.Collection)
                 return;
 
-            INestableCollection<T> valueCollection = value.GetNestableCollection();
+            INestableCollection<T> valueCollection = value.GetCollection();
 
-            switch (NestableCollectionHelper.GetGeneralType(valueCollection))
+            switch (NestableHelper.GetGeneralType(valueCollection))
             {
                 case CollectionGeneralType.Array:
                 case CollectionGeneralType.List:
@@ -409,7 +409,7 @@ namespace RIS.Collections.Nestable
 
             node.Set(value);
 
-            switch (NestableCollectionHelper.GetGeneralType(value))
+            switch (NestableHelper.GetGeneralType(value))
             {
                 case CollectionGeneralType.Array:
                 case CollectionGeneralType.List:
@@ -438,7 +438,7 @@ namespace RIS.Collections.Nestable
 
             KeysCollection[key].Node.Set(value);
 
-            switch (NestableCollectionHelper.GetGeneralType(value))
+            switch (NestableHelper.GetGeneralType(value))
             {
                 case CollectionGeneralType.Array:
                 case CollectionGeneralType.List:
@@ -488,12 +488,12 @@ namespace RIS.Collections.Nestable
 
             KeysCollection.Remove(oldKey);
 
-            if (node.NestedElementRef.Type != NestedType.NestableCollection)
+            if (node.NestedElementRef.Type != NestedType.Collection)
                 return true;
 
-            INestableCollection<T> valueCollection = node.NestedElementRef.GetNestableCollection();
+            INestableCollection<T> valueCollection = node.NestedElementRef.GetCollection();
 
-            switch (NestableCollectionHelper.GetGeneralType(valueCollection))
+            switch (NestableHelper.GetGeneralType(valueCollection))
             {
                 case CollectionGeneralType.Array:
                 case CollectionGeneralType.List:
@@ -513,24 +513,29 @@ namespace RIS.Collections.Nestable
             return true;
         }
 
+        public bool ContainsKey(string key)
+        {
+            return KeysCollection.ContainsKey(key);
+        }
+
         public string ToStringRepresent()
         {
-            return NestableCollectionHelper.ToStringRepresent<T>(this);
+            return NestableHelper.ToStringRepresent<T>(this);
         }
 
         public void FromStringRepresent(string represent)
         {
-            NestableCollectionHelper.FromStringRepresent<T>(represent, this);
+            NestableHelper.FromStringRepresent<T>(represent, this);
         }
 
         public IEnumerable<T> Enumerate()
         {
-            return NestableCollectionHelper.Enumerate<T>(this);
+            return NestableHelper.Enumerate<T>(this);
         }
 
         IEnumerator<T> IEnumerable<T>.GetEnumerator()
         {
-            IEnumerable<T> value = NestableCollectionHelper.Enumerate<T>(this);
+            IEnumerable<T> value = NestableHelper.Enumerate<T>(this);
 
             foreach (var element in value)
             {
@@ -539,7 +544,7 @@ namespace RIS.Collections.Nestable
         }
         IEnumerator IEnumerable.GetEnumerator()
         {
-            IEnumerable<T> value = NestableCollectionHelper.Enumerate<T>(this);
+            IEnumerable<T> value = NestableHelper.Enumerate<T>(this);
 
             foreach (var element in value)
             {
@@ -583,12 +588,12 @@ namespace RIS.Collections.Nestable
             KeysCollection.Add(key, (index, node));
             ++Length;
 
-            if (value.Type != NestedType.NestableCollection)
+            if (value.Type != NestedType.Collection)
                 return true;
 
-            INestableCollection<T> valueCollection = value.GetNestableCollection();
+            INestableCollection<T> valueCollection = value.GetCollection();
 
-            switch (NestableCollectionHelper.GetGeneralType(valueCollection))
+            switch (NestableHelper.GetGeneralType(valueCollection))
             {
                 case CollectionGeneralType.Array:
                 case CollectionGeneralType.List:
@@ -719,7 +724,7 @@ namespace RIS.Collections.Nestable
             KeysCollection.Add(key, (index, node));
             ++Length;
 
-            switch (NestableCollectionHelper.GetGeneralType(value))
+            switch (NestableHelper.GetGeneralType(value))
             {
                 case CollectionGeneralType.Array:
                 case CollectionGeneralType.List:
@@ -795,12 +800,12 @@ namespace RIS.Collections.Nestable
                 KeysCollection[nodeKey] = (i, nodeValue);
             }
 
-            if (value.Type != NestedType.NestableCollection)
+            if (value.Type != NestedType.Collection)
                 return true;
 
-            INestableCollection<T> valueCollection = value.GetNestableCollection();
+            INestableCollection<T> valueCollection = value.GetCollection();
 
-            switch (NestableCollectionHelper.GetGeneralType(valueCollection))
+            switch (NestableHelper.GetGeneralType(valueCollection))
             {
                 case CollectionGeneralType.Array:
                 case CollectionGeneralType.List:
@@ -991,7 +996,7 @@ namespace RIS.Collections.Nestable
                 KeysCollection[nodeKey] = (i, nodeValue);
             }
 
-            switch (NestableCollectionHelper.GetGeneralType(value))
+            switch (NestableHelper.GetGeneralType(value))
             {
                 case CollectionGeneralType.Array:
                 case CollectionGeneralType.List:

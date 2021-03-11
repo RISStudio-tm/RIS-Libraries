@@ -59,7 +59,7 @@ namespace RIS.Collections.Nestable
             IsSynchronized = false;
 
             Length = length;
-            CollectionType = NestableCollectionHelper.GetCollectionType(GetType().Name);
+            CollectionType = NestableHelper.GetCollectionType(GetType().Name);
 
             ValuesCollection = new List<NestedElementNode<T>>(length);
 
@@ -215,22 +215,22 @@ namespace RIS.Collections.Nestable
 
         public string ToStringRepresent()
         {
-            return NestableCollectionHelper.ToStringRepresent<T>(this);
+            return NestableHelper.ToStringRepresent<T>(this);
         }
 
         public void FromStringRepresent(string represent)
         {
-            NestableCollectionHelper.FromStringRepresent<T>(represent, this);
+            NestableHelper.FromStringRepresent<T>(represent, this);
         }
 
         public IEnumerable<T> Enumerate()
         {
-            return NestableCollectionHelper.Enumerate<T>(this);
+            return NestableHelper.Enumerate<T>(this);
         }
 
         IEnumerator<T> IEnumerable<T>.GetEnumerator()
         {
-            IEnumerable<T> value = NestableCollectionHelper.Enumerate<T>(this);
+            IEnumerable<T> value = NestableHelper.Enumerate<T>(this);
 
             foreach (var element in value)
             {
@@ -239,7 +239,7 @@ namespace RIS.Collections.Nestable
         }
         IEnumerator IEnumerable.GetEnumerator()
         {
-            IEnumerable<T> value = NestableCollectionHelper.Enumerate<T>(this);
+            IEnumerable<T> value = NestableHelper.Enumerate<T>(this);
 
             foreach (var element in value)
             {

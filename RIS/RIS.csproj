@@ -5,12 +5,12 @@
     <Configurations>Debug;Release;Release Nuget</Configurations>
     <RootNamespace>RIS</RootNamespace>
     <AssemblyName>RIS</AssemblyName>
-    <AssemblyVersion>3.9.2.0</AssemblyVersion>
-    <FileVersion>3.9.2.0</FileVersion>
+    <AssemblyVersion>3.9.3.0</AssemblyVersion>
+    <FileVersion>3.9.3.0</FileVersion>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <PackageId>RIS</PackageId>
     <Product>RIS</Product>
-    <Version>3.9.2</Version>
+    <Version>3.9.3</Version>
     <Description>A library designed for various types of tasks. The core of the RIS "ecosystem".</Description>
     <PackageTags>dotnet, dotnetcore, netframework, netcore, library</PackageTags>
     <Authors>Dmitry Ponomarev</Authors>

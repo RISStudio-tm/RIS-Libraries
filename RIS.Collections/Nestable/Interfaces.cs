@@ -76,6 +76,8 @@ namespace RIS.Collections.Nestable
 
         bool ChangeKey(string oldKey, string newKey);
 
+        bool ContainsKey(string key);
+
         bool Add(string key, NestedElement<T> value);
         bool Add(string key, T value);
         bool Add(string key, T[] value);

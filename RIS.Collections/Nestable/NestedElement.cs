@@ -33,7 +33,7 @@ namespace RIS.Collections.Nestable
                         Type = NestedType.Array;
                         break;
                     case INestableCollection<T> _:
-                        Type = NestedType.NestableCollection;
+                        Type = NestedType.Collection;
                         break;
                     default:
                         var exception =
@@ -108,12 +108,12 @@ namespace RIS.Collections.Nestable
 
             return (T[])Value;
         }
-        public INestableCollection<T> GetNestableCollection()
+        public INestableCollection<T> GetCollection()
         {
             if (Value == null)
                 return null;
 
-            if (Type != NestedType.NestableCollection)
+            if (Type != NestedType.Collection)
             {
                 var exception =
                     new InvalidCastException("Невозможно получить значение [NestedElement], так как оно содержит не тип NestableCollection");
@@ -153,12 +153,12 @@ namespace RIS.Collections.Nestable
 
         public override int GetHashCode()
         {
-            return Value.GetHashCode();
+            return Value?.GetHashCode() ?? 0;
         }
 
         public override string ToString()
         {
-            return NestableCollectionHelper.ToStringRepresent(this);
+            return NestableHelper.ToStringRepresent(this);
         }
 
         public static bool operator ==(NestedElement<T> element1, NestedElement<T> element2)
