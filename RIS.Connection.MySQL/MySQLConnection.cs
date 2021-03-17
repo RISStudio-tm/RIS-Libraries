@@ -202,7 +202,9 @@ namespace RIS.Connection.MySQL
         /// <returns>
         ///     Значение типа <see cref="bool"/>. Если <see langword="true"/>, то соединение открыто успешно, иначе <see langword="false"/>.
         /// </returns>
-        public bool Open(byte numberConnections, string ipAddress, string database, string login, string password, string charset = "utf8mb4")
+        public bool Open(byte numberConnections,
+            string ipAddress, string database, string login,
+            string password, string charset = "utf8mb4")
         {
             return Open(numberConnections, TimeSpan.FromMilliseconds(20000),
                 ipAddress, database, login, password, charset);
@@ -234,7 +236,9 @@ namespace RIS.Connection.MySQL
         /// <returns>
         ///     Значение типа <see cref="bool"/>. Если <see langword="true"/>, то соединение открыто успешно, иначе <see langword="false"/>.
         /// </returns>
-        public bool Open(byte numberConnections, TimeSpan timeout, string ipAddress, string database, string login, string password, string charset = "utf8mb4")
+        public bool Open(byte numberConnections, TimeSpan timeout,
+            string ipAddress, string database, string login,
+            string password, string charset = "utf8mb4")
         {
             MySqlConnectionStringBuilder connectionStringBuilder = new MySqlConnectionStringBuilder(string.Empty)
             {
@@ -246,7 +250,8 @@ namespace RIS.Connection.MySQL
                 CharacterSet = charset
             };
 
-            return Open(numberConnections, connectionStringBuilder.ConnectionString);
+            return Open(numberConnections, timeout,
+                connectionStringBuilder.ConnectionString);
         }
         /// <summary>
         ///     Открывает соединения в количестве <paramref name="numberConnections"/> c MySQL базой данных с использованием строки подключения <paramref name="connectionString"/>
@@ -260,7 +265,8 @@ namespace RIS.Connection.MySQL
         /// <returns>
         ///     Значение типа <see cref="bool"/>. Если <see langword="true"/>, то соединение открыто успешно, иначе <see langword="false"/>.
         /// </returns>
-        public bool Open(byte numberConnections, string connectionString)
+        public bool Open(byte numberConnections,
+            string connectionString)
         {
             return Open(numberConnections, TimeSpan.FromMilliseconds(20000),
                 connectionString);
@@ -280,14 +286,25 @@ namespace RIS.Connection.MySQL
         /// <returns>
         ///     Значение типа <see cref="bool"/>. Если <see langword="true"/>, то соединение открыто успешно, иначе <see langword="false"/>.
         /// </returns>
-        public bool Open(byte numberConnections, TimeSpan timeout, string connectionString)
+        public bool Open(byte numberConnections, TimeSpan timeout,
+            string connectionString)
         {
             try
             {
                 if (numberConnections < 1)
                     numberConnections = 1;
 
-                Task.Factory.StartNew(() => CreateConnections(numberConnections, connectionString)).Wait();
+                MySqlConnectionStringBuilder connectionStringBuilder = new MySqlConnectionStringBuilder(connectionString)
+                {
+                    DefaultCommandTimeout = (uint)timeout.TotalSeconds
+                };
+
+                connectionString = connectionStringBuilder.ConnectionString;
+
+                Task.Factory.StartNew(() => CreateConnections(
+                        numberConnections,
+                        connectionString))
+                    .Wait();
 
                 if (!ConnectionComplete)
                     return false;
@@ -345,7 +362,8 @@ namespace RIS.Connection.MySQL
             _connections = Array.Empty<MySqlConnection>();
         }
 
-        private void CreateConnections(byte numberConnections, string connectionString)
+        private void CreateConnections(byte numberConnections,
+            string connectionString)
         {
             _connections = new MySqlConnection[numberConnections];
 
