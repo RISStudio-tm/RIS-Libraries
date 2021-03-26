@@ -470,7 +470,7 @@ namespace RIS.Cryptography.Cipher.Methods
 
         public string Encrypt(string plainText)
         {
-            byte[] data = Utils.GetBytes(plainText);
+            byte[] data = SecureUtils.GetBytes(plainText);
 
             return Convert.ToBase64String(
                 Encrypt(data));
@@ -509,7 +509,7 @@ namespace RIS.Cryptography.Cipher.Methods
         {
             byte[] data = Convert.FromBase64String(cipherText);
 
-            return Utils.GetString(
+            return SecureUtils.GetString(
                 Decrypt(data));
         }
         public byte[] Decrypt(byte[] data)

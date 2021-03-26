@@ -248,7 +248,7 @@ namespace RIS.Cryptography.Cipher.Methods
                 }
                 catch (FormatException)
                 {
-                    RijndaelService.Key = Convert.FromBase64String(Convert.ToBase64String(Utils.GetBytes(key)));
+                    RijndaelService.Key = Convert.FromBase64String(Convert.ToBase64String(SecureUtils.GetBytes(key)));
                 }
 
                 GenIVAfterEncrypt = true;
@@ -287,7 +287,7 @@ namespace RIS.Cryptography.Cipher.Methods
                 }
                 catch (FormatException)
                 {
-                    RijndaelService.Key = Convert.FromBase64String(Convert.ToBase64String(Utils.GetBytes(key)));
+                    RijndaelService.Key = Convert.FromBase64String(Convert.ToBase64String(SecureUtils.GetBytes(key)));
                 }
 
                 GenIVAfterEncrypt = true;
@@ -358,7 +358,7 @@ namespace RIS.Cryptography.Cipher.Methods
                 }
                 catch (FormatException)
                 {
-                    RijndaelService.Key = Convert.FromBase64String(Convert.ToBase64String(Utils.GetBytes(key)));
+                    RijndaelService.Key = Convert.FromBase64String(Convert.ToBase64String(SecureUtils.GetBytes(key)));
                 }
 
                 try
@@ -367,7 +367,7 @@ namespace RIS.Cryptography.Cipher.Methods
                 }
                 catch (FormatException)
                 {
-                    RijndaelService.IV = Convert.FromBase64String(Convert.ToBase64String(Utils.GetBytes(iv)));
+                    RijndaelService.IV = Convert.FromBase64String(Convert.ToBase64String(SecureUtils.GetBytes(iv)));
                 }
 
                 GenIVAfterEncrypt = true;
@@ -406,7 +406,7 @@ namespace RIS.Cryptography.Cipher.Methods
                 }
                 catch (FormatException)
                 {
-                    RijndaelService.Key = Convert.FromBase64String(Convert.ToBase64String(Utils.GetBytes(key)));
+                    RijndaelService.Key = Convert.FromBase64String(Convert.ToBase64String(SecureUtils.GetBytes(key)));
                 }
 
                 try
@@ -415,7 +415,7 @@ namespace RIS.Cryptography.Cipher.Methods
                 }
                 catch (FormatException)
                 {
-                    RijndaelService.IV = Convert.FromBase64String(Convert.ToBase64String(Utils.GetBytes(iv)));
+                    RijndaelService.IV = Convert.FromBase64String(Convert.ToBase64String(SecureUtils.GetBytes(iv)));
                 }
 
                 GenIVAfterEncrypt = true;
@@ -463,7 +463,7 @@ namespace RIS.Cryptography.Cipher.Methods
 
         public string Encrypt(string plainText)
         {
-            byte[] data = Utils.GetBytes(plainText);
+            byte[] data = SecureUtils.GetBytes(plainText);
 
             return Convert.ToBase64String(
                 EncryptWithWriteIV(data));
@@ -513,7 +513,7 @@ namespace RIS.Cryptography.Cipher.Methods
         {
             byte[] data = Convert.FromBase64String(cipherText);
 
-            return Utils.GetString(
+            return SecureUtils.GetString(
                 DecryptWithReadIV(data));
         }
         public byte[] Decrypt(byte[] data)

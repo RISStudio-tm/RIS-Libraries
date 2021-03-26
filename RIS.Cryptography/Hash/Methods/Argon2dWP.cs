@@ -112,7 +112,7 @@ namespace RIS.Cryptography.Hash.Methods
                 }
                 catch (FormatException)
                 {
-                    _associatedData = Convert.FromBase64String(Convert.ToBase64String(Utils.GetBytes(value)));
+                    _associatedData = Convert.FromBase64String(Convert.ToBase64String(SecureUtils.GetBytes(value)));
                 }
             }
         }
@@ -142,7 +142,7 @@ namespace RIS.Cryptography.Hash.Methods
                 }
                 catch (FormatException)
                 {
-                    _knownSecret = Convert.FromBase64String(Convert.ToBase64String(Utils.GetBytes(value)));
+                    _knownSecret = Convert.FromBase64String(Convert.ToBase64String(SecureUtils.GetBytes(value)));
                 }
             }
         }
@@ -202,7 +202,7 @@ namespace RIS.Cryptography.Hash.Methods
         public string GetHash(string plainText, int memorySize, int iterations,
             int degreeOfParallelism, string associatedData, string knownSecret)
         {
-            byte[] data = Utils.GetBytes(plainText);
+            byte[] data = SecureUtils.GetBytes(plainText);
 
             return GetHash(data, memorySize, iterations,
                 degreeOfParallelism, associatedData, knownSecret);
@@ -239,7 +239,7 @@ namespace RIS.Cryptography.Hash.Methods
         public string GetHash(string plainText, string salt, int memorySize, int iterations,
             int degreeOfParallelism, string associatedData, string knownSecret)
         {
-            byte[] data = Utils.GetBytes(plainText);
+            byte[] data = SecureUtils.GetBytes(plainText);
 
             return GetHash(data, salt, memorySize, iterations,
                 degreeOfParallelism, associatedData, knownSecret);
@@ -295,7 +295,7 @@ namespace RIS.Cryptography.Hash.Methods
             }
             catch (FormatException)
             {
-                associatedDataBytes = Convert.FromBase64String(Convert.ToBase64String(Utils.GetBytes(associatedData)));
+                associatedDataBytes = Convert.FromBase64String(Convert.ToBase64String(SecureUtils.GetBytes(associatedData)));
             }
 
             byte[] knownSecretBytes;
@@ -305,7 +305,7 @@ namespace RIS.Cryptography.Hash.Methods
             }
             catch (FormatException)
             {
-                knownSecretBytes = Convert.FromBase64String(Convert.ToBase64String(Utils.GetBytes(knownSecret)));
+                knownSecretBytes = Convert.FromBase64String(Convert.ToBase64String(SecureUtils.GetBytes(knownSecret)));
             }
 
             Konscious.Security.Cryptography.Argon2d argon2Service = new Konscious.Security.Cryptography.Argon2d(data)
@@ -326,7 +326,7 @@ namespace RIS.Cryptography.Hash.Methods
                 hashText.Append(hashBytes[i].ToString("x2", CultureInfo.InvariantCulture));
             }
 
-            return $"${Enum.GetName(typeof(Argon2Type), Argon2Type.Argon2d)?.ToLower()}$v=19$m={memorySize},t={iterations},p={degreeOfParallelism}${Base64.RemovePadding(Convert.ToBase64String(hashSalt))}${Base64.RemovePadding(Convert.ToBase64String(Utils.GetBytes(hashText.ToString())))}";
+            return $"${Enum.GetName(typeof(Argon2Type), Argon2Type.Argon2d)?.ToLower()}$v=19$m={memorySize},t={iterations},p={degreeOfParallelism}${Base64.RemovePadding(Convert.ToBase64String(hashSalt))}${Base64.RemovePadding(Convert.ToBase64String(SecureUtils.GetBytes(hashText.ToString())))}";
         }
         public string GetHash(byte[] data, string salt)
         {
@@ -367,7 +367,7 @@ namespace RIS.Cryptography.Hash.Methods
             }
             catch (FormatException)
             {
-                hashSalt = Convert.FromBase64String(Convert.ToBase64String(Utils.GetBytes(salt)));
+                hashSalt = Convert.FromBase64String(Convert.ToBase64String(SecureUtils.GetBytes(salt)));
             }
 
             if (memorySize < 8)
@@ -386,7 +386,7 @@ namespace RIS.Cryptography.Hash.Methods
             }
             catch (FormatException)
             {
-                associatedDataBytes = Convert.FromBase64String(Convert.ToBase64String(Utils.GetBytes(associatedData)));
+                associatedDataBytes = Convert.FromBase64String(Convert.ToBase64String(SecureUtils.GetBytes(associatedData)));
             }
 
             byte[] knownSecretBytes;
@@ -396,7 +396,7 @@ namespace RIS.Cryptography.Hash.Methods
             }
             catch (FormatException)
             {
-                knownSecretBytes = Convert.FromBase64String(Convert.ToBase64String(Utils.GetBytes(knownSecret)));
+                knownSecretBytes = Convert.FromBase64String(Convert.ToBase64String(SecureUtils.GetBytes(knownSecret)));
             }
 
             Konscious.Security.Cryptography.Argon2d argon2Service = new Konscious.Security.Cryptography.Argon2d(data)
@@ -417,7 +417,7 @@ namespace RIS.Cryptography.Hash.Methods
                 hashText.Append(hashBytes[i].ToString("x2", CultureInfo.InvariantCulture));
             }
 
-            return $"${Enum.GetName(typeof(Argon2Type), Argon2Type.Argon2d)?.ToLower()}$v=19$m={memorySize},t={iterations},p={degreeOfParallelism}${Base64.RemovePadding(Convert.ToBase64String(hashSalt))}${Base64.RemovePadding(Convert.ToBase64String(Utils.GetBytes(hashText.ToString())))}";
+            return $"${Enum.GetName(typeof(Argon2Type), Argon2Type.Argon2d)?.ToLower()}$v=19$m={memorySize},t={iterations},p={degreeOfParallelism}${Base64.RemovePadding(Convert.ToBase64String(hashSalt))}${Base64.RemovePadding(Convert.ToBase64String(SecureUtils.GetBytes(hashText.ToString())))}";
         }
 
         public bool VerifyHash(string plainText, string hashText)
@@ -447,7 +447,7 @@ namespace RIS.Cryptography.Hash.Methods
             var plainTextHash = GetHash(plainText, metadata.Salt, metadata.MemorySize, metadata.Iterations,
                 metadata.DegreeOfParallelism, associatedData, knownSecret);
 
-            return Utils.SecureEquals(plainTextHash, hashText, false, null);
+            return SecureUtils.SecureEquals(plainTextHash, hashText, false, null);
         }
 
         public bool VerifyHash(byte[] data, string hashText)
@@ -477,7 +477,7 @@ namespace RIS.Cryptography.Hash.Methods
             var plainTextHash = GetHash(data, metadata.Salt, metadata.MemorySize, metadata.Iterations,
                 metadata.DegreeOfParallelism, associatedData, knownSecret);
 
-            return Utils.SecureEquals(plainTextHash, hashText, false, null);
+            return SecureUtils.SecureEquals(plainTextHash, hashText, false, null);
         }
 
         public bool VerifyAndUpdateHash(string plainText, string hashText, out bool isUpdated, out string newHashText)

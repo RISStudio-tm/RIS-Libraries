@@ -27,7 +27,7 @@ namespace RIS.Cryptography.Hash.Methods
 
         public string GetHash(string plainText)
         {
-            byte[] data = Utils.GetBytes(plainText);
+            byte[] data = SecureUtils.GetBytes(plainText);
 
             return GetHash(data);
         }
@@ -46,7 +46,7 @@ namespace RIS.Cryptography.Hash.Methods
 
         public bool VerifyHash(string plainText, string hashText)
         {
-            byte[] data = Utils.GetBytes(plainText);
+            byte[] data = SecureUtils.GetBytes(plainText);
 
             return VerifyHash(data, hashText);
         }
@@ -54,7 +54,7 @@ namespace RIS.Cryptography.Hash.Methods
         {
             var plainTextHash = GetHash(data);
 
-            return Utils.SecureEquals(plainTextHash, hashText,
+            return SecureUtils.SecureEquals(plainTextHash, hashText,
                 true, null);
         }
     }

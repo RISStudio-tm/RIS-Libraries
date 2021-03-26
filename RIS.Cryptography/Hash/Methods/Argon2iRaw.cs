@@ -41,10 +41,10 @@ namespace RIS.Cryptography.Hash.Methods
                 }
                 catch (FormatException)
                 {
-                    if (Convert.FromBase64String(Convert.ToBase64String(Utils.GetBytes(value))).Length < 8)
+                    if (Convert.FromBase64String(Convert.ToBase64String(SecureUtils.GetBytes(value))).Length < 8)
                         value = Convert.ToBase64String(new byte[8]);
 
-                    _salt = Convert.FromBase64String(Convert.ToBase64String(Utils.GetBytes(value)));
+                    _salt = Convert.FromBase64String(Convert.ToBase64String(SecureUtils.GetBytes(value)));
                 }
             }
         }
@@ -134,7 +134,7 @@ namespace RIS.Cryptography.Hash.Methods
                 }
                 catch (FormatException)
                 {
-                    _associatedData = Convert.FromBase64String(Convert.ToBase64String(Utils.GetBytes(value)));
+                    _associatedData = Convert.FromBase64String(Convert.ToBase64String(SecureUtils.GetBytes(value)));
                 }
             }
         }
@@ -164,7 +164,7 @@ namespace RIS.Cryptography.Hash.Methods
                 }
                 catch (FormatException)
                 {
-                    _knownSecret = Convert.FromBase64String(Convert.ToBase64String(Utils.GetBytes(value)));
+                    _knownSecret = Convert.FromBase64String(Convert.ToBase64String(SecureUtils.GetBytes(value)));
                 }
             }
         }
@@ -189,7 +189,7 @@ namespace RIS.Cryptography.Hash.Methods
 
         public string GetHash(string plainText)
         {
-            byte[] data = Utils.GetBytes(plainText);
+            byte[] data = SecureUtils.GetBytes(plainText);
 
             return GetHash(data);
         }
@@ -218,7 +218,7 @@ namespace RIS.Cryptography.Hash.Methods
 
         public bool VerifyHash(string plainText, string hashText)
         {
-            byte[] data = Utils.GetBytes(plainText);
+            byte[] data = SecureUtils.GetBytes(plainText);
 
             return VerifyHash(data, hashText);
         }
@@ -226,7 +226,7 @@ namespace RIS.Cryptography.Hash.Methods
         {
             var plainTextHash = GetHash(data);
 
-            return Utils.SecureEquals(plainTextHash, hashText,
+            return SecureUtils.SecureEquals(plainTextHash, hashText,
                 true, null);
         }
     }

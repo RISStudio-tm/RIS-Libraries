@@ -110,7 +110,7 @@ namespace RIS.Cryptography.Hash.Methods
                 }
                 catch (FormatException)
                 {
-                    _associatedData = Convert.FromBase64String(Convert.ToBase64String(Utils.GetBytes(value)));
+                    _associatedData = Convert.FromBase64String(Convert.ToBase64String(SecureUtils.GetBytes(value)));
                 }
             }
         }
@@ -140,7 +140,7 @@ namespace RIS.Cryptography.Hash.Methods
                 }
                 catch (FormatException)
                 {
-                    _knownSecret = Convert.FromBase64String(Convert.ToBase64String(Utils.GetBytes(value)));
+                    _knownSecret = Convert.FromBase64String(Convert.ToBase64String(SecureUtils.GetBytes(value)));
                 }
             }
         }
@@ -165,7 +165,7 @@ namespace RIS.Cryptography.Hash.Methods
 
         public string GetHash(string plainText)
         {
-            byte[] data = Utils.GetBytes(plainText);
+            byte[] data = SecureUtils.GetBytes(plainText);
 
             return GetHash(data);
         }
@@ -191,14 +191,14 @@ namespace RIS.Cryptography.Hash.Methods
                 hashText.Append(hashBytes[i].ToString("x2", CultureInfo.InvariantCulture));
             }
 
-            string hashString = Convert.ToBase64String(hashSalt) + "=/" + Convert.ToBase64String(Utils.GetBytes(hashText.ToString()));
-            hashString = Convert.ToBase64String(Utils.GetBytes(hashString));
+            string hashString = Convert.ToBase64String(hashSalt) + "=/" + Convert.ToBase64String(SecureUtils.GetBytes(hashText.ToString()));
+            hashString = Convert.ToBase64String(SecureUtils.GetBytes(hashString));
 
             return hashString;
         }
         public string GetHash(string plainText, string salt)
         {
-            byte[] data = Utils.GetBytes(plainText);
+            byte[] data = SecureUtils.GetBytes(plainText);
 
             return GetHash(data, salt);
         }
@@ -211,7 +211,7 @@ namespace RIS.Cryptography.Hash.Methods
             }
             catch (FormatException)
             {
-                hashSalt = Convert.FromBase64String(Convert.ToBase64String(Utils.GetBytes(salt)));
+                hashSalt = Convert.FromBase64String(Convert.ToBase64String(SecureUtils.GetBytes(salt)));
             }
 
             Konscious.Security.Cryptography.Argon2d argon2Service = new Konscious.Security.Cryptography.Argon2d(data)
@@ -232,21 +232,21 @@ namespace RIS.Cryptography.Hash.Methods
                 hashText.Append(hashBytes[i].ToString("x2", CultureInfo.InvariantCulture));
             }
 
-            string hashString = Convert.ToBase64String(hashSalt) + "=/" + Convert.ToBase64String(Utils.GetBytes(hashText.ToString()));
-            hashString = Convert.ToBase64String(Utils.GetBytes(hashString));
+            string hashString = Convert.ToBase64String(hashSalt) + "=/" + Convert.ToBase64String(SecureUtils.GetBytes(hashText.ToString()));
+            hashString = Convert.ToBase64String(SecureUtils.GetBytes(hashString));
 
             return hashString;
         }
 
         public bool VerifyHash(string plainText, string hashText)
         {
-            byte[] data = Utils.GetBytes(plainText);
+            byte[] data = SecureUtils.GetBytes(plainText);
 
             return VerifyHash(data, hashText);
         }
         public bool VerifyHash(byte[] data, string hashText)
         {
-            string hashTextSub = Utils.GetString(
+            string hashTextSub = SecureUtils.GetString(
                 Convert.FromBase64String(hashText));
 
             string hashSalt = hashTextSub.Substring(
@@ -258,7 +258,7 @@ namespace RIS.Cryptography.Hash.Methods
 
             var plainTextHash = GetHash(data, hashSalt);
 
-            return Utils.SecureEquals(plainTextHash, hashText,
+            return SecureUtils.SecureEquals(plainTextHash, hashText,
                 false, null);
         }
     }

@@ -78,27 +78,25 @@ namespace RIS.Cryptography.Hash.Methods
         }
         public string GetHash(byte[] data)
         {
-            string plainText = Utils.GetString(data);
+            string plainText = SecureUtils.GetString(data);
 
             return GetHash(plainText);
         }
 
         public bool VerifyHash(string plainText, string hashText)
         {
-            BCryptMetadata metadata = GetMetadata(hashText);
-
             var plainTextHash = global::BCrypt.Net.BCrypt.HashPassword(
                 plainText,
                 hashText,
                 UseEnhancedAlgorithm,
                 HashMethodOriginal);
 
-            return Utils.SecureEquals(plainTextHash, hashText,
+            return SecureUtils.SecureEquals(plainTextHash, hashText,
                 false, null);
         }
         public bool VerifyHash(byte[] data, string hashText)
         {
-            string plainText = Utils.GetString(data);
+            string plainText = SecureUtils.GetString(data);
 
             return VerifyHash(plainText, hashText);
         }
@@ -112,7 +110,7 @@ namespace RIS.Cryptography.Hash.Methods
         public bool VerifyAndUpdateHash(byte[] data, string hashText,
             out bool isUpdated, out string newHashText)
         {
-            string plainText = Utils.GetString(data);
+            string plainText = SecureUtils.GetString(data);
 
             return VerifyAndUpdateHash(plainText, hashText,
                out isUpdated, out newHashText);
@@ -156,7 +154,7 @@ namespace RIS.Cryptography.Hash.Methods
         public bool VerifyAndUpdateHash(byte[] data, string hashText,
             int newWorkFactor, out bool isUpdated, out string newHashText)
         {
-            string plainText = Utils.GetString(data);
+            string plainText = SecureUtils.GetString(data);
 
             return VerifyAndUpdateHash(plainText, hashText,
                 newWorkFactor, out isUpdated, out newHashText);

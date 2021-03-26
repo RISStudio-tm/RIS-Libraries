@@ -58,7 +58,7 @@ namespace RIS.Cryptography.Hash.Metadata
                 }
                 catch (FormatException)
                 {
-                    _salt = Convert.FromBase64String(Convert.ToBase64String(Utils.GetBytes(value)));
+                    _salt = Convert.FromBase64String(Convert.ToBase64String(SecureUtils.GetBytes(value)));
                 }
             }
         }
@@ -88,7 +88,7 @@ namespace RIS.Cryptography.Hash.Metadata
                 }
                 catch (FormatException)
                 {
-                    _hash = Convert.FromBase64String(Convert.ToBase64String(Utils.GetBytes(value)));
+                    _hash = Convert.FromBase64String(Convert.ToBase64String(SecureUtils.GetBytes(value)));
                 }
             }
         }
