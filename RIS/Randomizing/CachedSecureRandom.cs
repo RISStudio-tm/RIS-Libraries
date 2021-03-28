@@ -7,19 +7,20 @@ using RIS.Collections.Caches;
 
 namespace RIS.Randomizing
 {
-    public class FastSecureRandom
+    public class CachedSecureRandom : ICachedBiasedRandom
     {
         private readonly RNGCryptoServiceProvider _randomGenerator;
         private readonly BytesCache[] _caches;
         private readonly uint _cachesCountBiasZone;
 
         public object SyncRoot { get; }
+
         public uint CachesSize { get; }
         public ushort CachesCount { get; }
         public bool CachesPinned { get; }
         public bool CachesUseInitBlock { get; }
 
-        public FastSecureRandom(
+        public CachedSecureRandom(
             uint cachesSize = 1 * 1024 * 1024,
             ushort cachesCount = 3, bool cachesPinned = true,
             bool cachesUseInitBlock = true)
@@ -33,6 +34,7 @@ namespace RIS.Randomizing
             _randomGenerator = new RNGCryptoServiceProvider();
 
             SyncRoot = new object();
+
             CachesSize = cachesSize;
             CachesCount = cachesCount;
             CachesPinned = cachesPinned;
@@ -76,10 +78,10 @@ namespace RIS.Randomizing
 
 #pragma warning disable U2U1002 // Method can be declared static
         private void UnsafeUpdateCache(BytesCache cache)
-#pragma warning restore U2U1002 // Method can be declared static
         {
             cache.Update();
         }
+#pragma warning restore U2U1002 // Method can be declared static
 
 
 
@@ -95,7 +97,6 @@ namespace RIS.Randomizing
                 UnsafeFillBuffer(buffer);
             }
         }
-
         private void UnsafeFillBuffer(byte[] buffer)
         {
             var cache = GetRandomCache();
@@ -110,7 +111,6 @@ namespace RIS.Randomizing
                 UnsafeOptimizeBias(buffer, maxValue);
             }
         }
-
         private void UnsafeOptimizeBias(byte[] buffer, byte maxValue)
         {
             if (maxValue == 0)
@@ -147,19 +147,18 @@ namespace RIS.Randomizing
                 return UnsafeGetByte();
             }
         }
+        private byte UnsafeGetByte()
+        {
+            var cache = GetRandomCache();
+
+            return cache.GetByte();
+        }
         public byte GetByte(byte maxValue)
         {
             lock (SyncRoot)
             {
                 return UnsafeGetByte(maxValue);
             }
-        }
-
-        private byte UnsafeGetByte()
-        {
-            var cache = GetRandomCache();
-
-            return cache.GetByte();
         }
         private byte UnsafeGetByte(byte maxValue)
         {
@@ -180,12 +179,12 @@ namespace RIS.Randomizing
             return result;
         }
 
-        public void GetBytesUncached(byte[] buffer)
+        public void GetByteUncached(byte[] buffer)
         {
             FillBufferUncached(buffer);
         }
 
-        public void GetBytes(byte[] buffer)
+        public void GetByte(byte[] buffer)
         {
             if (buffer.Length > CachesSize)
             {
@@ -196,7 +195,7 @@ namespace RIS.Randomizing
 
             FillBuffer(buffer);
         }
-        public void GetBytes(byte[] buffer, byte maxValue)
+        public void GetByte(byte[] buffer, byte maxValue)
         {
             if (maxValue == 0)
             {
@@ -241,7 +240,6 @@ namespace RIS.Randomizing
                 UnsafeFillBuffer(buffer);
             }
         }
-
         private void UnsafeFillBuffer(ushort[] buffer)
         {
             var result = new byte[buffer.Length * 2];
@@ -261,7 +259,6 @@ namespace RIS.Randomizing
                 UnsafeOptimizeBias(buffer, maxValue);
             }
         }
-
         private void UnsafeOptimizeBias(ushort[] buffer, ushort maxValue)
         {
             if (maxValue == 0)
@@ -298,14 +295,6 @@ namespace RIS.Randomizing
                 return UnsafeGetUInt16();
             }
         }
-        public ushort GetUInt16(ushort maxValue)
-        {
-            lock (SyncRoot)
-            {
-                return UnsafeGetUInt16(maxValue);
-            }
-        }
-
         private ushort UnsafeGetUInt16()
         {
             var result = new ushort[1];
@@ -313,6 +302,13 @@ namespace RIS.Randomizing
             FillBuffer(result);
 
             return result[0];
+        }
+        public ushort GetUInt16(ushort maxValue)
+        {
+            lock (SyncRoot)
+            {
+                return UnsafeGetUInt16(maxValue);
+            }
         }
         private ushort UnsafeGetUInt16(ushort maxValue)
         {
@@ -394,7 +390,6 @@ namespace RIS.Randomizing
                 UnsafeFillBuffer(buffer);
             }
         }
-
         private void UnsafeFillBuffer(uint[] buffer)
         {
             var result = new byte[buffer.Length * 4];
@@ -414,7 +409,6 @@ namespace RIS.Randomizing
                 UnsafeOptimizeBias(buffer, maxValue);
             }
         }
-
         private void UnsafeOptimizeBias(uint[] buffer, uint maxValue)
         {
             if (maxValue == 0)
@@ -451,14 +445,6 @@ namespace RIS.Randomizing
                 return UnsafeGetUInt32();
             }
         }
-        public uint GetUInt32(uint maxValue)
-        {
-            lock (SyncRoot)
-            {
-                return UnsafeGetUInt32(maxValue);
-            }
-        }
-
         private uint UnsafeGetUInt32()
         {
             var result = new uint[1];
@@ -466,6 +452,13 @@ namespace RIS.Randomizing
             FillBuffer(result);
 
             return result[0];
+        }
+        public uint GetUInt32(uint maxValue)
+        {
+            lock (SyncRoot)
+            {
+                return UnsafeGetUInt32(maxValue);
+            }
         }
         private uint UnsafeGetUInt32(uint maxValue)
         {
@@ -547,7 +540,6 @@ namespace RIS.Randomizing
                 UnsafeFillBuffer(buffer);
             }
         }
-
         private void UnsafeFillBuffer(ulong[] buffer)
         {
             var result = new byte[buffer.Length * 8];
@@ -567,7 +559,6 @@ namespace RIS.Randomizing
                 UnsafeOptimizeBias(buffer, maxValue);
             }
         }
-
         private void UnsafeOptimizeBias(ulong[] buffer, ulong maxValue)
         {
             if (maxValue == 0)
@@ -604,14 +595,6 @@ namespace RIS.Randomizing
                 return UnsafeGetUInt64();
             }
         }
-        public ulong GetUInt64(ulong maxValue)
-        {
-            lock (SyncRoot)
-            {
-                return UnsafeGetUInt64(maxValue);
-            }
-        }
-
         private ulong UnsafeGetUInt64()
         {
             var result = new ulong[1];
@@ -619,6 +602,13 @@ namespace RIS.Randomizing
             FillBuffer(result);
 
             return result[0];
+        }
+        public ulong GetUInt64(ulong maxValue)
+        {
+            lock (SyncRoot)
+            {
+                return UnsafeGetUInt64(maxValue);
+            }
         }
         private ulong UnsafeGetUInt64(ulong maxValue)
         {

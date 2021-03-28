@@ -12,11 +12,8 @@ using RIS.Randomizing;
 
 namespace RIS.Text.Generating
 {
-    public static class StringGenerator
+    public class StringGenerator
     {
-        private static readonly RNGCryptoServiceProvider RandomGenerator;
-        private static readonly FastSecureRandom SecureRandom;
-
         public static readonly Regex GenerateStringFormatRegex = new Regex(@"(?<expression>(?:\((?<type>char/digit|char-lower/digit|char-upper/digit|char|char-lower|char-upper|digit|digit-notzero){1}\)){1}(?:\[(?<count>(?:[0]|[1-9][0-9]*))\])?){1}", RegexOptions.Multiline, TimeSpan.FromSeconds(10));
 
         public static readonly char[] DefaultAlphabet;
@@ -33,10 +30,36 @@ namespace RIS.Text.Generating
         public static readonly char[] CharsLowerAndDigitsAlphabet;
         public static readonly char[] CharsUpperAndDigitsAlphabet;
 
+
+        public static readonly StringGenerator Default;
+
+
+
+        private readonly RNGCryptoServiceProvider _randomGenerator;
+
+
+        private IBiasedRandom _biasedRandomGenerator;
+        public IBiasedRandom BiasedRandomGenerator
+        {
+            get
+            {
+                return _biasedRandomGenerator;
+            }
+            set
+            {
+                if (value == null)
+                    return;
+
+                _biasedRandomGenerator = value;
+            }
+        }
+
+
+
         static StringGenerator()
         {
-            RandomGenerator = new RNGCryptoServiceProvider();
-            SecureRandom = new FastSecureRandom();
+            Default = new StringGenerator(
+                new SecureRandom());
 
             DefaultAlphabet =
                 GetAlphabet(new (char start, char end)[]
@@ -82,6 +105,18 @@ namespace RIS.Text.Generating
                 .Concat(DigitsAlphabet)
                 .ToArray();
         }
+
+        public StringGenerator(IBiasedRandom randomGenerator = null)
+        {
+            if (randomGenerator == null)
+                randomGenerator = new SecureRandom();
+
+            _randomGenerator = new RNGCryptoServiceProvider();
+
+            BiasedRandomGenerator = randomGenerator;
+        }
+
+
 
         public static IEnumerable<char> GetAlphabet(int count,
             int startPosition = 0)
@@ -146,7 +181,9 @@ namespace RIS.Text.Generating
             return result;
         }
 
-        public static string GetRandom(int minSize, int maxSize,
+
+
+        public string GetRandom(int minSize, int maxSize,
             bool onlyLettersAndDigits = true)
         {
             return GetRandom(
@@ -156,7 +193,7 @@ namespace RIS.Text.Generating
                     ? DefaultAlphabet
                     : DefaultSpecialAlphabet);
         }
-        public static string GetRandom(int minSize, int maxSize,
+        public string GetRandom(int minSize, int maxSize,
             IEnumerable<char> alphabet)
         {
             int size = minSize < maxSize
@@ -165,7 +202,7 @@ namespace RIS.Text.Generating
 
             return GetRandom(size, alphabet);
         }
-        public static string GetRandom(int size,
+        public string GetRandom(int size,
             bool onlyLettersAndDigits = true)
         {
             return GetRandom(
@@ -174,7 +211,7 @@ namespace RIS.Text.Generating
                     ? DefaultAlphabet
                     : DefaultSpecialAlphabet);
         }
-        public static string GetRandom(int size,
+        public string GetRandom(int size,
             IEnumerable<char> alphabet)
         {
             if (size == 0)
@@ -204,7 +241,8 @@ namespace RIS.Text.Generating
             return new string(result);
         }
 
-        public static string GenerateString(int minSize, int maxSize,
+
+        public string GenerateString(int minSize, int maxSize,
             bool onlyLettersAndDigits = true)
         {
             return GenerateString(
@@ -214,16 +252,16 @@ namespace RIS.Text.Generating
                     ? DefaultAlphabet
                     : DefaultSpecialAlphabet);
         }
-        public static string GenerateString(int minSize, int maxSize,
+        public string GenerateString(int minSize, int maxSize,
             IEnumerable<char> alphabet)
         {
             int size = minSize < maxSize
-                ? RandomGenerator.GenerateInt(minSize, maxSize)
+                ? _randomGenerator.GenerateInt(minSize, maxSize)
                 : minSize;
 
             return GenerateString(size, alphabet);
         }
-        public static string GenerateString(int size,
+        public string GenerateString(int size,
             bool onlyLettersAndDigits = true)
         {
             return GenerateString(
@@ -232,7 +270,7 @@ namespace RIS.Text.Generating
                     ? DefaultAlphabet
                     : DefaultSpecialAlphabet);
         }
-        public static string GenerateString(int size,
+        public string GenerateString(int size,
             IEnumerable<char> alphabet)
         {
             if (size == 0)
@@ -254,7 +292,7 @@ namespace RIS.Text.Generating
             var biasZone =
                 (ushort)(ushort.MaxValue - ((ushort.MaxValue + 1) % alphabetArray.Length));
 
-            SecureRandom.GetUInt16(randomNumbers, biasZone);
+            BiasedRandomGenerator.GetUInt16(randomNumbers, biasZone);
 
             for (var i = 0; i < size; ++i)
             {
@@ -266,7 +304,7 @@ namespace RIS.Text.Generating
             return new string(result);
         }
 
-        public static string GenerateString(string format)
+        public string GenerateString(string format)
         {
             var result = new StringBuilder(format);
             var matches = GenerateStringFormatRegex.Matches(format);

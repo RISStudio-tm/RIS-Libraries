@@ -12,13 +12,16 @@ namespace RIS.Cryptography.Hash
 {
     public static class HashMethodsUtils
     {
-        private static readonly FastSecureRandom RandomGenerator;
+        private static readonly IBiasedRandom RandomGenerator;
+        private static readonly StringGenerator RandomStringGenerator;
 
         public static ReadOnlyDictionary<string, Type> HashMethods { get; }
 
         static HashMethodsUtils()
         {
-            RandomGenerator = new FastSecureRandom();
+            RandomGenerator = new SecureRandom();
+            RandomStringGenerator = new StringGenerator(
+                RandomGenerator);
 
             var hashMethodsTypes = GetHashMethods();
             var hashMethods = new Dictionary<string, Type>(
@@ -99,13 +102,13 @@ namespace RIS.Cryptography.Hash
                 throw exception;
             }
 
-            return StringGenerator.GenerateString(length);
+            return RandomStringGenerator.GenerateString(length);
         }
         public static byte[] GenerateSaltBytes(ushort length)
         {
             byte[] salt = new byte[length];
 
-            RandomGenerator.GetBytes(salt);
+            RandomGenerator.GetByte(salt);
 
             return salt;
         }
