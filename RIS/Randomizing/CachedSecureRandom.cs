@@ -17,19 +17,22 @@ namespace RIS.Randomizing
 
         public uint CachesSize { get; }
         public ushort CachesCount { get; }
+        public bool CachesClearUsedValues { get; }
         public bool CachesPinned { get; }
         public bool CachesUseInitBlock { get; }
 
         public CachedSecureRandom(
             uint cachesSize = 1 * 1024 * 1024,
-            ushort cachesCount = 3, bool cachesPinned = true,
+            ushort cachesCount = 3,
+            bool cachesClearUsedValues = true,
+            bool cachesPinned = true,
             bool cachesUseInitBlock = true)
         {
             if (cachesSize < 1024)
                 cachesSize = 1024;
 
-            if (cachesCount < 2)
-                cachesCount = 2;
+            if (cachesCount < 1)
+                cachesCount = 1;
 
             _randomGenerator = new RNGCryptoServiceProvider();
 
@@ -37,6 +40,7 @@ namespace RIS.Randomizing
 
             CachesSize = cachesSize;
             CachesCount = cachesCount;
+            CachesClearUsedValues = cachesClearUsedValues;
             CachesPinned = cachesPinned;
             CachesUseInitBlock = cachesUseInitBlock;
 
@@ -46,7 +50,7 @@ namespace RIS.Randomizing
             for (int i = 0; i < _caches.Length; ++i)
             {
                 _caches[i] = new BytesCache(
-                    updateHandler, cachesSize, true,
+                    updateHandler, cachesSize, cachesClearUsedValues,
                     cachesPinned, cachesUseInitBlock);
 
                 _caches[i].Update();
@@ -58,6 +62,9 @@ namespace RIS.Randomizing
 
         private BytesCache GetRandomCache()
         {
+            if (_caches.Length == 1)
+                return _caches[0];
+
             uint result;
 
             do
