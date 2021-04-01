@@ -8,7 +8,20 @@ namespace RIS
     public class RInformationEventArgs : EventArgs
     {
         public Exception SourceException { get; }
-        public string Message { get; }
+        private string _message;
+        public string Message
+        {
+            get
+            {
+                return _message
+                       ?? SourceException?.Message
+                       ?? string.Empty;
+            }
+            private set
+            {
+                _message = value;
+            }
+        }
 
         public RInformationEventArgs(string message)
             : this(null, message)
@@ -16,7 +29,7 @@ namespace RIS
 
         }
         public RInformationEventArgs(Exception sourceException,
-            string message)
+            string message = null)
         {
             SourceException = sourceException;
             Message = message;
@@ -26,7 +39,20 @@ namespace RIS
     public class RWarningEventArgs : EventArgs
     {
         public Exception SourceException { get; }
-        public string Message { get; }
+        private string _message;
+        public string Message
+        {
+            get
+            {
+                return _message
+                       ?? SourceException?.Message
+                       ?? string.Empty;
+            }
+            private set
+            {
+                _message = value;
+            }
+        }
 
         public RWarningEventArgs(string message)
             : this(null, message)
@@ -34,7 +60,7 @@ namespace RIS
 
         }
         public RWarningEventArgs(Exception sourceException,
-            string message)
+            string message = null)
         {
             SourceException = sourceException;
             Message = message;
