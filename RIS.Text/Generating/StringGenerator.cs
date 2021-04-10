@@ -38,19 +38,19 @@ namespace RIS.Text.Generating
         private readonly RNGCryptoServiceProvider _randomGenerator;
 
 
-        private IBiasedRandom _biasedRandomGenerator;
-        public IBiasedRandom BiasedRandomGenerator
+        private IUnbiasedRandom _unbiasedRandomGenerator;
+        public IUnbiasedRandom UnbiasedRandomGenerator
         {
             get
             {
-                return _biasedRandomGenerator;
+                return _unbiasedRandomGenerator;
             }
             set
             {
                 if (value == null)
                     return;
 
-                _biasedRandomGenerator = value;
+                _unbiasedRandomGenerator = value;
             }
         }
 
@@ -106,14 +106,14 @@ namespace RIS.Text.Generating
                 .ToArray();
         }
 
-        public StringGenerator(IBiasedRandom randomGenerator = null)
+        public StringGenerator(IUnbiasedRandom randomGenerator = null)
         {
             if (randomGenerator == null)
                 randomGenerator = new SecureRandom();
 
             _randomGenerator = new RNGCryptoServiceProvider();
 
-            BiasedRandomGenerator = randomGenerator;
+            UnbiasedRandomGenerator = randomGenerator;
         }
 
 
@@ -288,17 +288,14 @@ namespace RIS.Text.Generating
             }
 
             var result = new char[size];
-            var randomNumbers = new ushort[size];
-            var biasZone =
-                (ushort)(ushort.MaxValue - ((ushort.MaxValue + 1) % alphabetArray.Length));
+            var randomIndexes = new uint[size];
 
-            BiasedRandomGenerator.GetUInt16(randomNumbers, biasZone);
+            UnbiasedRandomGenerator.GetNormalizedIndex(
+                randomIndexes, (uint)alphabetArray.Length);
 
             for (var i = 0; i < size; ++i)
             {
-                var charIndex = randomNumbers[i] % alphabetArray.Length;
-
-                result[i] = alphabetArray[charIndex];
+                result[i] = alphabetArray[randomIndexes[i]];
             }
 
             return new string(result);

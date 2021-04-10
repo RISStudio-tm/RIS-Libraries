@@ -12,7 +12,7 @@ namespace RIS.Cryptography.Hash
 {
     public static class HashMethodsUtils
     {
-        private static readonly IBiasedRandom RandomGenerator;
+        private static readonly IUnbiasedRandom RandomGenerator;
         private static readonly StringGenerator RandomStringGenerator;
 
         public static ReadOnlyDictionary<string, Type> HashMethods { get; }
@@ -108,7 +108,7 @@ namespace RIS.Cryptography.Hash
         {
             byte[] salt = new byte[length];
 
-            RandomGenerator.GetByte(salt);
+            RandomGenerator.GetUInt8(salt);
 
             return salt;
         }

@@ -3,11 +3,10 @@
 
 using System;
 using System.Security.Cryptography;
-using RIS.Collections.Caches;
 
 namespace RIS.Randomizing
 {
-    public class SecureRandom : IBiasedRandom
+    public class SecureRandom : IUnbiasedRandom
     {
         private readonly RNGCryptoServiceProvider _randomGenerator;
 
@@ -22,6 +21,11 @@ namespace RIS.Randomizing
 
 
 
+        private static byte GetBiasZone(byte targetSamplingLength)
+        {
+            return (byte)(byte.MaxValue - ((byte.MaxValue % targetSamplingLength) + 1));
+        }
+
         private void FillBuffer(byte[] buffer)
         {
             _randomGenerator.GetBytes(buffer);
@@ -31,7 +35,7 @@ namespace RIS.Randomizing
         {
             if (maxValue == 0)
             {
-                var exception = new ArgumentOutOfRangeException(nameof(maxValue), "MaxValue cannot be equal to 0");
+                var exception = new ArgumentOutOfRangeException(nameof(maxValue), $"{nameof(maxValue)} cannot be equal to 0");
                 Events.OnError(new RErrorEventArgs(exception, exception.Message));
                 throw exception;
             }
@@ -42,12 +46,12 @@ namespace RIS.Randomizing
 
                 while (element > maxValue)
                 {
-                    element = GetByte();
+                    element = GetUInt8();
                 }
             }
         }
 
-        public byte GetByte()
+        public byte GetUInt8()
         {
             var result = new byte[1];
 
@@ -55,11 +59,11 @@ namespace RIS.Randomizing
 
             return result[0];
         }
-        public byte GetByte(byte maxValue)
+        public byte GetUInt8(byte maxValue)
         {
             if (maxValue == 0)
             {
-                var exception = new ArgumentOutOfRangeException(nameof(maxValue), "MaxValue cannot be equal to 0");
+                var exception = new ArgumentOutOfRangeException(nameof(maxValue), $"{nameof(maxValue)} cannot be equal to 0");
                 Events.OnError(new RErrorEventArgs(exception, exception.Message));
                 throw exception;
             }
@@ -68,21 +72,32 @@ namespace RIS.Randomizing
 
             do
             {
-                result = GetByte();
-            } while (result >= maxValue);
+                result = GetUInt8();
+            } while (result > maxValue);
 
             return result;
         }
 
-        public void GetByte(byte[] buffer)
+        public byte GetNormalizedUInt8(byte targetSamplingLength)
+        {
+            return GetUInt8(
+                GetBiasZone(targetSamplingLength));
+        }
+
+        public byte GetNormalizedIndex(byte targetSamplingLength)
+        {
+            return (byte)(GetNormalizedUInt8(targetSamplingLength) % targetSamplingLength);
+        }
+
+        public void GetUInt8(byte[] buffer)
         {
             FillBuffer(buffer);
         }
-        public void GetByte(byte[] buffer, byte maxValue)
+        public void GetUInt8(byte[] buffer, byte maxValue)
         {
             if (maxValue == 0)
             {
-                var exception = new ArgumentOutOfRangeException(nameof(maxValue), "MaxValue cannot be equal to 0");
+                var exception = new ArgumentOutOfRangeException(nameof(maxValue), $"{nameof(maxValue)} cannot be equal to 0");
                 Events.OnError(new RErrorEventArgs(exception, exception.Message));
                 throw exception;
             }
@@ -91,7 +106,29 @@ namespace RIS.Randomizing
             OptimizeBias(buffer, maxValue);
         }
 
+        public void GetNormalizedUInt8(byte[] buffer, byte targetSamplingLength)
+        {
+            GetUInt8(
+                buffer,
+                GetBiasZone(targetSamplingLength));
+        }
 
+        public void GetNormalizedIndex(byte[] buffer, byte targetSamplingLength)
+        {
+            GetNormalizedUInt8(buffer, targetSamplingLength);
+
+            for (int i = 0; i < buffer.Length; ++i)
+            {
+                buffer[i] %= targetSamplingLength;
+            }
+        }
+
+
+
+        private static ushort GetBiasZone(ushort targetSamplingLength)
+        {
+            return (ushort)(ushort.MaxValue - ((ushort.MaxValue % targetSamplingLength) + 1));
+        }
 
         private void FillBuffer(ushort[] buffer)
         {
@@ -109,7 +146,7 @@ namespace RIS.Randomizing
         {
             if (maxValue == 0)
             {
-                var exception = new ArgumentOutOfRangeException(nameof(maxValue), "MaxValue cannot be equal to 0");
+                var exception = new ArgumentOutOfRangeException(nameof(maxValue), $"{nameof(maxValue)} cannot be equal to 0");
                 Events.OnError(new RErrorEventArgs(exception, exception.Message));
                 throw exception;
             }
@@ -137,7 +174,7 @@ namespace RIS.Randomizing
         {
             if (maxValue == 0)
             {
-                var exception = new ArgumentOutOfRangeException(nameof(maxValue), "MaxValue cannot be equal to 0");
+                var exception = new ArgumentOutOfRangeException(nameof(maxValue), $"{nameof(maxValue)} cannot be equal to 0");
                 Events.OnError(new RErrorEventArgs(exception, exception.Message));
                 throw exception;
             }
@@ -147,9 +184,20 @@ namespace RIS.Randomizing
             do
             {
                 result = GetUInt16();
-            } while (result >= maxValue);
+            } while (result > maxValue);
 
             return result;
+        }
+
+        public ushort GetNormalizedUInt16(ushort targetSamplingLength)
+        {
+            return GetUInt16(
+                GetBiasZone(targetSamplingLength));
+        }
+
+        public ushort GetNormalizedIndex(ushort targetSamplingLength)
+        {
+            return (ushort)(GetNormalizedUInt16(targetSamplingLength) % targetSamplingLength);
         }
 
         public void GetUInt16(ushort[] buffer)
@@ -160,7 +208,7 @@ namespace RIS.Randomizing
         {
             if (maxValue == 0)
             {
-                var exception = new ArgumentOutOfRangeException(nameof(maxValue), "MaxValue cannot be equal to 0");
+                var exception = new ArgumentOutOfRangeException(nameof(maxValue), $"{nameof(maxValue)} cannot be equal to 0");
                 Events.OnError(new RErrorEventArgs(exception, exception.Message));
                 throw exception;
             }
@@ -169,7 +217,29 @@ namespace RIS.Randomizing
             OptimizeBias(buffer, maxValue);
         }
 
+        public void GetNormalizedUInt16(ushort[] buffer, ushort targetSamplingLength)
+        {
+            GetUInt16(
+                buffer,
+                GetBiasZone(targetSamplingLength));
+        }
 
+        public void GetNormalizedIndex(ushort[] buffer, ushort targetSamplingLength)
+        {
+            GetNormalizedUInt16(buffer, targetSamplingLength);
+
+            for (int i = 0; i < buffer.Length; ++i)
+            {
+                buffer[i] %= targetSamplingLength;
+            }
+        }
+
+
+
+        private static uint GetBiasZone(uint targetSamplingLength)
+        {
+            return (uint)(uint.MaxValue - ((uint.MaxValue % targetSamplingLength) + 1));
+        }
 
         private void FillBuffer(uint[] buffer)
         {
@@ -187,7 +257,7 @@ namespace RIS.Randomizing
         {
             if (maxValue == 0)
             {
-                var exception = new ArgumentOutOfRangeException(nameof(maxValue), "MaxValue cannot be equal to 0");
+                var exception = new ArgumentOutOfRangeException(nameof(maxValue), $"{nameof(maxValue)} cannot be equal to 0");
                 Events.OnError(new RErrorEventArgs(exception, exception.Message));
                 throw exception;
             }
@@ -215,7 +285,7 @@ namespace RIS.Randomizing
         {
             if (maxValue == 0)
             {
-                var exception = new ArgumentOutOfRangeException(nameof(maxValue), "MaxValue cannot be equal to 0");
+                var exception = new ArgumentOutOfRangeException(nameof(maxValue), $"{nameof(maxValue)} cannot be equal to 0");
                 Events.OnError(new RErrorEventArgs(exception, exception.Message));
                 throw exception;
             }
@@ -225,9 +295,20 @@ namespace RIS.Randomizing
             do
             {
                 result = GetUInt32();
-            } while (result >= maxValue);
+            } while (result > maxValue);
 
             return result;
+        }
+
+        public uint GetNormalizedUInt32(uint targetSamplingLength)
+        {
+            return GetUInt32(
+                GetBiasZone(targetSamplingLength));
+        }
+
+        public ulong GetNormalizedIndex(uint targetSamplingLength)
+        {
+            return (uint)(GetNormalizedUInt32(targetSamplingLength) % targetSamplingLength);
         }
 
         public void GetUInt32(uint[] buffer)
@@ -238,7 +319,7 @@ namespace RIS.Randomizing
         {
             if (maxValue == 0)
             {
-                var exception = new ArgumentOutOfRangeException(nameof(maxValue), "MaxValue cannot be equal to 0");
+                var exception = new ArgumentOutOfRangeException(nameof(maxValue), $"{nameof(maxValue)} cannot be equal to 0");
                 Events.OnError(new RErrorEventArgs(exception, exception.Message));
                 throw exception;
             }
@@ -247,7 +328,29 @@ namespace RIS.Randomizing
             OptimizeBias(buffer, maxValue);
         }
 
+        public void GetNormalizedUInt32(uint[] buffer, uint targetSamplingLength)
+        {
+            GetUInt32(
+                buffer,
+                GetBiasZone(targetSamplingLength));
+        }
 
+        public void GetNormalizedIndex(uint[] buffer, uint targetSamplingLength)
+        {
+            GetNormalizedUInt32(buffer, targetSamplingLength);
+
+            for (int i = 0; i < buffer.Length; ++i)
+            {
+                buffer[i] %= targetSamplingLength;
+            }
+        }
+
+
+
+        private static ulong GetBiasZone(ulong targetSamplingLength)
+        {
+            return (ulong)(ulong.MaxValue - ((ulong.MaxValue % targetSamplingLength) + 1));
+        }
 
         private void FillBuffer(ulong[] buffer)
         {
@@ -265,7 +368,7 @@ namespace RIS.Randomizing
         {
             if (maxValue == 0)
             {
-                var exception = new ArgumentOutOfRangeException(nameof(maxValue), "MaxValue cannot be equal to 0");
+                var exception = new ArgumentOutOfRangeException(nameof(maxValue), $"{nameof(maxValue)} cannot be equal to 0");
                 Events.OnError(new RErrorEventArgs(exception, exception.Message));
                 throw exception;
             }
@@ -293,7 +396,7 @@ namespace RIS.Randomizing
         {
             if (maxValue == 0)
             {
-                var exception = new ArgumentOutOfRangeException(nameof(maxValue), "MaxValue cannot be equal to 0");
+                var exception = new ArgumentOutOfRangeException(nameof(maxValue), $"{nameof(maxValue)} cannot be equal to 0");
                 Events.OnError(new RErrorEventArgs(exception, exception.Message));
                 throw exception;
             }
@@ -303,9 +406,20 @@ namespace RIS.Randomizing
             do
             {
                 result = GetUInt64();
-            } while (result >= maxValue);
+            } while (result > maxValue);
 
             return result;
+        }
+
+        public ulong GetNormalizedUInt64(ulong targetSamplingLength)
+        {
+            return GetUInt64(
+                GetBiasZone(targetSamplingLength));
+        }
+
+        public ulong GetNormalizedIndex(ulong targetSamplingLength)
+        {
+            return (ulong)(GetNormalizedUInt64(targetSamplingLength) % targetSamplingLength);
         }
 
         public void GetUInt64(ulong[] buffer)
@@ -316,13 +430,30 @@ namespace RIS.Randomizing
         {
             if (maxValue == 0)
             {
-                var exception = new ArgumentOutOfRangeException(nameof(maxValue), "MaxValue cannot be equal to 0");
+                var exception = new ArgumentOutOfRangeException(nameof(maxValue), $"{nameof(maxValue)} cannot be equal to 0");
                 Events.OnError(new RErrorEventArgs(exception, exception.Message));
                 throw exception;
             }
 
             FillBuffer(buffer);
             OptimizeBias(buffer, maxValue);
+        }
+
+        public void GetNormalizedUInt64(ulong[] buffer, ulong targetSamplingLength)
+        {
+            GetUInt64(
+                buffer,
+                GetBiasZone(targetSamplingLength));
+        }
+
+        public void GetNormalizedIndex(ulong[] buffer, ulong targetSamplingLength)
+        {
+            GetNormalizedUInt64(buffer, targetSamplingLength);
+
+            for (int i = 0; i < buffer.Length; ++i)
+            {
+                buffer[i] %= targetSamplingLength;
+            }
         }
     }
 }
