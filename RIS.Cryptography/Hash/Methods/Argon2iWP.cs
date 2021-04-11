@@ -35,8 +35,8 @@ namespace RIS.Cryptography.Hash.Methods
             }
             set
             {
-                if (value < 6)
-                    value = 6;
+                if (value < 8)
+                    value = 8;
 
                 _hashLength = value;
             }
@@ -172,8 +172,8 @@ namespace RIS.Cryptography.Hash.Methods
 
         public Argon2iWP()
         {
-            SaltLength = 8;
-            HashLength = 6;
+            SaltLength = 16;
+            HashLength = 32;
             DegreeOfParallelism = 2 * 2;
             Iterations = 4;
             MemorySize = (1 * 1024) * 128;
@@ -362,13 +362,7 @@ namespace RIS.Cryptography.Hash.Methods
 
             byte[] hashBytes = argon2Service.GetBytes(FixedHashLength ? HashLength : hashSalt.Length);
 
-            StringBuilder hashText = new StringBuilder(hashBytes.Length * 2);
-            for (int i = 0; i < hashBytes.Length; ++i)
-            {
-                hashText.Append(hashBytes[i].ToString("x2", CultureInfo.InvariantCulture));
-            }
-
-            return $"${Enum.GetName(typeof(Argon2Type), Argon2Type.Argon2i)?.ToLower()}$v=19$m={memorySize},t={iterations},p={degreeOfParallelism}${Base64.RemovePadding(Convert.ToBase64String(hashSalt))}${Base64.RemovePadding(Convert.ToBase64String(SecureUtils.GetBytes(hashText.ToString())))}";
+            return $"${Enum.GetName(typeof(Argon2Type), Argon2Type.Argon2i)?.ToLower()}$v=19$m={memorySize},t={iterations},p={degreeOfParallelism}${Base64.RemovePadding(Convert.ToBase64String(hashSalt))}${Base64.RemovePadding(Convert.ToBase64String(hashBytes))}";
         }
         public string GetHash(byte[] data, string salt)
         {
@@ -486,13 +480,7 @@ namespace RIS.Cryptography.Hash.Methods
 
             byte[] hashBytes = argon2Service.GetBytes(FixedHashLength ? HashLength : hashSalt.Length);
 
-            StringBuilder hashText = new StringBuilder(hashBytes.Length * 2);
-            for (int i = 0; i < hashBytes.Length; ++i)
-            {
-                hashText.Append(hashBytes[i].ToString("x2", CultureInfo.InvariantCulture));
-            }
-
-            return $"${Enum.GetName(typeof(Argon2Type), Argon2Type.Argon2i)?.ToLower()}$v=19$m={memorySize},t={iterations},p={degreeOfParallelism}${Base64.RemovePadding(Convert.ToBase64String(hashSalt))}${Base64.RemovePadding(Convert.ToBase64String(SecureUtils.GetBytes(hashText.ToString())))}";
+            return $"${Enum.GetName(typeof(Argon2Type), Argon2Type.Argon2i)?.ToLower()}$v=19$m={memorySize},t={iterations},p={degreeOfParallelism}${Base64.RemovePadding(Convert.ToBase64String(hashSalt))}${Base64.RemovePadding(Convert.ToBase64String(hashBytes))}";
         }
 
         public bool VerifyHash(string plainText, string hashText)

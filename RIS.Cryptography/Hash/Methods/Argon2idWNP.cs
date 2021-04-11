@@ -34,8 +34,8 @@ namespace RIS.Cryptography.Hash.Methods
             }
             set
             {
-                if (value < 6)
-                    value = 6;
+                if (value < 8)
+                    value = 8;
 
                 _hashLength = value;
             }
@@ -171,8 +171,8 @@ namespace RIS.Cryptography.Hash.Methods
 
         public Argon2idWNP()
         {
-            SaltLength = 8;
-            HashLength = 6;
+            SaltLength = 16;
+            HashLength = 32;
             DegreeOfParallelism = 2 * 2;
             Iterations = 4;
             MemorySize = (1 * 1024) * 128;
@@ -206,13 +206,7 @@ namespace RIS.Cryptography.Hash.Methods
 
             byte[] hashBytes = argon2Service.GetBytes(FixedHashLength ? HashLength : hashSalt.Length);
 
-            StringBuilder hashText = new StringBuilder(hashBytes.Length * 2);
-            for (int i = 0; i < hashBytes.Length; ++i)
-            {
-                hashText.Append(hashBytes[i].ToString("x2", CultureInfo.InvariantCulture));
-            }
-
-            string hashString = Convert.ToBase64String(hashSalt) + "=/" + Convert.ToBase64String(SecureUtils.GetBytes(hashText.ToString()));
+            string hashString = Convert.ToBase64String(hashSalt) + "=/" + Convert.ToBase64String(hashBytes);
             hashString = Convert.ToBase64String(SecureUtils.GetBytes(hashString));
 
             return hashString;
@@ -258,13 +252,7 @@ namespace RIS.Cryptography.Hash.Methods
 
             byte[] hashBytes = argon2Service.GetBytes(FixedHashLength ? HashLength : hashSalt.Length);
 
-            StringBuilder hashText = new StringBuilder(hashBytes.Length * 2);
-            for (int i = 0; i < hashBytes.Length; ++i)
-            {
-                hashText.Append(hashBytes[i].ToString("x2", CultureInfo.InvariantCulture));
-            }
-
-            string hashString = Convert.ToBase64String(hashSalt) + "=/" + Convert.ToBase64String(SecureUtils.GetBytes(hashText.ToString()));
+            string hashString = Convert.ToBase64String(hashSalt) + "=/" + Convert.ToBase64String(hashBytes);
             hashString = Convert.ToBase64String(SecureUtils.GetBytes(hashString));
 
             return hashString;

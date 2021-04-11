@@ -92,8 +92,8 @@ namespace RIS.Cryptography.Hash.Methods
             }
             set
             {
-                if (value < 6)
-                    value = 6;
+                if (value < 8)
+                    value = 8;
 
                 _hashLength = value;
             }
@@ -230,7 +230,7 @@ namespace RIS.Cryptography.Hash.Methods
         public Argon2dRaw()
         {
             SaltBytes = new byte[8];
-            HashLength = 6;
+            HashLength = 32;
             DegreeOfParallelism = 2 * 2;
             Iterations = 4;
             MemorySize = (1 * 1024) * 128;
