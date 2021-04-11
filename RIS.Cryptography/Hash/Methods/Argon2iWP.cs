@@ -106,13 +106,23 @@ namespace RIS.Cryptography.Hash.Methods
             }
             set
             {
-                try
+                if (Base64.IsBase64(value))
                 {
-                    _associatedData = Convert.FromBase64String(value);
+                    try
+                    {
+                        _associatedData =
+                            Convert.FromBase64String(value);
+                    }
+                    catch (FormatException)
+                    {
+                        _associatedData =
+                            Convert.FromBase64String(Convert.ToBase64String(SecureUtils.GetBytes(value)));
+                    }
                 }
-                catch (FormatException)
+                else
                 {
-                    _associatedData = Convert.FromBase64String(Convert.ToBase64String(SecureUtils.GetBytes(value)));
+                    _associatedData =
+                        Convert.FromBase64String(Convert.ToBase64String(SecureUtils.GetBytes(value)));
                 }
             }
         }
@@ -136,13 +146,23 @@ namespace RIS.Cryptography.Hash.Methods
             }
             set
             {
-                try
+                if (Base64.IsBase64(value))
                 {
-                    _knownSecret = Convert.FromBase64String(value);
+                    try
+                    {
+                        _knownSecret =
+                            Convert.FromBase64String(value);
+                    }
+                    catch (FormatException)
+                    {
+                        _knownSecret =
+                            Convert.FromBase64String(Convert.ToBase64String(SecureUtils.GetBytes(value)));
+                    }
                 }
-                catch (FormatException)
+                else
                 {
-                    _knownSecret = Convert.FromBase64String(Convert.ToBase64String(SecureUtils.GetBytes(value)));
+                    _knownSecret =
+                        Convert.FromBase64String(Convert.ToBase64String(SecureUtils.GetBytes(value)));
                 }
             }
         }
@@ -289,23 +309,45 @@ namespace RIS.Cryptography.Hash.Methods
                 degreeOfParallelism = 1;
 
             byte[] associatedDataBytes;
-            try
+
+            if (Base64.IsBase64(associatedData))
             {
-                associatedDataBytes = Convert.FromBase64String(associatedData);
+                try
+                {
+                    associatedDataBytes =
+                        Convert.FromBase64String(associatedData);
+                }
+                catch (FormatException)
+                {
+                    associatedDataBytes =
+                        Convert.FromBase64String(Convert.ToBase64String(SecureUtils.GetBytes(associatedData)));
+                }
             }
-            catch (FormatException)
+            else
             {
-                associatedDataBytes = Convert.FromBase64String(Convert.ToBase64String(SecureUtils.GetBytes(associatedData)));
+                associatedDataBytes =
+                    Convert.FromBase64String(Convert.ToBase64String(SecureUtils.GetBytes(associatedData)));
             }
 
             byte[] knownSecretBytes;
-            try
+
+            if (Base64.IsBase64(knownSecret))
             {
-                knownSecretBytes = Convert.FromBase64String(knownSecret);
+                try
+                {
+                    knownSecretBytes =
+                        Convert.FromBase64String(knownSecret);
+                }
+                catch (FormatException)
+                {
+                    knownSecretBytes =
+                        Convert.FromBase64String(Convert.ToBase64String(SecureUtils.GetBytes(knownSecret)));
+                }
             }
-            catch (FormatException)
+            else
             {
-                knownSecretBytes = Convert.FromBase64String(Convert.ToBase64String(SecureUtils.GetBytes(knownSecret)));
+                knownSecretBytes =
+                    Convert.FromBase64String(Convert.ToBase64String(SecureUtils.GetBytes(knownSecret)));
             }
 
             Konscious.Security.Cryptography.Argon2i argon2Service = new Konscious.Security.Cryptography.Argon2i(data)
@@ -361,13 +403,24 @@ namespace RIS.Cryptography.Hash.Methods
             int degreeOfParallelism, string associatedData, string knownSecret)
         {
             byte[] hashSalt;
-            try
+
+            if (Base64.IsBase64(salt))
             {
-                hashSalt = Convert.FromBase64String(salt);
+                try
+                {
+                    hashSalt =
+                        Convert.FromBase64String(salt);
+                }
+                catch (FormatException)
+                {
+                    hashSalt =
+                        Convert.FromBase64String(Convert.ToBase64String(SecureUtils.GetBytes(salt)));
+                }
             }
-            catch (FormatException)
+            else
             {
-                hashSalt = Convert.FromBase64String(Convert.ToBase64String(SecureUtils.GetBytes(salt)));
+                hashSalt =
+                    Convert.FromBase64String(Convert.ToBase64String(SecureUtils.GetBytes(salt)));
             }
 
             if (memorySize < 8)
@@ -380,23 +433,45 @@ namespace RIS.Cryptography.Hash.Methods
                 degreeOfParallelism = 1;
 
             byte[] associatedDataBytes;
-            try
+
+            if (Base64.IsBase64(associatedData))
             {
-                associatedDataBytes = Convert.FromBase64String(associatedData);
+                try
+                {
+                    associatedDataBytes =
+                        Convert.FromBase64String(associatedData);
+                }
+                catch (FormatException)
+                {
+                    associatedDataBytes =
+                        Convert.FromBase64String(Convert.ToBase64String(SecureUtils.GetBytes(associatedData)));
+                }
             }
-            catch (FormatException)
+            else
             {
-                associatedDataBytes = Convert.FromBase64String(Convert.ToBase64String(SecureUtils.GetBytes(associatedData)));
+                associatedDataBytes =
+                    Convert.FromBase64String(Convert.ToBase64String(SecureUtils.GetBytes(associatedData)));
             }
 
             byte[] knownSecretBytes;
-            try
+
+            if (Base64.IsBase64(knownSecret))
             {
-                knownSecretBytes = Convert.FromBase64String(knownSecret);
+                try
+                {
+                    knownSecretBytes =
+                        Convert.FromBase64String(knownSecret);
+                }
+                catch (FormatException)
+                {
+                    knownSecretBytes =
+                        Convert.FromBase64String(Convert.ToBase64String(SecureUtils.GetBytes(knownSecret)));
+                }
             }
-            catch (FormatException)
+            else
             {
-                knownSecretBytes = Convert.FromBase64String(Convert.ToBase64String(SecureUtils.GetBytes(knownSecret)));
+                knownSecretBytes =
+                    Convert.FromBase64String(Convert.ToBase64String(SecureUtils.GetBytes(knownSecret)));
             }
 
             Konscious.Security.Cryptography.Argon2i argon2Service = new Konscious.Security.Cryptography.Argon2i(data)

@@ -4,6 +4,7 @@
 using System;
 using System.Globalization;
 using System.Text;
+using RIS.Text.Encoding.Base;
 
 namespace RIS.Cryptography.Hash.Methods
 {
@@ -32,19 +33,53 @@ namespace RIS.Cryptography.Hash.Methods
             }
             set
             {
-                try
+                if (Base64.IsBase64(value))
                 {
-                    if (Convert.FromBase64String(value).Length < 8)
-                        value = Convert.ToBase64String(new byte[8]);
+                    try
+                    {
+                        var salt =
+                            Convert.FromBase64String(value);
 
-                    _salt = Convert.FromBase64String(value);
+                        if (salt.Length < 8)
+                        {
+                            _salt =
+                                Convert.FromBase64String(Convert.ToBase64String(new byte[8]));
+
+                            return;
+                        }
+
+                        _salt = salt;
+                    }
+                    catch (FormatException)
+                    {
+                        var salt =
+                            Convert.FromBase64String(Convert.ToBase64String(SecureUtils.GetBytes(value)));
+
+                        if (salt.Length < 8)
+                        {
+                            _salt =
+                                Convert.FromBase64String(Convert.ToBase64String(new byte[8]));
+
+                            return;
+                        }
+
+                        _salt = salt;
+                    }
                 }
-                catch (FormatException)
+                else
                 {
-                    if (Convert.FromBase64String(Convert.ToBase64String(SecureUtils.GetBytes(value))).Length < 8)
-                        value = Convert.ToBase64String(new byte[8]);
+                    var salt =
+                        Convert.FromBase64String(Convert.ToBase64String(SecureUtils.GetBytes(value)));
 
-                    _salt = Convert.FromBase64String(Convert.ToBase64String(SecureUtils.GetBytes(value)));
+                    if (salt.Length < 8)
+                    {
+                        _salt =
+                            Convert.FromBase64String(Convert.ToBase64String(new byte[8]));
+
+                        return;
+                    }
+
+                    _salt = salt;
                 }
             }
         }
@@ -128,13 +163,23 @@ namespace RIS.Cryptography.Hash.Methods
             }
             set
             {
-                try
+                if (Base64.IsBase64(value))
                 {
-                    _associatedData = Convert.FromBase64String(value);
+                    try
+                    {
+                        _associatedData =
+                            Convert.FromBase64String(value);
+                    }
+                    catch (FormatException)
+                    {
+                        _associatedData =
+                            Convert.FromBase64String(Convert.ToBase64String(SecureUtils.GetBytes(value)));
+                    }
                 }
-                catch (FormatException)
+                else
                 {
-                    _associatedData = Convert.FromBase64String(Convert.ToBase64String(SecureUtils.GetBytes(value)));
+                    _associatedData =
+                        Convert.FromBase64String(Convert.ToBase64String(SecureUtils.GetBytes(value)));
                 }
             }
         }
@@ -158,13 +203,23 @@ namespace RIS.Cryptography.Hash.Methods
             }
             set
             {
-                try
+                if (Base64.IsBase64(value))
                 {
-                    _knownSecret = Convert.FromBase64String(value);
+                    try
+                    {
+                        _knownSecret =
+                            Convert.FromBase64String(value);
+                    }
+                    catch (FormatException)
+                    {
+                        _knownSecret =
+                            Convert.FromBase64String(Convert.ToBase64String(SecureUtils.GetBytes(value)));
+                    }
                 }
-                catch (FormatException)
+                else
                 {
-                    _knownSecret = Convert.FromBase64String(Convert.ToBase64String(SecureUtils.GetBytes(value)));
+                    _knownSecret =
+                        Convert.FromBase64String(Convert.ToBase64String(SecureUtils.GetBytes(value)));
                 }
             }
         }

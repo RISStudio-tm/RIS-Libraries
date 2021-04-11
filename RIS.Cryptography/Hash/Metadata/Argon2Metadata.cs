@@ -52,13 +52,23 @@ namespace RIS.Cryptography.Hash.Metadata
             }
             private set
             {
-                try
+                if (Base64.IsBase64(value))
                 {
-                    _salt = Convert.FromBase64String(value);
+                    try
+                    {
+                        _salt =
+                            Convert.FromBase64String(value);
+                    }
+                    catch (FormatException)
+                    {
+                        _salt =
+                            Convert.FromBase64String(Convert.ToBase64String(SecureUtils.GetBytes(value)));
+                    }
                 }
-                catch (FormatException)
+                else
                 {
-                    _salt = Convert.FromBase64String(Convert.ToBase64String(SecureUtils.GetBytes(value)));
+                    _salt =
+                        Convert.FromBase64String(Convert.ToBase64String(SecureUtils.GetBytes(value)));
                 }
             }
         }
@@ -82,13 +92,23 @@ namespace RIS.Cryptography.Hash.Metadata
             }
             private set
             {
-                try
+                if (Base64.IsBase64(value))
                 {
-                    _hash = Convert.FromBase64String(value);
+                    try
+                    {
+                        _hash =
+                            Convert.FromBase64String(value);
+                    }
+                    catch (FormatException)
+                    {
+                        _hash =
+                            Convert.FromBase64String(Convert.ToBase64String(SecureUtils.GetBytes(value)));
+                    }
                 }
-                catch (FormatException)
+                else
                 {
-                    _hash = Convert.FromBase64String(Convert.ToBase64String(SecureUtils.GetBytes(value)));
+                    _hash =
+                        Convert.FromBase64String(Convert.ToBase64String(SecureUtils.GetBytes(value)));
                 }
             }
         }
