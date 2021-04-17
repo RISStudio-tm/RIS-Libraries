@@ -134,7 +134,7 @@ namespace RIS.Collections.Nestable
             NestedType partType;
             string[] partEndValues;
             int partExcludedStart;
-            int partExcludedCount;
+            int partExcludedEnd;
 
             switch (represent[startIndex])
             {
@@ -142,19 +142,19 @@ namespace RIS.Collections.Nestable
                     partType = NestedType.Element;
                     partEndValues = new[] { "\",", "\"}" };
                     partExcludedStart = 1;
-                    partExcludedCount = 1;
+                    partExcludedEnd = 1;
                     break;
                 case '[':
                     partType = NestedType.Array;
                     partEndValues = new[] { "],", "]}" };
                     partExcludedStart = 0;
-                    partExcludedCount = -1;
+                    partExcludedEnd = -1;
                     break;
                 case '{':
                     partType = NestedType.Collection;
                     partEndValues = new[] { "},", "}}" };
                     partExcludedStart = 0;
-                    partExcludedCount = -1;
+                    partExcludedEnd = -1;
                     break;
                 default:
                     var exception =
@@ -230,7 +230,7 @@ namespace RIS.Collections.Nestable
 
             var representPart = represent.Substring(
                 startIndex + partExcludedStart,
-                endIndex - (startIndex + partExcludedCount));
+                endIndex - (startIndex + partExcludedEnd));
 
             return (representPart, endIndex);
         }

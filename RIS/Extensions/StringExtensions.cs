@@ -8,21 +8,22 @@ namespace RIS.Extensions
 {
     public static class StringExtensions
     {
-        public static (int Index, int Count) IndexOfAny(this string sourceCode,
+        public static (int Index, int Count) IndexOfAny(this string source,
             string[] values, int startIndex = 0)
         {
             var rootIndex = RootIndex.FromStrings(values);
 
-            while (startIndex < sourceCode.Length)
+            while (startIndex < source.Length)
             {
-                var index = sourceCode.IndexOfAny(rootIndex.Chars, startIndex);
+                var index = source.IndexOfAny(rootIndex.Chars, startIndex);
 
                 if (index < 0)
                     return (index, 0);
 
+                var @char = source[index];
+
                 // only one character available
-                var @char = sourceCode[index];
-                if (sourceCode.Length == index + 1)
+                if (source.Length == index + 1)
                 {
                     if (rootIndex.SingleChars.Contains(@char))
                         return (index, 1);
@@ -30,10 +31,11 @@ namespace RIS.Extensions
                     return (-1, 0);
                 }
 
-                // only two characters available
                 var leafIndex = rootIndex.MultipleChars[@char];
-                var nextChar = sourceCode[index + 1];
-                if (sourceCode.Length == index + 2)
+                var nextChar = source[index + 1];
+
+                // only two characters available
+                if (source.Length == index + 2)
                 {
                     if (leafIndex.SingleChars.Contains(nextChar))
                         return (index, 2);
@@ -49,7 +51,7 @@ namespace RIS.Extensions
                 {
                     foreach (var s in leafIndex.Strings[nextChar])
                     {
-                        if (string.CompareOrdinal(sourceCode, index + 2, s, 0, s.Length) == 0)
+                        if (string.CompareOrdinal(source, index + 2, s, 0, s.Length) == 0)
                             return (index, s.Length + 2);
                     }
                 }
