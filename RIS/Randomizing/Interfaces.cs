@@ -53,7 +53,7 @@ namespace RIS.Randomizing
 
         uint GetNormalizedUInt32(uint targetSamplingLength);
 
-        ulong GetNormalizedIndex(uint targetSamplingLength);
+        uint GetNormalizedIndex(uint targetSamplingLength);
 
         void GetUInt32(uint[] buffer);
         void GetUInt32(uint[] buffer, uint maxValue);

@@ -562,7 +562,7 @@ namespace RIS.Randomizing
                 GetBiasZone(targetSamplingLength));
         }
 
-        public ulong GetNormalizedIndex(uint targetSamplingLength)
+        public uint GetNormalizedIndex(uint targetSamplingLength)
         {
             return (uint)(GetNormalizedUInt32(targetSamplingLength) % targetSamplingLength);
         }
