@@ -141,7 +141,7 @@ namespace RIS.Reflection.Mapping
 
             if (!_map.ContainsKey(name))
             {
-                var exception = new KeyNotFoundException($"Method with name '{nameof(name)}' not found");
+                var exception = new KeyNotFoundException($"Method with name '{name}' not found");
                 Events.OnError(this, new RErrorEventArgs(exception, exception.Message));
                 OnError(new RErrorEventArgs(exception, exception.Message));
                 throw exception;
