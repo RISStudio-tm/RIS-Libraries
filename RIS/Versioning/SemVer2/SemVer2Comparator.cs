@@ -3,6 +3,7 @@
 
 using System;
 using System.Text.RegularExpressions;
+using RIS.Mathematics;
 
 namespace RIS.Versioning
 {
@@ -151,18 +152,6 @@ namespace RIS.Versioning
 
         public bool Intersect(SemVer2Comparator other)
         {
-            bool IsGreaterThan(SemVer2Comparator comparator)
-            {
-                return comparator.CompareOperator == CompareOperator.GreaterThan
-                       || comparator.CompareOperator == CompareOperator.GreaterThanOrEqual;
-            }
-
-            bool IsLessThan(SemVer2Comparator comparator)
-            {
-                return comparator.CompareOperator == CompareOperator.LessThan
-                    || comparator.CompareOperator == CompareOperator.LessThanOrEqual;
-            }
-
             bool IsEqual(SemVer2Comparator comparator)
             {
                 return comparator.CompareOperator == CompareOperator.GreaterThanOrEqual
@@ -173,32 +162,51 @@ namespace RIS.Versioning
             bool IsNotEqual(SemVer2Comparator comparator)
             {
                 return comparator.CompareOperator == CompareOperator.GreaterThan
-                    || comparator.CompareOperator == CompareOperator.NotEqual
-                    || comparator.CompareOperator == CompareOperator.LessThan;
+                       || comparator.CompareOperator == CompareOperator.NotEqual
+                       || comparator.CompareOperator == CompareOperator.LessThan;
             }
 
+            bool IsGreaterThan(SemVer2Comparator comparator)
+            {
+                return comparator.CompareOperator == CompareOperator.GreaterThan
+                       || comparator.CompareOperator == CompareOperator.GreaterThanOrEqual;
+            }
 
-            if (Version > other.Version && (IsLessThan(this) || IsGreaterThan(other)))
-                return true;
+            bool IsLessThan(SemVer2Comparator comparator)
+            {
+                return comparator.CompareOperator == CompareOperator.LessThan
+                       || comparator.CompareOperator == CompareOperator.LessThanOrEqual;
+            }
 
-            if (Version < other.Version && (IsGreaterThan(this) || IsLessThan(other)))
+            if (Version > other.Version
+                && (IsLessThan(this) || IsGreaterThan(other)))
+            {
                 return true;
+            }
+
+            if (Version < other.Version
+                && (IsGreaterThan(this) || IsLessThan(other)))
+            {
+                return true;
+            }
 
             if (Version == other.Version 
                 && ((IsEqual(this) && IsEqual(other))
+                    || (IsNotEqual(this) && IsNotEqual(other))
                     || (IsLessThan(this) && IsLessThan(other))
                     || (IsGreaterThan(this) && IsGreaterThan(other))))
+            {
                 return true;
+            }
 
-            //if (Version != other.Version
-            //    && ((IsNotEqual(this) && !IsNotEqual(other))
-            //        || (IsEqual(this) && !IsEqual(other))
-            //        || (IsLessThan(this) && !IsLessThan(other))
-            //        || (IsGreaterThan(this) && !IsGreaterThan(other))))
-            //    return true;
-
-            //if (Version != other.Version && (IsNotEqual(this) && IsNotEqual(other)))
-            //    return true;
+            if (Version != other.Version
+                && ((IsNotEqual(this) && !IsNotEqual(other))
+                    || (IsEqual(this) && !IsEqual(other))
+                    || (IsLessThan(this) && !IsLessThan(other))
+                    || (IsGreaterThan(this) && !IsGreaterThan(other))))
+            {
+                return true;
+            }
 
             return false;
         }

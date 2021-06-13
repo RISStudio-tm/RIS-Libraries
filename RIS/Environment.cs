@@ -70,7 +70,11 @@ namespace RIS
                     value = 85000;
 
                 _originalGCLOHThresholdSize = value;
-                _modifiedGCLOHThresholdSize = value - 64;
+
+                if (value % 4 != 0)
+                    value -= value % 4;
+
+                _modifiedGCLOHThresholdSize = value - 512;
             }
         }
 
@@ -279,16 +283,16 @@ namespace RIS
                 if (runtimeFullName == null)
                     return ("unknown", "unknown", "unknown");
 
-                string[] runtimeFullNameComponents = runtimeFullName.Value<string>().Split('/');
-                string[] runtimeNameComponents = runtimeFullNameComponents[0].Split(',');
+                string[] runtimeFullNameComponents = runtimeFullName.Value<string>()?.Split('/');
+                string[] runtimeNameComponents = runtimeFullNameComponents?[0].Split(',');
 
-                string runtimeName = runtimeNameComponents[0];
-                string runtimeVersion = runtimeNameComponents[1].Substring(8);
+                string runtimeName = runtimeNameComponents?[0];
+                string runtimeVersion = runtimeNameComponents?[1].Substring(8);
 
-                if (runtimeFullNameComponents.Length < 2)
+                if (runtimeFullNameComponents?.Length < 2)
                     return (runtimeName, runtimeVersion, "any");
 
-                string runtimeIdentifier = runtimeFullNameComponents[1];
+                string runtimeIdentifier = runtimeFullNameComponents?[1];
 
                 return (runtimeName, runtimeVersion, runtimeIdentifier);
             }

@@ -3,9 +3,9 @@
 
 using System;
 
-namespace RIS.Versioning
+namespace RIS.Mathematics
 {
-    internal enum CompareOperator : byte
+    public enum CompareOperator : byte
     {
         Equal = 0,
         NotEqual = 1,

@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using RIS.Mathematics;
 
 namespace RIS.Versioning
 {
@@ -42,7 +43,7 @@ namespace RIS.Versioning
 
                     if (comparatorsResult != (null, null))
                     {
-                        position += comparatorsResult.MatchLength.Value;
+                        position += comparatorsResult.MatchLength ?? 0;
                         _comparators.AddRange(comparatorsResult.Comparators);
                     }
                 }
@@ -51,7 +52,7 @@ namespace RIS.Versioning
                 
                 if (comparatorResult != (null, null))
                 {
-                    position += comparatorResult.MatchLength.Value;
+                    position += comparatorResult.MatchLength ?? 0;
                     _comparators.Add(comparatorResult.Comparator);
                 }
 

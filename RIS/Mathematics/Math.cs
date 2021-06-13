@@ -12,6 +12,45 @@ namespace RIS.Mathematics
         public static event EventHandler<RWarningEventArgs> Warning;
         public static event EventHandler<RErrorEventArgs> Error;
 
+
+
+        public const double Pi =                 3.14159265358979323846264338328;
+        public const double InversePi =          0.31830988618379067153776752675;
+        public const double DoubleInversePi =    0.63661977236758134307553505349;
+        public const double DoublePi =           6.28318530717958647692528676656;
+        public const double HalfPi =             1.57079632679489661923132169164;
+        public const double SquarePi =           9.86960440108935861883449099988;
+        public const double SqrtPi =             1.77245385090551602729816748334;
+        public const double E =                  2.71828182845904523536028747135;
+        public const double InverseE =           0.36787944117144232159552377016;
+        public const double DoubleE =            5.43656365691809047072057494270;
+        public const double HalfE =              1.35914091422952261768014373568;
+        public const double SquareE =            1.64872127070012814684865078781;
+        public const double Log2 =               0.30102999566398119521373889472;
+        public const double Ln2 =                0.69314718055994530941723212146;
+        public const double Sqrt2 =              1.41421356237309504880168872421;
+        public const double Sqrt3 =              1.73205080756887729352744634151;
+        public const double EulerConstant =      0.57721566490153286060651209008;
+        public const double CatalanConstant =    0.91596559417721901505460351493;
+        public const double OmegaConstant =      0.56714329040978387299996866221;
+        public const double GaussConstant =      0.83462684167407318628142973280;
+        public const double GoldenRatio =        1.61803398874989484820458633437;
+
+
+
+        public const double Epsilon =            2.2204460492503131E-16;
+        public const double SqrtEpsilon =        1.4901161193847656E-08;
+        public const double CbrtEpsilon =        6.0554544523933395E-06;
+        public const double LogEpsilon =        -36.043653389117154;
+        public const double MinDouble =          2.2250738585072014E-308;
+        public const double SqrtMinDouble =      1.4916681462400413E-154;
+        public const double LogMinDouble =      -708.39641853226408;
+        public const double MaxDouble =          1.7976931348623157E+308;
+        public const double SqrtMaxDouble =      1.3407807929942596E+154;
+        public const double LogMaxDouble =       709.78271289338397;
+
+
+
         public static void OnInformation(RInformationEventArgs e)
         {
             OnInformation(null, e);
@@ -40,15 +79,177 @@ namespace RIS.Mathematics
         }
 
 
+
+        /// <summary>
+        /// Returns the value of the angle in degrees converted from radians.
+        /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool AlmostEquals(double number1, double number2, double precision)
+        public static double ToDegrees(double radians)
         {
-            return System.Math.Abs(number1 - number2) <= precision;
+            return 180.0 / Pi * radians;
         }
+
+        /// <summary>
+        /// Returns the value of the angle in radians converted from degrees.
+        /// </summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static double ToRadians(double degrees)
+        {
+            return degrees / 180.0 * Pi;
+        }
+
+
+        /// <summary>
+        ///     Returns the minus one raised to an integer power.
+        /// </summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static int MinusOnePow(int exponent)
+        {
+            return (exponent & 1) == 0
+                ? 1
+                : -1;
+        }
+
+
+        /// <summary>
+        ///     Returns the integer part of a float number.
+        /// </summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static double IntegerPart(float number)
+        {
+            return IntegerPart((double)number);
+        }
+        /// <summary>
+        ///     Returns the integer part of a double number.
+        /// </summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static double IntegerPart(double number)
+        {
+            return System.Math.Floor(number);
+        }
+
+
+        /// <summary>
+        ///     Returns the fractional part of a float number.
+        /// </summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static double FractionalPart(float number)
+        {
+            return FractionalPart((double)number);
+        }
+        /// <summary>
+        ///     Returns the fractional part of a double number.
+        /// </summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static double FractionalPart(double number)
+        {
+            return number - System.Math.Floor(number);
+        }
+
+
+        /// <summary>
+        ///     Calculates the integral part of a specified float number.
+        /// </summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static double Truncate(float number)
+        {
+            return Truncate((double)number);
+        }
+        /// <summary>
+        ///     Calculates the integral part of a specified double number.
+        /// </summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static double Truncate(double number)
+        {
+            return number > 0
+                ? System.Math.Floor(number)
+                : System.Math.Ceiling(number);
+        }
+
+
+        /// <summary>
+        ///     Returns whether or not two floats are "close". That is, whether or 
+        ///     not they are within epsilon of each other. Note that this epsilon is proportional
+        ///     to the numbers themselves to that AlmostEquals survives scalar multiplication.
+        ///     There are plenty of ways for this to return false even for numbers which
+        ///     are theoretically identical, so no code calling this should fail to work
+        ///     if this returns false.
+        /// </summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool AlmostEquals(float number1, float number2)
+        {
+            return AlmostEquals((double)number1, (double)number2);
+        }
+        /// <summary>
+        ///     Returns whether or not two doubles are "close". That is, whether or 
+        ///     not they are within epsilon of each other. Note that this epsilon is proportional
+        ///     to the numbers themselves to that AlmostEquals survives scalar multiplication.
+        ///     There are plenty of ways for this to return false even for numbers which
+        ///     are theoretically identical, so no code calling this should fail to work
+        ///     if this returns false.
+        /// </summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool AlmostEquals(double number1, double number2)
+        {
+            if (double.IsInfinity(number1)
+                && double.IsInfinity(number2))
+            {
+                return true;
+            }
+            if (double.IsInfinity(number1)
+                || double.IsInfinity(number2))
+            {
+                return false;
+            }
+
+            // This computes (|value1-value2| / (|value1| + |value2| + 10.0)) < Epsilon
+
+            double eps = (System.Math.Abs(number1) + System.Math.Abs(number2) + 10.0) * Epsilon;
+            double delta = number1 - number2;
+
+            return (-eps < delta) && (eps > delta);
+        }
+
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool AlmostEquals(float number1, float number2, float precision)
         {
-            return System.Math.Abs(number1 - number2) <= precision;
+            if (float.IsInfinity(number1)
+                && float.IsInfinity(number2))
+            {
+                return true;
+            }
+            if (float.IsInfinity(number1)
+                || float.IsInfinity(number2))
+            {
+                return false;
+            }
+
+            if (number1 == 0 || number2 == 0)
+                return System.Math.Abs(number1 - number2) <= precision;
+
+            return System.Math.Abs(number1 - number2) <= precision * System.Math.Max(
+                System.Math.Abs(number1), System.Math.Abs(number2));
+        }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool AlmostEquals(double number1, double number2, double precision)
+        {
+            if (double.IsInfinity(number1)
+                && double.IsInfinity(number2))
+            {
+                return true;
+            }
+            if (double.IsInfinity(number1)
+                || double.IsInfinity(number2))
+            {
+                return false;
+            }
+
+            if (number1 == 0 || number2 == 0)
+                return System.Math.Abs(number1 - number2) <= precision;
+
+            return System.Math.Abs(number1 - number2) <= precision * System.Math.Max(
+                System.Math.Abs(number1), System.Math.Abs(number2));
         }
 
 
@@ -75,12 +276,12 @@ namespace RIS.Mathematics
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static float Abs(float number)
         {
-            return number == float.MinValue ? float.MaxValue : System.Math.Abs(number);
+            return System.Math.Abs(number);
         }
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static double Abs(double number)
         {
-            return number == double.MinValue ? double.MaxValue : System.Math.Abs(number);
+            return System.Math.Abs(number);
         }
 
 
@@ -107,12 +308,12 @@ namespace RIS.Mathematics
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static float AbsOverflow(float number)
         {
-            return checked(System.Math.Abs(number));
+            return System.Math.Abs(number);
         }
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static double AbsOverflow(double number)
         {
-            return checked(System.Math.Abs(number));
+            return System.Math.Abs(number);
         }
 
 
@@ -136,12 +337,22 @@ namespace RIS.Mathematics
         {
             return (ulong)((number + (number >> 63)) ^ (number >> 63));
         }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static float AbsNoOverflow(float number)
+        {
+            return System.Math.Abs(number);
+        }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static double AbsNoOverflow(double number)
+        {
+            return System.Math.Abs(number);
+        }
 
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool IsPowerOfTwo(sbyte number)
         {
-            return IsPowerOfTwo(Abs(number));
+            return IsPowerOfTwo(AbsNoOverflow(number));
         }
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool IsPowerOfTwo(byte number)
@@ -151,7 +362,7 @@ namespace RIS.Mathematics
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool IsPowerOfTwo(short number)
         {
-            return IsPowerOfTwo(Abs(number));
+            return IsPowerOfTwo(AbsNoOverflow(number));
         }
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool IsPowerOfTwo(ushort number)
@@ -161,7 +372,7 @@ namespace RIS.Mathematics
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool IsPowerOfTwo(int number)
         {
-            return IsPowerOfTwo(Abs(number));
+            return IsPowerOfTwo(AbsNoOverflow(number));
         }
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool IsPowerOfTwo(uint number)
@@ -171,7 +382,7 @@ namespace RIS.Mathematics
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool IsPowerOfTwo(long number)
         {
-            return IsPowerOfTwo(Abs(number));
+            return IsPowerOfTwo(AbsNoOverflow(number));
         }
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool IsPowerOfTwo(ulong number)
@@ -181,7 +392,7 @@ namespace RIS.Mathematics
 
 
         /// <summary>
-        /// Returns 2^x more or equals <paramref name="number"/> (next power of two) (if possible)
+        ///     Returns 2^x more or equals <paramref name="number"/> (next power of two) (if possible)
         /// </summary>
         /// <exception cref="ArgumentException"></exception>
         public static sbyte NextPowerOfTwo(sbyte number)
@@ -199,7 +410,7 @@ namespace RIS.Mathematics
             return (sbyte)NextPowerOfTwo(numberUnsigned);
         }
         /// <summary>
-        /// Returns 2^x more or equals <paramref name="number"/> (next power of two) (if possible)
+        ///     Returns 2^x more or equals <paramref name="number"/> (next power of two) (if possible)
         /// </summary>
         /// <exception cref="ArgumentException"></exception>
         public static byte NextPowerOfTwo(byte number)
@@ -226,7 +437,7 @@ namespace RIS.Mathematics
             return number;
         }
         /// <summary>
-        /// Returns 2^x more or equals <paramref name="number"/> (next power of two) (if possible)
+        ///     Returns 2^x more or equals <paramref name="number"/> (next power of two) (if possible)
         /// </summary>
         /// <exception cref="ArgumentException"></exception>
         public static short NextPowerOfTwo(short number)
@@ -244,7 +455,7 @@ namespace RIS.Mathematics
             return (short)NextPowerOfTwo(numberUnsigned);
         }
         /// <summary>
-        /// Returns 2^x more or equals <paramref name="number"/> (next power of two) (if possible)
+        ///     Returns 2^x more or equals <paramref name="number"/> (next power of two) (if possible)
         /// </summary>
         /// <exception cref="ArgumentException"></exception>
         public static ushort NextPowerOfTwo(ushort number)
@@ -272,7 +483,7 @@ namespace RIS.Mathematics
             return number;
         }
         /// <summary>
-        /// Returns 2^x more or equals <paramref name="number"/> (next power of two) (if possible)
+        ///     Returns 2^x more or equals <paramref name="number"/> (next power of two) (if possible)
         /// </summary>
         /// <exception cref="ArgumentException"></exception>
         public static int NextPowerOfTwo(int number)
@@ -290,7 +501,7 @@ namespace RIS.Mathematics
             return (int)NextPowerOfTwo(numberUnsigned);
         }
         /// <summary>
-        /// Returns 2^x more or equals <paramref name="number"/> (next power of two) (if possible)
+        ///     Returns 2^x more or equals <paramref name="number"/> (next power of two) (if possible)
         /// </summary>
         /// <exception cref="ArgumentException"></exception>
         public static uint NextPowerOfTwo(uint number)
@@ -319,7 +530,7 @@ namespace RIS.Mathematics
             return number;
         }
         /// <summary>
-        /// Returns 2^x more or equals <paramref name="number"/> (next power of two) (if possible)
+        ///     Returns 2^x more or equals <paramref name="number"/> (next power of two) (if possible)
         /// </summary>
         /// <exception cref="ArgumentException"></exception>
         public static long NextPowerOfTwo(long number)
@@ -337,7 +548,7 @@ namespace RIS.Mathematics
             return (long)NextPowerOfTwo(numberUnsigned);
         }
         /// <summary>
-        /// Returns 2^x more or equals <paramref name="number"/> (next power of two) (if possible)
+        ///     Returns 2^x more or equals <paramref name="number"/> (next power of two) (if possible)
         /// </summary>
         /// <exception cref="ArgumentException"></exception>
         public static ulong NextPowerOfTwo(ulong number)
@@ -369,7 +580,7 @@ namespace RIS.Mathematics
 
 
         /// <summary>
-        /// Returns 2^x less or equals <paramref name="number"/> (previous power of two) (if possible)
+        ///     Returns 2^x less or equals <paramref name="number"/> (previous power of two) (if possible)
         /// </summary>
         /// <exception cref="ArgumentException"></exception>
         public static sbyte PrevPowerOfTwo(sbyte number)
@@ -395,7 +606,7 @@ namespace RIS.Mathematics
             return (sbyte)numberUnsigned;
         }
         /// <summary>
-        /// Returns 2^x less or equals <paramref name="number"/> (previous power of two) (if possible)
+        ///     Returns 2^x less or equals <paramref name="number"/> (previous power of two) (if possible)
         /// </summary>
         /// <exception cref="ArgumentException"></exception>
         public static byte PrevPowerOfTwo(byte number)
@@ -419,7 +630,7 @@ namespace RIS.Mathematics
             return number;
         }
         /// <summary>
-        /// Returns 2^x less or equals <paramref name="number"/> (previous power of two) (if possible)
+        ///     Returns 2^x less or equals <paramref name="number"/> (previous power of two) (if possible)
         /// </summary>
         /// <exception cref="ArgumentException"></exception>
         public static short PrevPowerOfTwo(short number)
@@ -445,7 +656,7 @@ namespace RIS.Mathematics
             return (short)numberUnsigned;
         }
         /// <summary>
-        /// Returns 2^x less or equals <paramref name="number"/> (previous power of two) (if possible)
+        ///     Returns 2^x less or equals <paramref name="number"/> (previous power of two) (if possible)
         /// </summary>
         /// <exception cref="ArgumentException"></exception>
         public static ushort PrevPowerOfTwo(ushort number)
@@ -469,7 +680,7 @@ namespace RIS.Mathematics
             return number;
         }
         /// <summary>
-        /// Returns 2^x less or equals <paramref name="number"/> (previous power of two) (if possible)
+        ///     Returns 2^x less or equals <paramref name="number"/> (previous power of two) (if possible)
         /// </summary>
         /// <exception cref="ArgumentException"></exception>
         public static int PrevPowerOfTwo(int number)
@@ -495,7 +706,7 @@ namespace RIS.Mathematics
             return (int)numberUnsigned;
         }
         /// <summary>
-        /// Returns 2^x less or equals <paramref name="number"/> (previous power of two) (if possible)
+        ///     Returns 2^x less or equals <paramref name="number"/> (previous power of two) (if possible)
         /// </summary>
         /// <exception cref="ArgumentException"></exception>
         public static uint PrevPowerOfTwo(uint number)
@@ -519,7 +730,7 @@ namespace RIS.Mathematics
             return number;
         }
         /// <summary>
-        /// Returns 2^x less or equals <paramref name="number"/> (previous power of two) (if possible)
+        ///     Returns 2^x less or equals <paramref name="number"/> (previous power of two) (if possible)
         /// </summary>
         /// <exception cref="ArgumentException"></exception>
         public static long PrevPowerOfTwo(long number)
@@ -545,7 +756,7 @@ namespace RIS.Mathematics
             return (long)numberUnsigned;
         }
         /// <summary>
-        /// Returns 2^x less or equals <paramref name="number"/> (previous power of two) (if possible)
+        ///     Returns 2^x less or equals <paramref name="number"/> (previous power of two) (if possible)
         /// </summary>
         /// <exception cref="ArgumentException"></exception>
         public static ulong PrevPowerOfTwo(ulong number)
@@ -573,10 +784,9 @@ namespace RIS.Mathematics
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static uint DigitsCount(sbyte number)
         {
-            if (number < 0)
-                number = Abs(number);
-
-            return DigitsCount((byte)number);
+            return DigitsCount(number < 0
+                ? AbsNoOverflow(number)
+                : (byte)number);
         }
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static uint DigitsCount(byte number)
@@ -591,10 +801,9 @@ namespace RIS.Mathematics
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static uint DigitsCount(short number)
         {
-            if (number < 0)
-                number = Abs(number);
-
-            return DigitsCount((ushort)number);
+            return DigitsCount(number < 0
+                ? AbsNoOverflow(number)
+                : (ushort)number);
         }
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static uint DigitsCount(ushort number)
@@ -613,10 +822,9 @@ namespace RIS.Mathematics
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static uint DigitsCount(int number)
         {
-            if (number < 0)
-                number = Abs(number);
-
-            return DigitsCount((uint)number);
+            return DigitsCount(number < 0
+                ? AbsNoOverflow(number)
+                : (uint)number);
         }
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static uint DigitsCount(uint number)
@@ -645,47 +853,9 @@ namespace RIS.Mathematics
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static uint DigitsCount(long number)
         {
-            if (number < 0)
-                number = Abs(number);
-
-            if (number < 10L)
-                return 1;
-            if (number < 100L)
-                return 2;
-            if (number < 1000L)
-                return 3;
-            if (number < 10000L)
-                return 4;
-            if (number < 100000L)
-                return 5;
-            if (number < 1000000L)
-                return 6;
-            if (number < 10000000L)
-                return 7;
-            if (number < 100000000L)
-                return 8;
-            if (number < 1000000000L)
-                return 9;
-            if (number < 10000000000L)
-                return 10;
-            if (number < 100000000000L)
-                return 11;
-            if (number < 1000000000000L)
-                return 12;
-            if (number < 10000000000000L)
-                return 13;
-            if (number < 100000000000000L)
-                return 14;
-            if (number < 1000000000000000L)
-                return 15;
-            if (number < 10000000000000000L)
-                return 16;
-            if (number < 100000000000000000L)
-                return 17;
-            if (number < 1000000000000000000L)
-                return 18;
-
-            return 19;
+            return DigitsCount(number < 0
+                ? AbsNoOverflow(number)
+                : (ulong)number);
         }
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static uint DigitsCount(ulong number)
