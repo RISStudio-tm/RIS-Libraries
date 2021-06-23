@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using System.Text;
 using RIS.Extensions;
 
@@ -344,7 +345,7 @@ namespace RIS.Collections.Nestable
                     throw exception;
             }
         }
-        public static string ToStringRepresent<TValue>(TValue value)
+        private static string ToStringRepresent<TValue>(TValue value)
         {
             if (value == null)
                 return "null";
@@ -368,12 +369,12 @@ namespace RIS.Collections.Nestable
 
             return valueString;
         }
-        public static string ToStringRepresent<TValue>(TValue[] value)
+        private static string ToStringRepresent<TValue>(TValue[] value)
         {
             if (value.Length == 0)
                 return "[]";
 
-            StringBuilder result = new StringBuilder();
+            StringBuilder result = new StringBuilder(value.Length);
 
             result.Append('[');
 
@@ -393,6 +394,8 @@ namespace RIS.Collections.Nestable
         }
         public static string ToStringRepresent<TValue>(INestableCollection<TValue> value)
         {
+            RuntimeHelpers.EnsureSufficientExecutionStack();
+
             switch (GetGeneralType(value))
             {
                 case CollectionGeneralType.Array:
@@ -412,7 +415,7 @@ namespace RIS.Collections.Nestable
             if (value.Length == 0)
                 return $"{{{GetCollectionType(value)}||}}";
 
-            StringBuilder result = new StringBuilder();
+            StringBuilder result = new StringBuilder(value.Length);
 
             result.Append('{');
 
@@ -436,6 +439,8 @@ namespace RIS.Collections.Nestable
                         result.Append(ToStringRepresent(value[i].GetCollection()));
                         result.Append(',');
                         break;
+                    default:
+                        break;
                 }
             }
 
@@ -447,7 +452,7 @@ namespace RIS.Collections.Nestable
             return result.ToString();
         }
 
-        public static string ToStringRepresentDictionary<TValue>(string key)
+        private static string ToStringRepresentDictionary<TValue>(string key)
         {
             if (key == null)
                 return "null";
@@ -465,19 +470,19 @@ namespace RIS.Collections.Nestable
 
             return key;
         }
-        public static string ToStringRepresentDictionary<TValue>(string key, TValue value)
+        private static string ToStringRepresentDictionary<TValue>(string key, TValue value)
         {
             key = ToStringRepresentDictionary<TValue>(key);
             string valueString = ToStringRepresent(value);
 
             return $"{key}::{valueString}";
         }
-        public static string ToStringRepresentDictionary<TValue>(string key, TValue[] value)
+        private static string ToStringRepresentDictionary<TValue>(string key, TValue[] value)
         {
             if (value.Length == 0)
                 return $"[{ToStringRepresentDictionary<TValue>(key)}::]";
 
-            StringBuilder result = new StringBuilder();
+            StringBuilder result = new StringBuilder(value.Length);
 
             result.Append('[');
 
@@ -498,7 +503,7 @@ namespace RIS.Collections.Nestable
 
             return result.ToString();
         }
-        public static string ToStringRepresentDictionary<TValue>(string key, INestableCollection<TValue> value)
+        private static string ToStringRepresentDictionary<TValue>(string key, INestableCollection<TValue> value)
         {
             switch (GetGeneralType(value))
             {
@@ -519,7 +524,7 @@ namespace RIS.Collections.Nestable
             if (value.Length == 0)
                 return $"{{{ToStringRepresentDictionary<TValue>(key)}::{GetCollectionType(value)}||}}";
 
-            StringBuilder result = new StringBuilder();
+            StringBuilder result = new StringBuilder(value.Length);
 
             result.Append('{');
 
@@ -546,6 +551,8 @@ namespace RIS.Collections.Nestable
                         result.Append(ToStringRepresent(value[i].GetCollection()));
                         result.Append(',');
                         break;
+                    default:
+                        break;
                 }
             }
 
@@ -556,16 +563,18 @@ namespace RIS.Collections.Nestable
 
             return result.ToString();
         }
-        public static string ToStringRepresentDictionary<TValue>(INestableDictionary<TValue> value)
+        private static string ToStringRepresentDictionary<TValue>(INestableDictionary<TValue> value)
         {
             return ToStringRepresentDictionary(ToStringRepresentDictionary<TValue>(value.Key), value);
         }
-        public static string ToStringRepresentDictionary<TValue>(string key, INestableDictionary<TValue> value)
+        private static string ToStringRepresentDictionary<TValue>(string key, INestableDictionary<TValue> value)
         {
+            RuntimeHelpers.EnsureSufficientExecutionStack();
+
             if (value.Length == 0)
                 return $"{{{ToStringRepresentDictionary<TValue>(key)}::{GetCollectionType(value)}||}}";
 
-            StringBuilder result = new StringBuilder();
+            StringBuilder result = new StringBuilder(value.Length);
 
             result.Append('{');
 
@@ -592,6 +601,8 @@ namespace RIS.Collections.Nestable
                         result.Append(ToStringRepresentDictionary(value.GetKey(i), value[i].GetCollection()));
                         result.Append(',');
                         break;
+                    default:
+                        break;
                 }
             }
 
@@ -604,7 +615,7 @@ namespace RIS.Collections.Nestable
         }
 
 
-        public static TValue FromStringRepresent<TValue>(string represent, ref TValue value)
+        private static TValue FromStringRepresent<TValue>(string represent, ref TValue value)
         {
             if (represent == "null")
             {
@@ -642,7 +653,7 @@ namespace RIS.Collections.Nestable
 
             return value;
         }
-        public static TValue[] FromStringRepresent<TValue>(string represent, ref TValue[] value)
+        private static TValue[] FromStringRepresent<TValue>(string represent, ref TValue[] value)
         {
             if (represent[0] != '[' || represent[represent.Length - 1] != ']')
             {
@@ -681,7 +692,7 @@ namespace RIS.Collections.Nestable
             }
 
             int typeDivide;
-            string type = string.Empty;
+            string type;
 
             if (represent.Contains("::"))
             {
@@ -702,6 +713,8 @@ namespace RIS.Collections.Nestable
         }
         public static INestableCollection<TValue> FromStringRepresent<TValue>(string represent, INestableCollection<TValue> value)
         {
+            RuntimeHelpers.EnsureSufficientExecutionStack();
+
             switch (GetGeneralType(value))
             {
                 case CollectionGeneralType.Array:
@@ -728,7 +741,7 @@ namespace RIS.Collections.Nestable
             }
 
             int typeDivide;
-            string type = string.Empty;
+            string type;
 
             if (represent.Contains("::"))
             {
@@ -831,14 +844,10 @@ namespace RIS.Collections.Nestable
             return value;
         }
 
-        public static string FromStringRepresentDictionary<TValue>(string key)
+        private static string FromStringRepresentDictionary<TValue>(string key)
         {
             if (key == "null")
-            {
-                key = default;
-
-                return key;
-            }
+                return null;
 
             key = key?
                 .Replace("/null/", "null")
@@ -853,8 +862,10 @@ namespace RIS.Collections.Nestable
 
             return key;
         }
-        public static INestableCollection<TValue> FromStringRepresentDictionary<TValue>(string represent, INestableDictionary<TValue> value)
+        private static INestableCollection<TValue> FromStringRepresentDictionary<TValue>(string represent, INestableDictionary<TValue> value)
         {
+            RuntimeHelpers.EnsureSufficientExecutionStack();
+
             if (represent[0] != '{' || represent[represent.Length - 1] != '}')
             {
                 var exception =
@@ -865,7 +876,7 @@ namespace RIS.Collections.Nestable
             }
 
             int typeDivide;
-            string type = string.Empty;
+            string type;
             string key = string.Empty;
 
             if (represent.Contains("::"))
@@ -1004,11 +1015,11 @@ namespace RIS.Collections.Nestable
                     throw exception;
             }
         }
-        public static IEnumerable<TValue> Enumerate<TValue>(TValue value)
+        private static IEnumerable<TValue> Enumerate<TValue>(TValue value)
         {
             yield return value;
         }
-        public static IEnumerable<TValue> Enumerate<TValue>(TValue[] value)
+        private static IEnumerable<TValue> Enumerate<TValue>(TValue[] value)
         {
             for (int i = 0; i < value.Length; ++i)
             {
@@ -1017,6 +1028,8 @@ namespace RIS.Collections.Nestable
         }
         public static IEnumerable<TValue> Enumerate<TValue>(INestableCollection<TValue> value)
         {
+            RuntimeHelpers.EnsureSufficientExecutionStack();
+
             for (int i = 0; i < value.Length; ++i)
             {
                 switch (value[i].Type)

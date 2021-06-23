@@ -5,11 +5,11 @@
     <Configurations>Debug;Release;Release Nuget</Configurations>
     <RootNamespace>RIS.Logging</RootNamespace>
     <AssemblyName>RIS.Logging</AssemblyName>
-    <AssemblyVersion>2.2.15.0</AssemblyVersion>
-    <FileVersion>2.2.15.0</FileVersion>
+    <AssemblyVersion>3.0.0.0</AssemblyVersion>
+    <FileVersion>3.0.0.0</FileVersion>
     <PackageId>RIS.Logging</PackageId>
     <Product>RIS.Logging</Product>
-    <Version>2.2.15</Version>
+    <Version>3.0.0</Version>
     <Description>A library designed for various types of tasks. Part of the RIS "ecosystem".</Description>
     <PackageTags>dotnet, dotnetcore, netframework, netcore, library</PackageTags>
     <Authors>Dmitry Ponomarev</Authors>
@@ -49,6 +49,10 @@
       <PackagePath></PackagePath>
     </None>
   </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\Configs\nlog.config" />
+  </ItemGroup>
   
   <ItemGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
     <ProjectReference Include="..\RIS.Collections\RIS.Collections.csproj" />
@@ -64,6 +68,11 @@
     <!--PackageReference for NuGet-->
     <ProjectReference Include="..\RIS.Collections\RIS.Collections.csproj" />
     <ProjectReference Include="..\RIS\RIS.csproj" />
+  </ItemGroup>
+  
+  <ItemGroup>
+    <PackageReference Include="NLog" Version="4.7.10" />
+    <PackageReference Include="NLog.Schema" Version="4.7.10" />
   </ItemGroup>
   
 </Project>

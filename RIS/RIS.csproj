@@ -5,12 +5,12 @@
     <Configurations>Debug;Release;Release Nuget</Configurations>
     <RootNamespace>RIS</RootNamespace>
     <AssemblyName>RIS</AssemblyName>
-    <AssemblyVersion>3.13.6.0</AssemblyVersion>
-    <FileVersion>3.13.6.0</FileVersion>
+    <AssemblyVersion>3.14.0.0</AssemblyVersion>
+    <FileVersion>3.14.0.0</FileVersion>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <PackageId>RIS</PackageId>
     <Product>RIS</Product>
-    <Version>3.13.6</Version>
+    <Version>3.14.0</Version>
     <Description>A library designed for various types of tasks. The core of the RIS "ecosystem".</Description>
     <PackageTags>dotnet, dotnetcore, netframework, netcore, library</PackageTags>
     <Authors>Dmitry Ponomarev</Authors>
@@ -54,6 +54,7 @@
   <ItemGroup>
     <PackageReference Include="GrEmit" Version="3.4.1" />
     <PackageReference Include="Microsoft.Bcl.AsyncInterfaces" Version="5.0.0" />
+    <PackageReference Include="Microsoft.Extensions.FileProviders.Embedded" Version="5.0.7" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
     <PackageReference Include="System.Configuration.ConfigurationManager" Version="5.0.0" />
     <PackageReference Include="System.Memory" Version="4.5.4" />
