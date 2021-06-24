@@ -8,7 +8,7 @@ using System.Linq;
 
 namespace RIS.Collections.Nestable
 {
-    public class NestableListL<T> : INestableList<T>, ICollection, IEnumerable<T>, IEnumerable
+    public class NestableListL<T> : INestableList<T>
     {
         public event EventHandler<RInformationEventArgs> Information;
         public event EventHandler<RWarningEventArgs> Warning;

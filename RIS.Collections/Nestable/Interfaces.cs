@@ -2,16 +2,28 @@
 // Licensed under the Apache License, Version 2.0. See LICENSE file in the project root for license information. 
 
 using System;
+using System.Collections;
 using System.Collections.Generic;
 
 namespace RIS.Collections.Nestable
 {
-    public interface INestableCollection<T>
+    public interface INestableCollection : ICollection, IEnumerable
     {
-        NestedElement<T> this[int index] { get; set; }
-
         int Length { get; }
         NestableCollectionType CollectionType { get; }
+
+        string ToStringRepresent();
+
+        void FromStringRepresent(string represent);
+
+        bool Remove();
+
+        void Clear();
+    }
+
+    public interface INestableCollection<T> : INestableCollection, IEnumerable<T>
+    {
+        NestedElement<T> this[int index] { get; set; }
 
         NestedElement<T> Get(int index);
 
@@ -22,20 +34,12 @@ namespace RIS.Collections.Nestable
         void Set(int index, T[] value);
         void Set(int index, INestableCollection<T> value);
 
-        string ToStringRepresent();
-
-        void FromStringRepresent(string represent);
-
         IEnumerable<T> Enumerate();
 
         bool Add(NestedElement<T> value);
         bool Add(T value);
         bool Add(T[] value);
         bool Add(INestableCollection<T> value);
-
-        bool Remove();
-
-        void Clear();
 
         void CopyTo(IList<T> collection, bool clearBeforeCopy);
     }

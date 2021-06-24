@@ -9,7 +9,7 @@ using RIS.Collections.Chunked;
 
 namespace RIS.Collections.Nestable
 {
-    public class NestableArrayCAL<T> : INestableArray<T>, ICollection, IEnumerable<T>, IEnumerable
+    public class NestableArrayCAL<T> : INestableArray<T>
     {
         public event EventHandler<RInformationEventArgs> Information;
         public event EventHandler<RWarningEventArgs> Warning;

@@ -6,6 +6,7 @@ using System.Globalization;
 using System.IO;
 using System.Reflection;
 using System.Runtime.ExceptionServices;
+using System.Threading;
 using NLog;
 using NLog.Config;
 using RIS.Providers;
@@ -58,6 +59,20 @@ namespace RIS.Logging
         private static bool AppDomainEventsSubscribed { get; set; }
 
 
+        private static int _running;
+        public static bool Running
+        {
+            get
+            {
+                return _running > 0;
+            }
+            private set
+            {
+                Interlocked.Exchange(ref _running, value ? 1 : 0);
+            }
+        }
+
+
 
 #pragma warning disable SS002 // DateTime.Now was referenced
         static LogManager()
@@ -68,13 +83,14 @@ namespace RIS.Logging
             AppDomainEventsLockObj = new object();
             AppDomainEventsSubscribed = false;
 
+            Running = false;
+
             DateTime startupTime;
 
             try
             {
-                startupTime = Environment.Process?.StartTime
-                                  .ToLocalTime()
-                              ?? DateTime.Now;
+                startupTime = Environment.Process.StartTime
+                                  .ToLocalTime();
             }
             catch (Exception)
             {
@@ -89,8 +105,10 @@ namespace RIS.Logging
             NLog.LogManager.Configuration = XmlLoggingConfiguration
                 .CreateFromXmlString(ResourceProvider
                     .GetEmbeddedAsString(@"Resources\Configs\nlog.config"));
-            NLog.LogManager.AutoShutdown = true;
+            NLog.LogManager.AutoShutdown = false;
             NLog.LogManager.Flush();
+
+            Running = true;
 
             DebugLog.Info("Logger initialized");
             Log.Info("Logger initialized");
@@ -108,6 +126,9 @@ namespace RIS.Logging
 
 #endif
 
+            AppDomain.CurrentDomain.DomainUnload += OnShutdown;
+            AppDomain.CurrentDomain.ProcessExit += OnShutdown;
+
             SubscribeRISEvents();
             SubscribeAppDomainEvents();
         }
@@ -117,7 +138,25 @@ namespace RIS.Logging
 
         public static void Initialize()
         {
-            Log.Info("App Run");
+            if (Running)
+                return;
+
+            Running = true;
+        }
+
+        public static void Shutdown()
+        {
+            if (!Running)
+                return;
+
+            Running = false;
+
+            AppDomain.CurrentDomain.DomainUnload -= OnShutdown;
+            AppDomain.CurrentDomain.ProcessExit -= OnShutdown;
+
+            Log.Info($"Exit code - {System.Environment.ExitCode}");
+
+            NLog.LogManager.Shutdown();
         }
 
 
@@ -160,7 +199,6 @@ namespace RIS.Logging
                 if (AppDomainEventsSubscribed)
                     return;
 
-                AppDomain.CurrentDomain.ProcessExit += AppDomain_OnProcessExit;
                 AppDomain.CurrentDomain.UnhandledException += AppDomain_OnUnhandledException;
                 AppDomain.CurrentDomain.FirstChanceException += AppDomain_OnFirstChanceException;
 
@@ -180,7 +218,6 @@ namespace RIS.Logging
                 if (!AppDomainEventsSubscribed)
                     return;
 
-                AppDomain.CurrentDomain.ProcessExit -= AppDomain_OnProcessExit;
                 AppDomain.CurrentDomain.UnhandledException -= AppDomain_OnUnhandledException;
                 AppDomain.CurrentDomain.FirstChanceException -= AppDomain_OnFirstChanceException;
 
@@ -311,6 +348,13 @@ namespace RIS.Logging
 
 
 
+        private static void OnShutdown(object sender, EventArgs e)
+        {
+            Shutdown();
+        }
+
+
+
         private static void RIS_OnInformation(object sender, RInformationEventArgs e)
         {
             DebugLog.Info($"{e.Message}");
@@ -327,12 +371,6 @@ namespace RIS.Logging
         }
 
 
-
-        private static void AppDomain_OnProcessExit(object sender, EventArgs e)
-        {
-            Log.Info($"App Exit Code - {System.Environment.ExitCode}");
-            NLog.LogManager.Shutdown();
-        }
 
         private static void AppDomain_OnUnhandledException(object sender, UnhandledExceptionEventArgs e)
         {

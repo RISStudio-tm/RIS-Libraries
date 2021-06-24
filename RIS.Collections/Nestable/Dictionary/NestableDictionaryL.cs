@@ -8,7 +8,7 @@ using System.Linq;
 
 namespace RIS.Collections.Nestable
 {
-    public class NestableDictionaryL<T> : INestableDictionary<T>, ICollection, IEnumerable<T>, IEnumerable
+    public class NestableDictionaryL<T> : INestableDictionary<T>
     {
         public event EventHandler<RInformationEventArgs> Information;
         public event EventHandler<RWarningEventArgs> Warning;
