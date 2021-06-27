@@ -5,7 +5,7 @@ using System;
 
 namespace RIS.Reflection.Mapping
 {
-    [AttributeUsage(AttributeTargets.Method)]
+    [AttributeUsage(AttributeTargets.Method, AllowMultiple = true)]
     public sealed class MappedMethodAttribute : Attribute
     {
         public string Name { get; }

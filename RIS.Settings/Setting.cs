@@ -12,6 +12,10 @@ namespace RIS.Settings
 {
     public sealed class Setting
     {
+        private const BindingFlags AccessBindingFlags = BindingFlags.Instance
+                                                        | BindingFlags.Public
+                                                        | BindingFlags.NonPublic;
+
         private readonly SettingsBase _settingsBase;
         private readonly PropertyInfo _propertyInfo;
 
@@ -35,6 +39,7 @@ namespace RIS.Settings
         {
             _settingsBase = settings;
             _propertyInfo = propertyInfo;
+
             CategoryName = category;
         }
 
@@ -44,25 +49,25 @@ namespace RIS.Settings
         }
         private static string ToStringRepresent<T>(ICollection<T> collection)
         {
-            var nestableArray = new NestableArrayCAL<T>();
+            var nestableCollection = new NestableArrayCAL<T>();
 
             foreach (var element in collection)
             {
-                nestableArray.Add(element);
+                nestableCollection.Add(element);
             }
 
-            return nestableArray.ToStringRepresent();
+            return nestableCollection.ToStringRepresent();
         }
         private static string ToStringRepresent<T>(IEnumerable<T> collection)
         {
-            var nestableArray = new NestableArrayCAL<T>();
+            var nestableCollection = new NestableArrayCAL<T>();
 
             foreach (var element in collection)
             {
-                nestableArray.Add(element);
+                nestableCollection.Add(element);
             }
 
-            return nestableArray.ToStringRepresent();
+            return nestableCollection.ToStringRepresent();
         }
 
         private static INestableCollection<T> FromStringRepresentNestable<T>(string represent)
@@ -71,45 +76,45 @@ namespace RIS.Settings
         }
         private static ICollection<T> FromStringRepresentArray<T>(string represent)
         {
-            var nestableArray = new NestableArrayCAL<T>();
+            var nestableCollection = new NestableArrayCAL<T>();
 
-            nestableArray.FromStringRepresent(represent);
+            nestableCollection.FromStringRepresent(represent);
 
-            var collection = new T[nestableArray.Length];
+            var collection = new T[nestableCollection.Length];
 
-            for (int i = 0; i < nestableArray.Length; ++i)
+            for (int i = 0; i < nestableCollection.Length; ++i)
             {
-                collection[i] = nestableArray[i].GetElement();
+                collection[i] = nestableCollection[i].GetElement();
             }
 
             return collection;
         }
         private static ICollection<T> FromStringRepresentCollection<T>(string represent)
         {
-            var nestableArray = new NestableArrayCAL<T>();
+            var nestableCollection = new NestableArrayCAL<T>();
 
-            nestableArray.FromStringRepresent(represent);
+            nestableCollection.FromStringRepresent(represent);
 
-            var collection = new List<T>(nestableArray.Length);
+            var collection = new List<T>(nestableCollection.Length);
 
-            for (int i = 0; i < nestableArray.Length; ++i)
+            for (int i = 0; i < nestableCollection.Length; ++i)
             {
-                collection.Add(nestableArray[i].GetElement());
+                collection.Add(nestableCollection[i].GetElement());
             }
 
             return collection;
         }
         private static IEnumerable<T> FromStringRepresentEnumerable<T>(string represent)
         {
-            var nestableArray = new NestableArrayCAL<T>();
+            var nestableCollection = new NestableArrayCAL<T>();
 
-            nestableArray.FromStringRepresent(represent);
+            nestableCollection.FromStringRepresent(represent);
 
-            var collection = new List<T>(nestableArray.Length);
+            var collection = new List<T>(nestableCollection.Length);
 
-            for (int i = 0; i < nestableArray.Length; ++i)
+            for (int i = 0; i < nestableCollection.Length; ++i)
             {
-                collection.Add(nestableArray[i].GetElement());
+                collection.Add(nestableCollection[i].GetElement());
             }
 
             return collection;
@@ -117,7 +122,20 @@ namespace RIS.Settings
 
         public object GetValue()
         {
-            return _propertyInfo.GetValue(_settingsBase);
+            try
+            {
+                if (!_propertyInfo.CanRead)
+                    return null;
+
+                return _propertyInfo.GetValue(_settingsBase,
+                    AccessBindingFlags, null, null,
+                    CultureInfo.InvariantCulture);
+            }
+            catch (Exception ex)
+            {
+                Events.OnError(this, new RErrorEventArgs(ex, ex.Message));
+                throw;
+            }
         }
 
         public string GetValueToString()
@@ -173,6 +191,8 @@ namespace RIS.Settings
                             return ToStringRepresent(settingValue);
                         case INestableCollection<UIntPtr> settingValue:
                             return ToStringRepresent(settingValue);
+                        case INestableCollection<DateTime> settingValue:
+                            return ToStringRepresent(settingValue);
                         default:
                             return value.ToString();
                     }
@@ -210,6 +230,8 @@ namespace RIS.Settings
                         case ICollection<IntPtr> settingValue:
                             return ToStringRepresent(settingValue);
                         case ICollection<UIntPtr> settingValue:
+                            return ToStringRepresent(settingValue);
+                        case ICollection<DateTime> settingValue:
                             return ToStringRepresent(settingValue);
                         default:
                             return value.ToString();
@@ -249,6 +271,8 @@ namespace RIS.Settings
                             return ToStringRepresent(settingValue);
                         case IEnumerable<UIntPtr> settingValue:
                             return ToStringRepresent(settingValue);
+                        case IEnumerable<DateTime> settingValue:
+                            return ToStringRepresent(settingValue);
                         default:
                             return value.ToString();
                     }
@@ -264,8 +288,13 @@ namespace RIS.Settings
 
             try
             {
+                if (!_propertyInfo.CanWrite)
+                    return;
+
                 _propertyInfo.SetValue(_settingsBase,
-                    Convert.ChangeType(value, Type, CultureInfo.InvariantCulture));
+                    Convert.ChangeType(value, Type, CultureInfo.InvariantCulture),
+                    AccessBindingFlags, null ,null,
+                    CultureInfo.InvariantCulture);
             }
             catch (Exception ex)
             {
@@ -283,6 +312,11 @@ namespace RIS.Settings
             else if (Type == typeof(string))
             {
                 SetValue(value);
+            }
+            else if (Type == typeof(DateTime))
+            {
+                SetValue(DateTime.Parse(value,
+                    CultureInfo.InvariantCulture));
             }
             else if (typeof(INestableCollection).IsAssignableFrom(Type))
             {
@@ -318,6 +352,8 @@ namespace RIS.Settings
                     SetValue(FromStringRepresentNestable<IntPtr>(value));
                 else if (typeof(INestableCollection<UIntPtr>).IsAssignableFrom(Type))
                     SetValue(FromStringRepresentNestable<UIntPtr>(value));
+                else if (typeof(INestableCollection<DateTime>).IsAssignableFrom(Type))
+                    SetValue(FromStringRepresentNestable<DateTime>(value));
                 else
                     SetValue(value);
             }
@@ -355,6 +391,8 @@ namespace RIS.Settings
                     SetValue(FromStringRepresentArray<IntPtr>(value));
                 else if(typeof(UIntPtr[]).IsAssignableFrom(Type))
                     SetValue(FromStringRepresentArray<UIntPtr>(value));
+                else if (typeof(DateTime[]).IsAssignableFrom(Type))
+                    SetValue(FromStringRepresentArray<DateTime>(value));
                 else
                     SetValue(value);
             }
@@ -392,6 +430,8 @@ namespace RIS.Settings
                     SetValue(FromStringRepresentCollection<IntPtr>(value));
                 else if (typeof(ICollection<UIntPtr>).IsAssignableFrom(Type))
                     SetValue(FromStringRepresentCollection<UIntPtr>(value));
+                else if (typeof(ICollection<DateTime>).IsAssignableFrom(Type))
+                    SetValue(FromStringRepresentCollection<DateTime>(value));
                 else
                     SetValue(value);
             }
@@ -429,6 +469,8 @@ namespace RIS.Settings
                     SetValue(FromStringRepresentEnumerable<IntPtr>(value));
                 else if (typeof(IEnumerable<UIntPtr>).IsAssignableFrom(Type))
                     SetValue(FromStringRepresentEnumerable<UIntPtr>(value));
+                else if (typeof(IEnumerable<DateTime>).IsAssignableFrom(Type))
+                    SetValue(FromStringRepresentEnumerable<DateTime>(value));
                 else
                     SetValue(value);
             }

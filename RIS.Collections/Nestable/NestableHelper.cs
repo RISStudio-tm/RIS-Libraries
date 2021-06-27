@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Runtime.CompilerServices;
 using System.Text;
 using RIS.Extensions;
@@ -356,7 +357,26 @@ namespace RIS.Collections.Nestable
                 return "db_null";
             }
 
-            string valueString = value.ToString()?
+            string valueString;
+
+            try
+            {
+                valueString = Convert.ChangeType(
+                        value,
+                        typeof(string),
+                        CultureInfo.InvariantCulture)
+                    .ToString();
+            }
+            catch (Exception)
+            {
+                valueString = value
+                    .ToString();
+            }
+
+            if (valueString == null)
+                return "null";
+
+            valueString = valueString
                 .Replace("null", "/null/")
                 .Replace("|", "/|/")
                 .Replace(":", "/:/")
@@ -628,12 +648,14 @@ namespace RIS.Collections.Nestable
             {
                 if (typeof(TValue) == typeof(string))
                 {
-                    value = (TValue)Convert.ChangeType("db_null", typeof(TValue));
+                    value = (TValue)Convert.ChangeType("db_null",
+                        typeof(TValue), CultureInfo.InvariantCulture);
 
                     return value;
                 }
 
-                value = (TValue)Convert.ChangeType(DBNull.Value, typeof(TValue));
+                value = (TValue)Convert.ChangeType(DBNull.Value,
+                    typeof(TValue), CultureInfo.InvariantCulture);
 
                 return value;
             }
@@ -649,7 +671,8 @@ namespace RIS.Collections.Nestable
                 .Replace("/{/", "{")
                 .Replace("/}/", "}");
 
-            value = (TValue)Convert.ChangeType(valueString, typeof(TValue));
+            value = (TValue)Convert.ChangeType(valueString,
+                typeof(TValue), CultureInfo.InvariantCulture);
 
             return value;
         }

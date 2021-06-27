@@ -81,26 +81,26 @@ namespace RIS.Reflection.Mapping
             foreach (MethodInfo method in _instanceType.GetMethods(BindingFlags.NonPublic
                                                                    | BindingFlags.Public | BindingFlags.Static))
             {
-                var mappedAttribute = method.GetCustomAttribute<MappedMethodAttribute>();
+                var mappedAttributes = method.GetCustomAttributes<MappedMethodAttribute>();
 
-                if (mappedAttribute == null)
-                    continue;
+                foreach (var mappedAttribute in mappedAttributes)
+                {
+                    string name = method.Name;
 
-                string name = method.Name;
+                    if (!string.IsNullOrEmpty(mappedAttribute.Name))
+                        name = mappedAttribute.Name;
 
-                if (!string.IsNullOrEmpty(mappedAttribute.Name))
-                    name = mappedAttribute.Name;
+                    var methodDelegate = Delegate.CreateDelegate(
+                        _targetType,
+                        null,
+                        method,
+                        false);
 
-                var methodDelegate = Delegate.CreateDelegate(
-                    _targetType,
-                    null,
-                    method,
-                    false);
+                    if (methodDelegate == null)
+                        continue;
 
-                if (methodDelegate == null)
-                    continue;
-
-                _map.Add(name, methodDelegate);
+                    _map.Add(name, methodDelegate);
+                }
             }
         }
 

@@ -85,39 +85,39 @@ namespace RIS.Reflection.Mapping
                                                                    | BindingFlags.Public | BindingFlags.Instance
                                                                    | BindingFlags.Static))
             {
-                var mappedAttribute = method.GetCustomAttribute<MappedMethodAttribute>();
+                var mappedAttributes = method.GetCustomAttributes<MappedMethodAttribute>();
 
-                if (mappedAttribute == null)
-                    continue;
-
-                string name = method.Name;
-
-                if (!string.IsNullOrEmpty(mappedAttribute.Name))
-                    name = mappedAttribute.Name;
-
-                Delegate methodDelegate;
-
-                if (method.IsStatic)
+                foreach (var mappedAttribute in mappedAttributes)
                 {
-                    methodDelegate = Delegate.CreateDelegate(
-                        _targetType,
-                        null,
-                        method,
-                        false);
-                }
-                else
-                {
-                    methodDelegate = Delegate.CreateDelegate(
-                        _targetType,
-                        _instance,
-                        method,
-                        false);
-                }
+                    string name = method.Name;
 
-                if (methodDelegate == null)
-                    continue;
+                    if (!string.IsNullOrEmpty(mappedAttribute.Name))
+                        name = mappedAttribute.Name;
 
-                _map.Add(name, methodDelegate);
+                    Delegate methodDelegate;
+
+                    if (method.IsStatic)
+                    {
+                        methodDelegate = Delegate.CreateDelegate(
+                            _targetType,
+                            null,
+                            method,
+                            false);
+                    }
+                    else
+                    {
+                        methodDelegate = Delegate.CreateDelegate(
+                            _targetType,
+                            _instance,
+                            method,
+                            false);
+                    }
+
+                    if (methodDelegate == null)
+                        continue;
+
+                    _map.Add(name, methodDelegate);
+                }
             }
         }
 

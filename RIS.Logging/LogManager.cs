@@ -15,6 +15,12 @@ namespace RIS.Logging
 {
     public static class LogManager
     {
+        public static event EventHandler<EventArgs> LoggingStartup;
+        public static event EventHandler<EventArgs> LoggingShutdown;
+        public static event EventHandler<EventArgs> LoggingPaused;
+        public static event EventHandler<EventArgs> LoggingResumed;
+
+
         private static readonly object LogSyncRoot = new object();
         private static volatile Logger _log;
         public static Logger Log
@@ -26,7 +32,7 @@ namespace RIS.Logging
                     lock (LogSyncRoot)
                     {
                         if (_log == null)
-                            _log = NLog.LogManager.GetLogger(nameof(Log));
+                            _log = LogFactory.GetLogger(nameof(Log));
                     }
                 }
 
@@ -44,7 +50,7 @@ namespace RIS.Logging
                     lock (DebugLogSyncRoot)
                     {
                         if (_debugLog == null)
-                            _debugLog = NLog.LogManager.GetLogger(nameof(DebugLog));
+                            _debugLog = LogFactory.GetLogger(nameof(DebugLog));
                     }
                 }
 
@@ -53,12 +59,17 @@ namespace RIS.Logging
         }
 
 
-        private static object RISEventsLockObj { get; }
+        private static LogFactory LogFactory { get; }
+        private static bool Disposed { get; set; }
+        private static object AppShutdownEventSyncRoot { get; }
+        private static bool AppShutdownEventSubscribed { get; set; }
+        private static object RISEventsSyncRoot { get; }
         private static bool RISEventsSubscribed { get; set; }
-        private static object AppDomainEventsLockObj { get; }
+        private static object AppDomainEventsSyncRoot { get; }
         private static bool AppDomainEventsSubscribed { get; set; }
 
 
+        public static object SyncRoot { get; }
         private static int _running;
         public static bool Running
         {
@@ -68,103 +79,266 @@ namespace RIS.Logging
             }
             private set
             {
+                if (Disposed)
+                    return;
+
                 Interlocked.Exchange(ref _running, value ? 1 : 0);
             }
+        }
+        private static object AutoShutdownSyncRoot { get; }
+        private static int _autoShutdown;
+        public static bool AutoShutdown
+        {
+            get
+            {
+                return _autoShutdown > 0;
+            }
+            set
+            {
+                lock (AutoShutdownSyncRoot)
+                {
+                    if (Disposed)
+                        return;
+
+                    var newState = value ? 1 : 0;
+                    var oldState = Interlocked.Exchange(ref _autoShutdown, newState);
+
+                    if (oldState == newState)
+                        return;
+
+                    if (value)
+                        SubscribeAppShutdownEvent();
+                    else
+                        UnsubscribeAppShutdownEvent();
+                }
+            }
+        }
+        public static LogLevel GlobalThreshold
+        {
+            get
+            {
+                return LogFactory.GlobalThreshold;
+            }
+            set
+            {
+                LogFactory.GlobalThreshold = value;
+            }
+        }
+
+
+
+        static LogManager()
+        {
+            LogFactory = new LogFactory();
+            Disposed = false;
+            AppShutdownEventSyncRoot = new object();
+            AppShutdownEventSubscribed = false;
+            RISEventsSyncRoot = new object();
+            RISEventsSubscribed = false;
+            AppDomainEventsSyncRoot = new object();
+            AppDomainEventsSubscribed = false;
+
+            SyncRoot = new object();
+            Running = false;
+            AutoShutdownSyncRoot = new object();
+            AutoShutdown = false;
+            GlobalThreshold = LogLevel.Trace;
+
+            Startup();
+
+            AutoShutdown = true;
+
+            SubscribeRISEvents();
+            SubscribeAppDomainEvents();
         }
 
 
 
 #pragma warning disable SS002 // DateTime.Now was referenced
-        static LogManager()
+        public static void Startup()
         {
-            RISEventsLockObj = new object();
-            RISEventsSubscribed = false;
-
-            AppDomainEventsLockObj = new object();
-            AppDomainEventsSubscribed = false;
-
-            Running = false;
-
-            DateTime startupTime;
-
-            try
+            lock (SyncRoot)
             {
-                startupTime = Environment.Process.StartTime
-                                  .ToLocalTime();
-            }
-            catch (Exception)
-            {
-                startupTime = DateTime.Now;
-            }
+                if (Disposed)
+                    return;
 
-            GlobalDiagnosticsContext.Set(
-                "AppStartupTime",
-                startupTime.ToString("yyyy.MM.dd HH-mm-ss",
-                    CultureInfo.InvariantCulture));
+                if (Running)
+                    return;
 
-            NLog.LogManager.Configuration = XmlLoggingConfiguration
-                .CreateFromXmlString(ResourceProvider
-                    .GetEmbeddedAsString(@"Resources\Configs\nlog.config"));
-            NLog.LogManager.AutoShutdown = false;
-            NLog.LogManager.Flush();
+                Disposed = false;
+                Running = true;
 
-            Running = true;
+                DateTime startupTime;
 
-            DebugLog.Info("Logger initialized");
-            Log.Info("Logger initialized");
+                try
+                {
+                    startupTime = Environment.Process.StartTime
+                        .ToLocalTime();
+                }
+                catch (Exception)
+                {
+                    startupTime = DateTime.Now;
+                }
 
-            Log.Info($"Libraries Directory - {Environment.ExecAppDirectoryName}");
-            Log.Info($"Execution File Directory - {Environment.ExecProcessDirectoryName}");
+                GlobalDiagnosticsContext.Set(
+                    "AppStartupTime",
+                    startupTime.ToString("yyyy.MM.dd HH-mm-ss",
+                        CultureInfo.InvariantCulture));
+
+                LogFactory.Configuration = XmlLoggingConfiguration
+                    .CreateFromXmlString(ResourceProvider
+                        .GetEmbeddedAsString(@"Resources\Configs\nlog.config"));
+                LogFactory.AutoShutdown = false;
+
+                LogFactory.Flush();
+
+                DebugLog.Info("Logger initialized");
+                Log.Info("Logger initialized");
+
+                Log.Info($"Libraries Directory - {Environment.ExecAppDirectoryName}");
+                Log.Info($"Execution File Directory - {Environment.ExecProcessDirectoryName}");
 
 #if NETCOREAPP
 
-            Log.Info($"Is Standalone App - {Environment.IsStandalone}");
-            Log.Info($"Is Single File App - {Environment.IsSingleFile}");
-            Log.Info($"Runtime Name - {Environment.RuntimeName}");
-            Log.Info($"Runtime Version - {Environment.RuntimeVersion}");
-            Log.Info($"Runtime Identifier - {Environment.RuntimeIdentifier}");
+                Log.Info($"Is Standalone App - {Environment.IsStandalone}");
+                Log.Info($"Is Single File App - {Environment.IsSingleFile}");
+                Log.Info($"Runtime Name - {Environment.RuntimeName}");
+                Log.Info($"Runtime Version - {Environment.RuntimeVersion}");
+                Log.Info($"Runtime Identifier - {Environment.RuntimeIdentifier}");
 
 #endif
 
-            AppDomain.CurrentDomain.DomainUnload += OnShutdown;
-            AppDomain.CurrentDomain.ProcessExit += OnShutdown;
+                Log.Info("Startup");
 
-            SubscribeRISEvents();
-            SubscribeAppDomainEvents();
+                LoggingStartup?.Invoke(
+                    null, EventArgs.Empty);
+            }
         }
 #pragma warning restore SS002 // DateTime.Now was referenced
 
-
-
-        public static void Initialize()
-        {
-            if (Running)
-                return;
-
-            Running = true;
-        }
-
         public static void Shutdown()
         {
-            if (!Running)
+            lock (SyncRoot)
+            {
+                if (Disposed)
+                    return;
+
+                if (!Running)
+                    return;
+
+                LoggingShutdown?.Invoke(
+                    null, EventArgs.Empty);
+
+                UnsubscribeAppShutdownEvent();
+
+                UnsubscribeRISEvents();
+                UnsubscribeAppDomainEvents();
+
+                Log.Info("Shutdown");
+
+                Log.Info($"Exit code - {System.Environment.ExitCode}");
+
+                LogFactory.Shutdown();
+
+                Running = false;
+                Disposed = true;
+            }
+        }
+
+        public static IDisposable Pause()
+        {
+            lock (SyncRoot)
+            {
+                var result = LogFactory.SuspendLogging();
+
+                LoggingPaused?.Invoke(
+                    null, EventArgs.Empty);
+
+                return result;
+            }
+        }
+
+        public static void Resume()
+        {
+            lock (SyncRoot)
+            {
+                LogFactory.ResumeLogging();
+
+                LoggingResumed?.Invoke(
+                    null, EventArgs.Empty);
+            }
+        }
+
+        public static bool IsEnabled()
+        {
+            lock (SyncRoot)
+            {
+                if (Disposed)
+                    return false;
+
+                return LogFactory.IsLoggingEnabled();
+            }
+        }
+
+        public static void Flush()
+        {
+            if (Disposed)
                 return;
 
-            Running = false;
+            LogFactory.Flush();
+        }
+        public static void Flush(TimeSpan timeout)
+        {
+            if (Disposed)
+                return;
 
-            AppDomain.CurrentDomain.DomainUnload -= OnShutdown;
-            AppDomain.CurrentDomain.ProcessExit -= OnShutdown;
+            LogFactory.Flush(timeout);
+        }
 
-            Log.Info($"Exit code - {System.Environment.ExitCode}");
 
-            NLog.LogManager.Shutdown();
+        private static void SubscribeAppShutdownEvent()
+        {
+            lock (AppShutdownEventSyncRoot)
+            {
+                if (Disposed)
+                    return;
+
+                if (AppShutdownEventSubscribed)
+                    return;
+
+                AppDomain.CurrentDomain.DomainUnload += App_OnShutdown;
+                AppDomain.CurrentDomain.ProcessExit += App_OnShutdown;
+
+                AppShutdownEventSubscribed = true;
+            }
+        }
+
+        private static void UnsubscribeAppShutdownEvent()
+        {
+            lock (AppShutdownEventSyncRoot)
+            {
+                if (Disposed)
+                    return;
+
+                if (!AppShutdownEventSubscribed)
+                    return;
+
+                AppDomain.CurrentDomain.DomainUnload -= App_OnShutdown;
+                AppDomain.CurrentDomain.ProcessExit -= App_OnShutdown;
+
+                AppShutdownEventSubscribed = false;
+            }
         }
 
 
 
         public static void SubscribeRISEvents()
         {
-            lock (RISEventsLockObj)
+            lock (RISEventsSyncRoot)
             {
+                if (Disposed)
+                    return;
+
                 if (RISEventsSubscribed)
                     return;
 
@@ -178,8 +352,11 @@ namespace RIS.Logging
 
         public static void UnsubscribeRISEvents()
         {
-            lock (RISEventsLockObj)
+            lock (RISEventsSyncRoot)
             {
+                if (Disposed)
+                    return;
+
                 if (!RISEventsSubscribed)
                     return;
 
@@ -192,16 +369,19 @@ namespace RIS.Logging
         }
 
 
+
         public static void SubscribeAppDomainEvents()
         {
-            lock (AppDomainEventsLockObj)
+            lock (AppDomainEventsSyncRoot)
             {
+                if (Disposed)
+                    return;
+
                 if (AppDomainEventsSubscribed)
                     return;
 
                 AppDomain.CurrentDomain.UnhandledException += AppDomain_OnUnhandledException;
                 AppDomain.CurrentDomain.FirstChanceException += AppDomain_OnFirstChanceException;
-
                 AppDomain.CurrentDomain.AssemblyResolve += AppDomain_OnAssemblyResolve;
                 AppDomain.CurrentDomain.ReflectionOnlyAssemblyResolve += AppDomain_OnAssemblyResolve;
                 AppDomain.CurrentDomain.TypeResolve += AppDomain_OnResolve;
@@ -213,14 +393,16 @@ namespace RIS.Logging
 
         public static void UnsubscribeAppDomainEvents()
         {
-            lock (AppDomainEventsLockObj)
+            lock (AppDomainEventsSyncRoot)
             {
+                if (Disposed)
+                    return;
+
                 if (!AppDomainEventsSubscribed)
                     return;
 
                 AppDomain.CurrentDomain.UnhandledException -= AppDomain_OnUnhandledException;
                 AppDomain.CurrentDomain.FirstChanceException -= AppDomain_OnFirstChanceException;
-
                 AppDomain.CurrentDomain.AssemblyResolve -= AppDomain_OnAssemblyResolve;
                 AppDomain.CurrentDomain.ReflectionOnlyAssemblyResolve -= AppDomain_OnAssemblyResolve;
                 AppDomain.CurrentDomain.TypeResolve -= AppDomain_OnResolve;
@@ -348,7 +530,7 @@ namespace RIS.Logging
 
 
 
-        private static void OnShutdown(object sender, EventArgs e)
+        private static void App_OnShutdown(object sender, EventArgs e)
         {
             Shutdown();
         }
@@ -378,16 +560,13 @@ namespace RIS.Logging
 
             Log.Fatal($"{exception?.GetType().Name ?? "Unknown"} - Message={exception?.Message ?? "Unknown"},HResult={exception?.HResult ?? 0},StackTrace=\n{exception?.StackTrace ?? "Unknown"}");
 
-            Log.Info($"App Exit Code - {System.Environment.ExitCode}");
-            NLog.LogManager.Shutdown();
+            Shutdown();
         }
 
         private static void AppDomain_OnFirstChanceException(object sender, FirstChanceExceptionEventArgs e)
         {
             DebugLog.Error($"{e.Exception.GetType().Name} - Message={e.Exception.Message},HResult={e.Exception.HResult},StackTrace=\n{e.Exception.StackTrace ?? "Unknown"}");
         }
-
-
 
         private static Assembly AppDomain_OnAssemblyResolve(object sender, ResolveEventArgs e)
         {

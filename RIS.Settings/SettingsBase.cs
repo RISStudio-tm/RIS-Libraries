@@ -6,18 +6,25 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Reflection;
 using System.Threading.Tasks;
+using RIS.Extensions;
 
 namespace RIS.Settings
 {
     public abstract class SettingsBase
     {
+        public event EventHandler<EventArgs> Loading;
+        public event EventHandler<EventArgs> Loaded;
+        public event EventHandler<EventArgs> Saving;
+        public event EventHandler<EventArgs> Saved;
+        public event EventHandler<AppVersionChangedEventArgs> AppVersionChanged;
+
         private readonly IEnumerable<Setting> _settingsList;
 
         [ExcludedSetting]
         public object SyncRoot { get; }
 
         [SettingCategory("Version")]
-        public string AppVersion { get; set; }
+        public string AppVersion { get; private set; }
 
         protected SettingsBase()
         {
@@ -32,15 +39,20 @@ namespace RIS.Settings
         {
             string category = null;
 
-            foreach (PropertyInfo property in GetType().GetProperties(BindingFlags.Instance | BindingFlags.Public))
+            foreach (PropertyInfo property in GetType().GetProperties(BindingFlags.Instance
+                                                                      | BindingFlags.Public
+                                                                      | BindingFlags.GetProperty
+                                                                      | BindingFlags.SetProperty))
             {
                 if (Attribute.IsDefined(property, typeof(SettingCategoryAttribute)))
                     category = ((SettingCategoryAttribute)property.GetCustomAttribute(typeof(SettingCategoryAttribute)))?.Name;
 
                 if (Attribute.IsDefined(property, typeof(ExcludedSettingAttribute)))
                     continue;
+                
+                var declaringProperty = property.GetDeclaring();
 
-                yield return new Setting(this, property, category);
+                yield return new Setting(this, declaringProperty, category);
             }
         }
 
@@ -49,25 +61,30 @@ namespace RIS.Settings
 
         protected abstract void OnSaveSettings(IEnumerable<Setting> settings);
 
-        public void Load(bool appVersionCheck = true,
-            SettingsLoadOptions options = SettingsLoadOptions.None)
+        public void Load(
+            SettingsLoadOptions options = SettingsLoadOptions.None,
+            bool appVersionCheck = true,
+            SettingsLoadOptions appVersionCheckOptions = SettingsLoadOptions.RemoveUnused)
         {
             lock (SyncRoot)
             {
-                OnLoadSettings(_settingsList, options);
+                Loading?.Invoke(this,
+                    EventArgs.Empty);
+
+                OnLoadSettings(_settingsList,
+                    options);
                 OnSaveSettings(_settingsList);
 
                 if (appVersionCheck)
                 {
-                    string appFilePath;
 
 #if NETCOREAPP
 
-                    appFilePath = Environment.ExecAppAssemblyFilePath;
+                    var appFilePath = Environment.ExecAppAssemblyFilePath;
 
 #elif NETFRAMEWORK
 
-                    appFilePath = Environment.ExecAppFilePath;
+                    var appFilePath = Environment.ExecAppFilePath;
 
 #endif
 
@@ -77,15 +94,23 @@ namespace RIS.Settings
 
                     if (AppVersion != currentAppVersion)
                     {
+                        var oldAppVersion = AppVersion;
+
                         OnLoadSettings(_settingsList,
-                            SettingsLoadOptions.RemoveUnused
-                            | SettingsLoadOptions.DeduplicatePreserveValues);
+                            appVersionCheckOptions);
 
                         AppVersion = currentAppVersion;
 
                         OnSaveSettings(_settingsList);
+
+                        AppVersionChanged?.Invoke(this,
+                            new AppVersionChangedEventArgs(
+                                oldAppVersion, currentAppVersion));
                     }
                 }
+
+                Loaded?.Invoke(this,
+                    EventArgs.Empty);
             }
         }
 
@@ -95,7 +120,13 @@ namespace RIS.Settings
             {
                 lock (SyncRoot)
                 {
+                    Saving?.Invoke(this,
+                        EventArgs.Empty);
+
                     OnSaveSettings(_settingsList);
+
+                    Saved?.Invoke(this,
+                        EventArgs.Empty);
                 }
             });
         }
