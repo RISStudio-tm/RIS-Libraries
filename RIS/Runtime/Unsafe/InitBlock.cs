@@ -40,11 +40,11 @@ namespace RIS.Runtime.Unsafe
 
             using (var il = new GroboIL(method))
             {
-                il.Ldarg(0); // address
-                il.Ldarg(1); // initialization value
-                il.Ldarg(2); // number of bytes
-                il.Initblk();     // block init
-                il.Ret();         // return
+                il.Ldarg(0);   // address
+                il.Ldarg(1);   // initialization value
+                il.Ldarg(2);   // number of bytes
+                il.Initblk();  // block init
+                il.Ret();      // return
             }
 
             return (SetMemoryCallback)method.CreateDelegate(typeof(SetMemoryCallback));

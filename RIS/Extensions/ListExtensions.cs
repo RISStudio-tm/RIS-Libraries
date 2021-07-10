@@ -14,7 +14,9 @@ namespace RIS.Extensions
         {
             if (list == null)
             {
-                throw new ArgumentNullException(nameof(list));
+                var exception = new ArgumentNullException(nameof(list));
+                Events.OnError(new RErrorEventArgs(exception, exception.Message));
+                throw exception;
             }
 
             Random rand = random ?? ThreadLocalRandom.Current;

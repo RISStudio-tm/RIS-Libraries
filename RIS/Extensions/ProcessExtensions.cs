@@ -14,7 +14,9 @@ namespace RIS.Extensions
         {
             if (process == null)
             {
-                throw new ArgumentNullException(nameof(process));
+                var exception = new ArgumentNullException(nameof(process));
+                Events.OnError(new RErrorEventArgs(exception, exception.Message));
+                throw exception;
             }
 
             process.EnableRaisingEvents = true;

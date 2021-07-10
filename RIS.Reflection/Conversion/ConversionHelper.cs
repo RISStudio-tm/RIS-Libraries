@@ -7,7 +7,6 @@ using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using Microsoft.CSharp.RuntimeBinder;
-using RIS.Extensions;
 using Binder = Microsoft.CSharp.RuntimeBinder.Binder;
 
 namespace RIS.Reflection.Conversion

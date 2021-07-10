@@ -6,6 +6,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Reflection;
+using RIS.Collections.Chunked;
 using RIS.Collections.Nestable;
 
 namespace RIS.Settings
@@ -47,6 +48,17 @@ namespace RIS.Settings
         {
             return collection.ToStringRepresent();
         }
+        private static string ToStringRepresent<T>(IChunkedCollection<T> collection)
+        {
+            var nestableCollection = new NestableArrayCAL<T>();
+
+            foreach (var element in collection)
+            {
+                nestableCollection.Add(element);
+            }
+
+            return nestableCollection.ToStringRepresent();
+        }
         private static string ToStringRepresent<T>(ICollection<T> collection)
         {
             var nestableCollection = new NestableArrayCAL<T>();
@@ -73,6 +85,21 @@ namespace RIS.Settings
         private static INestableCollection<T> FromStringRepresentNestable<T>(string represent)
         {
             return NestableHelper.FromStringRepresent<T>(represent);
+        }
+        private static IChunkedCollection<T> FromStringRepresentChunked<T>(string represent)
+        {
+            var nestableCollection = new NestableArrayCAL<T>();
+
+            nestableCollection.FromStringRepresent(represent);
+
+            var collection = new ChunkedArrayL<T>(nestableCollection.Length);
+
+            for (int i = 0; i < nestableCollection.Length; ++i)
+            {
+                collection[i] = nestableCollection[i].GetElement();
+            }
+
+            return collection;
         }
         private static ICollection<T> FromStringRepresentArray<T>(string represent)
         {
@@ -192,6 +219,46 @@ namespace RIS.Settings
                         case INestableCollection<UIntPtr> settingValue:
                             return ToStringRepresent(settingValue);
                         case INestableCollection<DateTime> settingValue:
+                            return ToStringRepresent(settingValue);
+                        default:
+                            return value.ToString();
+                    }
+                case IChunkedCollection collectionValue:
+                    switch (collectionValue)
+                    {
+                        case IChunkedCollection<string> settingValue:
+                            return ToStringRepresent(settingValue);
+                        case IChunkedCollection<sbyte> settingValue:
+                            return ToStringRepresent(settingValue);
+                        case IChunkedCollection<byte> settingValue:
+                            return ToStringRepresent(settingValue);
+                        case IChunkedCollection<short> settingValue:
+                            return ToStringRepresent(settingValue);
+                        case IChunkedCollection<ushort> settingValue:
+                            return ToStringRepresent(settingValue);
+                        case IChunkedCollection<int> settingValue:
+                            return ToStringRepresent(settingValue);
+                        case IChunkedCollection<uint> settingValue:
+                            return ToStringRepresent(settingValue);
+                        case IChunkedCollection<long> settingValue:
+                            return ToStringRepresent(settingValue);
+                        case IChunkedCollection<ulong> settingValue:
+                            return ToStringRepresent(settingValue);
+                        case IChunkedCollection<float> settingValue:
+                            return ToStringRepresent(settingValue);
+                        case IChunkedCollection<double> settingValue:
+                            return ToStringRepresent(settingValue);
+                        case IChunkedCollection<decimal> settingValue:
+                            return ToStringRepresent(settingValue);
+                        case IChunkedCollection<char> settingValue:
+                            return ToStringRepresent(settingValue);
+                        case IChunkedCollection<bool> settingValue:
+                            return ToStringRepresent(settingValue);
+                        case IChunkedCollection<IntPtr> settingValue:
+                            return ToStringRepresent(settingValue);
+                        case IChunkedCollection<UIntPtr> settingValue:
+                            return ToStringRepresent(settingValue);
+                        case IChunkedCollection<DateTime> settingValue:
                             return ToStringRepresent(settingValue);
                         default:
                             return value.ToString();
@@ -354,6 +421,45 @@ namespace RIS.Settings
                     SetValue(FromStringRepresentNestable<UIntPtr>(value));
                 else if (typeof(INestableCollection<DateTime>).IsAssignableFrom(Type))
                     SetValue(FromStringRepresentNestable<DateTime>(value));
+                else
+                    SetValue(value);
+            }
+            else if (typeof(IChunkedCollection).IsAssignableFrom(Type))
+            {
+                if (typeof(IChunkedCollection<string>).IsAssignableFrom(Type))
+                    SetValue(FromStringRepresentChunked<string>(value));
+                else if (typeof(IChunkedCollection<sbyte>).IsAssignableFrom(Type))
+                    SetValue(FromStringRepresentChunked<sbyte>(value));
+                else if (typeof(IChunkedCollection<byte>).IsAssignableFrom(Type))
+                    SetValue(FromStringRepresentChunked<byte>(value));
+                else if (typeof(IChunkedCollection<short>).IsAssignableFrom(Type))
+                    SetValue(FromStringRepresentChunked<short>(value));
+                else if (typeof(IChunkedCollection<ushort>).IsAssignableFrom(Type))
+                    SetValue(FromStringRepresentChunked<ushort>(value));
+                else if (typeof(IChunkedCollection<int>).IsAssignableFrom(Type))
+                    SetValue(FromStringRepresentChunked<int>(value));
+                else if (typeof(IChunkedCollection<uint>).IsAssignableFrom(Type))
+                    SetValue(FromStringRepresentChunked<uint>(value));
+                else if (typeof(IChunkedCollection<long>).IsAssignableFrom(Type))
+                    SetValue(FromStringRepresentChunked<long>(value));
+                else if (typeof(IChunkedCollection<ulong>).IsAssignableFrom(Type))
+                    SetValue(FromStringRepresentChunked<ulong>(value));
+                else if (typeof(IChunkedCollection<float>).IsAssignableFrom(Type))
+                    SetValue(FromStringRepresentChunked<float>(value));
+                else if (typeof(IChunkedCollection<double>).IsAssignableFrom(Type))
+                    SetValue(FromStringRepresentChunked<double>(value));
+                else if (typeof(IChunkedCollection<decimal>).IsAssignableFrom(Type))
+                    SetValue(FromStringRepresentChunked<decimal>(value));
+                else if (typeof(IChunkedCollection<char>).IsAssignableFrom(Type))
+                    SetValue(FromStringRepresentChunked<char>(value));
+                else if (typeof(IChunkedCollection<bool>).IsAssignableFrom(Type))
+                    SetValue(FromStringRepresentChunked<bool>(value));
+                else if (typeof(IChunkedCollection<IntPtr>).IsAssignableFrom(Type))
+                    SetValue(FromStringRepresentChunked<IntPtr>(value));
+                else if (typeof(IChunkedCollection<UIntPtr>).IsAssignableFrom(Type))
+                    SetValue(FromStringRepresentChunked<UIntPtr>(value));
+                else if (typeof(IChunkedCollection<DateTime>).IsAssignableFrom(Type))
+                    SetValue(FromStringRepresentChunked<DateTime>(value));
                 else
                     SetValue(value);
             }

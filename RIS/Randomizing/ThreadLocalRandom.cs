@@ -3,6 +3,7 @@
 
 using System;
 using System.Threading;
+using RIS.Extensions;
 
 namespace RIS.Randomizing
 {

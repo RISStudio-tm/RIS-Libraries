@@ -3,15 +3,15 @@
 
 using System;
 
-namespace RIS.Exceptions
+namespace RIS.Extensions
 {
-    public static class ExceptionsUtils
+    public static class AggregateExceptionExtensions
     {
-        public static Exception UnwrapFirst(AggregateException exception)
+        public static Exception UnwrapFirst(this AggregateException exception)
         {
             return UnwrapFirstInternal(exception);
         }
-        internal static Exception UnwrapFirstInternal(AggregateException exception)
+        private static Exception UnwrapFirstInternal(this AggregateException exception)
         {
             if (exception.InnerExceptions.Count == 1)
                 return exception.InnerExceptions[0];
@@ -19,7 +19,7 @@ namespace RIS.Exceptions
             return UnwrapFirstInternal(exception);
         }
 
-        public static void ThrowUnwrapFirst(AggregateException exception)
+        public static void ThrowUnwrapFirst(this AggregateException exception)
         {
             throw UnwrapFirst(exception);
         }

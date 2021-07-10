@@ -80,6 +80,37 @@ namespace RIS.Mathematics
 
 
 
+        public static double ToPercentage(double totalValue,
+            double value, int digits = 2)
+        {
+            if (digits < 0)
+                digits = 0;
+
+            double percent = 0;
+
+            if (value < totalValue)
+            {
+                percent = System.Math.Round(
+                    100 - (value / totalValue * 100),
+                    digits,
+                    MidpointRounding.AwayFromZero);
+            }
+
+            return percent;
+        }
+
+
+        public static double ToFahrenheit(double celsius)
+        {
+            return (celsius * 9 / 5) + 32;
+        }
+
+        public static double ToCelsius(double fahrenheit)
+        {
+            return (fahrenheit - 32) * 5 / 9;
+        }
+
+
         /// <summary>
         /// Returns the value of the angle in degrees converted from radians.
         /// </summary>

@@ -14,7 +14,9 @@ namespace RIS.Extensions
         {
             if (source == null)
             {
-                throw new ArgumentNullException(nameof(source));
+                var exception = new ArgumentNullException(nameof(source));
+                Events.OnError(new RErrorEventArgs(exception, exception.Message));
+                throw exception;
             }
 
             return ShuffledIterator(source, random ?? SingletonRandom.Instance);

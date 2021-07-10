@@ -4,7 +4,7 @@
 using System;
 using RIS.Reflection.Conversion;
 
-namespace RIS.Extensions
+namespace RIS.Reflection.Extensions
 {
     public static class TypeExtensions
     {
@@ -43,7 +43,6 @@ namespace RIS.Extensions
                 Events.OnError(new RErrorEventArgs(exception, exception.Message));
                 throw exception;
             }
-
             if (to == null)
             {
                 var exception = new ArgumentNullException(nameof(to), $"{nameof(to)} must not be null");
@@ -63,7 +62,6 @@ namespace RIS.Extensions
                 Events.OnError(new RErrorEventArgs(exception, exception.Message));
                 throw exception;
             }
-
             if (to == null)
             {
                 var exception = new ArgumentNullException(nameof(to), $"{nameof(to)} must not be null");

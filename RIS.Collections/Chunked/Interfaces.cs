@@ -2,47 +2,65 @@
 // Licensed under the Apache License, Version 2.0. See LICENSE file in the project root for license information. 
 
 using System;
+using System.Collections;
 using System.Collections.Generic;
 
 namespace RIS.Collections.Chunked
 {
-    public interface IChunkedCollection<T>
+    public interface IChunkedCollection : ICollection, IEnumerable
     {
-        T this[long index] { get; set; }
-        T this[int chunkIndex, uint valueIndex] { get; set; }
-
         int ChunksCount { get; }
         uint ChunkSize { get; }
         long Length { get; }
 
-        bool Add(T value);
-
         bool Remove();
 
         void Clear();
+    }
+
+    public interface IChunkedCollection<T> : IChunkedCollection, IEnumerable<T>
+    {
+        T this[long index] { get; set; }
+        T this[int chunkIndex, uint valueIndex] { get; set; }
+
+        bool Add(T value);
 
         void CopyTo(IChunkedCollection<T> collection, bool clearBeforeCopy);
         void CopyTo(ISyncChunkedCollection<T> collection, bool clearBeforeCopy);
         void CopyTo(IList<T> collection, bool clearBeforeCopy);
     }
 
-    public interface IChunkedArray<T> : IChunkedCollection<T>
+    public interface IChunkedArray : IChunkedCollection
+    {
+
+    }
+
+    public interface IChunkedArray<T> : IChunkedArray, IChunkedCollection<T>
     {
         ref T GetRef(long index);
         ref T GetRef(int chunkIndex, uint valueIndex);
     }
 
-    public interface ISyncChunkedCollection<T> : IChunkedCollection<T>
+    public interface ISyncChunkedCollection : IChunkedCollection
     {
-        object SyncRoot { get; }
+        new object SyncRoot { get; }
 
         object GetChunkSyncRootForElement(long index);
         object GetChunkSyncRoot(int chunkIndex);
     }
 
-    public interface ISyncChunkedArray<T> : ISyncChunkedCollection<T>
+    public interface ISyncChunkedCollection<T> : ISyncChunkedCollection, IChunkedCollection<T>
     {
-        ref T GetRef(long index);
-        ref T GetRef(int chunkIndex, uint valueIndex);
+
+    }
+
+    public interface ISyncChunkedArray : IChunkedArray, ISyncChunkedCollection
+    {
+
+    }
+
+    public interface ISyncChunkedArray<T> : ISyncChunkedArray, IChunkedArray<T>, ISyncChunkedCollection<T>
+    {
+
     }
 }

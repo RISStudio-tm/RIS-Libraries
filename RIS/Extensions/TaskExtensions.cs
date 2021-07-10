@@ -19,7 +19,9 @@ namespace RIS.Extensions
         {
             if (task == null)
             {
-                throw new ArgumentNullException(nameof(task));
+                var exception = new ArgumentNullException(nameof(task));
+                Events.OnError(new RErrorEventArgs(exception, exception.Message));
+                throw exception;
             }
 
             timeout.ThrowIfNotValidTaskTimeout();
@@ -35,13 +37,15 @@ namespace RIS.Extensions
             CancellationTokenSource timeoutCanceler = new CancellationTokenSource();
             Task timeoutTask = Task.Delay(timeout, timeoutCanceler.Token);
 
-            Task completed = await Task.WhenAny(task, timeoutTask).ConfigureAwait(false);
+            Task completed = await Task.WhenAny(task, timeoutTask)
+                .ConfigureAwait(false);
 
             if (completed == task)
             {
                 timeoutCanceler.Cancel();
 
-                await completed.ConfigureAwait(false);
+                await completed
+                    .ConfigureAwait(false);
 
                 return true;
             }

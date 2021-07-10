@@ -14,7 +14,9 @@ namespace RIS.Extensions
         {
             if (waitHandle == null)
             {
-                throw new ArgumentNullException(nameof(waitHandle));
+                var exception = new ArgumentNullException(nameof(waitHandle));
+                Events.OnError(new RErrorEventArgs(exception, exception.Message));
+                throw exception;
             }
 
             if (timeout.HasValue)
@@ -28,6 +30,7 @@ namespace RIS.Extensions
             CancellationToken cancellationToken)
         {
             RegisteredWaitHandle registeredHandle = null;
+
             try
             {
                 TaskCompletionSource<bool> taskCompletionSource = new TaskCompletionSource<bool>()

@@ -1118,7 +1118,7 @@ namespace RIS.Collections.Nestable
                 OnError(new RErrorEventArgs(exception, exception.Message));
                 throw exception;
             }
-            if (array.GetValue(0).GetType() != typeof(T))
+            if (array.GetType().GetElementType() != typeof(T))
             {
                 var exception = new ArrayTypeMismatchException("Для копирования тип целевого массива не может отличаться от типа текущей коллекции");
                 Events.OnError(this, new RErrorEventArgs(exception, exception.Message));

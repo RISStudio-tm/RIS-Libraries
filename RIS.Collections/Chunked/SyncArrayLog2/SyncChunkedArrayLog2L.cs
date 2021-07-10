@@ -7,7 +7,7 @@ using System.Collections.Generic;
 
 namespace RIS.Collections.Chunked
 {
-    public class SyncChunkedArrayL<T> : ISyncChunkedArray<T>
+    public class SyncChunkedArrayLog2L<T> : ISyncChunkedArray<T>
     {
         public event EventHandler<RInformationEventArgs> Information;
         public event EventHandler<RWarningEventArgs> Warning;
@@ -39,6 +39,7 @@ namespace RIS.Collections.Chunked
         private List<T[]> Chunks { get; }
         private ChunkedArrayL<object> ChunksSyncRoots { get; }
 
+        private byte Offset { get; }
         public int ChunksCount
         {
             get
@@ -68,12 +69,12 @@ namespace RIS.Collections.Chunked
 
         public struct Enumerator : IEnumerator<T>, IEnumerator, IDisposable
         {
-            private readonly SyncChunkedArrayL<T> _list;
+            private readonly SyncChunkedArrayLog2L<T> _list;
             private long _index;
 
             public T Current { get; private set; }
 
-            internal Enumerator(SyncChunkedArrayL<T> list)
+            internal Enumerator(SyncChunkedArrayLog2L<T> list)
             {
                 _list = list;
                 _index = 0;
@@ -87,7 +88,7 @@ namespace RIS.Collections.Chunked
 
             public bool MoveNext()
             {
-                SyncChunkedArrayL<T> list = _list;
+                SyncChunkedArrayLog2L<T> list = _list;
                 if (_index >= list.Length)
                 {
                     _index = _list.Length + 1;
@@ -121,17 +122,17 @@ namespace RIS.Collections.Chunked
             }
         }
 
-        public SyncChunkedArrayL()
+        public SyncChunkedArrayLog2L()
             : this(0)
         {
 
         }
-        public SyncChunkedArrayL(long length)
+        public SyncChunkedArrayLog2L(long length)
             : this(length, Environment.GCLOHThresholdSize / Environment.GetSize<T>())
         {
 
         }
-        public SyncChunkedArrayL(long length, uint chunkSize)
+        public SyncChunkedArrayLog2L(long length, uint chunkSize)
         {
             if (chunkSize < 1)
             {
@@ -155,7 +156,8 @@ namespace RIS.Collections.Chunked
             IsSynchronized = true;
 
             Length = length;
-            ChunkSize = chunkSize;
+            Offset = (byte)Math.Log(chunkSize, 2);
+            ChunkSize = (uint)Math.Pow(2, Offset);
 
             int chunksCount = (int)(length / chunkSize);
 
@@ -212,8 +214,8 @@ namespace RIS.Collections.Chunked
                 throw exception;
             }
 
-            int chunkIndex = (int)(index / ChunkSize);
-            uint valueIndex = (uint)(index % ChunkSize);
+            int chunkIndex = (int)(index >> Offset);
+            uint valueIndex = (uint)(index & (ChunkSize - 1));
 
             lock (ChunksSyncRoots[chunkIndex])
             {
@@ -274,8 +276,8 @@ namespace RIS.Collections.Chunked
                 throw exception;
             }
 
-            int chunkIndex = (int)(index / ChunkSize);
-            uint valueIndex = (uint)(index % ChunkSize);
+            int chunkIndex = (int)(index >> Offset);
+            uint valueIndex = (uint)(index & (ChunkSize - 1));
 
             lock (ChunksSyncRoots[chunkIndex])
             {
@@ -520,8 +522,8 @@ namespace RIS.Collections.Chunked
 
                 ++Length;
 
-                int needChunksCount = (int) (Length / ChunkSize);
-                if (Length % ChunkSize != 0)
+                int needChunksCount = (int)(Length >> Offset);
+                if ((Length & (ChunkSize - 1)) != 0)
                     ++needChunksCount;
 
                 if (ChunksCount < needChunksCount)
@@ -549,8 +551,8 @@ namespace RIS.Collections.Chunked
 
                 --Length;
 
-                int needChunksCount = (int) (Length / ChunkSize);
-                if (Length % ChunkSize != 0)
+                int needChunksCount = (int)(Length >> Offset);
+                if ((Length & (ChunkSize - 1)) != 0)
                     ++needChunksCount;
 
                 if (ChunksCount > needChunksCount)

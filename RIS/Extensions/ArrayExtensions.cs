@@ -2,8 +2,11 @@
 // Licensed under the Apache License, Version 2.0. See LICENSE file in the project root for license information. 
 
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+using RIS.Utilities;
 
 namespace RIS.Extensions
 {
@@ -11,6 +14,69 @@ namespace RIS.Extensions
     {
         private const int BufferBlockCopyThreshold = 1024;
         private const int UnmanagedThreshold = 128;
+
+
+
+        public static Array RemoveDuplicates(this Array array)
+        {
+            return ToList(array, SortDirectionType.None, true)
+                .ToArray();
+        }
+
+        public static Array ToArray(this Array array,
+            SortDirectionType sortDirectionType = SortDirectionType.None,
+            bool removeDuplicates = false)
+        {
+            return ToList(array, sortDirectionType, removeDuplicates)
+                .ToArray();
+        }
+
+        public static List<string> ToList(this Array array,
+            SortDirectionType sortDirectionType = SortDirectionType.None,
+            bool removeDuplicates = false)
+        {
+            if (array == null)
+            {
+                var exception = new ArgumentNullException(nameof(array));
+                Events.OnError(new RErrorEventArgs(exception, exception.Message));
+                throw exception;
+            }
+
+            var list = new List<string>(array.Length);
+
+            for (var i = 0; i < array.Length; i++)
+            {
+                var s = array.GetValue(i)?
+                    .ToString();
+
+                if (removeDuplicates)
+                {
+                    if (!list.Contains(s))
+                        list.Add(s);
+                }
+                else
+                {
+                    list.Add(s);
+                }
+            }
+
+            switch (sortDirectionType)
+            {
+                case SortDirectionType.None:
+                    return list;
+                case SortDirectionType.Ascending:
+                    return list
+                        .OrderBy(x => x)
+                        .ToList();
+                case SortDirectionType.Descending:
+                    return list
+                        .OrderByDescending(x => x)
+                        .ToList();
+                default:
+                    return list;
+            }
+        }
+
 
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -702,82 +768,108 @@ namespace RIS.Extensions
         {
             if (src == null)
             {
-                throw new ArgumentNullException(srcName ?? "src");
+                var exception = new ArgumentNullException(nameof(src));
+                Events.OnError(new RErrorEventArgs(exception, exception.Message));
+                throw exception;
             }
 
             int srcLength = src.Length;
 
             if (src.Length < 0)
             {
-                throw new ArgumentException($"{srcName ?? "src"}.Length < 0 : {srcLength} < 0", srcName ?? "src");
+                var exception = new ArgumentException($"{srcName ?? "src"}.Length < 0 : {srcLength} < 0", srcName ?? "src");
+                Events.OnError(new RErrorEventArgs(exception, exception.Message));
+                throw exception;
             }
 
             if (dst == null)
             {
-                throw new ArgumentNullException(dstName ?? "dst");
+                var exception = new ArgumentNullException(dstName ?? "dst");
+                Events.OnError(new RErrorEventArgs(exception, exception.Message));
+                throw exception;
             }
 
             int dstLength = dst.Length;
 
             if (dst.Length < 0)
             {
-                throw new ArgumentException($"{dstName ?? "dst"}.Length < 0 : {dstLength} < 0", dstName ?? "dst");
+                var exception = new ArgumentException($"{dstName ?? "dst"}.Length < 0 : {dstLength} < 0", dstName ?? "dst");
+                Events.OnError(new RErrorEventArgs(exception, exception.Message));
+                throw exception;
             }
 
             if (srcOffset != 0 || dstOffset != 0 || length != srcLength)
             {
                 if (length < 0)
                 {
-                    throw new ArgumentOutOfRangeException(lengthName ?? "length",
+                    var exception = new ArgumentOutOfRangeException(lengthName ?? "length",
                         $"{lengthName ?? "length"} < 0 : {length} < 0");
+                    Events.OnError(new RErrorEventArgs(exception, exception.Message));
+                    throw exception;
                 }
 
                 if (srcOffset + length > srcLength)
                 {
                     if (srcOffset >= srcLength)
                     {
-                        throw new ArgumentException(
+                        var exception = new ArgumentException(
                             $"{srcOffsetName ?? "srcOffset"} >= {srcName ?? "src"}.Length : {srcOffset} >= {srcLength}");
+                        Events.OnError(new RErrorEventArgs(exception, exception.Message));
+                        throw exception;
                     }
                     else if (length > srcLength)
                     {
-                        throw new ArgumentOutOfRangeException(lengthName ?? "length",
+                        var exception = new ArgumentOutOfRangeException(lengthName ?? "length",
                             $"{lengthName ?? "length"} > {srcName ?? "src"}.Length : {length} > {srcLength}");
+                        Events.OnError(new RErrorEventArgs(exception, exception.Message));
+                        throw exception;
                     }
                     else
                     {
-                        throw new ArgumentException(
+                        var exception = new ArgumentException(
                             $"{srcOffsetName ?? "srcOffset"} + {lengthName ?? "length"} > {srcName ?? "src"}.Length : {srcOffset} + {length} > {srcLength}");
+                        Events.OnError(new RErrorEventArgs(exception, exception.Message));
+                        throw exception;
                     }
                 }
                 else if (srcOffset < 0)
                 {
-                    throw new ArgumentOutOfRangeException(srcOffsetName ?? "srcOffset",
+                    var exception = new ArgumentOutOfRangeException(srcOffsetName ?? "srcOffset",
                         $"{srcOffsetName ?? "srcOffset"} < 0 : {srcOffset} < 0");
+                    Events.OnError(new RErrorEventArgs(exception, exception.Message));
+                    throw exception;
                 }
 
                 if (dstOffset + length > dstLength)
                 {
                     if (dstOffset >= dstLength)
                     {
-                        throw new ArgumentException(
+                        var exception = new ArgumentException(
                             $"{dstOffsetName ?? "dstOffset"} >= {dstName ?? "dst"} : {dstOffset} >= {dstLength}");
+                        Events.OnError(new RErrorEventArgs(exception, exception.Message));
+                        throw exception;
                     }
                     else if (length > dstLength)
                     {
-                        throw new ArgumentOutOfRangeException(lengthName ?? "length",
+                        var exception = new ArgumentOutOfRangeException(lengthName ?? "length",
                             $"{lengthName ?? "length"} > {dstName ?? "dst"}.Length : {length} > {dstLength}");
+                        Events.OnError(new RErrorEventArgs(exception, exception.Message));
+                        throw exception;
                     }
                     else
                     {
-                        throw new ArgumentException(
+                        var exception = new ArgumentException(
                             $"{dstOffsetName ?? "dstOffset"} + {lengthName ?? "length"} > {dstName ?? "dst"}.Length : {dstOffset} + {length} > {dstLength}");
+                        Events.OnError(new RErrorEventArgs(exception, exception.Message));
+                        throw exception;
                     }
                 }
                 else if (dstOffset < 0)
                 {
-                    throw new ArgumentOutOfRangeException(dstOffsetName ?? "dstOffset",
+                    var exception = new ArgumentOutOfRangeException(dstOffsetName ?? "dstOffset",
                         $"{dstOffsetName ?? "dstOffset"} < 0 : {dstOffset} < 0");
+                    Events.OnError(new RErrorEventArgs(exception, exception.Message));
+                    throw exception;
                 }
             }
         }

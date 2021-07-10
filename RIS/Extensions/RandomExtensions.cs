@@ -4,8 +4,9 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using RIS.Randomizing;
 
-namespace RIS.Randomizing
+namespace RIS.Extensions
 {
     public static class RandomExtensions
     {
@@ -13,7 +14,9 @@ namespace RIS.Randomizing
         {
             if (random == null)
             {
-                throw new ArgumentNullException(nameof(random));
+                var exception = new ArgumentNullException(nameof(random));
+                Events.OnError(new RErrorEventArgs(exception, exception.Message));
+                throw exception;
             }
 
             IGaussianRandom gaussianRandom = random as IGaussianRandom;
@@ -45,7 +48,9 @@ namespace RIS.Randomizing
         {
             if (random == null)
             {
-                throw new ArgumentNullException(nameof(random));
+                var exception = new ArgumentNullException(nameof(random));
+                Events.OnError(new RErrorEventArgs(exception, exception.Message));
+                throw exception;
             }
 
             return random.NextBits(1) != 0;
@@ -54,7 +59,9 @@ namespace RIS.Randomizing
         {
             if (random == null)
             {
-                throw new ArgumentNullException(nameof(random));
+                var exception = new ArgumentNullException(nameof(random));
+                Events.OnError(new RErrorEventArgs(exception, exception.Message));
+                throw exception;
             }
 
             if (probability == 0)
@@ -67,11 +74,17 @@ namespace RIS.Randomizing
             }
             else if (probability < 0 || probability > 1)
             {
-                throw new ArgumentOutOfRangeException(nameof(probability), $"Probability must be in [0, 1]. Found {probability}");
+                var exception = new ArgumentOutOfRangeException(nameof(probability), probability,
+                    $"Probability must be in [0, 1]. Found {probability}");
+                Events.OnError(new RErrorEventArgs(exception, exception.Message));
+                throw exception;
             }
             else if (double.IsNaN(probability))
             {
-                throw new ArgumentException("Probability must not be NaN", nameof(probability));
+                var exception = new ArgumentException(
+                    "Probability must not be NaN", nameof(probability));
+                Events.OnError(new RErrorEventArgs(exception, exception.Message));
+                throw exception;
             }
 
             return random.NextDouble() < probability;
@@ -81,7 +94,9 @@ namespace RIS.Randomizing
         {
             if (random == null)
             {
-                throw new ArgumentNullException(nameof(random));
+                var exception = new ArgumentNullException(nameof(random));
+                Events.OnError(new RErrorEventArgs(exception, exception.Message));
+                throw exception;
             }
 
             return random.NextBits(32);
@@ -91,7 +106,9 @@ namespace RIS.Randomizing
         {
             if (random == null)
             {
-                throw new ArgumentNullException(nameof(random));
+                var exception = new ArgumentNullException(nameof(random));
+                Events.OnError(new RErrorEventArgs(exception, exception.Message));
+                throw exception;
             }
 
             NextBitsRandom nextBitsRandom = random as NextBitsRandom;
@@ -108,7 +125,9 @@ namespace RIS.Randomizing
         {
             if (random == null)
             {
-                throw new ArgumentNullException(nameof(random));
+                var exception = new ArgumentNullException(nameof(random));
+                Events.OnError(new RErrorEventArgs(exception, exception.Message));
+                throw exception;
             }
 
             return random.NextBits(24) / ((float)(1 << 24));
@@ -118,16 +137,24 @@ namespace RIS.Randomizing
         {
             if (random == null)
             {
-                throw new ArgumentNullException(nameof(random));
+                var exception = new ArgumentNullException(nameof(random));
+                Events.OnError(new RErrorEventArgs(exception, exception.Message));
+                throw exception;
             }
 
             if (max < 0)
             {
-                throw new ArgumentOutOfRangeException(nameof(max), max, "Max must be non-negative");
+                var exception = new ArgumentOutOfRangeException(nameof(max), max,
+                    "Max must be non-negative");
+                Events.OnError(new RErrorEventArgs(exception, exception.Message));
+                throw exception;
             }
             else if (double.IsNaN(max) || double.IsInfinity(max))
             {
-                throw new ArgumentException("Max must not be infinity or NaN", nameof(max));
+                var exception = new ArgumentException(
+                    "Max must not be infinity or NaN", nameof(max));
+                Events.OnError(new RErrorEventArgs(exception, exception.Message));
+                throw exception;
             }
 
             if (max == 0)
@@ -139,7 +166,9 @@ namespace RIS.Randomizing
         {
             if (random == null)
             {
-                throw new ArgumentNullException(nameof(random));
+                var exception = new ArgumentNullException(nameof(random));
+                Events.OnError(new RErrorEventArgs(exception, exception.Message));
+                throw exception;
             }
 
             double range = max - min;
@@ -148,31 +177,47 @@ namespace RIS.Randomizing
             {
                 if (double.IsNaN(min))
                 {
-                    throw new ArgumentException("Min must not be NaN", nameof(min));
+                    var exception = new ArgumentException(
+                        "Min must not be NaN", nameof(min));
+                    Events.OnError(new RErrorEventArgs(exception, exception.Message));
+                    throw exception;
                 }
                 else if (double.IsNaN(max))
                 {
-                    throw new ArgumentException("Max must not be NaN", nameof(max));
+                    var exception = new ArgumentException(
+                        "Max must not be NaN", nameof(max));
+                    Events.OnError(new RErrorEventArgs(exception, exception.Message));
+                    throw exception;
                 }
                 else if (double.IsInfinity(min))
                 {
-                    throw new ArgumentOutOfRangeException(nameof(min), min, "Min must not be infinite");
+                    var exception = new ArgumentOutOfRangeException(nameof(min), min,
+                        "Min must not be infinite");
+                    Events.OnError(new RErrorEventArgs(exception, exception.Message));
+                    throw exception;
                 }
                 else if (double.IsInfinity(max))
                 {
-                    throw new ArgumentOutOfRangeException(nameof(max), max, "Max must not be infinite");
+                    var exception = new ArgumentOutOfRangeException(nameof(max), max,
+                        "Max must not be infinite");
+                    Events.OnError(new RErrorEventArgs(exception, exception.Message));
+                    throw exception;
                 }
                 else
                 {
-                    throw new ArgumentOutOfRangeException(nameof(range), range,
+                    var exception = new ArgumentOutOfRangeException(nameof(range), range,
                         $"Range (difference between {min} and {max}) is too large to be represented by {typeof(double)}");
+                    Events.OnError(new RErrorEventArgs(exception, exception.Message));
+                    throw exception;
                 }
             }
 
             if (range < 0)
             {
-                throw new ArgumentOutOfRangeException(nameof(range), range,
+                var exception = new ArgumentOutOfRangeException(nameof(range), range,
                     "Range must be greater than or equal to " + nameof(min));
+                Events.OnError(new RErrorEventArgs(exception, exception.Message));
+                throw exception;
             }
 
             if (range == 0)
@@ -185,7 +230,10 @@ namespace RIS.Randomizing
         {
             if (count <= 0)
             {
-                throw new ArgumentOutOfRangeException(nameof(count), "Count must be greater than 0");
+                var exception = new ArgumentOutOfRangeException(
+                    nameof(count), "Count must be greater than 0");
+                Events.OnError(new RErrorEventArgs(exception, exception.Message));
+                throw exception;
             }
 
             return NextDoubles(random).Take(count);
@@ -194,7 +242,9 @@ namespace RIS.Randomizing
         {
             if (random == null)
             {
-                throw new ArgumentNullException(nameof(random));
+                var exception = new ArgumentNullException(nameof(random));
+                Events.OnError(new RErrorEventArgs(exception, exception.Message));
+                throw exception;
             }
 
             return NextDoublesIterator(random);
@@ -212,7 +262,10 @@ namespace RIS.Randomizing
         {
             if (count <= 0)
             {
-                throw new ArgumentOutOfRangeException(nameof(count), "Count must be greater than 0");
+                var exception = new ArgumentOutOfRangeException(
+                    nameof(count), "Count must be greater than 0");
+                Events.OnError(new RErrorEventArgs(exception, exception.Message));
+                throw exception;
             }
 
             return NextBytes(random).Take(count);
@@ -221,7 +274,9 @@ namespace RIS.Randomizing
         {
             if (random == null)
             {
-                throw new ArgumentNullException(nameof(random));
+                var exception = new ArgumentNullException(nameof(random));
+                Events.OnError(new RErrorEventArgs(exception, exception.Message));
+                throw exception;
             }
 
             return NextBytesIterator(random);

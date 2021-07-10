@@ -6,7 +6,7 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
 
-namespace RIS.Extensions
+namespace RIS.Reflection.Extensions
 {
     public static class MethodInfoExtensions
     {
@@ -19,7 +19,6 @@ namespace RIS.Extensions
                 Events.OnError(new RErrorEventArgs(exception, exception.Message));
                 throw exception;
             }
-
             if (method.DeclaringType == null)
             {
                 var exception = new ArgumentNullException(nameof(method), $"{nameof(method.DeclaringType)} must not be null");

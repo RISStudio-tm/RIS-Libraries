@@ -14,7 +14,9 @@ namespace RIS.Extensions
         {
             if (taskCompletionSource == null)
             {
-                throw new ArgumentNullException(nameof(taskCompletionSource));
+                var exception = new ArgumentNullException(nameof(taskCompletionSource));
+                Events.OnError(new RErrorEventArgs(exception, exception.Message));
+                throw exception;
             }
 
             if (cancellationToken.CanBeCanceled)
@@ -35,7 +37,9 @@ namespace RIS.Extensions
         {
             if (taskCompletionSource == null)
             {
-                throw new ArgumentNullException(nameof(taskCompletionSource));
+                var exception = new ArgumentNullException(nameof(taskCompletionSource));
+                Events.OnError(new RErrorEventArgs(exception, exception.Message));
+                throw exception;
             }
 
             timeout.ThrowIfNotValidTaskTimeout();
@@ -71,7 +75,9 @@ namespace RIS.Extensions
         {
             if (resultFactory == null)
             {
-                throw new ArgumentNullException(nameof(resultFactory));
+                var exception = new ArgumentNullException(nameof(resultFactory));
+                Events.OnError(new RErrorEventArgs(exception, exception.Message));
+                throw exception;
             }
 
             return taskCompletionSource.InternalCompleteWith(task,
@@ -80,7 +86,9 @@ namespace RIS.Extensions
         public static TaskCompletionSource<TResult> CompleteWith<TResult>(this TaskCompletionSource<TResult> taskCompletionSource,
             Task task, Func<TResult> resultFactory = null)
         {
-            TaskContinuationOptions continuationOptions = resultFactory == null ? TaskContinuationOptions.ExecuteSynchronously : TaskContinuationOptions.None;
+            TaskContinuationOptions continuationOptions = resultFactory == null
+                ? TaskContinuationOptions.ExecuteSynchronously
+                : TaskContinuationOptions.None;
 
             return taskCompletionSource.InternalCompleteWith(task,
                 (_, state) => state != null ? ((Func<TResult>)state)() : default,
@@ -94,12 +102,15 @@ namespace RIS.Extensions
         {
             if (taskCompletionSource == null)
             {
-                throw new ArgumentNullException(nameof(taskCompletionSource));
+                var exception = new ArgumentNullException(nameof(taskCompletionSource));
+                Events.OnError(new RErrorEventArgs(exception, exception.Message));
+                throw exception;
             }
-
             if (task == null)
             {
-                throw new ArgumentNullException(nameof(task));
+                var exception = new ArgumentNullException(nameof(task));
+                Events.OnError(new RErrorEventArgs(exception, exception.Message));
+                throw exception;
             }
 
             task.ContinueWith((taskContinuation, state) =>
@@ -109,9 +120,9 @@ namespace RIS.Extensions
                     if (taskContinuation.IsFaulted)
                     {
                         if (taskContinuation.Exception?.InnerExceptions.Count == 1)
-                            tupleState.Item1.TrySetException(taskContinuation.Exception.InnerException);
+                            tupleState.Item1.TrySetException(taskContinuation.Exception?.InnerException ?? taskContinuation.Exception);
                         else
-                            tupleState.Item1.TrySetException(taskContinuation.Exception.InnerExceptions);
+                            tupleState.Item1.TrySetException(taskContinuation.Exception?.InnerExceptions);
                     }
                     else if (taskContinuation.IsCanceled)
                     {
