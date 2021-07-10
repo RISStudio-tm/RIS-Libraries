@@ -228,22 +228,18 @@ namespace RIS.Collections.Nestable
             return NestableHelper.Enumerate<T>(this);
         }
 
-        IEnumerator<T> IEnumerable<T>.GetEnumerator()
+        IEnumerator<NestedElement<T>> IEnumerable<NestedElement<T>>.GetEnumerator()
         {
-            IEnumerable<T> value = NestableHelper.Enumerate<T>(this);
-
-            foreach (var element in value)
+            foreach (var value in ValuesCollection)
             {
-                yield return element;
+                yield return value.NestedElement;
             }
         }
         IEnumerator IEnumerable.GetEnumerator()
         {
-            IEnumerable<T> value = NestableHelper.Enumerate<T>(this);
-
-            foreach (var element in value)
+            foreach (var value in ValuesCollection)
             {
-                yield return element;
+                yield return value.NestedElement;
             }
         }
 

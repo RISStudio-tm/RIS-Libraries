@@ -18,9 +18,6 @@ namespace RIS.Collections.Nestable
 
         private static readonly Dictionary<string, NestableCollectionType> CollectionsTypes;
         private static readonly Dictionary<NestableCollectionType, Type> CollectionsInfo;
-        private static readonly Dictionary<char, char> ElementParenthesesMap;
-        private static readonly Dictionary<char, char> ArrayParenthesesMap;
-        private static readonly Dictionary<char, char> CollectionParenthesesMap;
 
         static NestableHelper()
         {
@@ -51,19 +48,6 @@ namespace RIS.Collections.Nestable
                     type
                     );
             }
-
-            ElementParenthesesMap = new Dictionary<char, char>
-            {
-                { '\"', '\"' }
-            };
-            ArrayParenthesesMap = new Dictionary<char, char>
-            {
-                { ']', '[' }
-            };
-            CollectionParenthesesMap = new Dictionary<char, char>
-            {
-                { '}', '{' }
-            };
         }
 
         public static void OnInformation(RInformationEventArgs e)
@@ -95,26 +79,8 @@ namespace RIS.Collections.Nestable
 
 
 
-        private static Dictionary<char, char> GetParenthesesMap(NestedType type)
-        {
-            switch (type)
-            {
-                case NestedType.Element:
-                    return ElementParenthesesMap;
-                case NestedType.Array:
-                    return ArrayParenthesesMap;
-                case NestedType.Collection:
-                    return CollectionParenthesesMap;
-                default:
-                    var exception =
-                        new ArgumentException($"Invalid value for the {nameof(type)} parameter", nameof(type));
-                    Events.OnError(new RErrorEventArgs(exception, exception.Message));
-                    OnError(new RErrorEventArgs(exception, exception.Message));
-                    throw exception;
-            }
-        }
-
-        private static (string Represent, int EndIndex) GetRepresentPart(string represent, int startIndex)
+        private static (string Represent, int EndIndex) GetRepresentPart(
+            string represent, int startIndex)
         {
             if (string.IsNullOrEmpty(represent))
             {
@@ -133,43 +99,22 @@ namespace RIS.Collections.Nestable
                 throw exception;
             }
 
-            NestedType partType;
-            string[] partEndValues;
-            int partExcludedStart;
-            int partExcludedEnd;
+            RepresentPartParseInfo parseInfo;
 
-            switch (represent[startIndex])
+            try
             {
-                case '\"':
-                    partType = NestedType.Element;
-                    partEndValues = new[] { "\",", "\"}" };
-                    partExcludedStart = 1;
-                    partExcludedEnd = 1;
-                    break;
-                case '[':
-                    partType = NestedType.Array;
-                    partEndValues = new[] { "],", "]}" };
-                    partExcludedStart = 0;
-                    partExcludedEnd = -1;
-                    break;
-                case '{':
-                    partType = NestedType.Collection;
-                    partEndValues = new[] { "},", "}}" };
-                    partExcludedStart = 0;
-                    partExcludedEnd = -1;
-                    break;
-                default:
-                    var exception =
-                        new ArgumentException($"{nameof(startIndex)}[{startIndex}] indicates an unknown character of the beginning of the representation", nameof(startIndex));
-                    Events.OnError(new RErrorEventArgs(exception, exception.Message));
-                    OnError(new RErrorEventArgs(exception, exception.Message));
-                    throw exception;
+                parseInfo = RepresentPartParseInfo.Get(
+                    represent, startIndex);
+            }
+            catch (Exception ex)
+            {
+                OnError(new RErrorEventArgs(ex, ex.Message));
+                throw;
             }
 
-            var partParenthesesMap = GetParenthesesMap(partType);
             var skippedOccurrencesCount = 0;
 
-            if (partType == NestedType.Collection)
+            if (parseInfo.Type == NestedType.Collection)
             {
                 Stack<char> parentheses = new Stack<char>();
 
@@ -177,22 +122,22 @@ namespace RIS.Collections.Nestable
                 {
                     var ch = represent[i];
 
-                    if ((i > 0 && represent[i - 1] == '/')
-                        && (i < represent.Length && represent[i + 1] == '/'))
+                    if (((ICollection<char>)parseInfo.ParenthesesMap.Values).Contains(ch))
                     {
-                        continue;
-                    }
+                        if ((i > 0 && represent[i - 1] == '/')
+                            && (i < represent.Length && represent[i + 1] == '/'))
+                        {
+                            continue;
+                        }
 
-                    if (partParenthesesMap.ContainsValue(ch))
-                    {
                         parentheses.Push(ch);
                     }
-                    else if (partParenthesesMap.TryGetValue(ch, out var chMapped))
+                    else if (parseInfo.ParenthesesMap.TryGetValue(ch, out var chMapped))
                     {
                         if (parentheses.Pop() != chMapped)
                         {
                             var exception =
-                                new FormatException($"expected parentheses character '{chMapped}', but obtained character '{ch}'");
+                                new FormatException($"Expected parentheses character '{chMapped}', but obtained character '{ch}'");
                             Events.OnError(new RErrorEventArgs(exception, exception.Message));
                             OnError(new RErrorEventArgs(exception, exception.Message));
                             throw exception;
@@ -212,7 +157,7 @@ namespace RIS.Collections.Nestable
             for (int i = 0; i < 1 + skippedOccurrencesCount; ++i)
             {
                 endIndex = represent
-                    .IndexOfAny(partEndValues, startIndexOccurrence)
+                    .IndexOfAny(parseInfo.EndValues, startIndexOccurrence)
                     .Index;
 
                 if (endIndex == -1)
@@ -231,8 +176,8 @@ namespace RIS.Collections.Nestable
             }
 
             var representPart = represent.Substring(
-                startIndex + partExcludedStart,
-                endIndex - (startIndex + partExcludedEnd));
+                startIndex + parseInfo.ExcludedStart,
+                endIndex - (startIndex + parseInfo.ExcludedEnd));
 
             return (representPart, endIndex);
         }
@@ -249,8 +194,11 @@ namespace RIS.Collections.Nestable
                 return (null, CollectionGeneralType.Unknown);
             }
 
-            typeCollection = CollectionsInfo[type].MakeGenericType(typeof(TValue));
-            object collection = typeCollection.GetConstructor(Array.Empty<Type>())?.Invoke(Array.Empty<object>());
+            typeCollection = CollectionsInfo[type]
+                .MakeGenericType(typeof(TValue));
+            object collection = typeCollection
+                .GetConstructor(Array.Empty<Type>())?
+                .Invoke(Array.Empty<object>());
             CollectionGeneralType generalType = CollectionGeneralType.Unknown;
 
             if (collection is INestableArray<TValue>)
@@ -272,8 +220,11 @@ namespace RIS.Collections.Nestable
                 return (null, CollectionGeneralType.Unknown);
             }
 
-            typeCollection = CollectionsInfo[type].MakeGenericType(typeof(TValue));
-            object collection = typeCollection.GetConstructor(new Type[] { typeof(int) })?.Invoke(new object[] { length });
+            typeCollection = CollectionsInfo[type]
+                .MakeGenericType(typeof(TValue));
+            object collection = typeCollection
+                .GetConstructor(new Type[] { typeof(int) })?
+                .Invoke(new object[] { length });
             CollectionGeneralType generalType = CollectionGeneralType.Unknown;
 
             if (collection is INestableArray<TValue>)
@@ -296,36 +247,37 @@ namespace RIS.Collections.Nestable
 
             return CollectionsTypes[typeString];
         }
-        public static NestableCollectionType GetCollectionType<TValue>(INestableCollection<TValue> collection)
+        public static NestableCollectionType GetCollectionType(INestableCollection collection)
         {
             return collection.CollectionType;
         }
 
-        public static CollectionGeneralType GetGeneralType<TValue, TCollection>()
-            where TCollection: INestableCollection<TValue>
+        public static CollectionGeneralType GetGeneralType<TCollection>()
+            where TCollection: INestableCollection
         {
-            Type typeTCollection = typeof(TCollection);
+            Type typeCollection = typeof(TCollection);
 
-            if (typeTCollection.IsAssignableFrom(typeof(INestableArray<TValue>)))
+            if (typeCollection.IsAssignableFrom(typeof(INestableArray)))
                 return CollectionGeneralType.Array;
-            else if (typeTCollection.IsAssignableFrom(typeof(INestableDictionary<TValue>)))
+            else if (typeCollection.IsAssignableFrom(typeof(INestableDictionary)))
                 return CollectionGeneralType.Dictionary;
-            else if (typeTCollection.IsAssignableFrom(typeof(INestableList<TValue>)))
+            else if (typeCollection.IsAssignableFrom(typeof(INestableList)))
                 return CollectionGeneralType.List;
 
             return CollectionGeneralType.Unknown;
         }
-        public static CollectionGeneralType GetGeneralType<TValue>(INestableCollection<TValue> collection)
+        public static CollectionGeneralType GetGeneralType(INestableCollection collection)
         {
-            if (collection is INestableArray<TValue>)
+            if (collection is INestableArray)
                 return CollectionGeneralType.Array;
-            else if (collection is INestableDictionary<TValue>)
+            else if (collection is INestableDictionary)
                 return CollectionGeneralType.Dictionary;
-            else if (collection is INestableList<TValue>)
+            else if (collection is INestableList)
                 return CollectionGeneralType.List;
 
             return CollectionGeneralType.Unknown;
         }
+
 
 
         public static string ToStringRepresent<TValue>(NestedElement<TValue> value)
@@ -472,7 +424,7 @@ namespace RIS.Collections.Nestable
             return result.ToString();
         }
 
-        private static string ToStringRepresentDictionary<TValue>(string key)
+        private static string ToStringRepresentDictionary(string key)
         {
             if (key == null)
                 return "null";
@@ -492,7 +444,7 @@ namespace RIS.Collections.Nestable
         }
         private static string ToStringRepresentDictionary<TValue>(string key, TValue value)
         {
-            key = ToStringRepresentDictionary<TValue>(key);
+            key = ToStringRepresentDictionary(key);
             string valueString = ToStringRepresent(value);
 
             return $"{key}::{valueString}";
@@ -500,13 +452,13 @@ namespace RIS.Collections.Nestable
         private static string ToStringRepresentDictionary<TValue>(string key, TValue[] value)
         {
             if (value.Length == 0)
-                return $"[{ToStringRepresentDictionary<TValue>(key)}::]";
+                return $"[{ToStringRepresentDictionary(key)}::]";
 
             StringBuilder result = new StringBuilder(value.Length);
 
             result.Append('[');
 
-            result.Append(ToStringRepresentDictionary<TValue>(key));
+            result.Append(ToStringRepresentDictionary(key));
             result.Append("::");
 
             for (int i = 0; i < value.Length; ++i)
@@ -542,13 +494,13 @@ namespace RIS.Collections.Nestable
             }
 
             if (value.Length == 0)
-                return $"{{{ToStringRepresentDictionary<TValue>(key)}::{GetCollectionType(value)}||}}";
+                return $"{{{ToStringRepresentDictionary(key)}::{GetCollectionType(value)}||}}";
 
             StringBuilder result = new StringBuilder(value.Length);
 
             result.Append('{');
 
-            result.Append(ToStringRepresentDictionary<TValue>(key));
+            result.Append(ToStringRepresentDictionary(key));
             result.Append("::");
 
             result.Append(GetCollectionType(value));
@@ -585,20 +537,20 @@ namespace RIS.Collections.Nestable
         }
         private static string ToStringRepresentDictionary<TValue>(INestableDictionary<TValue> value)
         {
-            return ToStringRepresentDictionary(ToStringRepresentDictionary<TValue>(value.Key), value);
+            return ToStringRepresentDictionary(ToStringRepresentDictionary(value.Key), value);
         }
         private static string ToStringRepresentDictionary<TValue>(string key, INestableDictionary<TValue> value)
         {
             RuntimeHelpers.EnsureSufficientExecutionStack();
 
             if (value.Length == 0)
-                return $"{{{ToStringRepresentDictionary<TValue>(key)}::{GetCollectionType(value)}||}}";
+                return $"{{{ToStringRepresentDictionary(key)}::{GetCollectionType(value)}||}}";
 
             StringBuilder result = new StringBuilder(value.Length);
 
             result.Append('{');
 
-            result.Append(ToStringRepresentDictionary<TValue>(key));
+            result.Append(ToStringRepresentDictionary(key));
             result.Append("::");
 
             result.Append(GetCollectionType(value));
@@ -635,6 +587,8 @@ namespace RIS.Collections.Nestable
         }
 
 
+
+        // ReSharper disable once RedundantAssignment
         private static TValue FromStringRepresent<TValue>(string represent, ref TValue value)
         {
             if (represent == "null")
@@ -867,7 +821,7 @@ namespace RIS.Collections.Nestable
             return value;
         }
 
-        private static string FromStringRepresentDictionary<TValue>(string key)
+        private static string FromStringRepresentDictionary(string key)
         {
             if (key == "null")
                 return null;
@@ -905,7 +859,7 @@ namespace RIS.Collections.Nestable
             if (represent.Contains("::"))
             {
                 int resultKeyDivide = represent.IndexOf("::", 1, StringComparison.Ordinal);
-                key = FromStringRepresentDictionary<TValue>(represent.Substring(1, resultKeyDivide - 1));
+                key = FromStringRepresentDictionary(represent.Substring(1, resultKeyDivide - 1));
                 typeDivide = represent.IndexOf("||", resultKeyDivide + 2, StringComparison.Ordinal);
                 type = represent.Substring(resultKeyDivide + 2, typeDivide - resultKeyDivide - 2);
 
@@ -948,7 +902,7 @@ namespace RIS.Collections.Nestable
                     if (partRepresent.Contains("::"))
                     {
                         int resultKeyDivide = partRepresent.IndexOf("::", 0, StringComparison.Ordinal);
-                        string resultKey = FromStringRepresentDictionary<TValue>(partRepresent.Substring(0, resultKeyDivide));
+                        string resultKey = FromStringRepresentDictionary(partRepresent.Substring(0, resultKeyDivide));
 
                         partRepresent = $"{partRepresent.Substring(resultKeyDivide + 2)}";
 
@@ -971,7 +925,7 @@ namespace RIS.Collections.Nestable
                     if (partRepresent.Contains("::"))
                     {
                         int resultKeyDivide = partRepresent.IndexOf("::", 1, StringComparison.Ordinal);
-                        string resultKey = FromStringRepresentDictionary<TValue>(partRepresent.Substring(1, resultKeyDivide - 1));
+                        string resultKey = FromStringRepresentDictionary(partRepresent.Substring(1, resultKeyDivide - 1));
 
                         partRepresent = $"[{partRepresent.Substring(resultKeyDivide + 2)}";
 
@@ -992,7 +946,7 @@ namespace RIS.Collections.Nestable
                     if (partRepresent.Contains("::"))
                     {
                         int resultKeyDivide = partRepresent.IndexOf("::", 1, StringComparison.Ordinal);
-                        string resultKey = FromStringRepresentDictionary<TValue>(partRepresent.Substring(1, resultKeyDivide - 1));
+                        string resultKey = FromStringRepresentDictionary(partRepresent.Substring(1, resultKeyDivide - 1));
                         int resultTypeDivide = partRepresent.IndexOf("||", resultKeyDivide + 2, StringComparison.Ordinal);
                         string resultType = partRepresent.Substring(resultKeyDivide + 2, resultTypeDivide - resultKeyDivide - 2);
 
@@ -1018,6 +972,7 @@ namespace RIS.Collections.Nestable
 
             return value;
         }
+
 
 
         public static IEnumerable<TValue> Enumerate<TValue>(NestedElement<TValue> value)

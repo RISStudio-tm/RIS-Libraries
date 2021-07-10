@@ -239,6 +239,10 @@ namespace RIS.Collections.Nestable.Serialization
                     {
                         continue;
                     }
+                    catch (TargetParameterCountException)
+                    {
+                        continue;
+                    }
 
                     SerializeValueInternal(propertiesCollection,
                         propertyName, propertyValue, settings);

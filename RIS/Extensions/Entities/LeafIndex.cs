@@ -5,13 +5,21 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace RIS.Extensions
+namespace RIS.Extensions.Entities
 {
     public class LeafIndex
     {
-        public string Chars;
-        public string SingleChars;
-        public Dictionary<char, string[]> Strings;
+        public readonly string SingleChars;
+        public readonly string Chars;
+        public readonly IDictionary<char, string[]> MultipleChars;
+
+        public LeafIndex(string singleChars, string chars,
+            IDictionary<char, string[]> multipleChars)
+        {
+            SingleChars = singleChars;
+            Chars = chars;
+            MultipleChars = multipleChars;
+        }
 
         public static LeafIndex FromStrings(IEnumerable<string> strings)
         {
@@ -19,24 +27,22 @@ namespace RIS.Extensions
         }
         public static LeafIndex FromStrings(params string[] strings)
         {
-            var str = strings
+            var multipleChars = strings
                 .Where(s => !string.IsNullOrEmpty(s))
                 .ToLookup(s => s[0], s => s.Substring(1))
                 .ToDictionary(g => g.Key, g => g
                     .OrderByDescending(s => s.Length)
                     .Where(s => !string.IsNullOrEmpty(s))
                     .ToArray());
+            var chars = new string(multipleChars.Keys
+                .ToArray());
+            var singleChars = new string(strings
+                .Where(s => s?.Length == 1)
+                .Select(s => s[0])
+                .ToArray());
 
-            return new LeafIndex
-            {
-                Strings = str,
-                Chars = new string(str.Keys
-                    .ToArray()),
-                SingleChars = new string(strings
-                    .Where(s => s?.Length == 1)
-                    .Select(s => s[0])
-                    .ToArray())
-            };
+            return new LeafIndex(singleChars,
+                chars, multipleChars);
         }
     }
 }

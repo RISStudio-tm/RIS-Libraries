@@ -21,7 +21,7 @@ namespace RIS.Collections.Nestable
         void Clear();
     }
 
-    public interface INestableCollection<T> : INestableCollection, IEnumerable<T>
+    public interface INestableCollection<T> : INestableCollection, IEnumerable<NestedElement<T>>
     {
         NestedElement<T> this[int index] { get; set; }
 
@@ -44,30 +44,48 @@ namespace RIS.Collections.Nestable
         void CopyTo(IList<T> collection, bool clearBeforeCopy);
     }
 
-    public interface INestableArray<T> : INestableCollection<T>
+    public interface INestableArray : INestableCollection
     {
 
     }
 
-    public interface INestableList<T> : INestableCollection<T>
+    public interface INestableArray<T> : INestableArray, INestableCollection<T>
+    {
+
+    }
+
+    public interface INestableList : INestableCollection
+    {
+        bool Remove(int index);
+    }
+
+    public interface INestableList<T> : INestableList, INestableCollection<T>
     {
         bool Insert(NestedElement<T> value, int index);
         bool Insert(T value, int index);
         bool Insert(T[] value, int index);
         bool Insert(INestableCollection<T> value, int index);
-
-        bool Remove(int index);
     }
 
-    public interface INestableDictionary<T> : INestableCollection<T>
+    public interface INestableDictionary : INestableCollection
     {
-        NestedElement<T> this[string key] { get; set; }
-
         string Key { get; set; }
 
         string GetKey(int index);
 
         int GetIndex(string key);
+
+        bool ChangeKey(string oldKey, string newKey);
+
+        bool ContainsKey(string key);
+
+        bool Remove(int index);
+        bool Remove(string key);
+    }
+
+    public interface INestableDictionary<T> : INestableDictionary, INestableCollection<T>
+    {
+        NestedElement<T> this[string key] { get; set; }
 
         NestedElement<T> Get(string key);
 
@@ -77,10 +95,6 @@ namespace RIS.Collections.Nestable
         void Set(string key, T value);
         void Set(string key, T[] value);
         void Set(string key, INestableCollection<T> value);
-
-        bool ChangeKey(string oldKey, string newKey);
-
-        bool ContainsKey(string key);
 
         bool Add(string key, NestedElement<T> value);
         bool Add(string key, T value);
@@ -95,8 +109,5 @@ namespace RIS.Collections.Nestable
         bool Insert(string key, T[] value, int index);
         bool Insert(INestableCollection<T> value, int index);
         bool Insert(string key, INestableCollection<T> value, int index);
-
-        bool Remove(int index);
-        bool Remove(string key);
     }
 }

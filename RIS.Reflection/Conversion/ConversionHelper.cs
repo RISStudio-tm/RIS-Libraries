@@ -108,7 +108,8 @@ namespace RIS.Reflection.Conversion
                 // as mentioned above, primitive convertible types (i. e. not IntPtr) get special 
                 // treatment in the sense that if you can convert from Foo => int, you can convert
                 // from Foo => double as well
-                return conversionMethods.Any(m => m.ReturnType.IsExplicitlyCastableTo(to));
+                return conversionMethods.Any(m =>
+                    CanExplicitCast(m.ReturnType, to));
             }
 
             return conversionMethods.Any(m => m.ReturnType == to);
@@ -133,8 +134,9 @@ namespace RIS.Reflection.Conversion
             if (underlyingFrom != null
                 || underlyingTo != null)
             {
-                return (underlyingFrom ?? from)
-                    .IsExplicitlyCastableTo(underlyingTo ?? to);
+                return CanExplicitCast(
+                    underlyingFrom ?? from,
+                    underlyingTo ?? to);
             }
 
             bool result;
