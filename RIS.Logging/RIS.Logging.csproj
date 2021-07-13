@@ -31,8 +31,7 @@
   </PropertyGroup>
 
   <Target Name="PreBuild" BeforeTargets="BeforeBuild" Condition="'$(Configuration)|$(Platform)'=='Release Nuget|AnyCPU'">
-    <!--<Exec Command="&quot;ChangePackageVersion.exe&quot; &quot;$(MSBuildProjectFullPath)&quot;" WorkingDirectory="..\_tools\ChangePackageVersion" />
-    <Exec Command="&quot;UpdatePackageReference.exe&quot; &quot;$(MSBuildProjectFullPath)&quot;" WorkingDirectory="..\_tools\UpdatePackageReference" />-->
+
   </Target>
 
   <Target Name="PostPack" AfterTargets="Pack" Condition="'$(Configuration)|$(Platform)'=='Release Nuget|AnyCPU'">
@@ -53,6 +52,11 @@
   <ItemGroup>
     <EmbeddedResource Include="Resources\Configs\nlog.config" />
   </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="NLog" Version="4.7.10" />
+    <PackageReference Include="NLog.Schema" Version="4.7.10" />
+  </ItemGroup>
   
   <ItemGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
     <ProjectReference Include="..\RIS.Collections\RIS.Collections.csproj" />
@@ -65,14 +69,9 @@
   </ItemGroup>
   
   <ItemGroup Condition="'$(Configuration)|$(Platform)'=='Release Nuget|AnyCPU'">
-    <!--PackageReference for NuGet-->
+    <!--For NuGet Package-->
     <ProjectReference Include="..\RIS.Collections\RIS.Collections.csproj" />
     <ProjectReference Include="..\RIS\RIS.csproj" />
-  </ItemGroup>
-  
-  <ItemGroup>
-    <PackageReference Include="NLog" Version="4.7.10" />
-    <PackageReference Include="NLog.Schema" Version="4.7.10" />
   </ItemGroup>
   
 </Project>

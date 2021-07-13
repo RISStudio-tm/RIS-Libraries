@@ -5,13 +5,13 @@
     <Configurations>Debug;Release;Release Nuget</Configurations>
     <RootNamespace>RIS.Graphics</RootNamespace>
     <AssemblyName>RIS.Graphics</AssemblyName>
-    <AssemblyVersion>2.7.2.0</AssemblyVersion>
-    <FileVersion>2.7.2.0</FileVersion>
+    <AssemblyVersion>2.7.3.0</AssemblyVersion>
+    <FileVersion>2.7.3.0</FileVersion>
     <UseWPF>true</UseWPF>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <PackageId>RIS.Graphics</PackageId>
     <Product>RIS.Graphics</Product>
-    <Version>2.7.2</Version>
+    <Version>2.7.3</Version>
     <Description>A library designed for various types of tasks. Part of the RIS "ecosystem".</Description>
     <PackageTags>dotnet, dotnetcore, netframework, netcore, library</PackageTags>
     <Authors>Dmitry Ponomarev</Authors>
@@ -45,8 +45,7 @@
   </Target>
   
   <Target Name="PreBuild" BeforeTargets="BeforeBuild" Condition="'$(Configuration)|$(Platform)'=='Release Nuget|AnyCPU'">
-    <!--<Exec Command="&quot;ChangePackageVersion.exe&quot; &quot;$(MSBuildProjectFullPath)&quot;" WorkingDirectory="..\_tools\ChangePackageVersion" />
-    <Exec Command="&quot;UpdatePackageReference.exe&quot; &quot;$(MSBuildProjectFullPath)&quot;" WorkingDirectory="..\_tools\UpdatePackageReference" />-->
+
   </Target>
 
   <Target Name="PostPack" AfterTargets="Pack" Condition="'$(Configuration)|$(Platform)'=='Release Nuget|AnyCPU'">
@@ -81,7 +80,7 @@
   </ItemGroup>
   
   <ItemGroup>
-    <PackageReference Include="ControlzEx" Version="5.0.0" />
+    <PackageReference Include="ControlzEx" Version="5.0.1" />
     <PackageReference Include="CoreCLR-NCalc" Version="2.2.92" />
     <PackageReference Include="MahApps.Metro" Version="2.4.7" />
     <PackageReference Include="MaterialDesignColors" Version="2.0.1" />
@@ -98,9 +97,8 @@
   </ItemGroup>
   
   <ItemGroup Condition="'$(Configuration)|$(Platform)'=='Release Nuget|AnyCPU'">
-    <!--PackageReference for NuGet-->
+    <!--For NuGet Package-->
     <ProjectReference Include="..\RIS\RIS.csproj" />
   </ItemGroup>
   
 </Project>
-<!---->

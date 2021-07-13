@@ -5,11 +5,11 @@
     <Configurations>Debug;Release;Release Nuget</Configurations>
     <RootNamespace>RIS.Connection.MySQL</RootNamespace>
     <AssemblyName>RIS.Connection.MySQL</AssemblyName>
-    <AssemblyVersion>4.5.2.0</AssemblyVersion>
-    <FileVersion>4.5.2.0</FileVersion>
+    <AssemblyVersion>4.5.3.0</AssemblyVersion>
+    <FileVersion>4.5.3.0</FileVersion>
     <PackageId>RIS.Connection.MySQL</PackageId>
     <Product>RIS.Connection.MySQL</Product>
-    <Version>4.5.2</Version>
+    <Version>4.5.3</Version>
     <Description>A library designed for various types of tasks. Part of the RIS "ecosystem".</Description>
     <PackageTags>dotnet, dotnetcore, netframework, netcore, library</PackageTags>
     <Authors>Dmitry Ponomarev</Authors>
@@ -32,8 +32,7 @@
   </PropertyGroup>
 
   <Target Name="PreBuild" BeforeTargets="BeforeBuild" Condition="'$(Configuration)|$(Platform)'=='Release Nuget|AnyCPU'">
-    <!--<Exec Command="&quot;ChangePackageVersion.exe&quot; &quot;$(MSBuildProjectFullPath)&quot;" WorkingDirectory="..\_tools\ChangePackageVersion" />
-    <Exec Command="&quot;UpdatePackageReference.exe&quot; &quot;$(MSBuildProjectFullPath)&quot;" WorkingDirectory="..\_tools\UpdatePackageReference" />-->
+
   </Target>
 
   <Target Name="PostPack" AfterTargets="Pack" Condition="'$(Configuration)|$(Platform)'=='Release Nuget|AnyCPU'">
@@ -52,7 +51,7 @@
   </ItemGroup>
   
   <ItemGroup>
-    <PackageReference Include="MySqlConnector" Version="1.3.10" />
+    <PackageReference Include="MySqlConnector" Version="1.3.11" />
   </ItemGroup>
   
   <ItemGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
@@ -64,7 +63,7 @@
   </ItemGroup>
   
   <ItemGroup Condition="'$(Configuration)|$(Platform)'=='Release Nuget|AnyCPU'">
-    <!--PackageReference for NuGet-->
+    <!--For NuGet Package-->
     <ProjectReference Include="..\RIS\RIS.csproj" />
   </ItemGroup>
   
