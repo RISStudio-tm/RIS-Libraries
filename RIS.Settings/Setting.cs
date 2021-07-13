@@ -59,6 +59,17 @@ namespace RIS.Settings
 
             return nestableCollection.ToStringRepresent();
         }
+        private static string ToStringRepresent<T>(IDictionary<string, T> collection)
+        {
+            var nestableCollection = new NestableDictionaryL<T>();
+
+            foreach (var element in collection)
+            {
+                nestableCollection.Add(element.Key, element.Value);
+            }
+
+            return nestableCollection.ToStringRepresent();
+        }
         private static string ToStringRepresent<T>(ICollection<T> collection)
         {
             var nestableCollection = new NestableArrayCAL<T>();
@@ -97,6 +108,22 @@ namespace RIS.Settings
             for (int i = 0; i < nestableCollection.Length; ++i)
             {
                 collection[i] = nestableCollection[i].GetElement();
+            }
+
+            return collection;
+        }
+        private static IDictionary<string, T> FromStringRepresentDictionary<T>(string represent)
+        {
+            var nestableCollection = new NestableDictionaryL<T>();
+
+            nestableCollection.FromStringRepresent(represent);
+
+            var collection = new Dictionary<string, T>(nestableCollection.Length);
+
+            for (int i = 0; i < nestableCollection.Length; ++i)
+            {
+                collection.Add(nestableCollection.GetKey(i),
+                    nestableCollection[i].GetElement());
             }
 
             return collection;
@@ -259,6 +286,46 @@ namespace RIS.Settings
                         case IChunkedCollection<UIntPtr> settingValue:
                             return ToStringRepresent(settingValue);
                         case IChunkedCollection<DateTime> settingValue:
+                            return ToStringRepresent(settingValue);
+                        default:
+                            return value.ToString();
+                    }
+                case IDictionary collectionValue:
+                    switch (collectionValue)
+                    {
+                        case IDictionary<string, string> settingValue:
+                            return ToStringRepresent(settingValue);
+                        case IDictionary<string, sbyte> settingValue:
+                            return ToStringRepresent(settingValue);
+                        case IDictionary<string, byte> settingValue:
+                            return ToStringRepresent(settingValue);
+                        case IDictionary<string, short> settingValue:
+                            return ToStringRepresent(settingValue);
+                        case IDictionary<string, ushort> settingValue:
+                            return ToStringRepresent(settingValue);
+                        case IDictionary<string, int> settingValue:
+                            return ToStringRepresent(settingValue);
+                        case IDictionary<string, uint> settingValue:
+                            return ToStringRepresent(settingValue);
+                        case IDictionary<string, long> settingValue:
+                            return ToStringRepresent(settingValue);
+                        case IDictionary<string, ulong> settingValue:
+                            return ToStringRepresent(settingValue);
+                        case IDictionary<string, float> settingValue:
+                            return ToStringRepresent(settingValue);
+                        case IDictionary<string, double> settingValue:
+                            return ToStringRepresent(settingValue);
+                        case IDictionary<string, decimal> settingValue:
+                            return ToStringRepresent(settingValue);
+                        case IDictionary<string, char> settingValue:
+                            return ToStringRepresent(settingValue);
+                        case IDictionary<string, bool> settingValue:
+                            return ToStringRepresent(settingValue);
+                        case IDictionary<string, IntPtr> settingValue:
+                            return ToStringRepresent(settingValue);
+                        case IDictionary<string, UIntPtr> settingValue:
+                            return ToStringRepresent(settingValue);
+                        case IDictionary<string, DateTime> settingValue:
                             return ToStringRepresent(settingValue);
                         default:
                             return value.ToString();
@@ -460,6 +527,45 @@ namespace RIS.Settings
                     SetValue(FromStringRepresentChunked<UIntPtr>(value));
                 else if (typeof(IChunkedCollection<DateTime>).IsAssignableFrom(Type))
                     SetValue(FromStringRepresentChunked<DateTime>(value));
+                else
+                    SetValue(value);
+            }
+            else if (typeof(IDictionary).IsAssignableFrom(Type))
+            {
+                if (typeof(IDictionary<string, string>).IsAssignableFrom(Type))
+                    SetValue(FromStringRepresentDictionary<string>(value));
+                else if (typeof(IDictionary<string, sbyte>).IsAssignableFrom(Type))
+                    SetValue(FromStringRepresentDictionary<sbyte>(value));
+                else if (typeof(IDictionary<string, byte>).IsAssignableFrom(Type))
+                    SetValue(FromStringRepresentDictionary<byte>(value));
+                else if (typeof(IDictionary<string, short>).IsAssignableFrom(Type))
+                    SetValue(FromStringRepresentDictionary<short>(value));
+                else if (typeof(IDictionary<string, ushort>).IsAssignableFrom(Type))
+                    SetValue(FromStringRepresentDictionary<ushort>(value));
+                else if (typeof(IDictionary<string, int>).IsAssignableFrom(Type))
+                    SetValue(FromStringRepresentDictionary<int>(value));
+                else if (typeof(IDictionary<string, uint>).IsAssignableFrom(Type))
+                    SetValue(FromStringRepresentDictionary<uint>(value));
+                else if (typeof(IDictionary<string, long>).IsAssignableFrom(Type))
+                    SetValue(FromStringRepresentDictionary<long>(value));
+                else if (typeof(IDictionary<string, ulong>).IsAssignableFrom(Type))
+                    SetValue(FromStringRepresentDictionary<ulong>(value));
+                else if (typeof(IDictionary<string, float>).IsAssignableFrom(Type))
+                    SetValue(FromStringRepresentDictionary<float>(value));
+                else if (typeof(IDictionary<string, double>).IsAssignableFrom(Type))
+                    SetValue(FromStringRepresentDictionary<double>(value));
+                else if (typeof(IDictionary<string, decimal>).IsAssignableFrom(Type))
+                    SetValue(FromStringRepresentDictionary<decimal>(value));
+                else if (typeof(IDictionary<string, char>).IsAssignableFrom(Type))
+                    SetValue(FromStringRepresentDictionary<char>(value));
+                else if (typeof(IDictionary<string, bool>).IsAssignableFrom(Type))
+                    SetValue(FromStringRepresentDictionary<bool>(value));
+                else if (typeof(IDictionary<string, IntPtr>).IsAssignableFrom(Type))
+                    SetValue(FromStringRepresentDictionary<IntPtr>(value));
+                else if (typeof(IDictionary<string, UIntPtr>).IsAssignableFrom(Type))
+                    SetValue(FromStringRepresentDictionary<UIntPtr>(value));
+                else if (typeof(IDictionary<string, DateTime>).IsAssignableFrom(Type))
+                    SetValue(FromStringRepresentDictionary<DateTime>(value));
                 else
                     SetValue(value);
             }
