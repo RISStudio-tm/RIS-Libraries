@@ -285,6 +285,94 @@ namespace RIS.Mathematics
 
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void Swap<T>(ref T value1, ref T value2)
+        {
+            var temp = value1;
+
+            value1 = value2;
+            value2 = temp;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static unsafe void SwapUnmanaged<T>(ref T value1, ref T value2)
+            where T: unmanaged
+        {
+            var temp = stackalloc T[]
+            {
+                value1
+            };
+
+            value1 = value2;
+            value2 = temp[0];
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void SwapXor(ref sbyte value1, ref sbyte value2)
+        {
+            if (value1 == value2)
+                return;
+
+            value1 = (sbyte)((value2 ^= value1 ^= value2) ^ value1);
+        }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void SwapXor(ref byte value1, ref byte value2)
+        {
+            if (value1 == value2)
+                return;
+
+            value1 = (byte)((value2 ^= value1 ^= value2) ^ value1);
+        }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void SwapXor(ref short value1, ref short value2)
+        {
+            if (value1 == value2)
+                return;
+
+            value1 = (short)((value2 ^= value1 ^= value2) ^ value1);
+        }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void SwapXor(ref ushort value1, ref ushort value2)
+        {
+            if (value1 == value2)
+                return;
+
+            value1 = (ushort)((value2 ^= value1 ^= value2) ^ value1);
+        }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void SwapXor(ref int value1, ref int value2)
+        {
+            if (value1 == value2)
+                return;
+
+            value1 = (value2 ^= value1 ^= value2) ^ value1;
+        }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void SwapXor(ref uint value1, ref uint value2)
+        {
+            if (value1 == value2)
+                return;
+
+            value1 = (value2 ^= value1 ^= value2) ^ value1;
+        }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void SwapXor(ref long value1, ref long value2)
+        {
+            if (value1 == value2)
+                return;
+
+            value1 = (value2 ^= value1 ^= value2) ^ value1;
+        }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void SwapXor(ref ulong value1, ref ulong value2)
+        {
+            if (value1 == value2)
+                return;
+
+            value1 = (value2 ^= value1 ^= value2) ^ value1;
+        }
+
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static sbyte Abs(sbyte number)
         {
             return number == sbyte.MinValue ? sbyte.MaxValue : (sbyte)((number + (number >> 7)) ^ (number >> 7));
