@@ -101,6 +101,12 @@ namespace RIS.Graphics.WPF.Localization
 
             LocalizationChanged?.Invoke(null,
                 new LocalizationChangedEventArgs(oldLocalization, newLocalization));
+
+            Application.Current?.Dispatcher.Invoke(() =>
+            {
+                Thread.CurrentThread.CurrentCulture = newLocalization?.Culture ?? DefaultCulture;
+                Thread.CurrentThread.CurrentUICulture = newLocalization?.Culture ?? DefaultCulture;
+            });
         }
 
         private static void OnLocalizationsLoaded(
@@ -555,48 +561,42 @@ namespace RIS.Graphics.WPF.Localization
                 return false;
             }
 
-            var localizationModule = GetLocalizationModule(
+            var defaultLocalizationModule = GetLocalizationModule(
                 cultureName);
 
-            if (localizationModule == null)
-                return false;
-
-            var currentCultureName = CurrentLocalization.CultureName;
-            var currentLocalizationModule = GetLocalizationModule(
-                currentCultureName);
-
-            if (currentLocalizationModule == null)
+            if (defaultLocalizationModule == null)
                 return false;
 
             var source = Source;
 
             var setDefaultLocalizationSuccess = SetDefaultLocalization(
-                source, localizationModule);
+                source, defaultLocalizationModule);
 
             if (!setDefaultLocalizationSuccess)
                 return false;
 
-            Application.Current.Dispatcher.Invoke(() =>
+            LocalizationXamlModule localizationModule;
+
+            if (!string.IsNullOrEmpty(CurrentLocalization?.CultureName))
             {
-                Thread.CurrentThread.CurrentCulture = currentLocalizationModule.Culture;
-                Thread.CurrentThread.CurrentUICulture = currentLocalizationModule.Culture;
-            });
+                localizationModule = GetLocalizationModule(
+                    CurrentLocalization.CultureName);
 
-            OnLocalizationChanged(localizationModule);
+                if (localizationModule == null)
+                    return false;
+            }
+            else
+            {
+                localizationModule = defaultLocalizationModule;
+            }
 
-            var setCurrentLocalizationSuccess = SetLocalization(
-                source, currentLocalizationModule);
+            var setLocalizationSuccess = SetLocalization(
+                source, localizationModule);
 
-            if (!setCurrentLocalizationSuccess)
+            if (!setLocalizationSuccess)
                 return false;
 
-            Application.Current.Dispatcher.Invoke(() =>
-            {
-                Thread.CurrentThread.CurrentCulture = currentLocalizationModule.Culture;
-                Thread.CurrentThread.CurrentUICulture = currentLocalizationModule.Culture;
-            });
-
-            OnLocalizationChanged(currentLocalizationModule);
+            OnLocalizationChanged(localizationModule);
 
             return true;
         }
@@ -629,12 +629,6 @@ namespace RIS.Graphics.WPF.Localization
 
             if (!setLocalizationSuccess)
                 return false;
-
-            Application.Current.Dispatcher.Invoke(() =>
-            {
-                Thread.CurrentThread.CurrentCulture = localizationModule.Culture;
-                Thread.CurrentThread.CurrentUICulture = localizationModule.Culture;
-            });
 
             OnLocalizationChanged(localizationModule);
 
