@@ -535,4 +535,6 @@ _packages/*.nupkg
 # Directories
 
 ConsoleTest*/
+WPFTest*/
+WinFormsTest*/
 
