@@ -1,18 +1,17 @@
-﻿<Project Sdk="Microsoft.NET.Sdk.WindowsDesktop">
+<Project Sdk="Microsoft.NET.Sdk.WindowsDesktop">
 
   <PropertyGroup>
     <TargetFrameworks>netcoreapp3.1</TargetFrameworks>
     <Configurations>Debug;Release;Release Nuget</Configurations>
-    <RootNamespace>RIS.Graphics</RootNamespace>
-    <AssemblyName>RIS.Graphics</AssemblyName>
-    <AssemblyVersion>2.9.0.0</AssemblyVersion>
-    <FileVersion>2.9.0.0</FileVersion>
+    <RootNamespace>RIS.Localization.UI.WPF</RootNamespace>
+    <AssemblyName>RIS.Localization.UI.WPF</AssemblyName>
+    <AssemblyVersion>1.0.0.0</AssemblyVersion>
+    <FileVersion>1.0.0.0</FileVersion>
     <UseWPF>true</UseWPF>
-    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <PackageId>RIS.Graphics</PackageId>
-    <Product>RIS.Graphics</Product>
-    <Version>2.9.0</Version>
-    <Description>A library designed for various types of tasks. Part of the RIS "ecosystem".</Description>
+    <PackageId>RIS.Localization.UI.WPF</PackageId>
+    <Product>RIS.Localization.UI.WPF</Product>
+    <Version>1.0.0</Version>
+    <Description>A library designed for various types of tasks. The core of the RIS "ecosystem".</Description>
     <PackageTags>dotnet, dotnetcore, netframework, netcore, library</PackageTags>
     <Authors>Dmitry Ponomarev</Authors>
     <Company>RISStudio</Company>
@@ -31,12 +30,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release Nuget|AnyCPU'">
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
   </PropertyGroup>
-
-  <!--<ItemGroup>
-    <Compile DependentUpon="%(Filename)" SubType="Code" Update="**\obj\**\*.g$(DefaultLanguageSourceExtension)" />
-    <Compile DependentUpon="%(Filename)" SubType="Designer" Update="**\*.xaml$(DefaultLanguageSourceExtension)" />
-  </ItemGroup>-->
-
+  
   <Target Name="_SdkDesignTimeBuildAndIntelliSenseWorkaround" AfterTargets="_CheckCompileDesignTimePrerequisite">
     <PropertyGroup>
       <BuildingProject>false</BuildingProject>
@@ -51,18 +45,6 @@
   <Target Name="PostPack" AfterTargets="Pack" Condition="'$(Configuration)|$(Platform)'=='Release Nuget|AnyCPU'">
     <Exec Command="&quot;CopyPackage.exe&quot; &quot;..\..\_packages&quot; &quot;$(MSBuildProjectFullPath)&quot; &quot;$(Configuration)&quot;" WorkingDirectory="..\_tools\CopyPackage" />
   </Target>
-
-  <ItemGroup>
-    <None Remove="Resources\ToolBoxIcons\RIS.Graphics.WPF.Controls.ExtendedPasswordBox.icon.png" />
-    <None Remove="Resources\ToolBoxIcons\RIS.Graphics.WPF.Controls.ExtendedScrollViewer.icon.png" />
-    <None Remove="Resources\ToolBoxIcons\RIS.Graphics.WPF.Controls.Indicators.Loading.LoadingIndicator.icon.png" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <EmbeddedResource Include="Resources\ToolBoxIcons\RIS.Graphics.WPF.Controls.ExtendedPasswordBox.icon.png" />
-    <EmbeddedResource Include="Resources\ToolBoxIcons\RIS.Graphics.WPF.Controls.ExtendedScrollViewer.icon.png" />
-    <EmbeddedResource Include="Resources\ToolBoxIcons\RIS.Graphics.WPF.Controls.Indicators.Loading.LoadingIndicator.icon.png" />
-  </ItemGroup>
   
   <ItemGroup>
     <None Include="..\LICENSE">
@@ -80,26 +62,24 @@
   </ItemGroup>
   
   <ItemGroup>
-    <PackageReference Include="ControlzEx" Version="5.0.1" />
-    <PackageReference Include="CoreCLR-NCalc" Version="2.2.92" />
     <PackageReference Include="MahApps.Metro" Version="2.4.7" />
     <PackageReference Include="MahApps.Metro.IconPacks" Version="4.8.0" />
-    <PackageReference Include="MaterialDesignColors" Version="2.0.1" />
-    <PackageReference Include="MaterialDesignThemes" Version="4.1.0" />
-    <PackageReference Include="MaterialDesignThemes.MahApps" Version="0.1.7" />
   </ItemGroup>
   
   <ItemGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
     <ProjectReference Include="..\RIS\RIS.csproj" />
+    <ProjectReference Include="..\RIS.Localization\RIS.Localization.csproj" />
   </ItemGroup>
   
   <ItemGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
     <ProjectReference Include="..\RIS\RIS.csproj" />
+    <ProjectReference Include="..\RIS.Localization\RIS.Localization.csproj" />
   </ItemGroup>
   
   <ItemGroup Condition="'$(Configuration)|$(Platform)'=='Release Nuget|AnyCPU'">
     <!--For NuGet Package-->
     <ProjectReference Include="..\RIS\RIS.csproj" />
+    <ProjectReference Include="..\RIS.Localization\RIS.Localization.csproj" />
   </ItemGroup>
-  
+
 </Project>

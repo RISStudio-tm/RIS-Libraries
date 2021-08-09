@@ -4,8 +4,6 @@
       <Item Type="RIS.Graphics.WPF.Controls.Indicators.Loading.LoadingIndicator"/>
       <Item Type="RIS.Graphics.WPF.Controls.ExtendedPasswordBox"/>
       <Item Type="RIS.Graphics.WPF.Controls.ExtendedScrollViewer"/>
-      <Item Type="RIS.Graphics.WPF.Controls.LocalizationSplitButton"/>
-      <Item Type="RIS.Graphics.WPF.Controls.MetroLocalizationSplitButton"/>
     </ToolboxItems>
   </File>
 </FileList>

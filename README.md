@@ -24,6 +24,18 @@
     [![Nuget](https://img.shields.io/nuget/v/RIS.Graphics?style=flat)](https://www.nuget.org/packages/RIS.Graphics)
     [![Nuget](https://img.shields.io/nuget/dt/RIS.Graphics?style=flat)](https://www.nuget.org/packages/RIS.Graphics)
     
+- **[RIS.Localization](https://www.nuget.org/packages/RIS.Localization)**<br/>
+    [![Nuget](https://img.shields.io/nuget/v/RIS.Localization?style=flat)](https://www.nuget.org/packages/RIS.Localization)
+    [![Nuget](https://img.shields.io/nuget/dt/RIS.Localization?style=flat)](https://www.nuget.org/packages/RIS.Localization)
+    
+- **[RIS.Localization.UI.WPF](https://www.nuget.org/packages/RIS.Localization.UI.WPF)**<br/>
+    [![Nuget](https://img.shields.io/nuget/v/RIS.Localization.UI.WPF?style=flat)](https://www.nuget.org/packages/RIS.Localization.UI.WPF)
+    [![Nuget](https://img.shields.io/nuget/dt/RIS.Localization.UI.WPF?style=flat)](https://www.nuget.org/packages/RIS.Localization.UI.WPF)
+    
+- **[RIS.Localization.Xaml](https://www.nuget.org/packages/RIS.Localization.Xaml)**<br/>
+    [![Nuget](https://img.shields.io/nuget/v/RIS.Localization.Xaml?style=flat)](https://www.nuget.org/packages/RIS.Localization.Xaml)
+    [![Nuget](https://img.shields.io/nuget/dt/RIS.Localization.Xaml?style=flat)](https://www.nuget.org/packages/RIS.Localization.Xaml)
+    
 - **[RIS.Logging](https://www.nuget.org/packages/RIS.Logging)**<br/>
     [![Nuget](https://img.shields.io/nuget/v/RIS.Logging?style=flat)](https://www.nuget.org/packages/RIS.Logging)
     [![Nuget](https://img.shields.io/nuget/dt/RIS.Logging?style=flat)](https://www.nuget.org/packages/RIS.Logging)

@@ -6,16 +6,15 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Windows.Controls;
 using MahApps.Metro.Controls;
-using RIS.Graphics.WPF.Localization;
-using RIS.Graphics.WPF.Localization.Entities;
 
-namespace RIS.Graphics.WPF.Controls
+namespace RIS.Localization.UI.WPF.Controls
 {
     public partial class MetroLocalizationButton : SplitButton
     {
         public MetroLocalizationButton()
         {
             InitializeComponent();
+            DataContext = this;
 
             LocalizationManager.LocalizationsLoaded += LocalizationManager_LocalizationsLoaded;
             LocalizationManager.LocalizationChanged += LocalizationManager_LocalizationChanged;
@@ -38,15 +37,21 @@ namespace RIS.Graphics.WPF.Controls
 
             SelectionChanged -= Button_SelectionChanged;
 
-            if (e.Localizations.TryGetValue(LocalizationManager.CurrentLocalization.CultureName, out var localizationModule))
+            if (LocalizationManager.CurrentLocalization != null
+                && e.Localizations.TryGetValue(LocalizationManager.CurrentLocalization.CultureName, out var localizationModule))
             {
-                SelectedItem = new KeyValuePair<string, LocalizationXamlModule>(
+                SelectedItem = new KeyValuePair<string, ILocalizationModule>(
                     LocalizationManager.CurrentLocalization.CultureName, localizationModule);
             }
             else if (e.Localizations.TryGetValue(LocalizationManager.DefaultCulture.Name, out localizationModule))
             {
-                SelectedItem = new KeyValuePair<string, LocalizationXamlModule>(
+                SelectedItem = new KeyValuePair<string, ILocalizationModule>(
                     LocalizationManager.DefaultCulture.Name, localizationModule);
+            }
+            else if (e.Localizations.TryGetValue("en-US", out localizationModule))
+            {
+                SelectedItem = new KeyValuePair<string, ILocalizationModule>(
+                    "en-US", localizationModule);
             }
             else
             {
@@ -55,10 +60,13 @@ namespace RIS.Graphics.WPF.Controls
 
             SelectionChanged += Button_SelectionChanged;
 
+            if (LocalizationManager.CurrentLocalization == null)
+                return;
+
             string cultureName = null;
 
             if (SelectedItem != null)
-                cultureName = ((KeyValuePair<string, LocalizationXamlModule>)SelectedItem).Key;
+                cultureName = ((KeyValuePair<string, ILocalizationModule>)SelectedItem).Key;
 
             LocalizationManager.SwitchLocalization(
                 cultureName);
@@ -70,7 +78,7 @@ namespace RIS.Graphics.WPF.Controls
 
             SelectionChanged -= Button_SelectionChanged;
 
-            SelectedItem = new KeyValuePair<string, LocalizationXamlModule>(
+            SelectedItem = new KeyValuePair<string, ILocalizationModule>(
                 e.NewLocalization.CultureName, e.NewLocalization);
 
             SelectionChanged += Button_SelectionChanged;
@@ -86,7 +94,7 @@ namespace RIS.Graphics.WPF.Controls
                 return;
 
             var selectedPair =
-                (KeyValuePair<string, LocalizationXamlModule>)SelectedItem;
+                (KeyValuePair<string, ILocalizationModule>)SelectedItem;
 
             LocalizationManager.SwitchLocalization(
                 selectedPair.Key);

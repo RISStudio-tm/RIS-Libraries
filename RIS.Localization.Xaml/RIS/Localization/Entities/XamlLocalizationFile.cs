@@ -7,18 +7,15 @@ using System.Globalization;
 using System.IO;
 using System.Windows;
 
-namespace RIS.Graphics.WPF.Localization.Entities
+namespace RIS.Localization.Entities
 {
-    public class LocalizationXamlFile
+    public class XamlLocalizationFile : ILocalizationFile, IEquatable<XamlLocalizationFile>
     {
         public string Path { get; private set; }
         public string Name { get; private set; }
         public string Extension { get; private set; }
 
-        public string ElementName { get; private set; }
-
-        public ResourceDictionary Dictionary { get; private set; }
-        public string DictionaryName { get; private set; }
+        public ILocalizationDictionary Dictionary { get; private set; }
 
         public CultureInfo Culture { get; private set; }
         public string CultureName { get; private set; }
@@ -31,9 +28,9 @@ namespace RIS.Graphics.WPF.Localization.Entities
             }
             private set
             {
-                if (value.Length > 1)
+                if (value != null && value.Length > 1)
                 {
-                    value = char.ToUpper(value[0], Culture)
+                    value = char.ToUpper(value[0], Culture ?? CultureInfo.InvariantCulture)
                             + value.Remove(0, 1);
                 }
 
@@ -41,22 +38,24 @@ namespace RIS.Graphics.WPF.Localization.Entities
             }
         }
 
-        public LocalizationXamlFile(string filePath,
-            string elementName)
+
+
+        public XamlLocalizationFile(string filePath)
         {
-            Load(filePath, elementName);
+            Load(filePath);
         }
 
-        private void Load(string path,
-            string elementName)
+
+
+        private void Load(string path)
         {
             if (!System.IO.Path.IsPathRooted(path))
             {
                 var exception = new ArgumentException(
                     $"Path['{path}'] must contain the root",
                     nameof(path));
-                Events.OnError(new RErrorEventArgs(exception,
-                    exception.Message));
+                Events.OnError(new RErrorEventArgs(
+                    exception, exception.Message));
                 throw exception;
             }
             if (System.IO.Path.GetFileName(path) == null)
@@ -64,16 +63,16 @@ namespace RIS.Graphics.WPF.Localization.Entities
                 var exception = new ArgumentException(
                     $"Path['{path}'] must refer to the file",
                     nameof(path));
-                Events.OnError(new RErrorEventArgs(exception,
-                    exception.Message));
+                Events.OnError(new RErrorEventArgs(
+                    exception, exception.Message));
                 throw exception;
             }
             if (!File.Exists(path))
             {
                 var exception = new FileNotFoundException(
                     $"File['{path}'] not found");
-                Events.OnError(new RErrorEventArgs(exception,
-                    exception.Message));
+                Events.OnError(new RErrorEventArgs(
+                    exception, exception.Message));
                 throw exception;
             }
 
@@ -86,8 +85,8 @@ namespace RIS.Graphics.WPF.Localization.Entities
                 var exception = new ArgumentException(
                     $"File['{path}'] extension must not be null or empty",
                     nameof(path));
-                Events.OnError(new RErrorEventArgs(exception,
-                    exception.Message));
+                Events.OnError(new RErrorEventArgs(
+                    exception, exception.Message));
                 throw exception;
             }
             if (extension != ".xaml")
@@ -95,24 +94,12 @@ namespace RIS.Graphics.WPF.Localization.Entities
                 var exception = new ArgumentException(
                     $"File['{path}'] must have an extension '.xaml'",
                     nameof(path));
-                Events.OnError(new RErrorEventArgs(exception,
-                    exception.Message));
+                Events.OnError(new RErrorEventArgs(
+                    exception, exception.Message));
                 throw exception;
             }
 
             Extension = extension;
-
-            if (string.IsNullOrEmpty(elementName))
-            {
-                var exception = new ArgumentException(
-                    "Element name must not be null or empty",
-                    nameof(elementName));
-                Events.OnError(new RErrorEventArgs(exception,
-                    exception.Message));
-                throw exception;
-            }
-
-            ElementName = elementName;
 
             var name = System.IO.Path.GetFileNameWithoutExtension(path);
 
@@ -121,19 +108,19 @@ namespace RIS.Graphics.WPF.Localization.Entities
                 var exception = new ArgumentException(
                     $"File['{path}'] name must not be null or empty",
                     nameof(path));
-                Events.OnError(new RErrorEventArgs(exception,
-                    exception.Message));
+                Events.OnError(new RErrorEventArgs(
+                    exception, exception.Message));
                 throw exception;
             }
-            if (!name.StartsWith($"{elementName}."))
+            if (!name.StartsWith("Localization."))
             {
                 var exception = new ArgumentException(
                     $"File['{path}'] name must be in the format [element name + '.' + culture name] " +
-                    $"(In this case - ['{elementName}.' + culture name]) " +
+                    "(In this case - ['Localization.' + culture name]) " +
                     "(culture name must be in the ISO 639 format (for example, 'en-US' or 'ru-RU'))",
                     nameof(path));
-                Events.OnError(new RErrorEventArgs(exception,
-                    exception.Message));
+                Events.OnError(new RErrorEventArgs(
+                    exception, exception.Message));
                 throw exception;
             }
 
@@ -152,8 +139,8 @@ namespace RIS.Graphics.WPF.Localization.Entities
                 var exception = new ArgumentException(
                     $"Culture named '{cultureName}' for file['{path}'] not found",
                     nameof(path));
-                Events.OnError(new RErrorEventArgs(exception,
-                    exception.Message));
+                Events.OnError(new RErrorEventArgs(
+                    exception, exception.Message));
                 throw exception;
             }
 
@@ -172,29 +159,32 @@ namespace RIS.Graphics.WPF.Localization.Entities
             }
             catch (Exception ex)
             {
-                Events.OnError(new RErrorEventArgs(ex, ex.Message));
+                Events.OnError(new RErrorEventArgs(
+                    ex, ex.Message));
                 throw;
             }
 
-            Dictionary = dictionary;
+            Dictionary = LocalizationResourceDictionary.From(
+                dictionary);
 
             if (!dictionary.Contains("ResourceDictionaryName"))
             {
                 var exception = new KeyNotFoundException(
                     $"Dictionary file['{path}'] does not contain 'ResourceDictionaryName' definition");
-                Events.OnError(new RErrorEventArgs(exception,
-                    exception.Message));
+                Events.OnError(new RErrorEventArgs(
+                    exception, exception.Message));
                 throw exception;
             }
 
-            string dictionaryName = dictionary["ResourceDictionaryName"].ToString();
+            var dictionaryName = dictionary["ResourceDictionaryName"]
+                .ToString();
 
             if (string.IsNullOrWhiteSpace(dictionaryName))
             {
                 var exception = new Exception(
                     $"ResourceDictionaryName value in file['{path}'] must not be null or empty");
-                Events.OnError(new RErrorEventArgs(exception,
-                    exception.Message));
+                Events.OnError(new RErrorEventArgs(
+                    exception, exception.Message));
                 throw exception;
             }
             if (dictionaryName != "localization-xaml")
@@ -202,12 +192,64 @@ namespace RIS.Graphics.WPF.Localization.Entities
                 var exception = new Exception(
                     $"The dictionary file['{path}'] is not a localization dictionary " +
                     "(The ResourceDictionaryName value must be 'localization-xaml')");
-                Events.OnError(new RErrorEventArgs(exception,
-                    exception.Message));
+                Events.OnError(new RErrorEventArgs(
+                    exception, exception.Message));
                 throw exception;
             }
+        }
 
-            DictionaryName = dictionaryName;
+
+
+#pragma warning disable SS008 // GetHashCode() refers to mutable, static, or constant member
+        // ReSharper disable NonReadonlyMemberInGetHashCode
+        public override int GetHashCode()
+        {
+            return HashCode.Combine(Path, Name,
+                Extension, CultureName);
+        }
+        // ReSharper enable NonReadonlyMemberInGetHashCode
+#pragma warning restore SS008 // GetHashCode() refers to mutable, static, or constant member
+
+        public override bool Equals(object obj)
+        {
+            if (ReferenceEquals(null, obj))
+                return false;
+            if (GetType() != obj.GetType())
+                return false;
+
+            return Equals((XamlLocalizationFile)obj);
+        }
+        public bool Equals(ILocalizationFile obj)
+        {
+            if (ReferenceEquals(null, obj))
+                return false;
+            if (GetType() != obj.GetType())
+                return false;
+
+            return Equals((XamlLocalizationFile)obj);
+        }
+        public bool Equals(XamlLocalizationFile obj)
+        {
+            if (ReferenceEquals(null, obj))
+                return false;
+            if (ReferenceEquals(this, obj))
+                return true;
+
+            return Path == obj.Path
+                   && Name == obj.Name
+                   && Extension == obj.Extension
+                   && CultureName == obj.CultureName;
+        }
+
+
+
+        public static bool operator ==(XamlLocalizationFile obj1, XamlLocalizationFile obj2)
+        {
+            return obj1?.Equals(obj2) ?? false;
+        }
+        public static bool operator !=(XamlLocalizationFile obj1, XamlLocalizationFile obj2)
+        {
+            return !(obj1 == obj2);
         }
     }
 }

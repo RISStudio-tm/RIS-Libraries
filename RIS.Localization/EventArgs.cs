@@ -4,18 +4,17 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using RIS.Graphics.WPF.Localization.Entities;
 
-namespace RIS.Graphics.WPF.Localization
+namespace RIS.Localization
 {
     public class LocalizationChangedEventArgs : EventArgs
     {
-        public LocalizationXamlModule OldLocalization { get; }
-        public LocalizationXamlModule NewLocalization { get; }
+        public ILocalizationModule OldLocalization { get; }
+        public ILocalizationModule NewLocalization { get; }
 
         public LocalizationChangedEventArgs(
-            LocalizationXamlModule oldLocalization,
-            LocalizationXamlModule newLocalization)
+            ILocalizationModule oldLocalization,
+            ILocalizationModule newLocalization)
         {
             OldLocalization = oldLocalization;
             NewLocalization = newLocalization;
@@ -24,12 +23,12 @@ namespace RIS.Graphics.WPF.Localization
 
     public class LocalizationLoadedEventArgs : EventArgs
     {
-        public ReadOnlyDictionary<string, LocalizationXamlModule> Localizations { get; }
+        public ReadOnlyDictionary<string, ILocalizationModule> Localizations { get; }
 
         public LocalizationLoadedEventArgs(
-            Dictionary<string, LocalizationXamlModule> localizations)
+            IDictionary<string, ILocalizationModule> localizations)
         {
-            Localizations = new ReadOnlyDictionary<string, LocalizationXamlModule>(
+            Localizations = new ReadOnlyDictionary<string, ILocalizationModule>(
                 localizations);
         }
     }
