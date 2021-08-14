@@ -8,7 +8,7 @@ using RIS.Localization.Entities;
 
 namespace RIS.Localization.Providers
 {
-    public class XamlLocalizationProvider : ILocalizationProvider
+    public sealed class XamlLocalizationProvider : ILocalizationProvider
     {
         private XamlLocalizationProvider()
         {

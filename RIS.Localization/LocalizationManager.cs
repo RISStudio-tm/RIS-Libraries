@@ -168,6 +168,19 @@ namespace RIS.Localization
         }
 
 
+        public static void OnLocalizationUpdated(
+            ILocalizationModule localization)
+        {
+            using var @lock = SyncRoot.Lock();
+
+            if ((CurrentLocalization == null || !CurrentLocalization.Equals(localization)) &&
+                (CurrentDefaultLocalization == null || !CurrentDefaultLocalization.Equals(localization)))
+            {
+                return;
+            }
+
+            OnLocalizationUpdated();
+        }
         public static void OnLocalizationUpdated()
         {
             LocalizationUpdated?.Invoke(null,

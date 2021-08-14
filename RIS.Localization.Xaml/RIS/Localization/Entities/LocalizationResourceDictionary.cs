@@ -3,13 +3,14 @@
 
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Windows;
 
 namespace RIS.Localization.Entities
 {
-    public class LocalizationResourceDictionary : ILocalizationDictionary
+    public sealed class LocalizationResourceDictionary : ILocalizationDictionary, IEnumerable<KeyValuePair<object, object>>
     {
         public object this[object key]
         {
@@ -102,6 +103,78 @@ namespace RIS.Localization.Entities
 
 
 
+        public bool AddMergedDictionary(ILocalizationDictionary dictionary)
+        {
+            if (dictionary == null)
+                return false;
+            if (GetType() != dictionary.GetType())
+                return false;
+
+            return AddMergedDictionary((LocalizationResourceDictionary)dictionary);
+        }
+        public bool AddMergedDictionary(LocalizationResourceDictionary dictionary)
+        {
+            if (dictionary == null)
+                return false;
+
+            Source.MergedDictionaries.Add(
+                dictionary.Source);
+
+            return true;
+        }
+
+        public bool InsertMergedDictionary(int index, ILocalizationDictionary dictionary)
+        {
+            if (dictionary == null)
+                return false;
+            if (GetType() != dictionary.GetType())
+                return false;
+
+            return InsertMergedDictionary(index, (LocalizationResourceDictionary)dictionary);
+        }
+        public bool InsertMergedDictionary(int index, LocalizationResourceDictionary dictionary)
+        {
+            if (dictionary == null)
+                return false;
+            if (index < 0 || index > Source.MergedDictionaries.Count)
+                return false;
+
+            Source.MergedDictionaries.Insert(
+                index, dictionary.Source);
+
+            return true;
+        }
+
+        public bool RemoveMergedDictionary(ILocalizationDictionary dictionary)
+        {
+            if (dictionary == null)
+                return false;
+            if (GetType() != dictionary.GetType())
+                return false;
+
+            return RemoveMergedDictionary((LocalizationResourceDictionary)dictionary);
+        }
+        public bool RemoveMergedDictionary(LocalizationResourceDictionary dictionary)
+        {
+            if (dictionary == null)
+                return false;
+
+            return Source.MergedDictionaries.Remove(
+                dictionary.Source);
+        }
+
+        public bool RemoveAtMergedDictionary(int index)
+        {
+            if (index < 0)
+                return false;
+
+            Source.MergedDictionaries.RemoveAt(
+                index);
+
+            return true;
+        }
+
+
         public void Add(object key, object value)
         {
             Source.Add(key, value);
@@ -132,7 +205,21 @@ namespace RIS.Localization.Entities
 
         IEnumerator IEnumerable.GetEnumerator()
         {
-            return ((IEnumerable)Source).GetEnumerator();
+            return ((IDictionary)Source).GetEnumerator();
+        }
+        IEnumerator<KeyValuePair<object, object>> IEnumerable<KeyValuePair<object, object>>.GetEnumerator()
+        {
+            if (!(Source.Keys is object[] keysArray)
+                || !(Source.Values is object[] valuesArray))
+            {
+                yield break;
+            }
+
+            for (int i = 0; i < Source.Count; ++i)
+            {
+                yield return new KeyValuePair<object, object>(
+                    keysArray[i], valuesArray[i]);
+            }
         }
 
 

@@ -106,7 +106,7 @@ namespace RIS.Localization.Entities
 
                 _files.Add(
                     file);
-                Dictionary.MergedDictionaries.Add(
+                Dictionary.AddMergedDictionary(
                     file.Dictionary);
             }
         }
@@ -118,7 +118,7 @@ namespace RIS.Localization.Entities
 
                 _files.Add(
                     file);
-                Dictionary.MergedDictionaries.Add(
+                Dictionary.AddMergedDictionary(
                     file.Dictionary);
             }
         }
@@ -142,7 +142,7 @@ namespace RIS.Localization.Entities
 
             Load(targetFilesPathsArray);
 
-            LocalizationManager.OnLocalizationUpdated();
+            LocalizationManager.OnLocalizationUpdated(this);
         }
         public void Merge(ILocalizationFile file)
         {
@@ -172,7 +172,7 @@ namespace RIS.Localization.Entities
 
             Load(targetFilesArray);
 
-            LocalizationManager.OnLocalizationUpdated();
+            LocalizationManager.OnLocalizationUpdated(this);
         }
 
         public void Remove(string filePath)
@@ -199,12 +199,12 @@ namespace RIS.Localization.Entities
 
                     _files.Remove(
                         file);
-                    Dictionary.MergedDictionaries.Remove(
+                    Dictionary.RemoveMergedDictionary(
                         file.Dictionary);
                 }
             }
 
-            LocalizationManager.OnLocalizationUpdated();
+            LocalizationManager.OnLocalizationUpdated(this);
         }
         public void Remove(ILocalizationFile file)
         {
@@ -241,12 +241,12 @@ namespace RIS.Localization.Entities
 
                     _files.Remove(
                         file);
-                    Dictionary.MergedDictionaries.Remove(
+                    Dictionary.RemoveMergedDictionary(
                         file.Dictionary);
                 }
             }
 
-            LocalizationManager.OnLocalizationUpdated();
+            LocalizationManager.OnLocalizationUpdated(this);
         }
 
 

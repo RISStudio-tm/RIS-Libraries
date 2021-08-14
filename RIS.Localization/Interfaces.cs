@@ -12,6 +12,16 @@ namespace RIS.Localization
     public interface ILocalizationDictionary : IDictionary
     {
         ObservableCollection<ILocalizationDictionary> MergedDictionaries { get; }
+
+
+
+        bool AddMergedDictionary(ILocalizationDictionary dictionary);
+
+        bool InsertMergedDictionary(int index, ILocalizationDictionary dictionary);
+
+        bool RemoveMergedDictionary(ILocalizationDictionary dictionary);
+
+        bool RemoveAtMergedDictionary(int index);
     }
 
     public interface ILocalizationProvider
