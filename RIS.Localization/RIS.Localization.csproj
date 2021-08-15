@@ -5,12 +5,12 @@
     <Configurations>Debug;Release;Release Nuget</Configurations>
     <RootNamespace>RIS.Localization</RootNamespace>
     <AssemblyName>RIS.Localization</AssemblyName>
-    <AssemblyVersion>1.1.0.0</AssemblyVersion>
-    <FileVersion>1.1.0.0</FileVersion>
+    <AssemblyVersion>1.1.1.0</AssemblyVersion>
+    <FileVersion>1.1.1.0</FileVersion>
     <PackageId>RIS.Localization</PackageId>
     <Product>RIS.Localization</Product>
-    <Version>1.1.0</Version>
-    <Description>A library designed for various types of tasks. The core of the RIS "ecosystem".</Description>
+    <Version>1.1.1</Version>
+    <Description>A library designed for various types of tasks. Part of the RIS "ecosystem".</Description>
     <PackageTags>dotnet, dotnetcore, netframework, netcore, library</PackageTags>
     <Authors>Dmitry Ponomarev</Authors>
     <Company>RISStudio</Company>
