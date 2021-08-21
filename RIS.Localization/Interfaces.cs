@@ -11,7 +11,7 @@ namespace RIS.Localization
 {
     public interface ILocalizationDictionary : IDictionary
     {
-        ObservableCollection<ILocalizationDictionary> MergedDictionaries { get; }
+        ReadOnlyCollection<ILocalizationDictionary> MergedDictionaries { get; }
 
 
 

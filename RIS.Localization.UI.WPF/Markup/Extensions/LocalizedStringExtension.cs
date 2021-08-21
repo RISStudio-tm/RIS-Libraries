@@ -71,21 +71,67 @@ namespace RIS.Localization.UI.WPF.Markup
 
 
 
+        private object FormatValue(
+            object value)
+        {
+            Type propertyType = TargetPropertyType;
+
+            if (TargetProperty is DependencyProperty dependencyProperty)
+                propertyType = dependencyProperty.PropertyType;
+
+            if (Converter != null)
+            {
+                var culture = LocalizationManager.CurrentUIFactory?.CurrentLocalization?
+                    .Culture ?? CultureInfo.InvariantCulture;
+
+                value = Converter.Convert(
+                    value,
+                    propertyType,
+                    ConverterParameter,
+                    culture);
+            }
+            else
+            {
+                TypeConverter converter = TypeDescriptor
+                    .GetConverter(propertyType);
+
+                if (converter.CanConvertFrom(value.GetType()))
+                {
+                    value = converter.ConvertFrom(
+                        value);
+                }
+            }
+
+            return value;
+        }
+
         private void UpdateValue()
         {
             var targetObject = TargetObject.Target;
 
             if (targetObject == null)
                 return;
-
-            object value = LocalizationManager.GetLocalized(
-                ResourceKey);
-
             if (targetObject is DependencyObject { IsSealed: true })
                 return;
 
-            if (TargetPropertyType.IsValueType && value == null)
-                value = Activator.CreateInstance(TargetPropertyType);
+            object value = LocalizationManager.CurrentUIFactory?
+                .GetLocalized(ResourceKey);
+
+            if (value == null)
+            {
+                if (TargetPropertyType.IsValueType)
+                    value = Activator.CreateInstance(TargetPropertyType);
+                else
+                    value = ToString();
+            }
+
+            if (TargetObject == null
+                || TargetProperty == null)
+            {
+                return;
+            }
+
+            value = FormatValue(value);
 
             if (TargetProperty is DependencyProperty dependencyProperty)
             {
@@ -115,27 +161,7 @@ namespace RIS.Localization.UI.WPF.Markup
                 return value;
             }
 
-            if (Converter != null)
-            {
-                var culture = LocalizationManager.CurrentLocalization?.Culture
-                              ?? CultureInfo.InvariantCulture;
-
-                value = Converter.Convert(
-                    value,
-                    ((DependencyProperty)TargetProperty).PropertyType,
-                    ConverterParameter,
-                    culture);
-
-                return value;
-            }
-            else
-            {
-                var type = ((DependencyProperty)TargetProperty).PropertyType;
-
-                TypeConverter converter = TypeDescriptor.GetConverter(type);
-
-                return converter.ConvertFrom(value);
-            }
+            return FormatValue(value);
         }
         private object ProvideValueInternal(
             IServiceProvider serviceProvider)
@@ -205,8 +231,16 @@ namespace RIS.Localization.UI.WPF.Markup
             if (result != null)
                 return result;
 
-            result = LocalizationManager.GetLocalized(
-                ResourceKey);
+            result = LocalizationManager.CurrentUIFactory?
+                .GetLocalized(ResourceKey);
+
+            if (result == null)
+            {
+                if (TargetPropertyType.IsValueType)
+                    result = Activator.CreateInstance(TargetPropertyType);
+                else
+                    result = ToString();
+            }
 
             if (typeof(IList<>).IsAssignableFrom(targetPropertyType))
                 return result;

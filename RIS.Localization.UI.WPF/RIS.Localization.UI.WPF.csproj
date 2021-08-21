@@ -5,12 +5,12 @@
     <Configurations>Debug;Release;Release Nuget</Configurations>
     <RootNamespace>RIS.Localization.UI.WPF</RootNamespace>
     <AssemblyName>RIS.Localization.UI.WPF</AssemblyName>
-    <AssemblyVersion>1.1.1.0</AssemblyVersion>
-    <FileVersion>1.1.1.0</FileVersion>
+    <AssemblyVersion>1.2.0.0</AssemblyVersion>
+    <FileVersion>1.2.0.0</FileVersion>
     <UseWPF>true</UseWPF>
     <PackageId>RIS.Localization.UI.WPF</PackageId>
     <Product>RIS.Localization.UI.WPF</Product>
-    <Version>1.1.1</Version>
+    <Version>1.2.0</Version>
     <Description>A library designed for various types of tasks. Part of the RIS "ecosystem".</Description>
     <PackageTags>dotnet, dotnetcore, netframework, netcore, library</PackageTags>
     <Authors>Dmitry Ponomarev</Authors>

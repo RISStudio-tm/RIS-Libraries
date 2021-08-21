@@ -21,40 +21,40 @@ namespace RIS.Logging
         public static event EventHandler<EventArgs> LoggingResumed;
 
 
-        private static readonly object LogSyncRoot = new object();
-        private static volatile Logger _log;
-        public static Logger Log
+        private static readonly object DefaultSyncRoot = new object();
+        private static volatile Logger _default;
+        public static Logger Default
         {
             get
             {
-                if (_log == null)
+                if (_default == null)
                 {
-                    lock (LogSyncRoot)
+                    lock (DefaultSyncRoot)
                     {
-                        if (_log == null)
-                            _log = LogFactory.GetLogger(nameof(Log));
+                        if (_default == null)
+                            _default = LogFactory.GetLogger(nameof(Default));
                     }
                 }
 
-                return _log;
+                return _default;
             }
         }
-        private static readonly object DebugLogSyncRoot = new object();
-        private static volatile Logger _debugLog;
-        public static Logger DebugLog
+        private static readonly object DebugSyncRoot = new object();
+        private static volatile Logger _debug;
+        public static Logger Debug
         {
             get
             {
-                if (_debugLog == null)
+                if (_debug == null)
                 {
-                    lock (DebugLogSyncRoot)
+                    lock (DebugSyncRoot)
                     {
-                        if (_debugLog == null)
-                            _debugLog = LogFactory.GetLogger(nameof(DebugLog));
+                        if (_debug == null)
+                            _debug = LogFactory.GetLogger(nameof(Debug));
                     }
                 }
 
-                return _debugLog;
+                return _debug;
             }
         }
 
@@ -126,6 +126,68 @@ namespace RIS.Logging
         }
 
 
+        private static string AppDirectoryName
+        {
+            get
+            {
+                if (LogFactory.Configuration == null)
+                    return null;
+
+                return LogFactory.Configuration
+                    .Variables[nameof(AppDirectoryName)]
+                    .Text;
+            }
+            set
+            {
+                if (LogFactory.Configuration == null)
+                    return;
+
+                LogFactory.Configuration
+                    .Variables[nameof(AppDirectoryName)] = value;
+            }
+        }
+        private static string DefaultLogDirectoryPath
+        {
+            get
+            {
+                if (LogFactory.Configuration == null)
+                    return null;
+
+                return LogFactory.Configuration
+                    .Variables[nameof(DefaultLogDirectoryPath)]
+                    .ToString();
+            }
+            set
+            {
+                if (LogFactory.Configuration == null)
+                    return;
+
+                LogFactory.Configuration
+                    .Variables[nameof(DefaultLogDirectoryPath)] = value;
+            }
+        }
+        private static string DebugLogDirectoryPath
+        {
+            get
+            {
+                if (LogFactory.Configuration == null)
+                    return null;
+
+                return LogFactory.Configuration
+                    .Variables[nameof(DebugLogDirectoryPath)]
+                    .ToString();
+            }
+            set
+            {
+                if (LogFactory.Configuration == null)
+                    return;
+
+                LogFactory.Configuration
+                    .Variables[nameof(DebugLogDirectoryPath)] = value;
+            }
+        }
+
+
 
         static LogManager()
         {
@@ -181,34 +243,49 @@ namespace RIS.Logging
                 }
 
                 GlobalDiagnosticsContext.Set(
-                    "AppStartupTime",
+                    "RIS-AppStartupTime",
                     startupTime.ToString("yyyy.MM.dd HH-mm-ss",
                         CultureInfo.InvariantCulture));
 
                 LogFactory.Configuration = XmlLoggingConfiguration
                     .CreateFromXmlString(ResourceProvider
                         .GetEmbeddedAsString(@"Resources\Configs\nlog.config"));
+
+                if (LogFactory.Configuration == null)
+                {
+                    Running = false;
+
+                    return;
+                }
+
+                AppDirectoryName = Environment.Process
+                    .ProcessName;
+                DefaultLogDirectoryPath = GetLogsDirectoryPath(
+                    LogType.Default);
+                DebugLogDirectoryPath = GetLogsDirectoryPath(
+                    LogType.Debug);
+
                 LogFactory.AutoShutdown = false;
 
                 LogFactory.Flush();
 
-                DebugLog.Info("Logger initialized");
-                Log.Info("Logger initialized");
+                Debug.Info("Logger initialized");
+                Default.Info("Logger initialized");
 
-                Log.Info($"Libraries Directory - {Environment.ExecAppDirectoryName}");
-                Log.Info($"Execution File Directory - {Environment.ExecProcessDirectoryName}");
+                Default.Info($"Libraries Directory - {Environment.ExecAppDirectoryName}");
+                Default.Info($"Execution File Directory - {Environment.ExecProcessDirectoryName}");
 
 #if NETCOREAPP
 
-                Log.Info($"Is Standalone App - {Environment.IsStandalone}");
-                Log.Info($"Is Single File App - {Environment.IsSingleFile}");
-                Log.Info($"Runtime Name - {Environment.RuntimeName}");
-                Log.Info($"Runtime Version - {Environment.RuntimeVersion}");
-                Log.Info($"Runtime Identifier - {Environment.RuntimeIdentifier}");
+                Default.Info($"Is Standalone App - {Environment.IsStandalone}");
+                Default.Info($"Is Single File App - {Environment.IsSingleFile}");
+                Default.Info($"Runtime Name - {Environment.RuntimeName}");
+                Default.Info($"Runtime Version - {Environment.RuntimeVersion}");
+                Default.Info($"Runtime Identifier - {Environment.RuntimeIdentifier}");
 
 #endif
 
-                Log.Info("Startup");
+                Default.Info("Startup");
 
                 LoggingStartup?.Invoke(
                     null, EventArgs.Empty);
@@ -234,9 +311,9 @@ namespace RIS.Logging
                 UnsubscribeRISEvents();
                 UnsubscribeAppDomainEvents();
 
-                Log.Info("Shutdown");
+                Default.Info("Shutdown");
 
-                Log.Info($"Exit code - {System.Environment.ExitCode}");
+                Default.Info($"Exit code - {System.Environment.ExitCode}");
 
                 LogFactory.Shutdown();
 
@@ -294,6 +371,7 @@ namespace RIS.Logging
 
             LogFactory.Flush(timeout);
         }
+
 
 
         private static void SubscribeAppShutdownEvent()
@@ -414,6 +492,34 @@ namespace RIS.Logging
 
 
 
+        public static string GetLogsDirectoryPath(
+            LogType log)
+        {
+            var appDirectoryName = AppDirectoryName;
+            var basePath = Environment.ExecProcessDirectoryName;
+            var relativePath = "logs";
+
+            if (appDirectoryName != null)
+            {
+                switch (log)
+                {
+                    case LogType.Default:
+                        relativePath = Path.Combine(
+                            relativePath, appDirectoryName, "default");
+                        break;
+                    case LogType.Debug:
+                        relativePath = Path.Combine(
+                            relativePath, appDirectoryName, "debug");
+                        break;
+                    default:
+                        break;
+                }
+            }
+
+            return Path.Combine(
+                basePath, relativePath);
+        }
+
         public static int DeleteLogs(
             int retentionDaysPeriod)
         {
@@ -429,9 +535,8 @@ namespace RIS.Logging
         private static int DeleteLogs(LogType log,
             int retentionDaysPeriod)
         {
-
-            var logDirectoryPath = LogUtilities
-                .GetLogDirectoryPath(log);
+            var logDirectoryPath = GetLogsDirectoryPath(
+                log);
 
             return DeleteLogsInternal(logDirectoryPath,
                 retentionDaysPeriod, "log");
@@ -476,7 +581,7 @@ namespace RIS.Logging
                 }
 
                 var currentFileNameDate = GlobalDiagnosticsContext.Get(
-                    "AppStartupTime");
+                    "RIS-AppStartupTime");
                 var nowDate = DateTime.UtcNow;
                 var logFiles = Directory.GetFiles(
                     filesDirectoryPath, $"*{fileExtension}");
@@ -524,7 +629,7 @@ namespace RIS.Logging
             }
             finally
             {
-                Log.Info($"Deleted older logs[{filesDirectoryPath}] - {deletedFilesCount}");
+                Default.Info($"Deleted older logs[{filesDirectoryPath}] - {deletedFilesCount}");
             }
         }
 
@@ -539,17 +644,17 @@ namespace RIS.Logging
 
         private static void RIS_OnInformation(object sender, RInformationEventArgs e)
         {
-            DebugLog.Info($"{e.Message}");
+            Debug.Info($"{e.Message}");
         }
 
         private static void RIS_OnWarning(object sender, RWarningEventArgs e)
         {
-            Log.Warn($"{e.Message}");
+            Default.Warn($"{e.Message}");
         }
 
         private static void RIS_OnError(object sender, RErrorEventArgs e)
         {
-            Log.Error($"{e.SourceException?.GetType().Name ?? "Unknown"} - Message={e.Message ?? (e.SourceException?.Message ?? "Unknown")},HResult={e.SourceException?.HResult ?? 0},StackTrace=\n{e.SourceException?.StackTrace ?? "Unknown"}");
+            Default.Error($"{e.SourceException?.GetType().Name ?? "Unknown"} - Message={e.Message ?? (e.SourceException?.Message ?? "Unknown")},HResult={e.SourceException?.HResult ?? 0},StackTrace=\n{e.SourceException?.StackTrace ?? "Unknown"}");
         }
 
 
@@ -558,26 +663,26 @@ namespace RIS.Logging
         {
             Exception exception = e.ExceptionObject as Exception;
 
-            Log.Fatal($"{exception?.GetType().Name ?? "Unknown"} - Message={exception?.Message ?? "Unknown"},HResult={exception?.HResult ?? 0},StackTrace=\n{exception?.StackTrace ?? "Unknown"}");
+            Default.Fatal($"{exception?.GetType().Name ?? "Unknown"} - Message={exception?.Message ?? "Unknown"},HResult={exception?.HResult ?? 0},StackTrace=\n{exception?.StackTrace ?? "Unknown"}");
 
             Shutdown();
         }
 
         private static void AppDomain_OnFirstChanceException(object sender, FirstChanceExceptionEventArgs e)
         {
-            DebugLog.Error($"{e.Exception.GetType().Name} - Message={e.Exception.Message},HResult={e.Exception.HResult},StackTrace=\n{e.Exception.StackTrace ?? "Unknown"}");
+            Debug.Error($"{e.Exception.GetType().Name} - Message={e.Exception.Message},HResult={e.Exception.HResult},StackTrace=\n{e.Exception.StackTrace ?? "Unknown"}");
         }
 
         private static Assembly AppDomain_OnAssemblyResolve(object sender, ResolveEventArgs e)
         {
-            DebugLog.Info($"Resolve - Name={e.Name ?? "Unknown"},RequestingAssembly={e.RequestingAssembly?.FullName ?? "Unknown"}");
+            Debug.Info($"Resolve - Name={e.Name ?? "Unknown"},RequestingAssembly={e.RequestingAssembly?.FullName ?? "Unknown"}");
 
             return e.RequestingAssembly;
         }
 
         private static Assembly AppDomain_OnResolve(object sender, ResolveEventArgs e)
         {
-            DebugLog.Info($"Resolve - Name={e.Name ?? "Unknown"},RequestingAssembly={e.RequestingAssembly?.FullName ?? "Unknown"}");
+            Debug.Info($"Resolve - Name={e.Name ?? "Unknown"},RequestingAssembly={e.RequestingAssembly?.FullName ?? "Unknown"}");
 
             return e.RequestingAssembly;
         }

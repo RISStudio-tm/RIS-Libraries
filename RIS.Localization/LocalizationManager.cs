@@ -5,10 +5,9 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Globalization;
-using System.IO;
 using System.Linq;
-using System.Threading;
-using RIS.Localization.Providers;
+using System.Reflection;
+using System.Runtime.CompilerServices;
 using RIS.Synchronization;
 
 namespace RIS.Localization
@@ -20,495 +19,543 @@ namespace RIS.Localization
         public static event EventHandler<LocalizationLoadedEventArgs> LocalizationsLoaded;
         public static event EventHandler<LocalizationFileNotFoundEventArgs> LocalizationFileNotFound;
         public static event EventHandler<LocalizedCultureNotFoundEventArgs> LocalizedCultureNotFound;
-        public static event EventHandler<EventArgs> LocalizationsNotFound;
+        public static event EventHandler<LocalizationEventArgs> LocalizationsNotFound;
 
-        public static event EventHandler<EventArgs> LocalizationUpdated;
+        public static event EventHandler<LocalizationEventArgs> LocalizationUpdated;
 
 
 
-        public static AsyncLock SyncRoot { get; }
-        public static string DefaultLocalizationsDirectoryName { get; }
-        public static string CustomLocalizationsDirectoryName { get; }
-        private static ILocalizationModule _currentDefaultLocalization;
+        private static readonly Dictionary<string, Dictionary<string, LocalizationFactory>> FactoriesInternal;
+        public static ReadOnlyDictionary<string, ReadOnlyDictionary<string, LocalizationFactory>> Factories { get; private set; }
+        private static readonly Dictionary<string, LocalizationFactory> CurrentFactoriesInternal;
+        public static ReadOnlyDictionary<string, LocalizationFactory> CurrentFactories
+        {
+            get
+            {
+                return new ReadOnlyDictionary<string, LocalizationFactory>(
+                    CurrentFactoriesInternal);
+            }
+        }
+        public static LocalizationFactory CurrentFactory
+        {
+            [MethodImpl(MethodImplOptions.NoInlining)]
+            get
+            {
+                var assemblyName = Assembly.GetCallingAssembly()
+                    .GetName().Name;
+
+                return GetCurrentFactory(assemblyName);
+            }
+        }
+        public static LocalizationFactory CurrentUIFactory
+        {
+            [MethodImpl(MethodImplOptions.NoInlining)]
+            get
+            {
+                var assemblyName = Assembly.GetEntryAssembly()?
+                    .GetName().Name;
+
+                return GetCurrentFactory(assemblyName);
+            }
+        }
+
+
+        public static AsyncLock SyncRoot
+        {
+            [MethodImpl(MethodImplOptions.NoInlining)]
+            get
+            {
+                var assemblyName = Assembly.GetCallingAssembly()
+                    .GetName().Name;
+
+                return GetCurrentFactory(assemblyName)?
+                    .SyncRoot ?? new AsyncLock();
+            }
+        }
         public static ILocalizationModule CurrentDefaultLocalization
         {
+            [MethodImpl(MethodImplOptions.NoInlining)]
             get
             {
-                return _currentDefaultLocalization;
-            }
-            private set
-            {
-                Interlocked.Exchange(
-                    ref _currentDefaultLocalization, value);
+                var assemblyName = Assembly.GetCallingAssembly()
+                    .GetName().Name;
+
+                return GetCurrentFactory(assemblyName)?
+                    .CurrentDefaultLocalization;
             }
         }
-        private static ILocalizationModule _currentLocalization;
         public static ILocalizationModule CurrentLocalization
         {
+            [MethodImpl(MethodImplOptions.NoInlining)]
             get
             {
-                return _currentLocalization;
-            }
-            private set
-            {
-                Interlocked.Exchange(
-                    ref _currentLocalization, value);
+                var assemblyName = Assembly.GetCallingAssembly()
+                    .GetName().Name;
+
+                return GetCurrentFactory(assemblyName)?
+                    .CurrentLocalization;
             }
         }
-        public static ReadOnlyDictionary<string, ILocalizationModule> Localizations { get; private set; }
+        public static ReadOnlyDictionary<string, ILocalizationModule> Localizations
+        {
+            [MethodImpl(MethodImplOptions.NoInlining)]
+            get
+            {
+                var assemblyName = Assembly.GetCallingAssembly()
+                    .GetName().Name;
 
-        public static CultureInfo DefaultCulture { get; private set; }
+                return GetCurrentFactory(assemblyName)?
+                    .Localizations;
+            }
+        }
+
+        public static CultureInfo DefaultCulture
+        {
+            [MethodImpl(MethodImplOptions.NoInlining)]
+            get
+            {
+                return CurrentFactory?.DefaultCulture;
+            }
+        }
 
 
 
         static LocalizationManager()
         {
-            var baseAppDirectory = Environment.ExecAppDirectoryName;
-            var baseProcessDirectory = Environment.ExecProcessDirectoryName;
-
-            if (string.IsNullOrEmpty(baseAppDirectory) || baseAppDirectory == "Unknown")
-                return;
-            if (string.IsNullOrEmpty(baseProcessDirectory) || baseProcessDirectory == "Unknown")
-                return;
-
-            SyncRoot = new AsyncLock();
-            DefaultLocalizationsDirectoryName = Path.Combine(
-                baseAppDirectory, "localizations", "default");
-            CustomLocalizationsDirectoryName = Path.Combine(
-                baseProcessDirectory, "localizations");
-            CurrentLocalization = null;
-            Localizations = new ReadOnlyDictionary<string, ILocalizationModule>(
-                new Dictionary<string, ILocalizationModule>());
-
-            DefaultCulture = new CultureInfo("en-US");
-
-            if (!Directory.Exists(DefaultLocalizationsDirectoryName))
-                Directory.CreateDirectory(DefaultLocalizationsDirectoryName);
-            if (!Directory.Exists(CustomLocalizationsDirectoryName))
-                Directory.CreateDirectory(CustomLocalizationsDirectoryName);
+            FactoriesInternal = new Dictionary<string, Dictionary<string, LocalizationFactory>>(5);
+            Factories = new ReadOnlyDictionary<string, ReadOnlyDictionary<string, LocalizationFactory>>(
+                FactoriesInternal
+                    .Select(item =>
+                        new KeyValuePair<string, ReadOnlyDictionary<string, LocalizationFactory>>(
+                            item.Key,
+                            new ReadOnlyDictionary<string, LocalizationFactory>(item.Value)))
+                    .ToDictionary(item => item.Key,
+                        item => item.Value));
+            CurrentFactoriesInternal = new Dictionary<string, LocalizationFactory>(5);
         }
 
 
 
-        private static void OnDefaultLocalizationChanged(
-            ILocalizationModule newLocalization)
+        internal static void OnDefaultLocalizationChanged(
+            object sender, LocalizationChangedEventArgs e)
         {
-            var oldLocalization = Interlocked.Exchange(
-                ref _currentDefaultLocalization, newLocalization);
-
-            if (oldLocalization != null && oldLocalization.Equals(newLocalization))
-                return;
-
-            DefaultLocalizationChanged?.Invoke(null,
-                new LocalizationChangedEventArgs(oldLocalization, newLocalization));
+            DefaultLocalizationChanged?.Invoke(
+                sender, e);
         }
 
-        private static void OnLocalizationChanged(
-            ILocalizationModule newLocalization)
+        internal static void OnLocalizationChanged(
+            object sender, LocalizationChangedEventArgs e)
         {
-            var oldLocalization = Interlocked.Exchange(
-                ref _currentLocalization, newLocalization);
-
-            if (oldLocalization != null && oldLocalization.Equals(newLocalization))
-                return;
-
-            LocalizationChanged?.Invoke(null,
-                new LocalizationChangedEventArgs(oldLocalization, newLocalization));
-
-            Thread.CurrentThread.CurrentCulture = newLocalization?.Culture ?? DefaultCulture;
-            Thread.CurrentThread.CurrentUICulture = newLocalization?.Culture ?? DefaultCulture;
-
-            SynchronizationContext.Current?.Send((_) =>
-            {
-                Thread.CurrentThread.CurrentCulture = newLocalization?.Culture ?? DefaultCulture;
-                Thread.CurrentThread.CurrentUICulture = newLocalization?.Culture ?? DefaultCulture;
-            }, null);
+            LocalizationChanged?.Invoke(
+                sender, e);
         }
 
-        private static void OnLocalizationsLoaded(
-            Dictionary<string, ILocalizationModule> localizations)
+        internal static void OnLocalizationsLoaded(
+            object sender, LocalizationLoadedEventArgs e)
         {
-            LocalizationsLoaded?.Invoke(null,
-                new LocalizationLoadedEventArgs(localizations));
+            LocalizationsLoaded?.Invoke(
+                sender, e);
         }
 
-        private static void OnLocalizationFileNotFound(
-            string filePath)
+        internal static void OnLocalizationFileNotFound(
+            object sender, LocalizationFileNotFoundEventArgs e)
         {
-            LocalizationFileNotFound?.Invoke(null,
-                new LocalizationFileNotFoundEventArgs(filePath));
-
-            var exception = new FileNotFoundException(
-                $"Localization file['{filePath}'] not found");
-            Events.OnError(new RErrorEventArgs(
-                exception, exception.Message));
+            LocalizationFileNotFound?.Invoke(
+                sender, e);
         }
 
-        private static void OnLocalizedCultureNotFound(
-            string cultureName)
+        internal static void OnLocalizedCultureNotFound(
+            object sender, LocalizedCultureNotFoundEventArgs e)
         {
-            LocalizedCultureNotFound?.Invoke(null,
-                new LocalizedCultureNotFoundEventArgs(cultureName));
-
-            var exception = new CultureNotFoundException(
-                $"Localized culture['{cultureName}'] not found");
-            Events.OnError(new RErrorEventArgs(
-                exception, exception.Message));
+            LocalizedCultureNotFound?.Invoke(
+                sender, e);
         }
 
-        private static void OnLocalizationsNotFound()
+        internal static void OnLocalizationsNotFound(
+            object sender, LocalizationEventArgs e)
         {
-            LocalizationsNotFound?.Invoke(null,
-                new EventArgs());
+            LocalizationsNotFound?.Invoke(
+                sender, e);
+        }
 
-            var exception = new Exception(
-                "Localizations not found");
-            Events.OnError(new RErrorEventArgs(
-                exception, exception.Message));
+        internal static void OnLocalizationUpdated(
+            object sender, LocalizationEventArgs e)
+        {
+            LocalizationUpdated?.Invoke(
+                sender, e);
         }
 
 
         public static void OnLocalizationUpdated(
             ILocalizationModule localization)
         {
-            using var @lock = SyncRoot.Lock();
-
-            if ((CurrentLocalization == null || !CurrentLocalization.Equals(localization)) &&
-                (CurrentDefaultLocalization == null || !CurrentDefaultLocalization.Equals(localization)))
+            foreach (var factories in FactoriesInternal)
             {
-                return;
+                foreach (var factory in factories.Value)
+                {
+                    factory.Value.OnLocalizationUpdated(
+                        localization);
+                }
             }
+        }
+        public static void OnLocalizationUpdated(
+            string assemblyName, ILocalizationModule localization)
+        {
+            if (!FactoriesInternal.ContainsKey(assemblyName))
+                return;
 
-            OnLocalizationUpdated();
+            foreach (var factory in FactoriesInternal[assemblyName])
+            {
+                factory.Value.OnLocalizationUpdated(
+                    localization);
+            }
+        }
+        public static void OnLocalizationUpdated(
+            string assemblyName, string factoryName, ILocalizationModule localization)
+        {
+            if (!FactoriesInternal.ContainsKey(assemblyName))
+                return;
+
+            var factories = FactoriesInternal[assemblyName];
+
+            if (!factories.ContainsKey(factoryName))
+                return;
+
+            factories[factoryName].OnLocalizationUpdated(
+                localization);
         }
         public static void OnLocalizationUpdated()
         {
-            LocalizationUpdated?.Invoke(null,
-                new EventArgs());
-        }
-
-
-
-        private static bool IsValidLocalizationModule(
-            ILocalizationModule module)
-        {
-            var result = true;
-
-            foreach (var localizationFile in module.Files)
+            foreach (var factories in FactoriesInternal)
             {
-                if (File.Exists(localizationFile.Path))
-                    continue;
-
-                OnLocalizationFileNotFound(localizationFile.Path);
-
-                result = false;
+                foreach (var factory in factories.Value)
+                {
+                    factory.Value.OnLocalizationUpdated();
+                }
             }
-
-            return result;
         }
-
-
-
-        private static void LoadLocalizations<T>()
-            where T: ILocalizationProvider
+        public static void OnLocalizationUpdated(
+            string assemblyName)
         {
-            using var @lock = SyncRoot.Lock();
-
-            var localizations = LocalizationProviderStorage
-                .GetProvider<T>()
-                .GetLocalizations(
-                    DefaultLocalizationsDirectoryName,
-                    CustomLocalizationsDirectoryName);
-
-            if (localizations == null)
+            if (!FactoriesInternal.ContainsKey(assemblyName))
                 return;
 
-            Localizations = new ReadOnlyDictionary<string, ILocalizationModule>(
-                localizations);
+            foreach (var factory in FactoriesInternal[assemblyName])
+            {
+                factory.Value.OnLocalizationUpdated();
+            }
+        }
+        public static void OnLocalizationUpdated(
+            string assemblyName, string factoryName)
+        {
+            if (!FactoriesInternal.ContainsKey(assemblyName))
+                return;
 
-            OnLocalizationsLoaded(localizations);
+            var factories = FactoriesInternal[assemblyName];
+
+            if (!factories.ContainsKey(factoryName))
+                return;
+
+            factories[factoryName].OnLocalizationUpdated();
         }
 
-        private static ILocalizationModule GetLocalizationModule(
-            string cultureName)
+
+
+        internal static void AddLocalizationFactory(
+            string assemblyName, LocalizationFactory factory)
         {
-            using var @lock = SyncRoot.Lock();
+            if (factory == null)
+                return;
+            if (string.IsNullOrEmpty(factory.Name))
+                return;
 
-            if (string.IsNullOrEmpty(cultureName))
-                return null;
-
-            if (Localizations.TryGetValue(cultureName, out var localizationModule))
+            if (!FactoriesInternal.ContainsKey(assemblyName))
             {
-                if (IsValidLocalizationModule(localizationModule))
-                    return localizationModule;
-
-                return null;
+                FactoriesInternal.Add(assemblyName,
+                    new Dictionary<string, LocalizationFactory>(5));
             }
 
-            OnLocalizedCultureNotFound(cultureName);
+            var factories = FactoriesInternal[assemblyName];
+
+            if (!factories.ContainsKey(factory.Name))
+            {
+                factories.Add(
+                    factory.Name, factory);
+
+                Factories = new ReadOnlyDictionary<string, ReadOnlyDictionary<string, LocalizationFactory>>(
+                    FactoriesInternal
+                        .Select(item =>
+                            new KeyValuePair<string, ReadOnlyDictionary<string, LocalizationFactory>>(
+                                item.Key,
+                                new ReadOnlyDictionary<string, LocalizationFactory>(item.Value)))
+                        .ToDictionary(item => item.Key,
+                            item => item.Value));
+
+                if (factories.Count == 1)
+                {
+                    CurrentFactoriesInternal[assemblyName] = factories
+                        .FirstOrDefault().Value; ;
+                }
+            }
+        }
+
+        internal static void RemoveLocalizationFactory(
+            string assemblyName, LocalizationFactory factory)
+        {
+            if (factory == null)
+                return;
+            if (string.IsNullOrEmpty(factory.Name))
+                return;
+
+            if (!FactoriesInternal.ContainsKey(assemblyName))
+            {
+                FactoriesInternal.Add(assemblyName,
+                    new Dictionary<string, LocalizationFactory>(5));
+            }
+
+            var factories = FactoriesInternal[assemblyName];
+
+            if (factories.ContainsKey(factory.Name))
+            {
+                factories.Remove(
+                    factory.Name);
+
+                Factories = new ReadOnlyDictionary<string, ReadOnlyDictionary<string, LocalizationFactory>>(
+                    FactoriesInternal
+                        .Select(item =>
+                            new KeyValuePair<string, ReadOnlyDictionary<string, LocalizationFactory>>(
+                                item.Key,
+                                new ReadOnlyDictionary<string, LocalizationFactory>(item.Value)))
+                        .ToDictionary(item => item.Key,
+                            item => item.Value));
+
+                if (CurrentFactory.Name == factory.Name)
+                {
+                    CurrentFactoriesInternal[assemblyName] = factories
+                        .FirstOrDefault().Value;
+                }
+            }
+        }
+
+
+
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        public static LocalizationFactory GetCurrentFactory()
+        {
+            var assemblyName = Assembly.GetCallingAssembly()
+                .GetName().Name;
+
+            return GetCurrentFactory(
+                assemblyName);
+        }
+        public static LocalizationFactory GetCurrentFactory(
+            string assemblyName)
+        {
+            if (CurrentFactories.TryGetValue(assemblyName, out var factory))
+                return factory;
 
             return null;
         }
 
 
-
-        private static bool SetDefaultLocalization(
-            ILocalizationModule module)
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        public static bool SetCurrentFactory(
+            string factoryName)
         {
-            using var @lock = SyncRoot.Lock();
+            var assemblyName = Assembly.GetCallingAssembly()
+                .GetName().Name;
 
-            if (!IsValidLocalizationModule(module))
+            return SetCurrentFactory(
+                assemblyName, factoryName);
+        }
+        public static bool SetCurrentFactory(
+            string assemblyName, string factoryName)
+        {
+            if (string.IsNullOrEmpty(factoryName))
                 return false;
+
+            if (!FactoriesInternal.ContainsKey(assemblyName))
+            {
+                FactoriesInternal.Add(assemblyName,
+                    new Dictionary<string, LocalizationFactory>(5));
+            }
+
+            var factories = FactoriesInternal[assemblyName];
+
+            if (!factories.TryGetValue(factoryName, out var factory))
+                return false;
+
+            CurrentFactoriesInternal[assemblyName] = factory;
+
+            return true;
+        }
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        public static bool SetCurrentFactory(
+            LocalizationFactory factory)
+        {
+            var assemblyName = Assembly.GetCallingAssembly()
+                .GetName().Name;
+
+            return SetCurrentFactory(
+                assemblyName, factory);
+        }
+        public static bool SetCurrentFactory(
+            string assemblyName, LocalizationFactory factory)
+        {
+            if (factory == null)
+                return false;
+            if (string.IsNullOrEmpty(factory.Name))
+                return false;
+
+            AddLocalizationFactory(
+                assemblyName, factory);
+
+            CurrentFactoriesInternal[assemblyName] = factory;
 
             return true;
         }
 
-        private static bool SetLocalization(
-            ILocalizationModule module)
+
+
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        public static void SetDefaultCulture(
+            string cultureName)
         {
-            using var @lock = SyncRoot.Lock();
+            var assemblyName = Assembly.GetCallingAssembly()
+                .GetName().Name;
 
-            if (!IsValidLocalizationModule(module))
-                return false;
+            SetDefaultCulture(
+                assemblyName, cultureName);
+        }
+        public static void SetDefaultCulture(
+            string assemblyName, string cultureName)
+        {
+            GetCurrentFactory(assemblyName)?
+                .SetDefaultCulture(cultureName);
+        }
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        public static void SetDefaultCulture(
+            CultureInfo culture)
+        {
+            var assemblyName = Assembly.GetCallingAssembly()
+                .GetName().Name;
 
-            return true;
+            SetDefaultCulture(
+                assemblyName, culture);
+        }
+        public static void SetDefaultCulture(
+            string assemblyName, CultureInfo culture)
+        {
+            GetCurrentFactory(assemblyName)?
+                .SetDefaultCulture(culture);
         }
 
 
 
-        public static void SetDefaultCulture(string cultureName)
-        {
-            if (string.IsNullOrEmpty(cultureName))
-                return;
-
-            CultureInfo culture;
-
-            try
-            {
-                culture = CultureInfo.GetCultureInfo(cultureName);
-            }
-            catch (Exception)
-            {
-                var exception = new ArgumentException(
-                    $"Culture named '{cultureName}' not found",
-                    nameof(cultureName));
-                Events.OnError(new RErrorEventArgs(exception,
-                    exception.Message));
-                throw exception;
-            }
-
-            SetDefaultCulture(culture);
-        }
-        public static void SetDefaultCulture(CultureInfo culture)
-        {
-            if (culture == null)
-                return;
-            if (Equals(culture, CultureInfo.InvariantCulture))
-                return;
-
-            DefaultCulture = CultureInfo.ReadOnly(
-                culture);
-
-            SwitchDefaultLocalization(GetDefaultCultureName());
-        }
-
-
+        [MethodImpl(MethodImplOptions.NoInlining)]
         public static void ReloadLocalizations<T>()
             where T : ILocalizationProvider
         {
-            LoadLocalizations<T>();
+            var assemblyName = Assembly.GetCallingAssembly()
+                .GetName().Name;
+
+            ReloadLocalizations<T>(
+                assemblyName);
+        }
+        public static void ReloadLocalizations<T>(
+            string assemblyName)
+            where T : ILocalizationProvider
+        {
+            GetCurrentFactory(assemblyName)?
+                .ReloadLocalizations<T>();
         }
 
+        [MethodImpl(MethodImplOptions.NoInlining)]
         public static string GetDefaultCultureName()
         {
-            using var @lock = SyncRoot.Lock();
+            var assemblyName = Assembly.GetCallingAssembly()
+                .GetName().Name;
 
-            if (Localizations.Count == 0)
-            {
-                OnLocalizationsNotFound();
-
-                return null;
-            }
-
-            string cultureName;
-
-            if (Localizations.ContainsKey(DefaultCulture.Name))
-                cultureName = DefaultCulture.Name;
-            else if (Localizations.ContainsKey("en-US"))
-                cultureName = "en-US";
-            else if (CurrentLocalization != null && Localizations.ContainsKey(CurrentLocalization.CultureName))
-                cultureName = CurrentLocalization.CultureName;
-            else
-                cultureName = Localizations.Keys.FirstOrDefault();
-
-            if (string.IsNullOrEmpty(cultureName))
-            {
-                OnLocalizedCultureNotFound(cultureName);
-
-                return null;
-            }
-
-            return cultureName;
+            return GetDefaultCultureName(
+                assemblyName);
+        }
+        public static string GetDefaultCultureName(
+            string assemblyName)
+        {
+            return GetCurrentFactory(assemblyName)?
+                .GetDefaultCultureName();
         }
 
 
+        [MethodImpl(MethodImplOptions.NoInlining)]
         public static bool SwitchDefaultLocalization(
             string cultureName)
         {
-            using var @lock = SyncRoot.Lock();
+            var assemblyName = Assembly.GetCallingAssembly()
+                .GetName().Name;
 
-            if (Localizations.Count == 0)
-            {
-                OnLocalizationsNotFound();
-
-                return false;
-            }
-
-            if (CurrentDefaultLocalization != null && CurrentDefaultLocalization.CultureName == cultureName)
-                return true;
-
-            var defaultModule = GetLocalizationModule(
-                cultureName);
-
-            if (defaultModule == null)
-                return false;
-
-            var setDefaultLocalizationSuccess = SetDefaultLocalization(
-                defaultModule);
-
-            if (!setDefaultLocalizationSuccess)
-                return false;
-
-            OnDefaultLocalizationChanged(defaultModule);
-
-            if (CurrentLocalization == null)
-            {
-                var setLocalizationSuccess = SetLocalization(
-                    defaultModule);
-
-                if (!setLocalizationSuccess)
-                    return false;
-
-                OnLocalizationChanged(defaultModule);
-            }
-
-            OnLocalizationUpdated();
-
-            return true;
+            return SwitchDefaultLocalization(
+                assemblyName, cultureName);
+        }
+        public static bool SwitchDefaultLocalization(
+            string assemblyName, string cultureName)
+        {
+            return GetCurrentFactory(assemblyName)?
+                .SwitchDefaultLocalization(cultureName) == true;
         }
 
+        [MethodImpl(MethodImplOptions.NoInlining)]
         public static bool SwitchLocalization(
             string cultureName)
         {
-            using var @lock = SyncRoot.Lock();
+            var assemblyName = Assembly.GetCallingAssembly()
+                .GetName().Name;
 
-            if (Localizations.Count == 0)
-            {
-                OnLocalizationsNotFound();
-
-                return false;
-            }
-
-            if (CurrentLocalization != null && CurrentLocalization.CultureName == cultureName)
-                return true;
-
-            var module = GetLocalizationModule(
-                cultureName);
-
-            if (module == null)
-                return false;
-
-            var setLocalizationSuccess = SetLocalization(
-                module);
-
-            if (!setLocalizationSuccess)
-                return false;
-
-            OnLocalizationChanged(module);
-
-            if (CurrentDefaultLocalization == null)
-            {
-                var defaultModule = GetLocalizationModule(
-                    GetDefaultCultureName());
-
-                if (defaultModule == null)
-                    defaultModule = module;
-
-                var setDefaultLocalizationSuccess = SetDefaultLocalization(
-                    defaultModule);
-
-                if (!setDefaultLocalizationSuccess)
-                    return false;
-
-                OnDefaultLocalizationChanged(defaultModule);
-            }
-
-            OnLocalizationUpdated();
-
-            return true;
+            return SwitchLocalization(
+                assemblyName, cultureName);
+        }
+        public static bool SwitchLocalization(
+            string assemblyName, string cultureName)
+        {
+            return GetCurrentFactory(assemblyName)?
+                .SwitchLocalization(cultureName) == true;
         }
 
 
-        public static string GetLocalized(string key)
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        public static string GetLocalized(
+            string key)
         {
-            if (key == null)
-                return null;
+            var assemblyName = Assembly.GetCallingAssembly()
+                .GetName().Name;
 
-            if (CurrentLocalization != null
-                && CurrentLocalization.Dictionary.Contains(key))
-            {
-                return (string)CurrentLocalization.Dictionary[key];
-            }
-
-            if (CurrentDefaultLocalization != null
-                && CurrentDefaultLocalization.Dictionary.Contains(key))
-            {
-                return (string)CurrentDefaultLocalization.Dictionary[key];
-            }
-
-            return null;
+            return GetLocalized(
+                assemblyName, key);
+        }
+        public static string GetLocalized(
+            string assemblyName, string key)
+        {
+            return GetCurrentFactory(assemblyName)?
+                .GetLocalized(key);
         }
 
-        public static bool TryGetLocalized(string key, out string value)
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        public static bool TryGetLocalized(
+            string key, out string value)
+        {
+            var assemblyName = Assembly.GetCallingAssembly()
+                .GetName().Name;
+
+            return TryGetLocalized(
+                assemblyName, key, out value);
+        }
+        public static bool TryGetLocalized(
+            string assemblyName, string key, out string value)
         {
             value = null;
 
-            if (key == null)
-                return false;
-
-            if (CurrentLocalization != null
-                && CurrentLocalization.Dictionary.Contains(key))
-            {
-                try
-                {
-                    value = (string)CurrentLocalization.Dictionary[key];
-
-                    return true;
-                }
-                catch (Exception)
-                {
-
-                }
-            }
-
-            if (CurrentDefaultLocalization != null
-                && CurrentDefaultLocalization.Dictionary.Contains(key))
-            {
-                try
-                {
-                    value = (string)CurrentDefaultLocalization.Dictionary[key];
-
-                    return true;
-                }
-                catch (Exception)
-                {
-
-                }
-            }
-
-            value = null;
-
-            return false;
+            return GetCurrentFactory(assemblyName)?
+                .TryGetLocalized(key, out value) == true;
         }
     }
 }

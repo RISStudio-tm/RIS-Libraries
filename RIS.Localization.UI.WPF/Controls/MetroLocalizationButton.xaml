@@ -13,7 +13,7 @@
                       xmlns:localization="clr-namespace:RIS.Localization;assembly=RIS.Localization"
                       mc:Ignorable="d" 
                       d:DesignHeight="450" d:DesignWidth="800"
-                      ItemsSource="{Binding Path=(localization:LocalizationManager.Localizations), Mode=OneWay}"
+                      ItemsSource="{Binding Path=(localization:LocalizationManager.CurrentUIFactory).Localizations, Mode=OneWay}"
                       DisplayMemberPath="Value.CultureNativeName"
                       Margin="5"
                       SelectionChanged="Button_SelectionChanged">

@@ -29,13 +29,14 @@ namespace RIS.Localization.Entities
         public ResourceDictionary Source { get; }
 
 
-        public ObservableCollection<ILocalizationDictionary> MergedDictionaries
+        public ReadOnlyCollection<ILocalizationDictionary> MergedDictionaries
         {
             get
             {
-                return new ObservableCollection<ILocalizationDictionary>(
+                return new ReadOnlyCollection<ILocalizationDictionary>(
                     Source.MergedDictionaries
-                        .Select(dictionary => From(dictionary)));
+                        .Select(dictionary => (ILocalizationDictionary)From(dictionary))
+                        .ToList());
             }
         }
 
