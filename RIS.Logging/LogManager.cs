@@ -189,6 +189,7 @@ namespace RIS.Logging
 
 
 
+#pragma warning disable SS002 // DateTime.Now was referenced
         static LogManager()
         {
             LogFactory = new LogFactory();
@@ -206,6 +207,23 @@ namespace RIS.Logging
             AutoShutdown = false;
             GlobalThreshold = LogLevel.Trace;
 
+            DateTime startupTime;
+
+            try
+            {
+                startupTime = Environment.Process.StartTime
+                    .ToLocalTime();
+            }
+            catch (Exception)
+            {
+                startupTime = DateTime.Now;
+            }
+
+            GlobalDiagnosticsContext.Set(
+                "RIS-AppStartupTime",
+                startupTime.ToString("yyyy.MM.dd HH-mm-ss",
+                    CultureInfo.InvariantCulture));
+
             Startup();
 
             AutoShutdown = true;
@@ -213,10 +231,10 @@ namespace RIS.Logging
             SubscribeRISEvents();
             SubscribeAppDomainEvents();
         }
+#pragma warning restore SS002 // DateTime.Now was referenced
 
 
 
-#pragma warning disable SS002 // DateTime.Now was referenced
         public static void Startup()
         {
             lock (SyncRoot)
@@ -229,23 +247,6 @@ namespace RIS.Logging
 
                 Disposed = false;
                 Running = true;
-
-                DateTime startupTime;
-
-                try
-                {
-                    startupTime = Environment.Process.StartTime
-                        .ToLocalTime();
-                }
-                catch (Exception)
-                {
-                    startupTime = DateTime.Now;
-                }
-
-                GlobalDiagnosticsContext.Set(
-                    "RIS-AppStartupTime",
-                    startupTime.ToString("yyyy.MM.dd HH-mm-ss",
-                        CultureInfo.InvariantCulture));
 
                 LogFactory.Configuration = XmlLoggingConfiguration
                     .CreateFromXmlString(ResourceProvider
@@ -291,7 +292,6 @@ namespace RIS.Logging
                     null, EventArgs.Empty);
             }
         }
-#pragma warning restore SS002 // DateTime.Now was referenced
 
         public static void Shutdown()
         {
