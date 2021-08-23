@@ -114,7 +114,11 @@ namespace RIS.Localization
             [MethodImpl(MethodImplOptions.NoInlining)]
             get
             {
-                return CurrentFactory?.DefaultCulture;
+                var assemblyName = Assembly.GetCallingAssembly()
+                    .GetName().Name;
+
+                return GetCurrentFactory(assemblyName)?
+                    .DefaultCulture;
             }
         }
 
