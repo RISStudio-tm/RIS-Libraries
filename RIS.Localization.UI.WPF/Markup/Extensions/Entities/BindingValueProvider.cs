@@ -14,7 +14,7 @@ namespace RIS.Localization.UI.WPF.Markup.Extensions.Entities
 
 
 
-        public static PropertyInfo ValueProperty;
+        public static readonly PropertyInfo ValueProperty;
 
         private object _value;
         public object Value
@@ -34,7 +34,8 @@ namespace RIS.Localization.UI.WPF.Markup.Extensions.Entities
 
         static BindingValueProvider()
         {
-            ValueProperty = typeof(BindingValueProvider).GetProperty(nameof(Value));
+            ValueProperty = typeof(BindingValueProvider)
+                .GetProperty(nameof(Value));
         }
 
 

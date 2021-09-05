@@ -135,8 +135,11 @@ namespace RIS.Localization.UI.WPF.Markup
 
             if (TargetProperty is DependencyProperty dependencyProperty)
             {
-                ((DependencyObject)targetObject).SetValue(
-                    dependencyProperty, value);
+                if (targetObject is DependencyObject targetDependencyObject)
+                {
+                    targetDependencyObject.SetValue(
+                        dependencyProperty, value);
+                }
             }
             else if (TargetProperty is PropertyInfo propertyInfo)
             {
@@ -182,18 +185,18 @@ namespace RIS.Localization.UI.WPF.Markup
             {
                 targetObject = new BindingValueProvider();
                 targetProperty = BindingValueProvider.ValueProperty;
-                targetPropertyType = setter.Property.PropertyType;
+                targetPropertyType = setter.Property?.PropertyType ?? typeof(object);
 
                 result = new Binding(nameof(BindingValueProvider.Value))
                 {
                     Source = targetObject,
-                    Mode = BindingMode.TwoWay
+                    Mode = BindingMode.OneWay
                 };
             }
             else if (targetObject is Binding binding)
             {
                 binding.Path = new PropertyPath(nameof(BindingValueProvider.Value));
-                binding.Mode = BindingMode.TwoWay;
+                binding.Mode = BindingMode.OneWay;
 
                 targetObject = new BindingValueProvider();
                 targetProperty = BindingValueProvider.ValueProperty;
@@ -229,7 +232,11 @@ namespace RIS.Localization.UI.WPF.Markup
                 return null;
 
             if (result != null)
+            {
+                UpdateValue();
+
                 return result;
+            }
 
             result = LocalizationManager.CurrentUIFactory?
                 .GetLocalized(ResourceKey);
