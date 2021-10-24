@@ -91,7 +91,8 @@ namespace RIS.Cryptography.Hash.Methods
                 UseEnhancedAlgorithm,
                 HashMethodOriginal);
 
-            return SecureUtils.SecureEquals(plainTextHash, hashText,
+            return SecureUtils.SecureEqualsUnsafe(
+                plainTextHash, hashText,
                 false, null);
         }
         public bool VerifyHash(byte[] data, string hashText)

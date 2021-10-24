@@ -8,8 +8,10 @@ using RIS.Text.Encoding.Base;
 
 namespace RIS.Cryptography.Hash.Methods
 {
-    public sealed class Argon2dRaw : IHashMethod
+    public sealed class Argon2dRaw : IRawHashMethod
     {
+        public static readonly Argon2Type Type;
+
         private byte[] _salt;
         public byte[] SaltBytes
         {
@@ -33,54 +35,28 @@ namespace RIS.Cryptography.Hash.Methods
             }
             set
             {
+                byte[] salt;
+
                 if (Base64.IsBase64(value))
                 {
                     try
                     {
-                        var salt =
-                            Convert.FromBase64String(value);
-
-                        if (salt.Length < 8)
-                        {
-                            _salt =
-                                Convert.FromBase64String(Convert.ToBase64String(new byte[8]));
-
-                            return;
-                        }
-
-                        _salt = salt;
+                        salt = Convert.FromBase64String(value);
                     }
                     catch (FormatException)
                     {
-                        var salt =
-                            Convert.FromBase64String(Convert.ToBase64String(SecureUtils.GetBytes(value)));
-
-                        if (salt.Length < 8)
-                        {
-                            _salt =
-                                Convert.FromBase64String(Convert.ToBase64String(new byte[8]));
-
-                            return;
-                        }
-
-                        _salt = salt;
+                        salt = SecureUtils.GetBytes(value);
                     }
                 }
                 else
                 {
-                    var salt =
-                        Convert.FromBase64String(Convert.ToBase64String(SecureUtils.GetBytes(value)));
-
-                    if (salt.Length < 8)
-                    {
-                        _salt =
-                            Convert.FromBase64String(Convert.ToBase64String(new byte[8]));
-
-                        return;
-                    }
-
-                    _salt = salt;
+                    salt = SecureUtils.GetBytes(value);
                 }
+
+                if (salt.Length < 8)
+                    salt = new byte[8];
+
+                _salt = salt;
             }
         }
         private ushort _hashLength;
@@ -167,19 +143,16 @@ namespace RIS.Cryptography.Hash.Methods
                 {
                     try
                     {
-                        _associatedData =
-                            Convert.FromBase64String(value);
+                        _associatedData = Convert.FromBase64String(value);
                     }
                     catch (FormatException)
                     {
-                        _associatedData =
-                            Convert.FromBase64String(Convert.ToBase64String(SecureUtils.GetBytes(value)));
+                        _associatedData = SecureUtils.GetBytes(value);
                     }
                 }
                 else
                 {
-                    _associatedData =
-                        Convert.FromBase64String(Convert.ToBase64String(SecureUtils.GetBytes(value)));
+                    _associatedData = SecureUtils.GetBytes(value);
                 }
             }
         }
@@ -207,25 +180,27 @@ namespace RIS.Cryptography.Hash.Methods
                 {
                     try
                     {
-                        _knownSecret =
-                            Convert.FromBase64String(value);
+                        _knownSecret = Convert.FromBase64String(value);
                     }
                     catch (FormatException)
                     {
-                        _knownSecret =
-                            Convert.FromBase64String(Convert.ToBase64String(SecureUtils.GetBytes(value)));
+                        _knownSecret = SecureUtils.GetBytes(value);
                     }
                 }
                 else
                 {
-                    _knownSecret =
-                        Convert.FromBase64String(Convert.ToBase64String(SecureUtils.GetBytes(value)));
+                    _knownSecret = SecureUtils.GetBytes(value);
                 }
             }
         }
         public bool FixedHashLength { get; set; }
 
         public bool Initialized { get; }
+
+        static Argon2dRaw()
+        {
+            Type = Argon2Type.Argon2d;
+        }
 
         public Argon2dRaw()
         {
@@ -250,6 +225,26 @@ namespace RIS.Cryptography.Hash.Methods
         }
         public string GetHash(byte[] data)
         {
+            byte[] hashBytes = GetHashBytes(data);
+            StringBuilder hashText = new StringBuilder(hashBytes.Length * 2);
+
+            for (int i = 0; i < hashBytes.Length; ++i)
+            {
+                hashText.Append(hashBytes[i].ToString(
+                    "x2", CultureInfo.InvariantCulture));
+            }
+
+            return hashText.ToString();
+        }
+
+        public byte[] GetHashBytes(string plainText)
+        {
+            byte[] data = SecureUtils.GetBytes(plainText);
+
+            return GetHashBytes(data);
+        }
+        public byte[] GetHashBytes(byte[] data)
+        {
             Konscious.Security.Cryptography.Argon2d argon2Service = new Konscious.Security.Cryptography.Argon2d(data)
             {
                 Salt = SaltBytes,
@@ -260,15 +255,7 @@ namespace RIS.Cryptography.Hash.Methods
                 KnownSecret = KnownSecretBytes
             };
 
-            byte[] hashBytes = argon2Service.GetBytes(FixedHashLength ? HashLength : SaltBytes.Length);
-
-            StringBuilder hashText = new StringBuilder(hashBytes.Length * 2);
-            for (int i = 0; i < hashBytes.Length; ++i)
-            {
-                hashText.Append(hashBytes[i].ToString("x2", CultureInfo.InvariantCulture));
-            }
-
-            return hashText.ToString();
+            return argon2Service.GetBytes(FixedHashLength ? HashLength : SaltBytes.Length);
         }
 
         public bool VerifyHash(string plainText, string hashText)
@@ -281,8 +268,23 @@ namespace RIS.Cryptography.Hash.Methods
         {
             var plainTextHash = GetHash(data);
 
-            return SecureUtils.SecureEquals(plainTextHash, hashText,
+            return SecureUtils.SecureEqualsUnsafe(
+                plainTextHash, hashText,
                 true, null);
+        }
+
+        public bool VerifyHashBytes(string plainText, byte[] hashData)
+        {
+            byte[] data = SecureUtils.GetBytes(plainText);
+
+            return VerifyHashBytes(data, hashData);
+        }
+        public bool VerifyHashBytes(byte[] data, byte[] hashData)
+        {
+            var plainTextHashBytes = GetHashBytes(data);
+
+            return SecureUtils.SecureEqualsUnsafe(
+                plainTextHashBytes, hashData);
         }
     }
 }

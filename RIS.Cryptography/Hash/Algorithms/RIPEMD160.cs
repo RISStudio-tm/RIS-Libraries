@@ -6,46 +6,49 @@ using System.Security.Cryptography;
 
 namespace RIS.Cryptography.Hash.Algorithms
 {
-    public class RIPEMD160Managed : HashAlgorithm
+    public sealed class RIPEMD160 : HashAlgorithm
     {
         private byte[] _buffer;
         private long _count;
         private uint[] _stateMD160;
         private uint[] _blockDWords;
 
-        public new static RIPEMD160Managed Create()
+        public new static RIPEMD160 Create()
         {
-            return new RIPEMD160Managed();
+            return new RIPEMD160();
         }
-        public new static RIPEMD160Managed Create(string hashname)
+        public new static RIPEMD160 Create(string hashName)
         {
-            return new RIPEMD160Managed();
+            return new RIPEMD160();
         }
 
-        public RIPEMD160Managed()
+        public RIPEMD160()
         {
             HashSizeValue = 160;
+
             _stateMD160 = new uint[5];
             _blockDWords = new uint[16];
             _buffer = new byte[64];
+
             InitializeState();
         }
 
         public override void Initialize()
         {
             InitializeState();
+
             Array.Clear(_blockDWords, 0, _blockDWords.Length);
             Array.Clear(_buffer, 0, _buffer.Length);
         }
 
         protected override void HashCore(byte[] rgb, int ibStart, int cbSize)
         {
-            _HashData(rgb, ibStart, cbSize);
+            HashData(rgb, ibStart, cbSize);
         }
 
         protected override byte[] HashFinal()
         {
-            return _EndHash();
+            return EndHash();
         }
 
         private void InitializeState()
@@ -58,45 +61,59 @@ namespace RIS.Cryptography.Hash.Algorithms
             _stateMD160[4] = 3285377520U;
         }
 
-        private unsafe void _HashData(byte[] partIn, int ibStart, int cbSize)
+        private unsafe void HashData(byte[] partIn, int ibStart, int cbSize)
         {
             int byteCount = cbSize;
             int srcOffsetBytes = ibStart;
             int dstOffsetBytes = (int)(_count & 63L);
+
             _count += (long)byteCount;
+
             fixed (uint* state = _stateMD160)
-                fixed (byte* block = _buffer)
-                    fixed (uint* blockDWords = _blockDWords)
-                    {
-                        if (dstOffsetBytes > 0 && dstOffsetBytes + byteCount >= 64)
-                        {
-                            Buffer.BlockCopy(partIn, srcOffsetBytes, _buffer, dstOffsetBytes, 64 - dstOffsetBytes);
-                            srcOffsetBytes += 64 - dstOffsetBytes;
-                            byteCount -= 64 - dstOffsetBytes;
-                            MDTransform(blockDWords, state, block);
-                            dstOffsetBytes = 0;
-                        }
-                        while (byteCount >= 64)
-                        {
-                            Buffer.BlockCopy(partIn, srcOffsetBytes, _buffer, 0, 64);
-                            srcOffsetBytes += 64;
-                            byteCount -= 64;
-                            MDTransform(blockDWords, state, block);
-                        }
-                        if (byteCount > 0)
-                            Buffer.BlockCopy(partIn, srcOffsetBytes, _buffer, dstOffsetBytes, byteCount);
-                    }
+            fixed (byte* block = _buffer)
+            fixed (uint* blockDWords = _blockDWords)
+            {
+                if (dstOffsetBytes > 0 && dstOffsetBytes + byteCount >= 64)
+                {
+                    Buffer.BlockCopy(partIn, srcOffsetBytes, _buffer, dstOffsetBytes, 64 - dstOffsetBytes);
+
+                    srcOffsetBytes += 64 - dstOffsetBytes;
+                    byteCount -= 64 - dstOffsetBytes;
+
+                    MDTransform(blockDWords, state, block);
+
+                    dstOffsetBytes = 0;
+                }
+
+                while (byteCount >= 64)
+                {
+                    Buffer.BlockCopy(partIn, srcOffsetBytes, _buffer, 0, 64);
+
+                    srcOffsetBytes += 64;
+                    byteCount -= 64;
+
+                    MDTransform(blockDWords, state, block);
+                }
+
+                if (byteCount > 0)
+                {
+                    Buffer.BlockCopy(partIn, srcOffsetBytes, _buffer, dstOffsetBytes, byteCount);
+                }
+            }
         }
 
-        private byte[] _EndHash()
+        private byte[] EndHash()
         {
-            byte[] block = new byte[20];
             int length = 64 - (int)(_count & 63L);
+
             if (length <= 8)
                 length += 64;
+
+            byte[] block = new byte[20];
             byte[] partIn = new byte[length];
-            partIn[0] = (byte)128;
             long num = _count * 8L;
+
+            partIn[0] = (byte)128;
             partIn[length - 1] = (byte)((ulong)(num >> 56) & (ulong)byte.MaxValue);
             partIn[length - 2] = (byte)((ulong)(num >> 48) & (ulong)byte.MaxValue);
             partIn[length - 3] = (byte)((ulong)(num >> 40) & (ulong)byte.MaxValue);
@@ -105,14 +122,19 @@ namespace RIS.Cryptography.Hash.Algorithms
             partIn[length - 6] = (byte)((ulong)(num >> 16) & (ulong)byte.MaxValue);
             partIn[length - 7] = (byte)((ulong)(num >> 8) & (ulong)byte.MaxValue);
             partIn[length - 8] = (byte)((ulong)num & (ulong)byte.MaxValue);
-            _HashData(partIn, 0, partIn.Length);
+
+            HashData(partIn, 0, partIn.Length);
             DWORDToLittleEndian(block, _stateMD160, 5);
+
             HashValue = block;
+
             return block;
         }
 
         private static unsafe void MDTransform(uint* blockDWords, uint* state, byte* block)
         {
+            DWORDFromLittleEndian(blockDWords, 16, block);
+
             uint num1 = *state;
             uint num2 = state[1];
             uint y1 = state[2];
@@ -123,7 +145,6 @@ namespace RIS.Cryptography.Hash.Algorithms
             uint y2 = y1;
             uint z2 = z1;
             uint num6 = num3;
-            DWORDFromLittleEndian(blockDWords, 16, block);
             uint num7 = num1 + (*blockDWords + F(num2, y1, z1));
             uint num8 = (num7 << 11 | num7 >> 21) + num3;
             uint z3 = y1 << 10 | y1 >> 22;
@@ -641,8 +662,10 @@ namespace RIS.Cryptography.Hash.Algorithms
             int i;
             int j;
 
-            for (i = 0, j = 0; i < digits; i++, j += 4)
+            for (i = 0, j = 0; i < digits; ++i, j += 4)
+            {
                 x[i] = (uint)(block[j] | (block[j + 1] << 8) | (block[j + 2] << 16) | (block[j + 3] << 24));
+            }
         }
 
         private static void DWORDToLittleEndian(byte[] block, uint[] x, int digits)
@@ -650,12 +673,14 @@ namespace RIS.Cryptography.Hash.Algorithms
             int i;
             int j;
 
-            for (i = 0, j = 0; i < digits; i++, j += 4)
+            for (i = 0, j = 0; i < digits; ++i, j += 4)
             {
-                block[j] = (byte)(x[i] & 0xff);
-                block[j + 1] = (byte)((x[i] >> 8) & 0xff);
-                block[j + 2] = (byte)((x[i] >> 16) & 0xff);
-                block[j + 3] = (byte)((x[i] >> 24) & 0xff);
+                ref var element = ref x[i];
+
+                block[j] = (byte)(element & 0xff);
+                block[j + 1] = (byte)((element >> 8) & 0xff);
+                block[j + 2] = (byte)((element >> 16) & 0xff);
+                block[j + 3] = (byte)((element >> 24) & 0xff);
             }
         }
     }

@@ -15,4 +15,13 @@ namespace RIS.Cryptography.Hash
         bool VerifyHash(string plainText, string hashText);
         bool VerifyHash(byte[] data, string hashText);
     }
+
+    public interface IRawHashMethod : IHashMethod
+    {
+        byte[] GetHashBytes(string plainText);
+        byte[] GetHashBytes(byte[] data);
+
+        bool VerifyHashBytes(string plainText, byte[] hashData);
+        bool VerifyHashBytes(byte[] data, byte[] hashData);
+    }
 }

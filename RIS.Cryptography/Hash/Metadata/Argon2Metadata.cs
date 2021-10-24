@@ -17,22 +17,7 @@ namespace RIS.Cryptography.Hash.Metadata
 
         public Argon2Type Type { get; private set; }
         public int Version { get; private set; }
-        private ushort _saltLength;
-        public ushort SaltLength
-        {
-            get
-            {
-                return _saltLength;
-            }
-            private set
-            {
-                if (value < 8)
-                    value = 8;
-
-                _saltLength = value;
-            }
-        }
-        private byte[] _salt;
+         private byte[] _salt;
         public byte[] SaltBytes
         {
             get
@@ -52,24 +37,7 @@ namespace RIS.Cryptography.Hash.Metadata
             }
             private set
             {
-                if (Base64.IsBase64(value))
-                {
-                    try
-                    {
-                        _salt =
-                            Convert.FromBase64String(value);
-                    }
-                    catch (FormatException)
-                    {
-                        _salt =
-                            Convert.FromBase64String(Convert.ToBase64String(SecureUtils.GetBytes(value)));
-                    }
-                }
-                else
-                {
-                    _salt =
-                        Convert.FromBase64String(Convert.ToBase64String(SecureUtils.GetBytes(value)));
-                }
+                _salt = Convert.FromBase64String(value);
             }
         }
         private byte[] _hash;
@@ -92,24 +60,7 @@ namespace RIS.Cryptography.Hash.Metadata
             }
             private set
             {
-                if (Base64.IsBase64(value))
-                {
-                    try
-                    {
-                        _hash =
-                            Convert.FromBase64String(value);
-                    }
-                    catch (FormatException)
-                    {
-                        _hash =
-                            Convert.FromBase64String(Convert.ToBase64String(SecureUtils.GetBytes(value)));
-                    }
-                }
-                else
-                {
-                    _hash =
-                        Convert.FromBase64String(Convert.ToBase64String(SecureUtils.GetBytes(value)));
-                }
+                _hash = Convert.FromBase64String(value);
             }
         }
         private int _degreeOfParallelism;
@@ -169,8 +120,14 @@ namespace RIS.Cryptography.Hash.Metadata
                 OnError(new RErrorEventArgs(exception, exception.Message));
                 throw exception;
             }
+            if (!Enum.TryParse(hashInfo.Groups["type"].Value, true, out Argon2Type type))
+            {
+                var exception = new FormatException($"Invalid hash type in metadata[{ GetType().FullName }]");
+                Events.OnError(this, new RErrorEventArgs(exception, exception.Message));
+                OnError(new RErrorEventArgs(exception, exception.Message));
+                throw exception;
+            }
 
-            Enum.TryParse(hashInfo.Groups["type"].Value, true, out Argon2Type type);
             Type = type;
             Version = Convert.ToInt32(hashInfo.Groups["version"].Value);
             MemorySize = Convert.ToInt32(hashInfo.Groups["memory_size"].Value);
@@ -209,7 +166,7 @@ namespace RIS.Cryptography.Hash.Metadata
 
         public override string ToString()
         {
-            return $"${Enum.GetName(typeof(Argon2Type), Type)?.ToLower()}$v={Version}$m={MemorySize},t={Iterations},p={DegreeOfParallelism}${Base64.RemovePadding(Salt)}${Base64.RemovePadding(Hash)}";
+            return $"${Type.ToString().ToLower()}$v={Version}$m={MemorySize},t={Iterations},p={DegreeOfParallelism}${Base64.RemovePadding(Salt)}${Base64.RemovePadding(Hash)}";
         }
     }
 }

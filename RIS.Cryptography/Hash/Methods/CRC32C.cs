@@ -3,34 +3,128 @@
 
 using System;
 using System.Globalization;
+using System.Text;
 #if NETCOREAPP
 using System.Runtime.Intrinsics.X86;
 #endif
 
 namespace RIS.Cryptography.Hash.Methods
 {
-    public sealed class CRC32C : IHashMethod
+    public sealed class CRC32C : IRawHashMethod
     {
-        private Algorithms.CRC32C CRCService { get; }
+        private static readonly Func<CRC32C, bool> InitializeFunction;
+        private static readonly Func<byte[], Algorithms.CRC32C, byte[]> GetHashFunction;
+
+        private Algorithms.CRC32C CRCService { get; set; }
 
         public bool Initialized { get; }
 
-        public CRC32C()
+        static CRC32C()
         {
-
 #if NETCOREAPP
-            if (!Sse42.X64.IsSupported && !Sse42.IsSupported)
+
+            if (Sse42.X64.IsSupported && Sse42.IsSupported)
             {
-                CRCService = new Algorithms.CRC32C();
-                CRCService.Initialize();
+                InitializeFunction = _ =>
+                {
+                    return true;
+                };
+                GetHashFunction = (data, _) =>
+                {
+                    ulong hashValue = 0xFFFFFFFF;
+
+                    var dataSpan = new Span<byte>(data);
+                    var remainingCount = dataSpan.Length % 8;
+
+                    for (int i = 0; i < dataSpan.Length - remainingCount; i += 8)
+                    {
+                        hashValue = Sse42.X64.Crc32(hashValue,
+                            BitConverter.ToUInt64(dataSpan.Slice(i, 8)));
+                    }
+
+                    for (int i = dataSpan.Length - remainingCount; i < dataSpan.Length; ++i)
+                    {
+                        hashValue = Sse42.Crc32((uint)hashValue,
+                            dataSpan[i]);
+                    }
+
+                    hashValue ^= 0xFFFFFFFF;
+
+                    return BitConverter.GetBytes(
+                        (uint)hashValue);
+                };
+            }
+            else if (Sse42.IsSupported)
+            {
+                InitializeFunction = _ =>
+                {
+                    return true;
+                };
+                GetHashFunction = (data, _) =>
+                {
+                    uint hashValue = 0xFFFFFFFF;
+
+                    var dataSpan = new Span<byte>(data);
+                    var remainingCount = dataSpan.Length % 4;
+
+                    for (int i = 0; i < dataSpan.Length - remainingCount; i += 4)
+                    {
+                        hashValue = Sse42.Crc32(hashValue,
+                            BitConverter.ToUInt32(dataSpan.Slice(i, 4)));
+                    }
+
+                    for (int i = dataSpan.Length - remainingCount; i < dataSpan.Length; ++i)
+                    {
+                        hashValue = Sse42.Crc32(hashValue,
+                            dataSpan[i]);
+                    }
+
+                    hashValue ^= 0xFFFFFFFF;
+
+                    return BitConverter.GetBytes(
+                        hashValue);
+                };
+            }
+            else
+            {
+                InitializeFunction = instance =>
+                {
+                    instance.CRCService = new Algorithms.CRC32C();
+                    instance.CRCService.Initialize();
+
+                    return true;
+                };
+                GetHashFunction = (data, service) =>
+                {
+                    return service.ComputeHash(data);
+                };
             }
 
 #elif NETFRAMEWORK
 
-                CRCService = new Algorithms.CRC32C();
-                CRCService.Initialize();
+            InitializeFunction = instance =>
+            {
+                instance.CRCService = new Algorithms.CRC32C();
+                instance.CRCService.Initialize();
+
+                return true;
+            };
+            GetHashFunction = (data, service) =>
+            {
+                return service.ComputeHash(data);
+            };
 
 #endif
+        }
+
+        public CRC32C()
+        {
+            if (!InitializeFunction(this))
+            {
+                var exception = new Exception($"HashMethod[{ GetType().FullName }] is not initialized");
+                Events.OnError(this, new RErrorEventArgs(exception, exception.Message));
+                throw exception;
+            }
 
             Initialized = true;
         }
@@ -43,132 +137,27 @@ namespace RIS.Cryptography.Hash.Methods
         }
         public string GetHash(byte[] data)
         {
+            byte[] hashBytes = GetHashBytes(data);
+            StringBuilder hashText = new StringBuilder(hashBytes.Length * 2);
 
-#if NETCOREAPP
-
-            ulong hashValue = 0xFFFFFFFF;
-
-            if (Sse42.X64.IsSupported)
+            for (int i = 0; i < hashBytes.Length; ++i)
             {
-                //hashValue ^= 0xFFFFFFFF;
-
-                Span<byte> dataSpan = new Span<byte>(data);
-                int remainingCount = dataSpan.Length % 8;
-
-                for (int i = 0; i < dataSpan.Length - remainingCount; i += 8)
-                    hashValue = Sse42.X64.Crc32(hashValue, BitConverter.ToUInt64(dataSpan.Slice(i, 8)));
-
-                if (remainingCount % 2 == 0)
-                {
-                    for (int i = 0; i < remainingCount; i += 2)
-                    {
-                        hashValue = Sse42.Crc32((uint)hashValue,
-                            BitConverter.ToUInt16(dataSpan.Slice(dataSpan.Length - remainingCount + i, 2)));
-                    }
-                }
-                else
-                {
-                    for (int i = 0; i < remainingCount; ++i)
-                    {
-                        hashValue = Sse42.Crc32((uint)hashValue,
-                            dataSpan.Slice(dataSpan.Length - remainingCount + i, 1)[0]);
-                    }
-                }
-
-                //if (remainingCount == 1)
-                //{
-                //    hashValue = Sse42.Crc32((uint)hashValue, dataSpan.Slice(dataSpan.Length - 1, 1)[0]);
-                //}
-                //else if (remainingCount == 2)
-                //{
-                //    hashValue = Sse42.Crc32((uint)hashValue, BitConverter.ToUInt16(dataSpan.Slice(dataSpan.Length - 2, 2)));
-                //}
-                //else if (remainingCount == 3)
-                //{
-                //    hashValue = Sse42.Crc32((uint)hashValue, BitConverter.ToUInt16(dataSpan.Slice(dataSpan.Length - 3, 2)));
-                //    hashValue = Sse42.Crc32((uint)hashValue, dataSpan.Slice(dataSpan.Length - 1, 1)[0]);
-                //}
-                //else if (remainingCount == 4)
-                //{
-                //    hashValue = Sse42.Crc32((uint)hashValue, BitConverter.ToUInt32(dataSpan.Slice(dataSpan.Length - 4, 4)));
-                //}
-                //else if (remainingCount == 5)
-                //{
-                //    hashValue = Sse42.Crc32((uint)hashValue, BitConverter.ToUInt32(dataSpan.Slice(dataSpan.Length - 5, 4)));
-                //    hashValue = Sse42.Crc32((uint)hashValue, dataSpan.Slice(dataSpan.Length - 1, 1)[0]);
-                //}
-                //else if (remainingCount == 6)
-                //{
-                //    hashValue = Sse42.Crc32((uint)hashValue, BitConverter.ToUInt32(dataSpan.Slice(dataSpan.Length - 6, 4)));
-                //    hashValue = Sse42.Crc32((uint)hashValue, BitConverter.ToUInt16(dataSpan.Slice(dataSpan.Length - 2, 2)));
-                //}
-                //else if (remainingCount == 7)
-                //{
-                //    hashValue = Sse42.Crc32((uint)hashValue, BitConverter.ToUInt32(dataSpan.Slice(data.Length - 7, 4)));
-                //    hashValue = Sse42.Crc32((uint)hashValue, BitConverter.ToUInt16(dataSpan.Slice(data.Length - 3, 2)));
-                //    hashValue = Sse42.Crc32((uint)hashValue, dataSpan.Slice(dataSpan.Length - 1, 1)[0]);
-                //}
-
-                hashValue ^= 0xFFFFFFFF;
-            }
-            else if (Sse42.IsSupported)
-            {
-                //hashValue ^= 0xFFFFFFFF;
-
-                Span<byte> dataSpan = new Span<byte>(data);
-                int remainingCount = dataSpan.Length % 4;
-
-                for (int i = 0; i < dataSpan.Length - (data.Length % 4); i += 4)
-                    hashValue = Sse42.Crc32((uint)hashValue, BitConverter.ToUInt32(dataSpan.Slice(i, 4)));
-
-                if (remainingCount % 2 == 0)
-                {
-                    for (int i = 0; i < remainingCount; i += 2)
-                    {
-                        hashValue = Sse42.Crc32((uint)hashValue,
-                            BitConverter.ToUInt16(dataSpan.Slice(dataSpan.Length - remainingCount + i, 2)));
-                    }
-                }
-                else
-                {
-                    for (int i = 0; i < remainingCount; ++i)
-                    {
-                        hashValue = Sse42.Crc32((uint)hashValue,
-                            dataSpan.Slice(dataSpan.Length - remainingCount + i, 1)[0]);
-                    }
-                }
-
-                //if (remainingCount == 1)
-                //{
-                //    hashValue = Sse42.Crc32((uint)hashValue, dataSpan.Slice(dataSpan.Length - 1, 1)[0]);
-                //}
-                //else if (remainingCount == 2)
-                //{
-                //    hashValue = Sse42.Crc32((uint)hashValue, BitConverter.ToUInt16(dataSpan.Slice(dataSpan.Length - 2, 2)));
-                //}
-                //else if (remainingCount == 3)
-                //{
-                //    hashValue = Sse42.Crc32((uint)hashValue, BitConverter.ToUInt16(dataSpan.Slice(dataSpan.Length - 3, 2)));
-                //    hashValue = Sse42.Crc32((uint)hashValue, dataSpan.Slice(dataSpan.Length - 1, 1)[0]);
-                //}
-
-                hashValue ^= 0xFFFFFFFF;
-            }
-            else
-            {
-                hashValue = BitConverter.ToUInt32(
-                    CRCService.ComputeHash(data), 0);
+                hashText.Append(hashBytes[i].ToString(
+                    "x2", CultureInfo.InvariantCulture));
             }
 
-#elif NETFRAMEWORK
+            return hashText.ToString();
+        }
 
-                uint hashValue = BitConverter.ToUInt32(
-                    CRCService.ComputeHash(data), 0);
+        public byte[] GetHashBytes(string plainText)
+        {
+            byte[] data = SecureUtils.GetBytes(plainText);
 
-#endif
-
-            return hashValue.ToString(
-                "x2", CultureInfo.InvariantCulture);
+            return GetHashBytes(data);
+        }
+        public byte[] GetHashBytes(byte[] data)
+        {
+            return GetHashFunction(data, CRCService);
         }
 
         public bool VerifyHash(string plainText, string hashText)
@@ -181,8 +170,23 @@ namespace RIS.Cryptography.Hash.Methods
         {
             var plainTextHash = GetHash(data);
 
-            return SecureUtils.SecureEquals(plainTextHash, hashText,
+            return SecureUtils.SecureEqualsUnsafe(
+                plainTextHash, hashText,
                 true, null);
+        }
+
+        public bool VerifyHashBytes(string plainText, byte[] hashData)
+        {
+            byte[] data = SecureUtils.GetBytes(plainText);
+
+            return VerifyHashBytes(data, hashData);
+        }
+        public bool VerifyHashBytes(byte[] data, byte[] hashData)
+        {
+            var plainTextHashBytes = GetHashBytes(data);
+
+            return SecureUtils.SecureEqualsUnsafe(
+                plainTextHashBytes, hashData);
         }
     }
 }

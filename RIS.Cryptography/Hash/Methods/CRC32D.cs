@@ -3,10 +3,11 @@
 
 using System;
 using System.Globalization;
+using System.Text;
 
 namespace RIS.Cryptography.Hash.Methods
 {
-    public sealed class CRC32D : IHashMethod
+    public sealed class CRC32D : IRawHashMethod
     {
         private Algorithms.CRC32D CRCService { get; }
 
@@ -28,11 +29,27 @@ namespace RIS.Cryptography.Hash.Methods
         }
         public string GetHash(byte[] data)
         {
-            uint hashValue = BitConverter.ToUInt32(
-                CRCService.ComputeHash(data), 0);
+            byte[] hashBytes = GetHashBytes(data);
+            StringBuilder hashText = new StringBuilder(hashBytes.Length * 2);
 
-            return hashValue.ToString(
-                "x2", CultureInfo.InvariantCulture);
+            for (int i = 0; i < hashBytes.Length; ++i)
+            {
+                hashText.Append(hashBytes[i].ToString(
+                    "x2", CultureInfo.InvariantCulture));
+            }
+
+            return hashText.ToString();
+        }
+
+        public byte[] GetHashBytes(string plainText)
+        {
+            byte[] data = SecureUtils.GetBytes(plainText);
+
+            return GetHashBytes(data);
+        }
+        public byte[] GetHashBytes(byte[] data)
+        {
+            return CRCService.ComputeHash(data);
         }
 
         public bool VerifyHash(string plainText, string hashText)
@@ -45,8 +62,23 @@ namespace RIS.Cryptography.Hash.Methods
         {
             var plainTextHash = GetHash(data);
 
-            return SecureUtils.SecureEquals(plainTextHash, hashText,
+            return SecureUtils.SecureEqualsUnsafe(
+                plainTextHash, hashText,
                 true, null);
+        }
+
+        public bool VerifyHashBytes(string plainText, byte[] hashData)
+        {
+            byte[] data = SecureUtils.GetBytes(plainText);
+
+            return VerifyHashBytes(data, hashData);
+        }
+        public bool VerifyHashBytes(byte[] data, byte[] hashData)
+        {
+            var plainTextHashBytes = GetHashBytes(data);
+
+            return SecureUtils.SecureEqualsUnsafe(
+                plainTextHashBytes, hashData);
         }
     }
 }

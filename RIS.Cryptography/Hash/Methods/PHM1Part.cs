@@ -5,7 +5,7 @@ using System;
 
 namespace RIS.Cryptography.Hash.Methods
 {
-    public class PHM1Part
+    public sealed class PHM1Part
     {
         public ushort Index { get; }
         public char? Content { get; set; }

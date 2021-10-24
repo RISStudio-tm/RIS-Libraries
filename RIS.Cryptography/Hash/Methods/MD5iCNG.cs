@@ -11,7 +11,7 @@ namespace RIS.Cryptography.Hash.Methods
 
 #if NETFRAMEWORK
 
-    public sealed class MD5iCNG : IHashMethod
+    public sealed class MD5iCNG : IRawHashMethod
     {
         private MD5Cng MDService { get; }
 
@@ -33,15 +33,27 @@ namespace RIS.Cryptography.Hash.Methods
         }
         public string GetHash(byte[] data)
         {
-            byte[] hashBytes = MDService.ComputeHash(data);
-
+            byte[] hashBytes = GetHashBytes(data);
             StringBuilder hashText = new StringBuilder(hashBytes.Length * 2);
+
             for (int i = 0; i < hashBytes.Length; ++i)
             {
-                hashText.Append(hashBytes[i].ToString("x2", CultureInfo.InvariantCulture));
+                hashText.Append(hashBytes[i].ToString(
+                    "x2", CultureInfo.InvariantCulture));
             }
 
             return hashText.ToString();
+        }
+
+        public byte[] GetHashBytes(string plainText)
+        {
+            byte[] data = SecureUtils.GetBytes(plainText);
+
+            return GetHashBytes(data);
+        }
+        public byte[] GetHashBytes(byte[] data)
+        {
+            return MDService.ComputeHash(data);
         }
 
         public bool VerifyHash(string plainText, string hashText)
@@ -54,8 +66,23 @@ namespace RIS.Cryptography.Hash.Methods
         {
             var plainTextHash = GetHash(data);
 
-            return SecureUtils.SecureEquals(plainTextHash, hashText,
+            return SecureUtils.SecureEqualsUnsafe(
+                plainTextHash, hashText,
                 true, null);
+        }
+
+        public bool VerifyHashBytes(string plainText, byte[] hashData)
+        {
+            byte[] data = SecureUtils.GetBytes(plainText);
+
+            return VerifyHashBytes(data, hashData);
+        }
+        public bool VerifyHashBytes(byte[] data, byte[] hashData)
+        {
+            var plainTextHashBytes = GetHashBytes(data);
+
+            return SecureUtils.SecureEqualsUnsafe(
+                plainTextHashBytes, hashData);
         }
     }
 

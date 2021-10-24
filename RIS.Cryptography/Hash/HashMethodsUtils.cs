@@ -93,22 +93,15 @@ namespace RIS.Cryptography.Hash
 
         public static string GenerateSalt(ushort length)
         {
-            if (length < 1)
-            {
-                var exception = new ArgumentOutOfRangeException(nameof(length),
-                    "Salt length cannot be less than 1");
-                Events.OnError(new RErrorEventArgs(exception,
-                    exception.Message));
-                throw exception;
-            }
-
-            return RandomStringGenerator.GenerateString(length);
+            return RandomStringGenerator.GenerateString(
+                length);
         }
         public static byte[] GenerateSaltBytes(ushort length)
         {
             byte[] salt = new byte[length];
 
-            RandomGenerator.GetUInt8(salt);
+            RandomGenerator.GetUInt8(
+                salt);
 
             return salt;
         }

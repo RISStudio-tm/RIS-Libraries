@@ -12,6 +12,13 @@ namespace RIS.Cryptography.Cipher.Methods
         L256Bit = 256
     }
 
+    public enum RijndaelBlockSize
+    {
+        L128Bit = 128,
+        L192Bit = 192,
+        L256Bit = 256
+    }
+
     public enum RSAKeySize
     {
         L512Bit = 512,

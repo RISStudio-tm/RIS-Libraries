@@ -12,8 +12,8 @@ namespace RIS.Cryptography.Cipher.Methods
         public event EventHandler<RWarningEventArgs> Warning;
         public event EventHandler<RErrorEventArgs> Error;
 
-        private RSACryptoServiceProvider RSAServiceEncryptor { get; }
-        private RSACryptoServiceProvider RSAServiceDecryptor { get; }
+        private RSACryptoServiceProvider RSAServiceEncryptor { get; set; }
+        private RSACryptoServiceProvider RSAServiceDecryptor { get; set; }
 
         public string PublicKey
         {
@@ -26,6 +26,15 @@ namespace RIS.Cryptography.Cipher.Methods
         {
             get
             {
+                if (RSAServiceDecryptor == null)
+                {
+                    var exception = new Exception(
+                        $"CipherMethod[{ GetType().FullName }] not contained PrivateKey");
+                    Events.OnError(this, new RErrorEventArgs(exception, exception.Message));
+                    OnError(new RErrorEventArgs(exception, exception.Message));
+                    throw exception;
+                }
+
                 return RSAServiceDecryptor.ToXmlString(true);
             }
         }
@@ -40,6 +49,15 @@ namespace RIS.Cryptography.Cipher.Methods
         {
             get
             {
+                if (RSAServiceDecryptor == null)
+                {
+                    var exception = new Exception(
+                        $"CipherMethod[{ GetType().FullName }] not contained PrivateKey");
+                    Events.OnError(this, new RErrorEventArgs(exception, exception.Message));
+                    OnError(new RErrorEventArgs(exception, exception.Message));
+                    throw exception;
+                }
+
                 return RSAServiceDecryptor.KeySize;
             }
         }
@@ -49,7 +67,7 @@ namespace RIS.Cryptography.Cipher.Methods
         public bool Initialized { get; }
 
         public RSAiCSP()
-            : this(RSAKeySize.L2048Bit)
+            : this(RSAKeySize.L2048Bit, RSAKeySize.L2048Bit)
         {
 
         }
@@ -57,7 +75,7 @@ namespace RIS.Cryptography.Cipher.Methods
         {
             try
             {
-                RSACryptoServiceProvider rsaService = new RSACryptoServiceProvider();
+                RSACng rsaService = new RSACng();
                 KeySizes keySizes = rsaService.LegalKeySizes[0];
                 int countSizes = ((keySizes.MaxSize - keySizes.MinSize) / keySizes.SkipSize) + 1;
                 int size = keySizes.MinSize;
@@ -108,40 +126,14 @@ namespace RIS.Cryptography.Cipher.Methods
             }
         }
         public RSAiCSP(int publicKeySize, int privateKeySize)
+            : this(publicKeySize)
         {
             try
             {
-                RSACryptoServiceProvider rsaService = new RSACryptoServiceProvider();
+                RSACng rsaService = new RSACng();
                 KeySizes keySizes = rsaService.LegalKeySizes[0];
                 int countSizes = ((keySizes.MaxSize - keySizes.MinSize) / keySizes.SkipSize) + 1;
                 int size = keySizes.MinSize;
-
-                for (int i = 0; i < countSizes; ++i)
-                {
-                    if (size == publicKeySize)
-                    {
-                        rsaService.KeySize = publicKeySize;
-                        break;
-                    }
-
-                    if (i != countSizes - 1)
-                    {
-                        size += keySizes.SkipSize;
-                    }
-                    else
-                    {
-                        if (rsaService.KeySize != publicKeySize)
-                        {
-                            var exception = new Exception(
-                                $"KeySize[{publicKeySize}] not supported for CipherMethod[{GetType().FullName}]");
-                            Events.OnError(this, new RErrorEventArgs(exception, exception.Message));
-                            OnError(new RErrorEventArgs(exception, exception.Message));
-                            throw exception;
-                        }
-                    }
-                }
-
-                size = keySizes.MinSize;
 
                 for (int i = 0; i < countSizes; ++i)
                 {
@@ -161,27 +153,17 @@ namespace RIS.Cryptography.Cipher.Methods
                         {
                             var exception = new Exception(
                                 $"KeySize[{privateKeySize}] not supported for CipherMethod[{GetType().FullName}]");
-                            if (Error == null)
-                            {
-                                throw exception;
-                            }
-                            else
-                            {
-                                Error.Invoke(this, new RErrorEventArgs(exception, exception.Message));
-                            }
+                            Events.OnError(this, new RErrorEventArgs(exception, exception.Message));
+                            OnError(new RErrorEventArgs(exception, exception.Message));
+                            throw exception;
                         }
                     }
                 }
 
                 rsaService.Dispose();
 
-                RSAServiceEncryptor = new RSACryptoServiceProvider(publicKeySize);
                 RSAServiceDecryptor = new RSACryptoServiceProvider(privateKeySize);
                 RSAServiceDecryptor.FromXmlString(RSAServiceEncryptor.ToXmlString(true));
-
-                Padding = RSAEncryptionPadding.OaepSHA384;
-                ReverseBytes = false;
-                Initialized = true;
             }
             catch (Exception ex)
             {
@@ -196,96 +178,21 @@ namespace RIS.Cryptography.Cipher.Methods
             }
         }
         public RSAiCSP(RSAKeySize publicKeySize)
+            : this((int)publicKeySize)
         {
-            try
-            {
-                RSAServiceEncryptor = new RSACryptoServiceProvider((int)publicKeySize);
 
-                Padding = RSAEncryptionPadding.OaepSHA384;
-                ReverseBytes = false;
-                Initialized = true;
-            }
-            catch (Exception ex)
-            {
-                Events.OnError(this, new RErrorEventArgs(ex, ex.Message));
-                OnError(new RErrorEventArgs(ex, ex.Message));
-
-                var exception = new Exception($"CipherMethod[{ GetType().FullName }] is not initialized");
-                Events.OnError(this, new RErrorEventArgs(exception, exception.Message));
-                OnError(new RErrorEventArgs(exception, exception.Message));
-
-                throw;
-            }
         }
         public RSAiCSP(RSAKeySize publicKeySize, RSAKeySize privateKeySize)
+            : this((int)publicKeySize, (int)privateKeySize)
         {
-            try
-            {
-                RSAServiceEncryptor = new RSACryptoServiceProvider((int)publicKeySize);
-                RSAServiceDecryptor = new RSACryptoServiceProvider((int)privateKeySize);
-                RSAServiceDecryptor.FromXmlString(RSAServiceEncryptor.ToXmlString(true));
 
-                Padding = RSAEncryptionPadding.OaepSHA384;
-                ReverseBytes = false;
-                Initialized = true;
-            }
-            catch (Exception ex)
-            {
-                Events.OnError(this, new RErrorEventArgs(ex, ex.Message));
-                OnError(new RErrorEventArgs(ex, ex.Message));
-
-                var exception = new Exception($"CipherMethod[{ GetType().FullName }] is not initialized");
-                Events.OnError(this, new RErrorEventArgs(exception, exception.Message));
-                OnError(new RErrorEventArgs(exception, exception.Message));
-
-                throw;
-            }
         }
         public RSAiCSP(string xmlPublicKey, int publicKeySize)
+            : this(publicKeySize)
         {
             try
             {
-                if (xmlPublicKey.Length != 0)
-                {
-                    RSACryptoServiceProvider rsaService = new RSACryptoServiceProvider();
-                    KeySizes keySizes = rsaService.LegalKeySizes[0];
-                    int countSizes = ((keySizes.MaxSize - keySizes.MinSize) / keySizes.SkipSize) + 1;
-                    int size = keySizes.MinSize;
-
-                    for (int i = 0; i < countSizes; ++i)
-                    {
-                        if (size == publicKeySize)
-                        {
-                            rsaService.KeySize = publicKeySize;
-                            break;
-                        }
-
-                        if (i != countSizes - 1)
-                        {
-                            size += keySizes.SkipSize;
-                        }
-                        else
-                        {
-                            if (rsaService.KeySize != publicKeySize)
-                            {
-                                var exception = new Exception(
-                                    $"KeySize[{publicKeySize}] not supported for CipherMethod[{GetType().FullName}]");
-                                Events.OnError(this, new RErrorEventArgs(exception, exception.Message));
-                                OnError(new RErrorEventArgs(exception, exception.Message));
-                                throw exception;
-                            }
-                        }
-                    }
-
-                    rsaService.Dispose();
-
-                    RSAServiceEncryptor = new RSACryptoServiceProvider(publicKeySize);
-                    RSAServiceEncryptor.FromXmlString(xmlPublicKey);
-
-                    Padding = RSAEncryptionPadding.OaepSHA384;
-                    ReverseBytes = false;
-                    Initialized = true;
-                }
+                RSAServiceEncryptor.FromXmlString(xmlPublicKey);
             }
             catch (Exception ex)
             {
@@ -300,79 +207,12 @@ namespace RIS.Cryptography.Cipher.Methods
             }
         }
         public RSAiCSP(string xmlPublicKey, string xmlPrivateKey, int publicKeySize, int privateKeySize)
+            : this(publicKeySize, privateKeySize)
         {
             try
             {
-                if (xmlPublicKey.Length != 0 && xmlPrivateKey.Length != 0)
-                {
-                    RSACryptoServiceProvider rsaService = new RSACryptoServiceProvider();
-                    KeySizes keySizes = rsaService.LegalKeySizes[0];
-                    int countSizes = ((keySizes.MaxSize - keySizes.MinSize) / keySizes.SkipSize) + 1;
-                    int size = keySizes.MinSize;
-
-                    for (int i = 0; i < countSizes; ++i)
-                    {
-                        if (size == publicKeySize)
-                        {
-                            rsaService.KeySize = publicKeySize;
-                            break;
-                        }
-
-                        if (i != countSizes - 1)
-                        {
-                            size += keySizes.SkipSize;
-                        }
-                        else
-                        {
-                            if (rsaService.KeySize != publicKeySize)
-                            {
-                                var exception = new Exception(
-                                    $"KeySize[{publicKeySize}] not supported for CipherMethod[{GetType().FullName}]");
-                                Events.OnError(this, new RErrorEventArgs(exception, exception.Message));
-                                OnError(new RErrorEventArgs(exception, exception.Message));
-                                throw exception;
-                            }
-                        }
-                    }
-
-                    size = keySizes.MinSize;
-
-                    for (int i = 0; i < countSizes; ++i)
-                    {
-                        if (size == privateKeySize)
-                        {
-                            rsaService.KeySize = privateKeySize;
-                            break;
-                        }
-
-                        if (i != countSizes - 1)
-                        {
-                            size += keySizes.SkipSize;
-                        }
-                        else
-                        {
-                            if (rsaService.KeySize != privateKeySize)
-                            {
-                                var exception = new Exception(
-                                    $"KeySize[{privateKeySize}] not supported for CipherMethod[{GetType().FullName}]");
-                                Events.OnError(this, new RErrorEventArgs(exception, exception.Message));
-                                OnError(new RErrorEventArgs(exception, exception.Message));
-                                throw exception;
-                            }
-                        }
-                    }
-
-                    rsaService.Dispose();
-
-                    RSAServiceEncryptor = new RSACryptoServiceProvider(publicKeySize);
-                    RSAServiceEncryptor.FromXmlString(xmlPublicKey);
-                    RSAServiceDecryptor = new RSACryptoServiceProvider(privateKeySize);
-                    RSAServiceDecryptor.FromXmlString(xmlPrivateKey);
-
-                    Padding = RSAEncryptionPadding.OaepSHA384;
-                    ReverseBytes = false;
-                    Initialized = true;
-                }
+                RSAServiceEncryptor.FromXmlString(xmlPublicKey);
+                RSAServiceDecryptor.FromXmlString(xmlPrivateKey);
             }
             catch (Exception ex)
             {
@@ -387,58 +227,14 @@ namespace RIS.Cryptography.Cipher.Methods
             }
         }
         public RSAiCSP(string xmlPublicKey, RSAKeySize publicKeySize)
+            : this(xmlPublicKey, (int)publicKeySize)
         {
-            try
-            {
-                if (xmlPublicKey.Length != 0)
-                {
-                    RSAServiceEncryptor = new RSACryptoServiceProvider((int)publicKeySize);
-                    RSAServiceEncryptor.FromXmlString(xmlPublicKey);
 
-                    Padding = RSAEncryptionPadding.OaepSHA384;
-                    ReverseBytes = false;
-                    Initialized = true;
-                }
-            }
-            catch (Exception ex)
-            {
-                Events.OnError(this, new RErrorEventArgs(ex, ex.Message));
-                OnError(new RErrorEventArgs(ex, ex.Message));
-
-                var exception = new Exception($"CipherMethod[{ GetType().FullName }] is not initialized");
-                Events.OnError(this, new RErrorEventArgs(exception, exception.Message));
-                OnError(new RErrorEventArgs(exception, exception.Message));
-
-                throw;
-            }
         }
         public RSAiCSP(string xmlPublicKey, string xmlPrivateKey, RSAKeySize publicKeySize, RSAKeySize privateKeySize)
+            : this(xmlPublicKey, xmlPrivateKey, (int)publicKeySize, (int)privateKeySize)
         {
-            try
-            {
-                if (xmlPublicKey.Length != 0 && xmlPrivateKey.Length != 0)
-                {
-                    RSAServiceEncryptor = new RSACryptoServiceProvider((int)publicKeySize);
-                    RSAServiceEncryptor.FromXmlString(xmlPublicKey);
-                    RSAServiceDecryptor = new RSACryptoServiceProvider((int)privateKeySize);
-                    RSAServiceDecryptor.FromXmlString(xmlPrivateKey);
 
-                    Padding = RSAEncryptionPadding.OaepSHA384;
-                    ReverseBytes = false;
-                    Initialized = true;
-                }
-            }
-            catch (Exception ex)
-            {
-                Events.OnError(this, new RErrorEventArgs(ex, ex.Message));
-                OnError(new RErrorEventArgs(ex, ex.Message));
-
-                var exception = new Exception($"CipherMethod[{ GetType().FullName }] is not initialized");
-                Events.OnError(this, new RErrorEventArgs(exception, exception.Message));
-                OnError(new RErrorEventArgs(exception, exception.Message));
-
-                throw;
-            }
         }
 
         public void OnInformation(RInformationEventArgs e)
@@ -479,12 +275,10 @@ namespace RIS.Cryptography.Cipher.Methods
         {
             try
             {
-                byte[] encryptedData;
-
                 if (data.Length == 0)
                     return Array.Empty<byte>();
 
-                encryptedData = RSAServiceEncryptor.Encrypt(data, Padding);
+                var encryptedData = RSAServiceEncryptor.Encrypt(data, Padding);
 
                 if (ReverseBytes)
                     Array.Reverse(encryptedData);
@@ -516,12 +310,10 @@ namespace RIS.Cryptography.Cipher.Methods
         {
             try
             {
-                byte[] decryptedData;
-
                 if (RSAServiceDecryptor == null)
                 {
                     var exception = new Exception(
-                        $"CipherMethod[{ GetType().FullName }] not contained PrivateKey, which is needed for decryption");
+                        $"CipherMethod[{ GetType().FullName }] not contained PrivateKey");
                     Events.OnError(this, new RErrorEventArgs(exception, exception.Message));
                     OnError(new RErrorEventArgs(exception, exception.Message));
                     throw exception;
@@ -533,7 +325,7 @@ namespace RIS.Cryptography.Cipher.Methods
                 if (ReverseBytes)
                     Array.Reverse(data);
 
-                decryptedData = RSAServiceDecryptor.Decrypt(data, Padding);
+                var decryptedData = RSAServiceDecryptor.Decrypt(data, Padding);
 
                 return decryptedData;
             }
@@ -558,6 +350,15 @@ namespace RIS.Cryptography.Cipher.Methods
 
         public string GetPrivateKey()
         {
+            if (RSAServiceDecryptor == null)
+            {
+                var exception = new Exception(
+                    $"CipherMethod[{ GetType().FullName }] not contained PrivateKey");
+                Events.OnError(this, new RErrorEventArgs(exception, exception.Message));
+                OnError(new RErrorEventArgs(exception, exception.Message));
+                throw exception;
+            }
+
             return RSAServiceDecryptor.ToXmlString(true);
         }
 
@@ -569,6 +370,7 @@ namespace RIS.Cryptography.Cipher.Methods
                     return false;
 
                 RSAServiceEncryptor.FromXmlString(xmlPublicKey);
+
                 return true;
             }
             catch (Exception ex)
@@ -586,7 +388,11 @@ namespace RIS.Cryptography.Cipher.Methods
                 if (string.IsNullOrEmpty(xmlPrivateKey))
                     return false;
 
+                if (RSAServiceDecryptor == null)
+                    RSAServiceDecryptor = new RSACryptoServiceProvider(PublicKeySize);
+
                 RSAServiceDecryptor.FromXmlString(xmlPrivateKey);
+
                 return true;
             }
             catch (Exception ex)

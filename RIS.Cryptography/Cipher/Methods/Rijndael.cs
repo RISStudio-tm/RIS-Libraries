@@ -22,6 +22,35 @@ namespace RIS.Cryptography.Cipher.Methods
             {
                 return Convert.ToBase64String(RijndaelService.Key);
             }
+            set
+            {
+                if (Base64.IsBase64(value))
+                {
+                    try
+                    {
+                        RijndaelService.Key = Convert.FromBase64String(value);
+                    }
+                    catch (FormatException)
+                    {
+                        RijndaelService.Key = SecureUtils.GetBytes(value);
+                    }
+                }
+                else
+                {
+                    RijndaelService.Key = SecureUtils.GetBytes(value);
+                }
+            }
+        }
+        public byte[] KeyBytes
+        {
+            get
+            {
+                return RijndaelService.Key;
+            }
+            set
+            {
+                RijndaelService.Key = value;
+            }
         }
         public string IV
         {
@@ -31,52 +60,54 @@ namespace RIS.Cryptography.Cipher.Methods
             }
             set
             {
-                RijndaelService.IV = Convert.FromBase64String(value);
+                if (Base64.IsBase64(value))
+                {
+                    try
+                    {
+                        RijndaelService.IV = Convert.FromBase64String(value);
+                    }
+                    catch (FormatException)
+                    {
+                        RijndaelService.IV = SecureUtils.GetBytes(value);
+                    }
+                }
+                else
+                {
+                    RijndaelService.IV = SecureUtils.GetBytes(value);
+                }
             }
         }
-        public int KeySize
+        public byte[] IVBytes
         {
             get
             {
-                return RijndaelService.KeySize;
-            }
-        }
-        public int BlockSize
-        {
-            get
-            {
-                return RijndaelService.BlockSize;
+                return RijndaelService.IV;
             }
             set
             {
-                KeySizes blockSizes = RijndaelService.LegalBlockSizes[0];
-                int countSizes = ((blockSizes.MaxSize - blockSizes.MinSize) / blockSizes.SkipSize) + 1;
-                int size = blockSizes.MinSize;
-
-                for (int i = 0; i < countSizes; ++i)
-                {
-                    if (size == value)
-                    {
-                        RijndaelService.BlockSize = value;
-                        break;
-                    }
-
-                    if (i != countSizes - 1)
-                    {
-                        size += blockSizes.SkipSize;
-                    }
-                    else
-                    {
-                        if (RijndaelService.BlockSize != value)
-                        {
-                            var exception = new Exception(
-                                $"BlockSize[{value}] not supported for CipherMethod[{GetType().FullName}]");
-                            Events.OnError(this, new RErrorEventArgs(exception, exception.Message));
-                            OnError(new RErrorEventArgs(exception, exception.Message));
-                            throw exception;
-                        }
-                    }
-                }
+                RijndaelService.IV = value;
+            }
+        }
+        public RijndaelKeySize KeySize
+        {
+            get
+            {
+                return (RijndaelKeySize)RijndaelService.KeySize;
+            }
+            set
+            {
+                RijndaelService.KeySize = (int)value;
+            }
+        }
+        public RijndaelBlockSize BlockSize
+        {
+            get
+            {
+                return (RijndaelBlockSize)RijndaelService.BlockSize;
+            }
+            set
+            {
+                RijndaelService.BlockSize = (int)value;
             }
         }
         public PaddingMode Padding
@@ -110,159 +141,23 @@ namespace RIS.Cryptography.Cipher.Methods
         {
 
         }
-        public Rijndael(int keySize)
-        {
-            try
-            {
-                RijndaelManaged rijndaelService = new RijndaelManaged();
-                KeySizes keySizes = rijndaelService.LegalKeySizes[0];
-                int countSizes = ((keySizes.MaxSize - keySizes.MinSize) / keySizes.SkipSize) + 1;
-                int size = keySizes.MinSize;
-
-                for (int i = 0; i < countSizes; ++i)
-                {
-                    if (size == keySize)
-                    {
-                        rijndaelService.KeySize = keySize;
-                        break;
-                    }
-
-                    if (i != countSizes - 1)
-                    {
-                        size += keySizes.SkipSize;
-                    }
-                    else
-                    {
-                        if (rijndaelService.KeySize != keySize)
-                        {
-                            var exception = new Exception(
-                                $"KeySize[{keySize}] not supported for CipherMethod[{GetType().FullName}]");
-                            Events.OnError(this, new RErrorEventArgs(exception, exception.Message));
-                            OnError(new RErrorEventArgs(exception, exception.Message));
-                            throw exception;
-                        }
-                    }
-                }
-
-                rijndaelService.Dispose();
-
-                RijndaelService = new RijndaelManaged
-                {
-                    BlockSize = 128,
-                    Padding = PaddingMode.ISO10126,
-                    Mode = CipherMode.CBC,
-                    KeySize = keySize
-                };
-
-                GenIVAfterEncrypt = true;
-                Initialized = true;
-            }
-            catch (Exception ex)
-            {
-                Events.OnError(this, new RErrorEventArgs(ex, ex.Message));
-                OnError(new RErrorEventArgs(ex, ex.Message));
-
-                var exception = new Exception($"CipherMethod[{ GetType().FullName }] is not initialized");
-                Events.OnError(this, new RErrorEventArgs(exception, exception.Message));
-                OnError(new RErrorEventArgs(exception, exception.Message));
-
-                throw;
-            }
-        }
         public Rijndael(RijndaelKeySize keySize)
         {
             try
             {
                 RijndaelService = new RijndaelManaged
                 {
-                    BlockSize = 128,
+                    BlockSize = (int)RijndaelBlockSize.L128Bit,
                     Padding = PaddingMode.ISO10126,
                     Mode = CipherMode.CBC,
                     KeySize = (int)keySize
                 };
 
-                GenIVAfterEncrypt = true;
-                Initialized = true;
-            }
-            catch (Exception ex)
-            {
-                Events.OnError(this, new RErrorEventArgs(ex, ex.Message));
-                OnError(new RErrorEventArgs(ex, ex.Message));
-
-                var exception = new Exception($"CipherMethod[{ GetType().FullName }] is not initialized");
-                Events.OnError(this, new RErrorEventArgs(exception, exception.Message));
-                OnError(new RErrorEventArgs(exception, exception.Message));
-
-                throw;
-            }
-        }
-        public Rijndael(string key, int keySize)
-        {
-            try
-            {
-                if (string.IsNullOrEmpty(key))
-                    return;
-
-                RijndaelManaged rijndaelService = new RijndaelManaged();
-                KeySizes keySizes = rijndaelService.LegalKeySizes[0];
-                int countSizes = ((keySizes.MaxSize - keySizes.MinSize) / keySizes.SkipSize) + 1;
-                int size = keySizes.MinSize;
-
-                for (int i = 0; i < countSizes; ++i)
-                {
-                    if (size == keySize)
-                    {
-                        rijndaelService.KeySize = keySize;
-                        break;
-                    }
-
-                    if (i != countSizes - 1)
-                    {
-                        size += keySizes.SkipSize;
-                    }
-                    else
-                    {
-                        if (rijndaelService.KeySize != keySize)
-                        {
-                            var exception = new Exception(
-                                $"KeySize[{keySize}] not supported for CipherMethod[{GetType().FullName}]");
-                            Events.OnError(this, new RErrorEventArgs(exception, exception.Message));
-                            OnError(new RErrorEventArgs(exception, exception.Message));
-                            throw exception;
-                        }
-                    }
-                }
-
-                rijndaelService.Dispose();
-
-                RijndaelService = new RijndaelManaged
-                {
-                    BlockSize = 128,
-                    Padding = PaddingMode.ISO10126,
-                    Mode = CipherMode.CBC,
-                    KeySize = keySize
-                };
-
-                if (Base64.IsBase64(key))
-                {
-                    try
-                    {
-                        RijndaelService.Key =
-                            Convert.FromBase64String(key);
-                    }
-                    catch (FormatException)
-                    {
-                        RijndaelService.Key =
-                            Convert.FromBase64String(Convert.ToBase64String(SecureUtils.GetBytes(key)));
-                    }
-                }
-                else
-                {
-                    RijndaelService.Key =
-                        Convert.FromBase64String(Convert.ToBase64String(SecureUtils.GetBytes(key)));
-                }
+                RijndaelService.GenerateKey();
+                RijndaelService.GenerateIV();
 
                 GenIVAfterEncrypt = true;
+
                 Initialized = true;
             }
             catch (Exception ex)
@@ -278,41 +173,14 @@ namespace RIS.Cryptography.Cipher.Methods
             }
         }
         public Rijndael(string key, RijndaelKeySize keySize)
+            : this(keySize)
         {
             try
             {
                 if (string.IsNullOrEmpty(key))
                     return;
 
-                RijndaelService = new RijndaelManaged
-                {
-                    BlockSize = 128,
-                    Padding = PaddingMode.ISO10126,
-                    Mode = CipherMode.CBC,
-                    KeySize = (int)keySize
-                };
-
-                if (Base64.IsBase64(key))
-                {
-                    try
-                    {
-                        RijndaelService.Key =
-                            Convert.FromBase64String(key);
-                    }
-                    catch (FormatException)
-                    {
-                        RijndaelService.Key =
-                            Convert.FromBase64String(Convert.ToBase64String(SecureUtils.GetBytes(key)));
-                    }
-                }
-                else
-                {
-                    RijndaelService.Key =
-                        Convert.FromBase64String(Convert.ToBase64String(SecureUtils.GetBytes(key)));
-                }
-
-                GenIVAfterEncrypt = true;
-                Initialized = true;
+                Key = key;
             }
             catch (Exception ex)
             {
@@ -326,161 +194,15 @@ namespace RIS.Cryptography.Cipher.Methods
                 throw;
             }
         }
-        public Rijndael(string key, int keySize, string iv)
+        public Rijndael(byte[] key, RijndaelKeySize keySize)
+            : this(keySize)
         {
             try
             {
-                if (string.IsNullOrEmpty(key))
+                if (key == null || key.Length == 0)
                     return;
 
-                RijndaelManaged rijndaelService = new RijndaelManaged();
-                KeySizes keySizes = rijndaelService.LegalKeySizes[0];
-                int countSizes = ((keySizes.MaxSize - keySizes.MinSize) / keySizes.SkipSize) + 1;
-                int size = keySizes.MinSize;
-
-                for (int i = 0; i < countSizes; ++i)
-                {
-                    if (size == keySize)
-                    {
-                        rijndaelService.KeySize = keySize;
-                        break;
-                    }
-
-                    if (i != countSizes - 1)
-                    {
-                        size += keySizes.SkipSize;
-                    }
-                    else
-                    {
-                        if (rijndaelService.KeySize != keySize)
-                        {
-                            var exception = new Exception(
-                                $"KeySize[{keySize}] not supported for CipherMethod[{GetType().FullName}]");
-                            Events.OnError(this, new RErrorEventArgs(exception, exception.Message));
-                            OnError(new RErrorEventArgs(exception, exception.Message));
-                            throw exception;
-                        }
-                    }
-                }
-
-                rijndaelService.Dispose();
-
-                RijndaelService = new RijndaelManaged
-                {
-                    BlockSize = 128,
-                    Padding = PaddingMode.ISO10126,
-                    Mode = CipherMode.CBC,
-                    KeySize = keySize
-                };
-
-                if (Base64.IsBase64(key))
-                {
-                    try
-                    {
-                        RijndaelService.Key =
-                            Convert.FromBase64String(key);
-                    }
-                    catch (FormatException)
-                    {
-                        RijndaelService.Key =
-                            Convert.FromBase64String(Convert.ToBase64String(SecureUtils.GetBytes(key)));
-                    }
-                }
-                else
-                {
-                    RijndaelService.Key =
-                        Convert.FromBase64String(Convert.ToBase64String(SecureUtils.GetBytes(key)));
-                }
-
-                if (Base64.IsBase64(iv))
-                {
-                    try
-                    {
-                        RijndaelService.IV =
-                            Convert.FromBase64String(iv);
-                    }
-                    catch (FormatException)
-                    {
-                        RijndaelService.IV =
-                            Convert.FromBase64String(Convert.ToBase64String(SecureUtils.GetBytes(iv)));
-                    }
-                }
-                else
-                {
-                    RijndaelService.IV =
-                        Convert.FromBase64String(Convert.ToBase64String(SecureUtils.GetBytes(iv)));
-                }
-
-                GenIVAfterEncrypt = true;
-                Initialized = true;
-            }
-            catch (Exception ex)
-            {
-                Events.OnError(this, new RErrorEventArgs(ex, ex.Message));
-                OnError(new RErrorEventArgs(ex, ex.Message));
-
-                var exception = new Exception($"CipherMethod[{ GetType().FullName }] is not initialized");
-                Events.OnError(this, new RErrorEventArgs(exception, exception.Message));
-                OnError(new RErrorEventArgs(exception, exception.Message));
-
-                throw;
-            }
-        }
-        public Rijndael(string key, RijndaelKeySize keySize, string iv)
-        {
-            try
-            {
-                if (string.IsNullOrEmpty(key))
-                    return;
-
-                RijndaelService = new RijndaelManaged
-                {
-                    BlockSize = 128,
-                    Padding = PaddingMode.ISO10126,
-                    Mode = CipherMode.CBC,
-                    KeySize = (int)keySize
-                };
-
-                if (Base64.IsBase64(key))
-                {
-                    try
-                    {
-                        RijndaelService.Key =
-                            Convert.FromBase64String(key);
-                    }
-                    catch (FormatException)
-                    {
-                        RijndaelService.Key =
-                            Convert.FromBase64String(Convert.ToBase64String(SecureUtils.GetBytes(key)));
-                    }
-                }
-                else
-                {
-                    RijndaelService.Key =
-                        Convert.FromBase64String(Convert.ToBase64String(SecureUtils.GetBytes(key)));
-                }
-
-                if (Base64.IsBase64(iv))
-                {
-                    try
-                    {
-                        RijndaelService.IV =
-                            Convert.FromBase64String(iv);
-                    }
-                    catch (FormatException)
-                    {
-                        RijndaelService.IV =
-                            Convert.FromBase64String(Convert.ToBase64String(SecureUtils.GetBytes(iv)));
-                    }
-                }
-                else
-                {
-                    RijndaelService.IV =
-                        Convert.FromBase64String(Convert.ToBase64String(SecureUtils.GetBytes(iv)));
-                }
-
-                GenIVAfterEncrypt = true;
-                Initialized = true;
+                KeyBytes = key;
             }
             catch (Exception ex)
             {
@@ -524,7 +246,7 @@ namespace RIS.Cryptography.Cipher.Methods
 
         public string Encrypt(string plainText)
         {
-            byte[] data = SecureUtils.GetBytes(plainText);
+            var data = SecureUtils.GetBytes(plainText);
 
             return Convert.ToBase64String(
                 EncryptWithWriteIV(data));
@@ -537,20 +259,18 @@ namespace RIS.Cryptography.Cipher.Methods
         {
             try
             {
-                byte[] encryptedData;
-                byte[] iv;
-
                 if (data.Length == 0)
                     return Array.Empty<byte>();
 
-                iv = RijndaelService.IV;
+                var iv = RijndaelService.IV;
 
                 if (GenIVAfterEncrypt)
                     RijndaelService.GenerateIV();
 
-                ICryptoTransform transform = RijndaelService.CreateEncryptor(RijndaelService.Key, iv);
-
-                encryptedData = transform.TransformFinalBlock(data, 0, data.Length);
+                var transform = RijndaelService
+                    .CreateEncryptor(RijndaelService.Key, iv);
+                var encryptedData = transform
+                    .TransformFinalBlock(data, 0, data.Length);
 
                 return iv
                     .Concat(encryptedData)
@@ -572,7 +292,7 @@ namespace RIS.Cryptography.Cipher.Methods
 
         public string Decrypt(string cipherText)
         {
-            byte[] data = Convert.FromBase64String(cipherText);
+            var data = Convert.FromBase64String(cipherText);
 
             return SecureUtils.GetString(
                 DecryptWithReadIV(data));
@@ -585,22 +305,20 @@ namespace RIS.Cryptography.Cipher.Methods
         {
             try
             {
-                byte[] decryptedData;
-
                 if (dataWithIV.Length == 0)
                     return Array.Empty<byte>();
 
-                int ivLength = RijndaelService.IV.Length;
-                byte[] iv = dataWithIV
+                var ivLength = RijndaelService.IV.Length;
+                var iv = dataWithIV
                     .Take(ivLength)
                     .ToArray();
-                byte[] data = dataWithIV
+                var data = dataWithIV
                     .Skip(ivLength)
                     .ToArray();
-
-                ICryptoTransform transform = RijndaelService.CreateDecryptor(RijndaelService.Key, iv);
-
-                decryptedData = transform.TransformFinalBlock(data, 0, data.Length);
+                var transform = RijndaelService
+                    .CreateDecryptor(RijndaelService.Key, iv);
+                var decryptedData = transform
+                    .TransformFinalBlock(data, 0, data.Length);
 
                 return decryptedData;
             }

@@ -42,7 +42,7 @@ namespace RIS.Cryptography.Hash.Metadata
             {
                 hashInfo = BCrypt.Net.BCrypt.InterrogateHash(hashText);
             }
-            catch (BCrypt.Net.HashInformationException)
+            catch (BCrypt.Net.SaltParseException)
             {
                 var exception = new FormatException($"Invalid hash format in metadata[{GetType().FullName}]");
                 Events.OnError(this, new RErrorEventArgs(exception, exception.Message));

@@ -4,13 +4,12 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using RIS.Cryptography.Cipher.Methods;
 using RIS.Randomizing;
 
 namespace RIS.Cryptography.Hash.Methods
 {
-    public class PHM1iArgon2id
+    public sealed class PHM1iArgon2id
     {
         private const int PartHashLength = 16;
         private const int MinInputStringLength = 8;
@@ -56,21 +55,12 @@ namespace RIS.Cryptography.Hash.Methods
                 if (string.IsNullOrEmpty(value))
                     value = $"global+key+{GetType().Name}";
 
-                var globalKeyBuilder = new StringBuilder(
-                    KeyHashProvider.GetHash(value));
-
-                for (int i = globalKeyBuilder.Length - 1; i >= 0; i -= 2)
-                {
-                    globalKeyBuilder.Remove(i, 1);
-                }
-
-                _globalKey = SecureUtils.GetBytes(
-                    globalKeyBuilder.ToString());
+                _globalKey = KeyHashProvider
+                    .GetHashBytes(value);
 
                 HashProvider.KnownSecretBytes = _globalKey;
                 CipherProvider = new Rijndael(
-                    GlobalKey,
-                    RijndaelKeySize.L256Bit);
+                    _globalKey, RijndaelKeySize.L256Bit);
             }
         }
         public int MemorySize
@@ -124,8 +114,9 @@ namespace RIS.Cryptography.Hash.Methods
             RandomGenerator = new SecureRandom();
         }
 
-        public PHM1iArgon2id(int memorySize = 1 * 1024 * 64,
-            int iterations = 1, int degreeOfParallelism = 2)
+        public PHM1iArgon2id(
+            int memorySize = 1 * 1024 * 64, int iterations = 1,
+            int degreeOfParallelism = 2)
         {
             if (GlobalKeyBytes == null)
                 GlobalKey = null;
