@@ -15,6 +15,8 @@ namespace RIS.Collections.Nestable
         public event EventHandler<RWarningEventArgs> Warning;
         public event EventHandler<RErrorEventArgs> Error;
 
+
+
         public NestedElement<T> this[int index]
         {
             get
@@ -38,10 +40,23 @@ namespace RIS.Collections.Nestable
             }
         }
 
+
+
+        // ReSharper disable once StaticMemberInGenericType
+        private static readonly NestableCollectionType CollectionTypeStatic;
+
+
+
         private ChunkedArrayL<NestedElement<T>> ValuesCollection { get; }
 
+        public NestableCollectionType CollectionType
+        {
+            get
+            {
+                return CollectionTypeStatic;
+            }
+        }
         public int Length { get; private set; }
-        public NestableCollectionType CollectionType { get; }
         public object SyncRoot { get; }
         public bool IsSynchronized { get; }
         int ICollection.Count
@@ -52,18 +67,39 @@ namespace RIS.Collections.Nestable
             }
         }
 
+
+
+        static NestableArrayCAL()
+        {
+            CollectionTypeStatic = NestableCollectionType.NestableArrayCAL;
+        }
+
+
+
         public NestableArrayCAL()
             : this(0)
         {
 
         }
+        public NestableArrayCAL(string represent)
+            : this(0)
+        {
+            if (string.IsNullOrEmpty(represent))
+                return;
+
+            FromStringRepresent(represent);
+        }
         public NestableArrayCAL(int length)
         {
             if (length < 0)
             {
-                var exception = new ArgumentOutOfRangeException(nameof(length), "Длина коллекции не может быть меньше 0");
-                Events.OnError(this, new RErrorEventArgs(exception, exception.Message));
-                OnError(new RErrorEventArgs(exception, exception.Message));
+                var exception = new ArgumentOutOfRangeException(
+                    nameof(length),
+                    "Длина коллекции не может быть меньше 0");
+                Events.OnError(this,
+                    new RErrorEventArgs(exception, exception.Message));
+                OnError(
+                    new RErrorEventArgs(exception, exception.Message));
                 throw exception;
             }
 
@@ -71,10 +107,11 @@ namespace RIS.Collections.Nestable
             IsSynchronized = false;
 
             Length = length;
-            CollectionType = NestableHelper.GetCollectionType(GetType().Name);
 
             ValuesCollection = new ChunkedArrayL<NestedElement<T>>(length);
         }
+
+
 
         public void OnInformation(RInformationEventArgs e)
         {
@@ -103,148 +140,191 @@ namespace RIS.Collections.Nestable
             Error?.Invoke(sender, e);
         }
 
+
+
         public NestedElement<T> Get(int index)
         {
-            return ValuesCollection.GetRef(index);
+            return ValuesCollection
+                .GetRef(index);
         }
         public NestedElement<T> Get(int chunkIndex, uint valueIndex)
         {
-            return ValuesCollection.GetRef(chunkIndex, valueIndex);
+            return ValuesCollection
+                .GetRef(chunkIndex, valueIndex);
         }
 
         public ref NestedElement<T> GetRef(int index)
         {
-            return ref ValuesCollection.GetRef(index);
+            return ref ValuesCollection
+                .GetRef(index);
         }
         public ref NestedElement<T> GetRef(int chunkIndex, uint valueIndex)
         {
-            return ref ValuesCollection.GetRef(chunkIndex, valueIndex);
+            return ref ValuesCollection
+                .GetRef(chunkIndex, valueIndex);
         }
 
         public void Set(int index, NestedElement<T> value)
         {
-            ValuesCollection.GetRef(index).Set(value);
+            ValuesCollection
+                .GetRef(index)
+                .Set(value);
         }
         public void Set(int chunkIndex, uint valueIndex, NestedElement<T> value)
         {
-            ValuesCollection.GetRef(chunkIndex, valueIndex).Set(value);
+            ValuesCollection
+                .GetRef(chunkIndex, valueIndex)
+                .Set(value);
         }
         public void Set(int index, T value)
         {
-            ValuesCollection.GetRef(index).Set(value);
+            ValuesCollection
+                .GetRef(index)
+                .Set(value);
         }
         public void Set(int chunkIndex, uint valueIndex, T value)
         {
-            ValuesCollection.GetRef(chunkIndex, valueIndex).Set(value);
+            ValuesCollection
+                .GetRef(chunkIndex, valueIndex)
+                .Set(value);
         }
         public void Set(int index, T[] value)
         {
-            ValuesCollection.GetRef(index).Set(value);
+            ValuesCollection
+                .GetRef(index)
+                .Set(value);
         }
         public void Set(int chunkIndex, uint valueIndex, T[] value)
         {
-            ValuesCollection.GetRef(chunkIndex, valueIndex).Set(value);
+            ValuesCollection
+                .GetRef(chunkIndex, valueIndex)
+                .Set(value);
         }
         public void Set(int index, INestableCollection<T> value)
         {
-            ValuesCollection.GetRef(index).Set(value);
+            ValuesCollection
+                .GetRef(index)
+                .Set(value);
         }
         public void Set(int chunkIndex, uint valueIndex, INestableCollection<T> value)
         {
-            ValuesCollection.GetRef(chunkIndex, valueIndex).Set(value);
+            ValuesCollection
+                .GetRef(chunkIndex, valueIndex)
+                .Set(value);
         }
 
         public string ToStringRepresent()
         {
-            return NestableHelper.ToStringRepresent<T>(this);
+            return NestableHelper.ToStringRepresent<T>(
+                this);
         }
 
-        public void FromStringRepresent(string represent)
+        INestableCollection INestableCollection.FromStringRepresent(string represent)
         {
-            NestableHelper.FromStringRepresent<T>(represent, this);
+            NestableHelper.FromStringRepresent<T>(
+                represent, this);
+
+            return this;
+        }
+        INestableCollection<T> INestableCollection<T>.FromStringRepresent(string represent)
+        {
+            NestableHelper.FromStringRepresent<T>(
+                represent, this);
+
+            return this;
+        }
+
+        INestableArray INestableArray.FromStringRepresent(string represent)
+        {
+            NestableHelper.FromStringRepresent<T>(
+                represent, this);
+
+            return this;
+        }
+        INestableArray<T> INestableArray<T>.FromStringRepresent(string represent)
+        {
+            NestableHelper.FromStringRepresent<T>(
+                represent, this);
+
+            return this;
+        }
+
+        public NestableArrayCAL<T> FromStringRepresent(string represent)
+        {
+            NestableHelper.FromStringRepresent<T>(
+                represent, this);
+
+            return this;
         }
 
         public IEnumerable<T> Enumerate()
         {
-            return NestableHelper.Enumerate<T>(this);
+            return NestableHelper.Enumerate<T>(
+                this);
         }
 
         IEnumerator<NestedElement<T>> IEnumerable<NestedElement<T>>.GetEnumerator()
         {
-            return ((IEnumerable<NestedElement<T>>)ValuesCollection)
+            return ValuesCollection
                 .GetEnumerator();
         }
         IEnumerator IEnumerable.GetEnumerator()
         {
-            return ((IEnumerable<NestedElement<T>>)ValuesCollection)
+            return ValuesCollection
                 .GetEnumerator();
         }
 
         public bool Add(NestedElement<T> value)
         {
-            if (ValuesCollection.Add(value))
-            {
-                ++Length;
-                return true;
-            }
-            else
-            {
+            if (!ValuesCollection.Add(value))
                 return false;
-            }
+
+            ++Length;
+
+            return true;
         }
         public bool Add(T value)
         {
-            if (ValuesCollection.Add(new NestedElement<T>(value)))
-            {
-                ++Length;
-                return true;
-            }
-            else
-            {
+            if (!ValuesCollection.Add(new NestedElement<T>(value)))
                 return false;
-            }
+
+            ++Length;
+
+            return true;
         }
         public bool Add(T[] value)
         {
-            if (ValuesCollection.Add(new NestedElement<T>(value)))
-            {
-                ++Length;
-                return true;
-            }
-            else
-            {
+            if (!ValuesCollection.Add(new NestedElement<T>(value)))
                 return false;
-            }
+
+            ++Length;
+
+            return true;
         }
         public bool Add(INestableCollection<T> value)
         {
-            if (ValuesCollection.Add(new NestedElement<T>(value)))
-            {
-                ++Length;
-                return true;
-            }
-            else
-            {
+            if (!ValuesCollection.Add(new NestedElement<T>(value)))
                 return false;
-            }
+
+            ++Length;
+
+            return true;
         }
 
         public bool Remove()
         {
-            if (ValuesCollection.Remove())
-            {
-                --Length;
-                return true;
-            }
-            else
-            {
+            if (!ValuesCollection.Remove())
                 return false;
-            }
+
+            --Length;
+
+            return true;
         }
 
         public void Clear()
         {
             Length = 0;
+
             ValuesCollection.Clear();
         }
 
@@ -252,79 +332,63 @@ namespace RIS.Collections.Nestable
         {
             if (array != null && array.Rank != 1)
             {
-                var exception = new RankException("Копирование в многомерные массивы не поддерживается");
-                Events.OnError(this, new RErrorEventArgs(exception, exception.Message));
-                OnError(new RErrorEventArgs(exception, exception.Message));
+                var exception = new RankException(
+                    "Копирование в многомерные массивы не поддерживается");
+                Events.OnError(this,
+                    new RErrorEventArgs(exception, exception.Message));
+                OnError(
+                    new RErrorEventArgs(exception, exception.Message));
                 throw exception;
             }
             if (array.GetType().GetElementType() != typeof(T))
             {
-                var exception = new ArrayTypeMismatchException("Для копирования тип целевого массива не может отличаться от типа текущей коллекции");
-                Events.OnError(this, new RErrorEventArgs(exception, exception.Message));
-                OnError(new RErrorEventArgs(exception, exception.Message));
+                var exception = new ArrayTypeMismatchException(
+                    "Для копирования тип целевого массива не может отличаться от типа текущей коллекции");
+                Events.OnError(this,
+                    new RErrorEventArgs(exception, exception.Message));
+                OnError(
+                    new RErrorEventArgs(exception, exception.Message));
                 throw exception;
             }
 
-            List<T> thisCollection = Enumerate().ToList();
+            var thisCollection = Enumerate()
+                .ToList();
 
-            if (thisCollection.Count < 1)
-            {
-                var exception = new Exception("Нельзя скопировать пустую коллекцию");
-                Events.OnError(this, new RErrorEventArgs(exception, exception.Message));
-                OnError(new RErrorEventArgs(exception, exception.Message));
-                throw exception;
-            }
             if (array.Length - index < thisCollection.Count)
             {
                 var exception = new Exception("Для копирования длина целевого массива, начиная с указанного индекса, не может быть меньше длины текущей коллекции");
-                Events.OnError(this, new RErrorEventArgs(exception, exception.Message));
-                OnError(new RErrorEventArgs(exception, exception.Message));
+                Events.OnError(this,
+                    new RErrorEventArgs(exception, exception.Message));
+                OnError(
+                    new RErrorEventArgs(exception, exception.Message));
                 throw exception;
             }
 
-            int arrayIndex = index;
+            var arrayIndex = index;
+
             for (int i = 0; i < thisCollection.Count; ++i)
             {
                 array.SetValue(thisCollection[i], arrayIndex);
+
                 ++arrayIndex;
             }
-
-            //int arrayIndex = index;
-            //for (int thisChunkIndex = 0; thisChunkIndex < ValuesCollection.ChunksCount - 1; ++thisChunkIndex)
-            //{
-            //    for (uint thisValueIndex = 0; thisValueIndex < ValuesCollection.ChunkSize; ++thisValueIndex)
-            //    {
-            //        array.SetValue(this[thisChunkIndex, thisValueIndex], arrayIndex);
-            //        ++arrayIndex;
-            //    }
-            //}
-            //for (uint thisValueIndex = 0;
-            //    thisValueIndex < Length - ValuesCollection.ChunkSize * (ValuesCollection.ChunksCount - 1);
-            //    ++thisValueIndex)
-            //{
-            //    array.SetValue(this[ValuesCollection.ChunksCount - 1, thisValueIndex], arrayIndex);
-            //    ++arrayIndex;
-            //}
         }
-        public void CopyTo(IList<T> collection, bool clearBeforeCopy)
+        public void CopyTo(ICollection<T> collection, bool clearBeforeCopy)
         {
             if (collection == null)
             {
-                var exception = new ArgumentNullException(nameof(collection), "Целевая коллекция не может быть равна null");
-                Events.OnError(this, new RErrorEventArgs(exception, exception.Message));
-                OnError(new RErrorEventArgs(exception, exception.Message));
+                var exception = new ArgumentNullException(
+                    nameof(collection),
+                    "Целевая коллекция не может быть равна null");
+                Events.OnError(this,
+                    new RErrorEventArgs(exception, exception.Message));
+                OnError(
+                    new RErrorEventArgs(exception, exception.Message));
                 throw exception;
             }
 
-            List<T> thisCollection = Enumerate().ToList();
-
-            if (thisCollection.Count < 1)
-            {
-                var exception = new Exception("Нельзя скопировать пустую коллекцию");
-                Events.OnError(this, new RErrorEventArgs(exception, exception.Message));
-                OnError(new RErrorEventArgs(exception, exception.Message));
-                throw exception;
-            }
+            var thisCollection = Enumerate()
+                .ToList();
 
             if (clearBeforeCopy)
                 collection.Clear();
@@ -333,23 +397,6 @@ namespace RIS.Collections.Nestable
             {
                 collection.Add(thisCollection[i]);
             }
-
-            //int collectionIndex = 0;
-            //for (int thisChunkIndex = 0; thisChunkIndex < ValuesCollection.ChunksCount - 1; ++thisChunkIndex)
-            //{
-            //    for (uint thisValueIndex = 0; thisValueIndex < ValuesCollection.ChunkSize; ++thisValueIndex)
-            //    {
-            //        collection[collectionIndex] = this[thisChunkIndex, thisValueIndex];
-            //        ++collectionIndex;
-            //    }
-            //}
-            //for (uint thisValueIndex = 0;
-            //    thisValueIndex < Length - ValuesCollection.ChunkSize * (ValuesCollection.ChunksCount - 1);
-            //    ++thisValueIndex)
-            //{
-            //    collection[collectionIndex] = this[ValuesCollection.ChunksCount - 1, thisValueIndex];
-            //    ++collectionIndex;
-            //}
         }
     }
 }

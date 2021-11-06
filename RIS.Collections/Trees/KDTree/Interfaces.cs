@@ -5,13 +5,13 @@ using System;
 
 namespace RIS.Collections.Trees
 {
-    public interface IKDPoinTComparer<in TPoint>
+    public interface IKDPointComparer<in TPoint>
     {
         int Dimensions { get; }
         int Compare(TPoint a, TPoint b, int dimension);
     }
 
-    internal interface INeedsInitializationKDPoinTComparer<in TPoint> : IKDPoinTComparer<TPoint>
+    internal interface IInitializableKDPointComparer<in TPoint> : IKDPointComparer<TPoint>
     {
         void InitializeFrom(TPoint point);
     }

@@ -6,6 +6,7 @@ using System.Configuration;
 using System.Diagnostics;
 using System.IO;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 #if NETFRAMEWORK
@@ -427,29 +428,15 @@ namespace RIS
 #endif
         }
 
-        public static uint GetSize<T>()
+        public static int GetSize<T>()
         {
-            Type type = typeof(T);
-            int size;
+            var type = typeof(T);
 
             try
             {
-                if (type.IsValueType)
-                {
-                    if (type.IsGenericType)
-                    {
-                        var defaultValue = default(T);
-                        size = Marshal.SizeOf(defaultValue);
-                    }
-                    else
-                    {
-                        size = Marshal.SizeOf(type);
-                    }
-                }
-                else
-                {
-                    size = IntPtr.Size;
-                }
+                return type.IsValueType
+                    ? Unsafe.SizeOf<T>()
+                    : IntPtr.Size;
             }
             catch (Exception ex)
             {
@@ -457,31 +444,17 @@ namespace RIS
                 OnError(new RErrorEventArgs(ex, ex.Message));
                 throw;
             }
-
-            return (uint)size;
         }
-        public static uint GetSize(Type type)
-        {
-            int size;
 
+        // ReSharper disable AssignNullToNotNullAttribute
+        public static int GetSize(Type type)
+        {
             try
             {
-                if (type.IsValueType)
-                {
-                    if (type.IsGenericType)
-                    {
-                        var defaultValue = Activator.CreateInstance(type);
-                        size = Marshal.SizeOf(defaultValue);
-                    }
-                    else
-                    {
-                        size = Marshal.SizeOf(type);
-                    }
-                }
-                else
-                {
-                    size = IntPtr.Size;
-                }
+                return type.IsValueType
+                    ? Marshal.SizeOf(Activator.CreateInstance(
+                        type, true))
+                    : IntPtr.Size;
             }
             catch (Exception ex)
             {
@@ -489,9 +462,9 @@ namespace RIS
                 OnError(new RErrorEventArgs(ex, ex.Message));
                 throw;
             }
-
-            return (uint)size;
         }
+        // ReSharper restore AssignNullToNotNullAttribute
+
 
         public static byte ReflectBits(byte value)
         {

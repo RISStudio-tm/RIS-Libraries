@@ -2,9 +2,12 @@
 // Licensed under the Apache License, Version 2.0. See LICENSE file in the project root for license information. 
 
 using System;
+using System.Collections;
+using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Reflection;
+using RIS.Extensions;
 
 namespace RIS.Collections.Nestable.Serialization
 {
@@ -93,8 +96,9 @@ namespace RIS.Collections.Nestable.Serialization
         {
             if (value == null)
             {
-                var exception =
-                    new ArgumentNullException(nameof(value), $"{nameof(value)} cannot be null");
+                var exception = new ArgumentNullException(
+                    nameof(value),
+                    $"{nameof(value)} cannot be null");
                 Events.OnError(new RErrorEventArgs(exception, exception.Message));
                 OnError(new RErrorEventArgs(exception, exception.Message));
                 throw exception;
@@ -118,7 +122,7 @@ namespace RIS.Collections.Nestable.Serialization
             var collection =
                 CreateCollection(settings, name);
 
-            collection.Add("FullType", type.AssemblyQualifiedName);
+            collection.Add("FullType", type.GetAssemblyQualifiedName());
 
             if (settings.Targets == NestableSerializerTargets.None)
                 return collection;
@@ -179,10 +183,12 @@ namespace RIS.Collections.Nestable.Serialization
                     }
 
                     SerializeValueInternal(fieldsCollection,
-                        fieldName, fieldValue, settings);
+                        fieldName, field.FieldType,
+                        fieldValue, settings);
                 }
 
-                collection.Add("Fields", fieldsCollection);
+                if (fieldsCollection.Length > 0)
+                    collection.Add("Fields", fieldsCollection);
             }
 
             if (settings.HasTarget(NestableSerializerTargets.PublicProperties)
@@ -245,17 +251,59 @@ namespace RIS.Collections.Nestable.Serialization
                     }
 
                     SerializeValueInternal(propertiesCollection,
-                        propertyName, propertyValue, settings);
+                        propertyName, property.PropertyType,
+                        propertyValue, settings);
                 }
 
-                collection.Add("Properties", propertiesCollection);
+                if (propertiesCollection.Length > 0)
+                    collection.Add("Properties", propertiesCollection);
+            }
+
+            Type elementType = null;
+
+            if (typeof(IEnumerable).IsAssignableFrom(type)
+                && !typeof(Array).IsAssignableFrom(type)
+                && !typeof(Enum).IsAssignableFrom(type))
+            {
+                foreach (var interfaceType in type.GetInterfaces())
+                {
+                    if (interfaceType.IsGenericType &&
+                        interfaceType.GetGenericTypeDefinition() != typeof(ICollection<>))
+                    {
+                        continue;
+                    }
+
+                    elementType = interfaceType.GetGenericArguments()[0];
+                    break;
+                }
+            }
+
+            if (elementType != null)
+            {
+                var elementsCollection =
+                    CreateCollection(settings, "Elements");
+
+                ulong elementIndex = 0;
+
+                foreach (var element in (IEnumerable)value)
+                {
+                    SerializeValueInternal(elementsCollection,
+                        elementIndex.ToString(), elementType,
+                        element, settings);
+
+                    ++elementIndex;
+                }
+
+                collection.Add("ElementType", elementType.GetAssemblyQualifiedName());
+                collection.Add("Length", elementIndex.ToString());
+                collection.Add("Elements", elementsCollection);
             }
 
             return collection;
         }
         private static void SerializeValueInternal(
             INestableDictionary<string> collection,
-            string key, object value,
+            string key, Type containerType, object value,
             NestableSerializerSettings settings)
         {
             switch (value)
@@ -287,6 +335,18 @@ namespace RIS.Collections.Nestable.Serialization
                 case char _:
                 case string _:
                 case DateTime _:
+                    if (containerType == typeof(object)
+                        && value.GetType() != typeof(object))
+                    {
+                        collection.Add(
+                            key,
+                            value.GetType().GetAssemblyQualifiedName() +
+                            '|' +
+                            Convert.ToString(value, CultureInfo.InvariantCulture));
+
+                        break;
+                    }
+
                     collection.Add(
                         key,
                         Convert.ToString(value, CultureInfo.InvariantCulture));
@@ -295,12 +355,39 @@ namespace RIS.Collections.Nestable.Serialization
                 case IntPtr _:
                 case UIntPtr _:
                     break;
+                case Enum _:
+                    if (containerType == typeof(object)
+                        && value.GetType() != typeof(object))
+                    {
+                        collection.Add(
+                            key,
+                            value.GetType().GetAssemblyQualifiedName() +
+                            '|' +
+                            Convert.ToString(
+                                Convert.ToUInt64(value,
+                                    CultureInfo.InvariantCulture),
+                                CultureInfo.InvariantCulture));
+
+                        break;
+                    }
+
+                    collection.Add(
+                        key,
+                        Convert.ToString(
+                            Convert.ToUInt64(value,
+                                CultureInfo.InvariantCulture),
+                            CultureInfo.InvariantCulture));
+
+                    break;
                 case object[][] array:
                     var arrayCollection11 =
                         CreateCollection(settings, key);
 
                     arrayCollection11.Add("Lengths", $"{array.GetLength(0)}");
-                    arrayCollection11.Add("Type", $"{array.GetType().GetElementType()?.Name}");
+
+                    var elementType11 = array.GetType().GetElementType();
+
+                    arrayCollection11.Add("Type", elementType11?.GetAssemblyQualifiedName());
 
                     for (var i = 0; i < array.Length; ++i)
                     {
@@ -308,7 +395,8 @@ namespace RIS.Collections.Nestable.Serialization
                         var element = array[i];
 
                         SerializeValueInternal(arrayCollection11,
-                            elementKey, element, settings);
+                            elementKey, elementType11,
+                            element, settings);
                     }
 
                     collection.Add(
@@ -321,7 +409,10 @@ namespace RIS.Collections.Nestable.Serialization
                         CreateCollection(settings, key);
 
                     arrayCollection12.Add("Lengths", $"{array.GetLength(0)}");
-                    arrayCollection12.Add("Type", $"{array.GetType().GetElementType()?.Name}");
+
+                    var elementType12 = array.GetType().GetElementType();
+
+                    arrayCollection12.Add("Type", elementType12.GetAssemblyQualifiedName());
 
                     for (var i = 0; i < array.Length; ++i)
                     {
@@ -329,7 +420,8 @@ namespace RIS.Collections.Nestable.Serialization
                         var element = array[i];
 
                         SerializeValueInternal(arrayCollection12,
-                            elementKey, element, settings);
+                            elementKey, elementType12,
+                            element, settings);
                     }
 
                     collection.Add(
@@ -342,7 +434,10 @@ namespace RIS.Collections.Nestable.Serialization
                         CreateCollection(settings, key);
 
                     arrayCollection13.Add("Lengths", $"{array.GetLength(0)}");
-                    arrayCollection13.Add("Type", $"{array.GetType().GetElementType()?.Name}");
+
+                    var elementType13 = array.GetType().GetElementType();
+
+                    arrayCollection13.Add("Type", elementType13.GetAssemblyQualifiedName());
 
                     for (var i = 0; i < array.Length; ++i)
                     {
@@ -350,7 +445,8 @@ namespace RIS.Collections.Nestable.Serialization
                         var element = array[i];
 
                         SerializeValueInternal(arrayCollection13,
-                            elementKey, element, settings);
+                            elementKey, elementType13,
+                            element, settings);
                     }
 
                     collection.Add(
@@ -364,7 +460,10 @@ namespace RIS.Collections.Nestable.Serialization
 
                     arrayCollection21.Add("Lengths", $"{array.GetLength(0)}" +
                                                      $",{array.GetLength(1)}");
-                    arrayCollection21.Add("Type", $"{array.GetType().GetElementType()?.Name}");
+
+                    var elementType21 = array.GetType().GetElementType();
+
+                    arrayCollection21.Add("Type", elementType21.GetAssemblyQualifiedName());
 
                     for (var i = 0; i < array.Length; ++i)
                     {
@@ -374,7 +473,8 @@ namespace RIS.Collections.Nestable.Serialization
                             var element = array[i, j];
 
                             SerializeValueInternal(arrayCollection21,
-                                elementKey, element, settings);
+                                elementKey, elementType21,
+                                element, settings);
                         }
                     }
 
@@ -389,7 +489,10 @@ namespace RIS.Collections.Nestable.Serialization
 
                     arrayCollection22.Add("Lengths", $"{array.GetLength(0)}" +
                                                      $",{array.GetLength(1)}");
-                    arrayCollection22.Add("Type", $"{array.GetType().GetElementType()?.Name}");
+
+                    var elementType22 = array.GetType().GetElementType();
+
+                    arrayCollection22.Add("Type", elementType22.GetAssemblyQualifiedName());
 
                     for (var i = 0; i < array.Length; ++i)
                     {
@@ -399,7 +502,8 @@ namespace RIS.Collections.Nestable.Serialization
                             var element = array[i, j];
 
                             SerializeValueInternal(arrayCollection22,
-                                elementKey, element, settings);
+                                elementKey, elementType22,
+                                element, settings);
                         }
                     }
 
@@ -414,7 +518,10 @@ namespace RIS.Collections.Nestable.Serialization
 
                     arrayCollection23.Add("Lengths", $"{array.GetLength(0)}" +
                                                      $",{array.GetLength(1)}");
-                    arrayCollection23.Add("Type", $"{array.GetType().GetElementType()?.Name}");
+
+                    var elementType23 = array.GetType().GetElementType();
+
+                    arrayCollection23.Add("Type", elementType23.GetAssemblyQualifiedName());
 
                     for (var i = 0; i < array.Length; ++i)
                     {
@@ -424,7 +531,8 @@ namespace RIS.Collections.Nestable.Serialization
                             var element = array[i, j];
 
                             SerializeValueInternal(arrayCollection23,
-                                elementKey, element, settings);
+                                elementKey, elementType23,
+                                element, settings);
                         }
                     }
 
@@ -440,7 +548,10 @@ namespace RIS.Collections.Nestable.Serialization
                     arrayCollection31.Add("Lengths", $"{array.GetLength(0)}" +
                                                      $",{array.GetLength(1)}" +
                                                      $",{array.GetLength(2)}");
-                    arrayCollection31.Add("Type", $"{array.GetType().GetElementType()?.Name}");
+
+                    var elementType31 = array.GetType().GetElementType();
+
+                    arrayCollection31.Add("Type", elementType31.GetAssemblyQualifiedName());
 
                     for (var i = 0; i < array.Length; ++i)
                     {
@@ -452,7 +563,8 @@ namespace RIS.Collections.Nestable.Serialization
                                 var element = array[i, j, k];
 
                                 SerializeValueInternal(arrayCollection31,
-                                    elementKey, element, settings);
+                                    elementKey, elementType31,
+                                    element, settings);
                             }
                         }
                     }
@@ -469,7 +581,10 @@ namespace RIS.Collections.Nestable.Serialization
                     arrayCollection32.Add("Lengths", $"{array.GetLength(0)}" +
                                                      $",{array.GetLength(1)}" +
                                                      $",{array.GetLength(2)}");
-                    arrayCollection32.Add("Type", $"{array.GetType().GetElementType()?.Name}");
+
+                    var elementType32 = array.GetType().GetElementType();
+
+                    arrayCollection32.Add("Type", elementType32.GetAssemblyQualifiedName());
 
                     for (var i = 0; i < array.Length; ++i)
                     {
@@ -481,7 +596,8 @@ namespace RIS.Collections.Nestable.Serialization
                                 var element = array[i, j, k];
 
                                 SerializeValueInternal(arrayCollection32,
-                                    elementKey, element, settings);
+                                    elementKey, elementType32,
+                                    element, settings);
                             }
                         }
                     }
@@ -498,7 +614,10 @@ namespace RIS.Collections.Nestable.Serialization
                     arrayCollection33.Add("Lengths", $"{array.GetLength(0)}" +
                                                      $",{array.GetLength(1)}" +
                                                      $",{array.GetLength(2)}");
-                    arrayCollection33.Add("Type", $"{array.GetType().GetElementType()?.Name}");
+
+                    var elementType33 = array.GetType().GetElementType();
+
+                    arrayCollection33.Add("Type", elementType33.GetAssemblyQualifiedName());
 
                     for (var i = 0; i < array.Length; ++i)
                     {
@@ -510,7 +629,8 @@ namespace RIS.Collections.Nestable.Serialization
                                 var element = array[i, j, k];
 
                                 SerializeValueInternal(arrayCollection33,
-                                    elementKey, element, settings);
+                                    elementKey, elementType33,
+                                    element, settings);
                             }
                         }
                     }
@@ -525,7 +645,10 @@ namespace RIS.Collections.Nestable.Serialization
                         CreateCollection(settings, key);
 
                     arrayCollection1.Add("Lengths", $"{array.GetLength(0)}");
-                    arrayCollection1.Add("Type", $"{array.GetType().GetElementType()?.Name}");
+
+                    var elementType1 = array.GetType().GetElementType();
+
+                    arrayCollection1.Add("Type", elementType1.GetAssemblyQualifiedName());
 
                     for (var i = 0; i < array.Length; ++i)
                     {
@@ -533,7 +656,8 @@ namespace RIS.Collections.Nestable.Serialization
                         var element = array[i];
 
                         SerializeValueInternal(arrayCollection1,
-                            elementKey, element, settings);
+                            elementKey, elementType1,
+                            element, settings);
                     }
 
                     collection.Add(
@@ -547,7 +671,10 @@ namespace RIS.Collections.Nestable.Serialization
 
                     arrayCollection2.Add("Lengths", $"{array.GetLength(0)}" +
                                                      $",{array.GetLength(1)}");
-                    arrayCollection2.Add("Type", $"{array.GetType().GetElementType()?.Name}");
+
+                    var elementType2 = array.GetType().GetElementType();
+
+                    arrayCollection2.Add("Type", elementType2.GetAssemblyQualifiedName());
 
                     for (var i = 0; i < array.Length; ++i)
                     {
@@ -557,7 +684,8 @@ namespace RIS.Collections.Nestable.Serialization
                             var element = array[i, j];
 
                             SerializeValueInternal(arrayCollection2,
-                                elementKey, element, settings);
+                                elementKey, elementType2,
+                                element, settings);
                         }
                     }
 
@@ -573,7 +701,10 @@ namespace RIS.Collections.Nestable.Serialization
                     arrayCollection3.Add("Lengths", $"{array.GetLength(0)}" +
                                                      $",{array.GetLength(1)}" +
                                                      $",{array.GetLength(2)}");
-                    arrayCollection3.Add("Type", $"{array.GetType().GetElementType()?.Name}");
+                    
+                    var elementType3 = array.GetType().GetElementType();
+
+                    arrayCollection3.Add("Type", elementType3.GetAssemblyQualifiedName());
 
                     for (var i = 0; i < array.Length; ++i)
                     {
@@ -585,7 +716,8 @@ namespace RIS.Collections.Nestable.Serialization
                                 var element = array[i, j, k];
 
                                 SerializeValueInternal(arrayCollection3,
-                                    elementKey, element, settings);
+                                    elementKey, elementType3,
+                                    element, settings);
                             }
                         }
                     }
@@ -656,24 +788,17 @@ namespace RIS.Collections.Nestable.Serialization
                 settings = NestableDeserializerSettings.Default;
 
             var type = target.GetType();
-            var name = type.FullName;
 
             if (settings.TypeNameCheck)
             {
-                if (Attribute.IsDefined(type, typeof(NestableSerializedAttribute)))
-                {
-                    name = ((NestableSerializedAttribute)type
-                        .GetCustomAttribute(typeof(NestableSerializedAttribute)))?.Name ?? type.FullName;
-                }
-
+                var resultingType = type.GetAssemblyQualifiedName();
                 var serializedType = collection["FullType"]
-                    .GetElement()
-                    .Split(',')[0];
+                    .GetElement();
 
-                if (serializedType != name)
+                if (serializedType != resultingType)
                 {
                     var exception =
-                        new Exception($"Name of the serialized type[{serializedType}] and the resulting type[{name}] do not match");
+                        new Exception($"Name of the serialized type[{serializedType}] and the resulting type[{resultingType}] do not match");
                     Events.OnError(new RErrorEventArgs(exception, exception.Message));
                     OnError(new RErrorEventArgs(exception, exception.Message));
                     throw exception;
@@ -784,6 +909,47 @@ namespace RIS.Collections.Nestable.Serialization
                 }
             }
 
+            if (collection.ContainsKey("Elements"))
+            {
+                var length = Convert.ToUInt64(
+                    collection["Length"].GetElement(),
+                    CultureInfo.InvariantCulture);
+                var elementType = Type.GetType(
+                    collection["ElementType"].GetElement());
+                var elementsCollection = (INestableDictionary<string>)
+                    collection["Elements"].GetCollection();
+
+                var addMethod = type
+                    .GetMethods(BindingFlags.Instance | BindingFlags.Public)
+                    .FirstOrDefault(method => method.Name == "Add"
+                                              && method.GetParameters().Length == 1);
+
+                if (addMethod != null)
+                {
+                    ulong elementIndex = 0;
+
+                    while (elementIndex < length)
+                    {
+                        object elementValue = DeserializeValueInternal(
+                            elementsCollection, elementIndex.ToString(),
+                            elementType, bindingFlags, settings,
+                            out var success);
+
+                        if (!success)
+                        {
+                            ++elementIndex;
+
+                            continue;
+                        }
+
+                        addMethod.Invoke(target,
+                            new[] {elementValue});
+
+                        ++elementIndex;
+                    }
+                }
+            }
+
             return target;
         }
         private static object DeserializeValueInternal(
@@ -795,9 +961,10 @@ namespace RIS.Collections.Nestable.Serialization
         {
             success = true;
 
-            var collectionElement = collection[key];
+            ref var collectionElement = ref collection.GetRef(key);
 
-            if (collectionElement.Value == null)
+            if (collectionElement.Value == null
+                || collectionElement.Type == NestedType.Unknown)
             {
                 if (!type.IsValueType)
                     return null;
@@ -828,13 +995,27 @@ namespace RIS.Collections.Nestable.Serialization
             {
                 return Convert.ChangeType(
                     collectionElement.GetElement(),
-                    type);
+                    type, CultureInfo.InvariantCulture);
             }
             else if (typeof(IntPtr).IsAssignableFrom(type)
                      || typeof(UIntPtr).IsAssignableFrom(type))
             {
                 success = false;
                 return null;
+            }
+            else if (typeof(Enum).IsAssignableFrom(type))
+            {
+                var enumName = Enum.GetName(type, Convert.ToUInt64(
+                    collectionElement.GetElement(),
+                    CultureInfo.InvariantCulture));
+
+                if (string.IsNullOrEmpty(enumName))
+                {
+                    success = false;
+                    return null;
+                }
+
+                return Enum.Parse(type, enumName);
             }
             else if (typeof(object[][]).IsAssignableFrom(type))
             {
@@ -1176,7 +1357,7 @@ namespace RIS.Collections.Nestable.Serialization
                     })
                     .ToArray();
                 var arrayElementType = Type.GetType(
-                    $"System.{arrayCollection["Type"].GetElement()}",
+                    arrayCollection["Type"].GetElement(),
                     false);
 
                 if (arrayElementType == null)
@@ -1220,7 +1401,7 @@ namespace RIS.Collections.Nestable.Serialization
                     })
                     .ToArray();
                 var arrayElementType = Type.GetType(
-                    $"System.{arrayCollection["Type"].GetElement()}",
+                    arrayCollection["Type"].GetElement(),
                     false);
 
                 if (arrayElementType == null)
@@ -1267,7 +1448,7 @@ namespace RIS.Collections.Nestable.Serialization
                     })
                     .ToArray();
                 var arrayElementType = Type.GetType(
-                    $"System.{arrayCollection["Type"].GetElement()}",
+                    arrayCollection["Type"].GetElement(),
                     false);
 
                 if (arrayElementType == null)
@@ -1307,12 +1488,31 @@ namespace RIS.Collections.Nestable.Serialization
                 {
                     var objectElement = collectionElement.GetElement();
 
+                    if (objectElement == null)
+                        return null;
                     if (objectElement == "db_null")
                         return DBNull.Value;
 
+                    var objectElementTypeIndex = objectElement.IndexOf('|');
+
+                    if (objectElementTypeIndex != -1)
+                    {
+                        var objectElementType =
+                            objectElement.Substring(0, objectElementTypeIndex);
+                        collectionElement.Set(
+                            objectElement.Substring(objectElementTypeIndex + 1));
+
+                        if (!string.IsNullOrEmpty(objectElementType))
+                        {
+                            return DeserializeValueInternal(collection,
+                                key, Type.GetType(objectElementType),
+                                bindingFlags, settings, out success);
+                        }
+                    }
+
                     return Convert.ChangeType(
-                        objectElement,
-                        type);
+                        objectElement, type,
+                        CultureInfo.InvariantCulture);
                 }
 
                 var objectCollection = (INestableDictionary<string>)
@@ -1324,7 +1524,8 @@ namespace RIS.Collections.Nestable.Serialization
                     return null;
                 }
 
-                var objectType = Type.GetType(objectCollection["FullType"].GetElement());
+                var objectType = Type.GetType(
+                    objectCollection["FullType"].GetElement());
 
                 return DeserializeInternal(objectType,
                     objectCollection, settings);

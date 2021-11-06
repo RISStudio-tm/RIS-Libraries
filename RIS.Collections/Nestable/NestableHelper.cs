@@ -4,9 +4,11 @@
 using System;
 using System.Collections.Generic;
 using System.Globalization;
-using System.Runtime.CompilerServices;
 using System.Text;
-using RIS.Extensions;
+using RIS.Collections.Chunked;
+using RIS.Collections.Extensions;
+using RIS.Collections.Nestable.Entities;
+using RIS.Collections.Nestable.Frames;
 
 namespace RIS.Collections.Nestable
 {
@@ -16,39 +18,41 @@ namespace RIS.Collections.Nestable
         public static event EventHandler<RWarningEventArgs> Warning;
         public static event EventHandler<RErrorEventArgs> Error;
 
+
+
         private static readonly Dictionary<string, NestableCollectionType> CollectionsTypes;
         private static readonly Dictionary<NestableCollectionType, Type> CollectionsInfo;
 
+
+
         static NestableHelper()
         {
-            string[] names = Enum.GetNames(typeof(NestableCollectionType));
+            var names = Enum.GetNames(typeof(NestableCollectionType));
 
             CollectionsTypes = new Dictionary<string, NestableCollectionType>(names.Length);
             CollectionsInfo = new Dictionary<NestableCollectionType, Type>(names.Length);
 
             for (int i = 0; i < names.Length; ++i)
             {
-                ref string value = ref names[i];
+                ref var name = ref names[i];
 
-                Type type = Type.GetType($"RIS.Collections.Nestable.{value}`1");
+                var type = Type.GetType(
+                    $"RIS.Collections.Nestable.{name}`1, RIS.Collections");
 
                 if (type == null)
                     continue;
 
-                NestableCollectionType collectionType =
-                    (NestableCollectionType)Enum.Parse(typeof(NestableCollectionType), value);
+                var collectionType = (NestableCollectionType)Enum.Parse(
+                    typeof(NestableCollectionType), name);
 
                 CollectionsTypes.Add(
-                    value,
-                    collectionType
-                    );
-
+                    name, collectionType);
                 CollectionsInfo.Add(
-                    collectionType,
-                    type
-                    );
+                    collectionType, type);
             }
         }
+
+
 
         public static void OnInformation(RInformationEventArgs e)
         {
@@ -79,71 +83,57 @@ namespace RIS.Collections.Nestable
 
 
 
-        private static (string Represent, int EndIndex) GetRepresentPart(
-            string represent, int startIndex)
+        private static (NestedType Type, int StartIndex, int EndIndex, int Length) GetRepresentPart(
+            ref string represent, int startIndex)
         {
-            if (string.IsNullOrEmpty(represent))
+            if (represent == null)
             {
-                var exception =
-                    new ArgumentOutOfRangeException(nameof(startIndex), $"{nameof(startIndex)} cannot be null or empty");
-                Events.OnError(new RErrorEventArgs(exception, exception.Message));
-                OnError(new RErrorEventArgs(exception, exception.Message));
+                var exception = new ArgumentException(
+                    $"{nameof(startIndex)} cannot be null",
+                    nameof(startIndex));
+                Events.OnError(
+                    new RErrorEventArgs(exception, exception.Message));
+                OnError(
+                    new RErrorEventArgs(exception, exception.Message));
                 throw exception;
             }
             if (startIndex < 0)
             {
-                var exception =
-                    new ArgumentOutOfRangeException(nameof(startIndex), $"{nameof(startIndex)} cannot be less than zero");
-                Events.OnError(new RErrorEventArgs(exception, exception.Message));
-                OnError(new RErrorEventArgs(exception, exception.Message));
+                var exception = new ArgumentOutOfRangeException(
+                    nameof(startIndex),
+                    $"{nameof(startIndex)} cannot be less than zero");
+                Events.OnError(
+                    new RErrorEventArgs(exception, exception.Message));
+                OnError(
+                    new RErrorEventArgs(exception, exception.Message));
                 throw exception;
             }
 
-            RepresentPartParseInfo parseInfo;
-
-            try
-            {
-                parseInfo = RepresentPartParseInfo.Get(
-                    represent, startIndex);
-            }
-            catch (Exception ex)
-            {
-                OnError(new RErrorEventArgs(ex, ex.Message));
-                throw;
-            }
-
+            var parseInfo = RepresentPartParseInfo.Get(
+                represent[startIndex]);
             var skippedOccurrencesCount = 0;
 
             if (parseInfo.Type == NestedType.Collection)
             {
-                Stack<char> parentheses = new Stack<char>();
+                var parentheses = 0;
+                var parenthesesMap = parseInfo.ParenthesesMap;
 
                 for (int i = startIndex; i < represent.Length; ++i)
                 {
                     var ch = represent[i];
 
-                    if (((ICollection<char>)parseInfo.ParenthesesMap.Values).Contains(ch))
+                    if (ch == parenthesesMap.Key)
                     {
-                        if ((i > 0 && represent[i - 1] == '/')
-                            && (i < represent.Length && represent[i + 1] == '/'))
-                        {
+                        if (i > 0 && represent[i - 1] == '/')
                             continue;
-                        }
 
-                        parentheses.Push(ch);
+                        ++parentheses;
                     }
-                    else if (parseInfo.ParenthesesMap.TryGetValue(ch, out var chMapped))
+                    else if (ch == parenthesesMap.Value)
                     {
-                        if (parentheses.Pop() != chMapped)
-                        {
-                            var exception =
-                                new FormatException($"Expected parentheses character '{chMapped}', but obtained character '{ch}'");
-                            Events.OnError(new RErrorEventArgs(exception, exception.Message));
-                            OnError(new RErrorEventArgs(exception, exception.Message));
-                            throw exception;
-                        }
+                        --parentheses;
 
-                        if (parentheses.Count == 0)
+                        if (parentheses == 0)
                             break;
 
                         ++skippedOccurrencesCount;
@@ -154,11 +144,15 @@ namespace RIS.Collections.Nestable
             var endIndex = -1;
             var startIndexOccurrence = startIndex;
 
-            for (int i = 0; i < 1 + skippedOccurrencesCount; ++i)
+            for (int i = 0; i < skippedOccurrencesCount + 1; ++i)
             {
-                endIndex = represent
-                    .IndexOfAny(parseInfo.EndValues, startIndexOccurrence)
-                    .Index;
+                endIndex =
+                    startIndexOccurrence +
+                    parseInfo.EndValuesTrie
+                        .IndexOfAny(represent
+                            .AsSpan()
+                            .Slice(startIndexOccurrence))
+                        .Index;
 
                 if (endIndex == -1)
                     break;
@@ -168,18 +162,17 @@ namespace RIS.Collections.Nestable
 
             if (endIndex == -1)
             {
-                var exception =
-                    new Exception($"Could not find the end of the representation part at the start index {startIndex}");
-                Events.OnError(new RErrorEventArgs(exception, exception.Message));
-                OnError(new RErrorEventArgs(exception, exception.Message));
+                var exception = new Exception(
+                    $"Could not find the end of the representation part at the start index {startIndex}");
+                Events.OnError(
+                    new RErrorEventArgs(exception, exception.Message));
+                OnError(
+                    new RErrorEventArgs(exception, exception.Message));
                 throw exception;
             }
 
-            var representPart = represent.Substring(
-                startIndex + parseInfo.ExcludedStart,
-                endIndex - (startIndex + parseInfo.ExcludedEnd));
-
-            return (representPart, endIndex);
+            return (parseInfo.Type, startIndex, endIndex,
+                    endIndex - startIndex + 1);
         }
 
 
@@ -187,86 +180,91 @@ namespace RIS.Collections.Nestable
         public static (INestableCollection<TValue> Collection, CollectionGeneralType GeneralType) CreateCollectionByType<TValue>(
             NestableCollectionType type)
         {
-            Type typeCollection;
-
-            if (!CollectionsInfo.ContainsKey(type))
-            {
+            if (!CollectionsInfo.TryGetValue(type, out var typeInfo))
                 return (null, CollectionGeneralType.Unknown);
-            }
 
-            typeCollection = CollectionsInfo[type]
+            var collectionType = typeInfo
                 .MakeGenericType(typeof(TValue));
-            object collection = typeCollection
+            var collection = (INestableCollection<TValue>)collectionType
                 .GetConstructor(Array.Empty<Type>())?
                 .Invoke(Array.Empty<object>());
-            CollectionGeneralType generalType = CollectionGeneralType.Unknown;
+            var generalType = GetGeneralType(collection);
 
-            if (collection is INestableArray<TValue>)
-                generalType = CollectionGeneralType.Array;
-            else if (collection is INestableDictionary<TValue>)
-                generalType = CollectionGeneralType.Dictionary;
-            else if (collection is INestableList<TValue>)
-                generalType = CollectionGeneralType.List;
+            return (collection, generalType);
+        }
+        public static (INestableCollection<TValue> Collection, CollectionGeneralType GeneralType) CreateCollectionByType<TValue>(
+            NestableCollectionType type, string represent)
+        {
+            if (!CollectionsInfo.TryGetValue(type, out var typeInfo))
+                return (null, CollectionGeneralType.Unknown);
 
-            return ((INestableCollection<TValue>)collection, generalType);
+            var collectionType = typeInfo
+                .MakeGenericType(typeof(TValue));
+            var collection = (INestableCollection<TValue>)collectionType
+                .GetConstructor(new[] { typeof(string) })?
+                .Invoke(new object[] { represent });
+            var generalType = GetGeneralType(collection);
+
+            return (collection, generalType);
         }
         public static (INestableCollection<TValue> Collection, CollectionGeneralType GeneralType) CreateCollectionByType<TValue>(
             NestableCollectionType type, int length)
         {
-            Type typeCollection;
-
-            if (!CollectionsInfo.ContainsKey(type))
-            {
+            if (!CollectionsInfo.TryGetValue(type, out var typeInfo))
                 return (null, CollectionGeneralType.Unknown);
-            }
 
-            typeCollection = CollectionsInfo[type]
+            var collectionType = typeInfo
                 .MakeGenericType(typeof(TValue));
-            object collection = typeCollection
-                .GetConstructor(new Type[] { typeof(int) })?
+            var collection = (INestableCollection<TValue>)collectionType
+                .GetConstructor(new[] { typeof(int) })?
                 .Invoke(new object[] { length });
-            CollectionGeneralType generalType = CollectionGeneralType.Unknown;
+            var generalType = GetGeneralType(collection);
 
-            if (collection is INestableArray<TValue>)
-                generalType = CollectionGeneralType.Array;
-            else if (collection is INestableDictionary<TValue>)
-                generalType = CollectionGeneralType.Dictionary;
-            else if (collection is INestableList<TValue>)
-                generalType = CollectionGeneralType.List;
-
-            return ((INestableCollection<TValue>)collection, generalType);
+            return (collection, generalType);
         }
 
-        public static NestableCollectionType GetCollectionType(string typeString)
+        public static NestableCollectionType GetCollectionType(
+            string typeName)
         {
-            if (typeString.IndexOf('`') >= 0)
-                typeString = typeString.Substring(0, typeString.Length - 2);
+            if (string.IsNullOrEmpty(typeName))
+                return NestableCollectionType.Unknown;
 
-            if (!CollectionsTypes.ContainsKey(typeString))
-                return NestableCollectionType.NestableListL;
+            if (typeName.IndexOf('`') >= 0)
+                typeName = typeName.Substring(0, typeName.Length - 2);
+            else if (typeName.IndexOf('[') >= 0)
+                typeName = typeName.Substring(0, typeName.Length - 3);
+            else if (typeName.IndexOf('<') >= 0)
+                typeName = typeName.Substring(0, typeName.Length - 3);
 
-            return CollectionsTypes[typeString];
+            if (CollectionsTypes.TryGetValue(typeName, out var type))
+                return type;
+
+            return NestableCollectionType.Unknown;
+
         }
-        public static NestableCollectionType GetCollectionType(INestableCollection collection)
+        public static NestableCollectionType GetCollectionType(
+            INestableCollection collection)
         {
-            return collection.CollectionType;
+            return collection?.CollectionType
+                ?? NestableCollectionType.Unknown;
         }
 
         public static CollectionGeneralType GetGeneralType<TCollection>()
             where TCollection: INestableCollection
         {
-            Type typeCollection = typeof(TCollection);
+            var collectionType = typeof(TCollection);
 
-            if (typeCollection.IsAssignableFrom(typeof(INestableArray)))
+            if (collectionType.IsAssignableFrom(typeof(INestableArray)))
                 return CollectionGeneralType.Array;
-            else if (typeCollection.IsAssignableFrom(typeof(INestableDictionary)))
+            else if (collectionType.IsAssignableFrom(typeof(INestableDictionary)))
                 return CollectionGeneralType.Dictionary;
-            else if (typeCollection.IsAssignableFrom(typeof(INestableList)))
+            else if (collectionType.IsAssignableFrom(typeof(INestableList)))
                 return CollectionGeneralType.List;
 
             return CollectionGeneralType.Unknown;
         }
-        public static CollectionGeneralType GetGeneralType(INestableCollection collection)
+        public static CollectionGeneralType GetGeneralType(
+            INestableCollection collection)
         {
             if (collection is INestableArray)
                 return CollectionGeneralType.Array;
@@ -280,33 +278,84 @@ namespace RIS.Collections.Nestable
 
 
 
-        public static string ToStringRepresent<TValue>(NestedElement<TValue> value)
+        public static string ToStringRepresent<TValue>(
+            NestedElement<TValue> value)
         {
+            var builder = new StringBuilder(30);
+
             switch (value.Type)
             {
                 case NestedType.Element:
-                    return ToStringRepresent(value.GetElement());
+                    ToStringRepresent(ref builder, value.GetElement());
+                    return builder.ToString();
                 case NestedType.Array:
-                    return ToStringRepresent(value.GetArray());
+                    ToStringRepresent(ref builder, value.GetArray());
+                    return builder.ToString();
                 case NestedType.Collection:
                     return ToStringRepresent(value.GetCollection());
+                case NestedType.Unknown:
                 default:
-                    var exception =
-                        new ArgumentException("Недопустимое значение поля Type в [NestedElement] для создания строкового представления", nameof(value));
-                    Events.OnError(new RErrorEventArgs(exception, exception.Message));
-                    OnError(new RErrorEventArgs(exception, exception.Message));
+                    var exception = new ArgumentException(
+                        "Недопустимое значение поля Type в [NestedElement] для создания строкового представления",
+                        nameof(value));
+                    Events.OnError(
+                        new RErrorEventArgs(exception, exception.Message));
+                    OnError(
+                        new RErrorEventArgs(exception, exception.Message));
                     throw exception;
             }
         }
-        private static string ToStringRepresent<TValue>(TValue value)
+        private static void ToStringRepresent(
+            ref StringBuilder builder, string key)
         {
-            if (value == null)
-                return "null";
-
-            if (ReferenceEquals(value, DBNull.Value)
-                || value.ToString() == "db_null")
+            if (key == null)
             {
-                return "db_null";
+                builder.Append("null");
+
+                return;
+            }
+            else if (key.Length == 0)
+            {
+                return;
+            }
+
+            key = key
+                .Replace("null", "/null/")
+                .Replace("|", "/|/")
+                .Replace(":", "/:/")
+                .Replace(",", "/,/")
+                .Replace("\"", "/\"/")
+                .Replace("[", "/[/")
+                .Replace("]", "/]/")
+                .Replace("{", "/{/")
+                .Replace("}", "/}/");
+
+            builder.Append(key);
+        }
+        private static void ToStringRepresent<TValue>(
+            ref StringBuilder builder, TValue value,
+            string key = null)
+        {
+            builder.Append('"');
+
+            if (key != null)
+            {
+                ToStringRepresent(ref builder, key);
+                
+                builder.Append("::");
+            }
+
+            if (value == null)
+            {
+                builder.Append("null");
+
+                goto FinishElementProcessing;
+            }
+            else if (ReferenceEquals(value, DBNull.Value))
+            {
+                builder.Append("db_null");
+
+                goto FinishElementProcessing;
             }
 
             string valueString;
@@ -326,718 +375,880 @@ namespace RIS.Collections.Nestable
             }
 
             if (valueString == null)
-                return "null";
+            {
+                builder.Append("null");
+
+                goto FinishElementProcessing;
+            }
+            else if (valueString.Length == 0)
+            {
+                goto FinishElementProcessing;
+            }
+            else if (valueString == "db_null")
+            {
+                builder.Append("db_null");
+
+                goto FinishElementProcessing;
+            }
 
             valueString = valueString
                 .Replace("null", "/null/")
                 .Replace("|", "/|/")
                 .Replace(":", "/:/")
-                .Replace("\"", "/\"/")
                 .Replace(",", "/,/")
+                .Replace("\"", "/\"/")
                 .Replace("[", "/[/")
                 .Replace("]", "/]/")
                 .Replace("{", "/{/")
                 .Replace("}", "/}/");
 
-            return valueString;
+            builder.Append(valueString);
+
+            // Label
+            FinishElementProcessing:
+
+
+
+            builder.Append('"');
         }
-        private static string ToStringRepresent<TValue>(TValue[] value)
+        private static void ToStringRepresent<TValue>(
+            ref StringBuilder builder, TValue[] value,
+            string key = null)
         {
-            if (value.Length == 0)
-                return "[]";
+            builder.Append('[');
 
-            StringBuilder result = new StringBuilder(value.Length);
-
-            result.Append('[');
-
-            for (int i = 0; i < value.Length; ++i)
+            if (key != null)
             {
-                result.Append('"');
-                result.Append(ToStringRepresent(value[i]));
-                result.Append("\",");
+                ToStringRepresent(ref builder, key);
+
+                builder.Append("::");
             }
 
-            if (result[result.Length - 1] == ',')
-                result.Remove(result.Length - 1, 1);
+            if (value == null)
+            {
+                builder.Append("null");
 
-            result.Append(']');
+                goto FinishArrayProcessing;
+            }
+            else if (value.Length == 0)
+            {
+                goto FinishArrayProcessing;
+            }
 
-            return result.ToString();
+            foreach (var element in value)
+            {
+                ToStringRepresent(ref builder, element);
+
+                builder.Append(',');
+            }
+
+            builder.Remove(builder.Length - 1, 1);
+
+            // Label
+            FinishArrayProcessing:
+
+
+
+            builder.Append(']');
         }
-        public static string ToStringRepresent<TValue>(INestableCollection<TValue> value)
+        // ReSharper disable PossibleNullReferenceException
+        public static string ToStringRepresent<TValue>(
+            INestableCollection<TValue> value)
         {
-            RuntimeHelpers.EnsureSufficientExecutionStack();
+            var builder =
+                new StringBuilder(value.Length * 20);
+            var collectionFrames =
+                new ChunkedArrayL<NestableCollectionStringifyFrame<TValue>>(0, 32);
 
-            switch (GetGeneralType(value))
+            collectionFrames.Push(
+                new NestableCollectionStringifyFrame<TValue>(value));
+
+            ref var previousCollectionInfo = ref collectionFrames.PeekRef();
+            ref var previousCollection = ref previousCollectionInfo.Collection;
+            ref var previousIndex = ref previousCollectionInfo.Index;
+            ref var previousGeneralType = ref previousCollectionInfo.GeneralType;
+
+            var previousDictionary = previousGeneralType == CollectionGeneralType.Dictionary
+                ? (INestableDictionary<TValue>)previousCollection
+                : null;
+
+            // Label
+            StartNextCollectionProcessing:
+
+
+
+            ref var currentCollectionInfo = ref collectionFrames.PeekRef();
+            ref var currentCollection = ref currentCollectionInfo.Collection;
+            ref var currentIndex = ref currentCollectionInfo.Index;
+            ref var currentGeneralType = ref currentCollectionInfo.GeneralType;
+
+            var currentDictionary = currentGeneralType == CollectionGeneralType.Dictionary
+                ? (INestableDictionary<TValue>)currentCollection
+                : null;
+
+            currentIndex = 0;
+
+            switch (currentGeneralType)
             {
                 case CollectionGeneralType.Array:
                 case CollectionGeneralType.List:
-                    break;
                 case CollectionGeneralType.Dictionary:
-                    return ToStringRepresentDictionary((INestableDictionary<TValue>)value);
+                    break;
                 case CollectionGeneralType.Unknown:
                 default:
-                    var exception =
-                        new ArgumentException("Недопустимое значение CollectionGeneralType у коллекции", nameof(value));
-                    Events.OnError(new RErrorEventArgs(exception, exception.Message));
-                    OnError(new RErrorEventArgs(exception, exception.Message));
+                    var exception = new ArgumentException(
+                        "Недопустимое значение CollectionGeneralType у коллекции",
+                        nameof(currentCollection));
+                    Events.OnError(
+                        new RErrorEventArgs(exception, exception.Message));
+                    OnError(
+                        new RErrorEventArgs(exception, exception.Message));
                     throw exception;
             }
 
-            if (value.Length == 0)
-                return $"{{{GetCollectionType(value)}||}}";
+            var currentCollectionType = GetCollectionType(currentCollection);
 
-            StringBuilder result = new StringBuilder(value.Length);
+            builder.Append('{');
 
-            result.Append('{');
-
-            result.Append(GetCollectionType(value));
-            result.Append("||");
-
-            for (int i = 0; i < value.Length; ++i)
+            if (currentGeneralType == CollectionGeneralType.Dictionary)
             {
-                switch (value[i].Type)
-                {
-                    case NestedType.Element:
-                        result.Append('"');
-                        result.Append(ToStringRepresent(value[i].GetElement()));
-                        result.Append("\",");
-                        break;
-                    case NestedType.Array:
-                        result.Append(ToStringRepresent(value[i].GetArray()));
-                        result.Append(',');
-                        break;
-                    case NestedType.Collection:
-                        result.Append(ToStringRepresent(value[i].GetCollection()));
-                        result.Append(',');
-                        break;
-                    default:
-                        break;
-                }
+                var key = currentDictionary.Key;
+
+                ToStringRepresent(ref builder, key);
+
+                builder.Append("::");
+            }
+            else if (previousGeneralType == CollectionGeneralType.Dictionary)
+            {
+                var key = previousDictionary.GetKey(
+                    previousIndex - 1);
+
+                ToStringRepresent(ref builder, key);
+
+                builder.Append("::");
             }
 
-            if (result[result.Length - 1] == ',')
-                result.Remove(result.Length - 1, 1);
+            builder.Append(currentCollectionType);
+            builder.Append("||");
 
-            result.Append('}');
+            if (currentCollection.Length == 0)
+                goto FinishCollectionProcessing;
 
-            return result.ToString();
+            // Label
+            ContinuePreviousCollectionProcessing:
+
+
+
+            while (currentIndex < currentCollection.Length)
+            {
+                ref var currentElement = ref currentCollection.GetRef(currentIndex);
+
+                if (currentElement.Type == NestedType.Element)
+                {
+                    if (currentGeneralType == CollectionGeneralType.Dictionary)
+                    {
+                        ToStringRepresent(
+                            ref builder,
+                            currentElement.GetElement(),
+                            currentDictionary.GetKey(currentIndex));
+                    }
+                    else
+                    {
+                        ToStringRepresent(
+                            ref builder,
+                            currentElement.GetElement());
+                    }
+
+                    builder.Append(',');
+                }
+                else if (currentElement.Type == NestedType.Array)
+                {
+                    if (currentGeneralType == CollectionGeneralType.Dictionary)
+                    {
+                        ToStringRepresent(
+                            ref builder,
+                            currentElement.GetArray(),
+                            currentDictionary.GetKey(currentIndex));
+                    }
+                    else
+                    {
+                        ToStringRepresent(
+                            ref builder,
+                            currentElement.GetArray());
+                    }
+
+                    builder.Append(',');
+                }
+                else if (currentElement.Type == NestedType.Collection)
+                {
+                    var collection = currentElement.GetCollection();
+
+                    collectionFrames.Push(
+                        new NestableCollectionStringifyFrame<TValue>(collection));
+
+                    ++currentIndex;
+
+                    previousCollectionInfo = ref currentCollectionInfo;
+                    previousCollection = ref previousCollectionInfo.Collection;
+                    previousIndex = ref previousCollectionInfo.Index;
+                    previousGeneralType = ref previousCollectionInfo.GeneralType;
+
+                    previousDictionary = previousGeneralType == CollectionGeneralType.Dictionary
+                        ? (INestableDictionary<TValue>)previousCollection
+                        : null;
+
+                    goto StartNextCollectionProcessing;
+                }
+
+                ++currentIndex;
+            }
+
+            builder.Remove(builder.Length - 1, 1);
+
+            // Label
+            FinishCollectionProcessing:
+
+
+
+            builder.Append('}');
+            builder.Append(',');
+
+            _ = collectionFrames.Pop();
+
+            if (collectionFrames.IsEmpty())
+            {
+                if (builder[builder.Length - 1] == ',')
+                    builder.Remove(builder.Length - 1, 1);
+
+                return builder.ToString();
+            }
+
+            currentCollectionInfo = ref collectionFrames.PeekRef();
+            currentCollection = ref currentCollectionInfo.Collection;
+            currentIndex = ref currentCollectionInfo.Index;
+            currentGeneralType = ref currentCollectionInfo.GeneralType;
+
+            currentDictionary = currentGeneralType == CollectionGeneralType.Dictionary
+                ? (INestableDictionary<TValue>)currentCollection
+                : null;
+
+            goto ContinuePreviousCollectionProcessing;
         }
+        // ReSharper restore PossibleNullReferenceException
 
-        private static string ToStringRepresentDictionary(string key)
+
+
+        private static string FromStringRepresent(
+            string key)
         {
             if (key == null)
-                return "null";
+                return null;
+            else if (key == "null")
+                return null;
+            else if (key.Length == 0)
+                return string.Empty;
 
-            key = key?
-                .Replace("null", "/null/")
-                .Replace("|", "/|/")
-                .Replace(":", "/:/")
-                .Replace("\"", "/\"/")
-                .Replace(",", "/,/")
-                .Replace("[", "/[/")
-                .Replace("]", "/]/")
-                .Replace("{", "/{/")
-                .Replace("}", "/}/");
+            key = key
+                .Replace("/null/", "null")
+                .Replace("/|/", "|")
+                .Replace("/:/", ":")
+                .Replace("/,/", ",")
+                .Replace("/\"/", "\"")
+                .Replace("/[/", "[")
+                .Replace("/]/", "]")
+                .Replace("/{/", "{")
+                .Replace("/}/", "}");
 
             return key;
         }
-        private static string ToStringRepresentDictionary<TValue>(string key, TValue value)
+        // ReSharper disable RedundantAssignment
+        private static (string Key, TValue Value) FromStringRepresent<TValue>(
+            ref string represent, ref TValue value,
+            bool includingKey = false,
+            bool includingQuotes = true)
         {
-            key = ToStringRepresentDictionary(key);
-            string valueString = ToStringRepresent(value);
-
-            return $"{key}::{valueString}";
-        }
-        private static string ToStringRepresentDictionary<TValue>(string key, TValue[] value)
-        {
-            if (value.Length == 0)
-                return $"[{ToStringRepresentDictionary(key)}::]";
-
-            StringBuilder result = new StringBuilder(value.Length);
-
-            result.Append('[');
-
-            result.Append(ToStringRepresentDictionary(key));
-            result.Append("::");
-
-            for (int i = 0; i < value.Length; ++i)
+            if (includingQuotes)
             {
-                result.Append('"');
-                result.Append(ToStringRepresent(value[i]));
-                result.Append("\",");
-            }
-
-            if (result[result.Length - 1] == ',')
-                result.Remove(result.Length - 1, 1);
-
-            result.Append(']');
-
-            return result.ToString();
-        }
-        private static string ToStringRepresentDictionary<TValue>(string key, INestableCollection<TValue> value)
-        {
-            switch (GetGeneralType(value))
-            {
-                case CollectionGeneralType.Array:
-                case CollectionGeneralType.List:
-                    break;
-                case CollectionGeneralType.Dictionary:
-                    return ToStringRepresentDictionary(key, (INestableDictionary<TValue>)value);
-                case CollectionGeneralType.Unknown:
-                default:
-                    var exception =
-                        new ArgumentException("Недопустимое значение CollectionGeneralType у коллекции", nameof(value));
-                    Events.OnError(new RErrorEventArgs(exception, exception.Message));
-                    OnError(new RErrorEventArgs(exception, exception.Message));
+                if (represent[0] != '"' || represent[represent.Length - 1] != '"')
+                {
+                    var exception = new ArgumentException(
+                        $"Неверный формат строки[{0}, {represent.Length - 1}] для преобразования в элемент",
+                        nameof(represent));
+                    Events.OnError(
+                        new RErrorEventArgs(exception, exception.Message));
+                    OnError(
+                        new RErrorEventArgs(exception, exception.Message));
                     throw exception;
+                }
+
+                represent = represent
+                    .Substring(1, represent.Length - 2);
             }
 
-            if (value.Length == 0)
-                return $"{{{ToStringRepresentDictionary(key)}::{GetCollectionType(value)}||}}";
+            string key = null;
 
-            StringBuilder result = new StringBuilder(value.Length);
-
-            result.Append('{');
-
-            result.Append(ToStringRepresentDictionary(key));
-            result.Append("::");
-
-            result.Append(GetCollectionType(value));
-            result.Append("||");
-
-            for (int i = 0; i < value.Length; ++i)
+            if (includingKey)
             {
-                switch (value[i].Type)
+                var keyDivide = represent
+                    .IndexOf("::", 0, StringComparison.Ordinal);
+                
+                if (keyDivide != -1)
                 {
-                    case NestedType.Element:
-                        result.Append('"');
-                        result.Append(ToStringRepresent(value[i].GetElement()));
-                        result.Append("\",");
-                        break;
-                    case NestedType.Array:
-                        result.Append(ToStringRepresent(value[i].GetArray()));
-                        result.Append(',');
-                        break;
-                    case NestedType.Collection:
-                        result.Append(ToStringRepresent(value[i].GetCollection()));
-                        result.Append(',');
-                        break;
-                    default:
-                        break;
+                    key = FromStringRepresent(represent
+                        .Substring(0, keyDivide));
+
+                    represent = represent
+                        .Substring(keyDivide + 2);
                 }
             }
 
-            if (result[result.Length - 1] == ',')
-                result.Remove(result.Length - 1, 1);
+            string valueString;
 
-            result.Append('}');
-
-            return result.ToString();
-        }
-        private static string ToStringRepresentDictionary<TValue>(INestableDictionary<TValue> value)
-        {
-            return ToStringRepresentDictionary(ToStringRepresentDictionary(value.Key), value);
-        }
-        private static string ToStringRepresentDictionary<TValue>(string key, INestableDictionary<TValue> value)
-        {
-            RuntimeHelpers.EnsureSufficientExecutionStack();
-
-            if (value.Length == 0)
-                return $"{{{ToStringRepresentDictionary(key)}::{GetCollectionType(value)}||}}";
-
-            StringBuilder result = new StringBuilder(value.Length);
-
-            result.Append('{');
-
-            result.Append(ToStringRepresentDictionary(key));
-            result.Append("::");
-
-            result.Append(GetCollectionType(value));
-            result.Append("||");
-
-            for (int i = 0; i < value.Length; ++i)
-            {
-                switch (value[i].Type)
-                {
-                    case NestedType.Element:
-                        result.Append('"');
-                        result.Append(ToStringRepresentDictionary(value.GetKey(i), value[i].GetElement()));
-                        result.Append("\",");
-                        break;
-                    case NestedType.Array:
-                        result.Append(ToStringRepresentDictionary(value.GetKey(i), value[i].GetArray()));
-                        result.Append(',');
-                        break;
-                    case NestedType.Collection:
-                        result.Append(ToStringRepresentDictionary(value.GetKey(i), value[i].GetCollection()));
-                        result.Append(',');
-                        break;
-                    default:
-                        break;
-                }
-            }
-
-            if (result[result.Length - 1] == ',')
-                result.Remove(result.Length - 1, 1);
-
-            result.Append('}');
-
-            return result.ToString();
-        }
-
-
-
-        // ReSharper disable once RedundantAssignment
-        private static TValue FromStringRepresent<TValue>(string represent, ref TValue value)
-        {
-            if (represent == "null")
-            {
-                value = default;
-
-                return value;
-            }
-
-            if (represent == "db_null")
+            if (represent.Length == 0)
             {
                 if (typeof(TValue) == typeof(string))
                 {
-                    value = (TValue)Convert.ChangeType("db_null",
-                        typeof(TValue), CultureInfo.InvariantCulture);
+                    valueString = string.Empty;
 
-                    return value;
+                    goto FinishElementProcessing;
+                }
+
+                value = default;
+
+                return (key, value);
+            }
+            else if (represent == "null")
+            {
+                value = default;
+
+                return (key, value);
+            }
+            else if (represent == "db_null")
+            {
+                if (typeof(TValue) == typeof(string))
+                {
+                    valueString = "db_null";
+
+                    goto FinishElementProcessing;
                 }
 
                 value = (TValue)Convert.ChangeType(DBNull.Value,
                     typeof(TValue), CultureInfo.InvariantCulture);
 
-                return value;
+                return (key, value);
             }
 
-            string valueString = represent
+            valueString = represent
                 .Replace("/null/", "null")
                 .Replace("/|/", "|")
                 .Replace("/:/", ":")
-                .Replace("/\"/", "\"")
                 .Replace("/,/", ",")
+                .Replace("/\"/", "\"")
                 .Replace("/[/", "[")
                 .Replace("/]/", "]")
                 .Replace("/{/", "{")
                 .Replace("/}/", "}");
+
+            // Label
+            FinishElementProcessing:
+
+
 
             value = (TValue)Convert.ChangeType(valueString,
                 typeof(TValue), CultureInfo.InvariantCulture);
 
-            return value;
+            return (key, value);
         }
-        private static TValue[] FromStringRepresent<TValue>(string represent, ref TValue[] value)
+        // ReSharper restore RedundantAssignment
+        private static (string Key, TValue[] Value) FromStringRepresent<TValue>(
+            ref string represent, ref TValue[] value,
+            int startIndex, int endIndex, int length,
+            bool includingKey = false)
         {
-            if (represent[0] != '[' || represent[represent.Length - 1] != ']')
+            if (represent[startIndex] != '[' || represent[endIndex] != ']')
             {
-                var exception =
-                    new ArgumentException("Неверный формат строки для преобразования в массив" + " " + represent, nameof(represent));
-                Events.OnError(new RErrorEventArgs(exception, exception.Message));
-                OnError(new RErrorEventArgs(exception, exception.Message));
+                var exception = new ArgumentException(
+                    $"Неверный формат строки[{startIndex}, {endIndex}] для преобразования в массив",
+                    nameof(represent));
+                Events.OnError(
+                    new RErrorEventArgs(exception, exception.Message));
+                OnError(
+                    new RErrorEventArgs(exception, exception.Message));
                 throw exception;
             }
 
-            if (represent == "[]")
+            var startElementsIndex = startIndex + 1;
+            string key = null;
+
+            if (includingKey)
             {
-                value = Array.Empty<TValue>();
-                return value;
+                var keyDivide = represent.IndexOf("::",
+                    startIndex + 1, length - 1,
+                    StringComparison.Ordinal);
+
+                if (keyDivide != -1)
+                {
+                    startElementsIndex = keyDivide + 2;
+
+                    key = FromStringRepresent(represent
+                        .Substring(startIndex + 1, keyDivide - startIndex - 1));
+                }
             }
 
-            string[] values = represent.Substring(2, represent.Length - 4).Split(new[] { "\",\"" }, StringSplitOptions.None);
-
-            value = Array.ConvertAll(values, new Converter<string, TValue>((string stringValue) =>
+            if (startElementsIndex == endIndex)
             {
-                TValue result = default(TValue);
-                return FromStringRepresent(stringValue, ref result);
-            }));
+                value = Array.Empty<TValue>();
 
-            return value;
+                return (key, value);
+            }
+            else if (startElementsIndex + 4 == endIndex
+                     && string.Compare(represent, startElementsIndex,
+                         "null", 0, 4, StringComparison.Ordinal) == 0)
+            {
+                value = null;
+
+                return (key, value);
+            }
+
+            var values = represent
+                .Substring(startElementsIndex + 1,
+                    endIndex - startElementsIndex - 2)
+                .Split(new[] { "\",\"" }, StringSplitOptions.None);
+
+            value = Array.ConvertAll(values, stringValue =>
+            {
+                var result = default(TValue);
+
+                return FromStringRepresent(ref stringValue,
+                    ref result, false, false).Value;
+            });
+
+            return (key, value);
         }
-        public static INestableCollection<TValue> FromStringRepresent<TValue>(string represent)
+        public static INestableCollection<TValue> FromStringRepresent<TValue>(
+            string represent)
         {
             if (represent[0] != '{' || represent[represent.Length - 1] != '}')
             {
-                var exception =
-                    new ArgumentException("Неверный формат строки для преобразования в коллекцию с поддержкой вложенности", nameof(represent));
-                Events.OnError(new RErrorEventArgs(exception, exception.Message));
-                OnError(new RErrorEventArgs(exception, exception.Message));
+                var exception = new ArgumentException(
+                    $"Неверный формат строки[{0}, {represent.Length - 1}] для преобразования в коллекцию с поддержкой вложенности",
+                    nameof(represent));
+                Events.OnError(
+                    new RErrorEventArgs(exception, exception.Message));
+                OnError(
+                    new RErrorEventArgs(exception, exception.Message));
                 throw exception;
             }
 
-            int typeDivide;
+            int keyDivide;
             string type;
 
-            if (represent.Contains("::"))
+            var typeDivide = represent.IndexOf(
+                "||", 1, represent.Length - 1,
+                StringComparison.Ordinal);
+
+            if ((keyDivide = represent.IndexOf(
+                "::", 1, typeDivide - 1,
+                StringComparison.Ordinal)) != -1)
             {
-                int resultKeyDivide = represent.IndexOf("::", 1, StringComparison.Ordinal);
-                typeDivide = represent.IndexOf("||", resultKeyDivide + 2, StringComparison.Ordinal);
-                type = represent.Substring(resultKeyDivide + 2, typeDivide - resultKeyDivide - 2);
+                type = represent
+                    .Substring(keyDivide + 2,
+                        typeDivide - keyDivide - 2);
             }
             else
             {
-                typeDivide = represent.IndexOf("||", 1, StringComparison.Ordinal);
-                type = represent.Substring(1, typeDivide - 1);
+                type = represent
+                    .Substring(1,
+                        typeDivide - 1);
             }
 
-            (INestableCollection<TValue> collection, CollectionGeneralType generalType) =
-                CreateCollectionByType<TValue>(GetCollectionType(type));
+            var collection = CreateCollectionByType<TValue>(
+                    GetCollectionType(type))
+                .Collection;
 
             return FromStringRepresent(represent, collection);
         }
-        public static INestableCollection<TValue> FromStringRepresent<TValue>(string represent, INestableCollection<TValue> value)
+        // ReSharper disable PossibleNullReferenceException
+        public static INestableCollection<TValue> FromStringRepresent<TValue>(
+            string represent, INestableCollection<TValue> value)
         {
-            RuntimeHelpers.EnsureSufficientExecutionStack();
+            value.Clear();
 
-            switch (GetGeneralType(value))
+            var collectionFrames =
+                new ChunkedArrayL<NestableCollectionUnstringifyFrame<TValue>>(0, 32);
+
+            collectionFrames.Push(
+                new NestableCollectionUnstringifyFrame<TValue>(
+                    value, 0, represent.Length - 1));
+
+            // Label
+            StartNextCollectionProcessing:
+
+
+
+            ref var currentCollectionInfo = ref collectionFrames.PeekRef();
+            ref var currentCollection = ref currentCollectionInfo.Collection;
+            ref var currentStartIndex = ref currentCollectionInfo.StartIndex;
+            ref var currentEndIndex = ref currentCollectionInfo.EndIndex;
+            ref var currentLength = ref currentCollectionInfo.Length;
+            ref var currentDivideIndex = ref currentCollectionInfo.DivideIndex;
+            ref var currentGeneralType = ref currentCollectionInfo.GeneralType;
+
+            var currentDictionary = currentGeneralType == CollectionGeneralType.Dictionary
+                ? (INestableDictionary<TValue>)currentCollection
+                : null;
+
+            if (represent[currentStartIndex] != '{' || represent[currentEndIndex] != '}')
+            {
+                var exception = new ArgumentException(
+                    $"Неверный формат строки[{currentStartIndex}, {currentEndIndex}] для преобразования в коллекцию с поддержкой вложенности",
+                    nameof(represent));
+                Events.OnError(
+                    new RErrorEventArgs(exception, exception.Message));
+                OnError(
+                    new RErrorEventArgs(exception, exception.Message));
+                throw exception;
+            }
+
+            switch (currentGeneralType)
             {
                 case CollectionGeneralType.Array:
                 case CollectionGeneralType.List:
-                    break;
                 case CollectionGeneralType.Dictionary:
-                    return FromStringRepresentDictionary<TValue>(represent, (INestableDictionary<TValue>)value);
+                    break;
                 case CollectionGeneralType.Unknown:
                 default:
-                    var exception =
-                        new ArgumentException("Недопустимое значение CollectionGeneralType у коллекции", nameof(value));
-                    Events.OnError(new RErrorEventArgs(exception, exception.Message));
-                    OnError(new RErrorEventArgs(exception, exception.Message));
+                    var exception = new ArgumentException(
+                        "Недопустимое значение CollectionGeneralType у коллекции",
+                        nameof(currentCollection));
+                    Events.OnError(
+                        new RErrorEventArgs(exception, exception.Message));
+                    OnError(
+                        new RErrorEventArgs(exception, exception.Message));
                     throw exception;
             }
 
-            if (represent[0] != '{' || represent[represent.Length - 1] != '}')
-            {
-                var exception =
-                    new ArgumentException("Неверный формат строки для преобразования в коллекцию с поддержкой вложенности", nameof(represent));
-                Events.OnError(new RErrorEventArgs(exception, exception.Message));
-                OnError(new RErrorEventArgs(exception, exception.Message));
-                throw exception;
-            }
-
-            int typeDivide;
+            int keyDivide;
             string type;
 
-            if (represent.Contains("::"))
+            var typeDivide = represent.IndexOf(
+                "||", currentStartIndex + 1, currentLength - 1,
+                StringComparison.Ordinal);
+
+            if ((keyDivide = represent.IndexOf(
+                "::", currentStartIndex + 1, typeDivide - currentStartIndex - 1,
+                StringComparison.Ordinal)) != -1)
             {
-                int resultKeyDivide = represent.IndexOf("::", 1, StringComparison.Ordinal);
-                typeDivide = represent.IndexOf("||", resultKeyDivide + 2, StringComparison.Ordinal);
-                type = represent.Substring(resultKeyDivide + 2, typeDivide - resultKeyDivide - 2);
+                var key = FromStringRepresent(represent
+                    .Substring(currentStartIndex + 1,
+                        keyDivide - currentStartIndex - 1));
+
+                if (currentGeneralType == CollectionGeneralType.Dictionary)
+                    currentDictionary.Key = key;
+
+                type = represent
+                    .Substring(keyDivide + 2,
+                        typeDivide - keyDivide - 2);
             }
             else
             {
-                typeDivide = represent.IndexOf("||", 1, StringComparison.Ordinal);
-                type = represent.Substring(1, typeDivide - 1);
+                type = represent
+                    .Substring(currentStartIndex + 1,
+                        typeDivide - currentStartIndex - 1);
             }
 
-            if (GetCollectionType(type) != GetCollectionType(value))
+            currentDivideIndex = typeDivide + 1;
+
+            if (GetCollectionType(type) != GetCollectionType(currentCollection))
             {
-                var exception =
-                    new ArgumentException("Тип переданной коллекции не соответствует типу коллекции из строкового представления", nameof(value));
-                Events.OnError(new RErrorEventArgs(exception, exception.Message));
-                OnError(new RErrorEventArgs(exception, exception.Message));
+                var exception = new ArgumentException(
+                    "Тип переданной коллекции не соответствует типу коллекции из строкового представления",
+                    nameof(currentCollection));
+                Events.OnError(
+                    new RErrorEventArgs(exception, exception.Message));
+                OnError(
+                    new RErrorEventArgs(exception, exception.Message));
                 throw exception;
             }
 
-            value.Clear();
+            if (typeDivide + 2 == currentEndIndex)
+                goto FinishCollectionProcessing;
 
-            if (represent.EndsWith("||}", StringComparison.Ordinal))
-                return value;
+            // Label
+            ContinuePreviousCollectionProcessing:
 
-            int divideIndex = typeDivide + 1;
+
+
+            if (currentDivideIndex < currentStartIndex + 1
+                || currentDivideIndex > currentEndIndex - 1)
+            {
+                goto FinishCollectionProcessing;
+            }
 
             do
             {
-                if (represent[divideIndex + 1] == '\"')
+                var (partType, partStartIndex, partEndIndex, partLength) = GetRepresentPart(
+                    ref represent, currentDivideIndex + 1);
+
+                if (partType == NestedType.Element)
                 {
-                    var (partRepresent, partEndIndex) = GetRepresentPart(
-                        represent, divideIndex + 1);
+                    var partRepresent = represent.Substring(
+                        partStartIndex + 1, partEndIndex - (partStartIndex + 1));
 
-                    TValue result = default(TValue);
-                    value.Add(FromStringRepresent(partRepresent, ref result));
+                    var result = default(TValue);
+                    var node = FromStringRepresent(
+                        ref partRepresent, ref result,
+                        currentGeneralType == CollectionGeneralType.Dictionary,
+                        false);
 
-                    divideIndex = partEndIndex;
+                    if (currentGeneralType == CollectionGeneralType.Dictionary)
+                    {
+                        currentDictionary.Add(
+                            node.Key,
+                            node.Value);
+                    }
+                    else
+                    {
+                        currentCollection.Add(
+                            node.Value);
+                    }
                 }
-                else if (represent[divideIndex + 1] == '[')
+                else if (partType == NestedType.Array)
                 {
-                    var (partRepresent, partEndIndex) = GetRepresentPart(
-                        represent, divideIndex + 1);
+                    var result = Array.Empty<TValue>();
+                    var node = FromStringRepresent(
+                        ref represent, ref result,
+                        partStartIndex, partEndIndex, partLength,
+                        currentGeneralType == CollectionGeneralType.Dictionary);
 
-                    TValue[] result = Array.Empty<TValue>();
-                    value.Add(FromStringRepresent(partRepresent, ref result));
-
-                    divideIndex = partEndIndex;
+                    if (currentGeneralType == CollectionGeneralType.Dictionary)
+                    {
+                        currentDictionary.Add(
+                            node.Key,
+                            node.Value);
+                    }
+                    else
+                    {
+                        currentCollection.Add(
+                            node.Value);
+                    }
                 }
-                else if (represent[divideIndex + 1] == '{')
+                else if (partType == NestedType.Collection)
                 {
-                    var (partRepresent, partEndIndex) = GetRepresentPart(
-                        represent, divideIndex + 1);
-
-                    int resultTypeDivide;
+                    int resultKeyDivide;
+                    string resultKey = null;
                     string resultType;
 
-                    if (partRepresent.Contains("::"))
+                    var resultTypeDivide = represent.IndexOf(
+                        "||", partStartIndex + 1, partLength - 1,
+                        StringComparison.Ordinal);
+
+                    if ((resultKeyDivide = represent.IndexOf(
+                            "::", partStartIndex + 1, resultTypeDivide - partStartIndex - 1,
+                            StringComparison.Ordinal)) != -1)
                     {
-                        int resultKeyDivide = partRepresent.IndexOf("::", 1, StringComparison.Ordinal);
-                        resultTypeDivide = partRepresent.IndexOf("||", resultKeyDivide + 2, StringComparison.Ordinal);
-                        resultType = partRepresent.Substring(resultKeyDivide + 2, resultTypeDivide - resultKeyDivide - 2);
+                        resultKey = FromStringRepresent(represent
+                            .Substring(partStartIndex + 1,
+                                resultKeyDivide - partStartIndex - 1));
+                        resultType = represent
+                            .Substring(resultKeyDivide + 2,
+                                resultTypeDivide - resultKeyDivide - 2);
                     }
                     else
                     {
-                        resultTypeDivide = partRepresent.IndexOf("||", 1, StringComparison.Ordinal);
-                        resultType = partRepresent.Substring(1, resultTypeDivide - 1);
+                        resultType = represent
+                            .Substring(partStartIndex + 1,
+                                resultTypeDivide - partStartIndex - 1);
                     }
 
-                    (INestableCollection<TValue> result, CollectionGeneralType generalType) =
-                        CreateCollectionByType<TValue>(GetCollectionType(resultType));
+                    var result = CreateCollectionByType<TValue>(
+                            GetCollectionType(resultType))
+                        .Collection;
 
-                    switch (generalType)
+                    if (currentGeneralType == CollectionGeneralType.Dictionary)
                     {
-                        case CollectionGeneralType.Array:
-                        case CollectionGeneralType.List:
-                            value.Add(FromStringRepresent<TValue>(partRepresent, result));
-                            break;
-                        case CollectionGeneralType.Dictionary:
-                            value.Add(FromStringRepresentDictionary<TValue>(partRepresent, (INestableDictionary<TValue>)result));
-                            break;
-                        case CollectionGeneralType.Unknown:
-                        default:
-                            var exception =
-                                new ArgumentException("Недопустимое значение CollectionGeneralType у коллекции", nameof(value));
-                            Events.OnError(new RErrorEventArgs(exception, exception.Message));
-                            OnError(new RErrorEventArgs(exception, exception.Message));
-                            throw exception;
+                        currentDictionary.Add(
+                            resultKey,
+                            result);
+                    }
+                    else
+                    {
+                        currentCollection.Add(
+                            result);
                     }
 
-                    divideIndex = partEndIndex;
-                }
-            } while (divideIndex != -1
-                     && divideIndex != represent.Length - 1
-                     && (divideIndex = represent.IndexOf(',', divideIndex + 1)) != -1
-                     );
+                    currentDivideIndex = partEndIndex + 1;
 
-            return value;
+                    collectionFrames.Push(
+                        new NestableCollectionUnstringifyFrame<TValue>(
+                            result, partStartIndex, partEndIndex));
+
+                    goto StartNextCollectionProcessing;
+                }
+
+                currentDivideIndex = partEndIndex + 1;
+            } while (currentDivideIndex >= currentStartIndex + 1
+                     && currentDivideIndex <= currentEndIndex - 1
+                     && represent[currentDivideIndex] == ',');
+
+            // Label
+            FinishCollectionProcessing:
+
+
+
+            var latestCollectionInfo = collectionFrames.Pop();
+
+            if (collectionFrames.IsEmpty())
+                return latestCollectionInfo.Collection;
+
+            currentCollectionInfo = ref collectionFrames.PeekRef();
+            currentCollection = ref currentCollectionInfo.Collection;
+            currentStartIndex = ref currentCollectionInfo.StartIndex;
+            currentEndIndex = ref currentCollectionInfo.EndIndex;
+            currentLength = ref currentCollectionInfo.Length;
+            currentDivideIndex = ref currentCollectionInfo.DivideIndex;
+            currentGeneralType = ref currentCollectionInfo.GeneralType;
+
+            currentDictionary = currentGeneralType == CollectionGeneralType.Dictionary
+                ? (INestableDictionary<TValue>)currentCollection
+                : null;
+
+            goto ContinuePreviousCollectionProcessing;
         }
-
-        private static string FromStringRepresentDictionary(string key)
-        {
-            if (key == "null")
-                return null;
-
-            key = key?
-                .Replace("/null/", "null")
-                .Replace("/|/", "|")
-                .Replace("/:/", ":")
-                .Replace("/\"/", "\"")
-                .Replace("/,/", ",")
-                .Replace("/[/", "[")
-                .Replace("/]/", "]")
-                .Replace("/{/", "{")
-                .Replace("/}/", "}");
-
-            return key;
-        }
-        private static INestableCollection<TValue> FromStringRepresentDictionary<TValue>(string represent, INestableDictionary<TValue> value)
-        {
-            RuntimeHelpers.EnsureSufficientExecutionStack();
-
-            if (represent[0] != '{' || represent[represent.Length - 1] != '}')
-            {
-                var exception =
-                    new ArgumentException("Неверный формат строки для преобразования в коллекцию с поддержкой вложенности", nameof(represent));
-                Events.OnError(new RErrorEventArgs(exception, exception.Message));
-                OnError(new RErrorEventArgs(exception, exception.Message));
-                throw exception;
-            }
-
-            int typeDivide;
-            string type;
-            string key = string.Empty;
-
-            if (represent.Contains("::"))
-            {
-                int resultKeyDivide = represent.IndexOf("::", 1, StringComparison.Ordinal);
-                key = FromStringRepresentDictionary(represent.Substring(1, resultKeyDivide - 1));
-                typeDivide = represent.IndexOf("||", resultKeyDivide + 2, StringComparison.Ordinal);
-                type = represent.Substring(resultKeyDivide + 2, typeDivide - resultKeyDivide - 2);
-
-                represent = $"{{{represent.Substring(resultKeyDivide + 2)}";
-            }
-            else
-            {
-                typeDivide = represent.IndexOf("||", 1, StringComparison.Ordinal);
-                type = represent.Substring(1, typeDivide - 1);
-            }
-
-            if (GetCollectionType(type) != GetCollectionType(value))
-            {
-                var exception =
-                    new ArgumentException("Тип переданной коллекции не соответствует типу коллекции из строкового представления", nameof(value));
-                Events.OnError(new RErrorEventArgs(exception, exception.Message));
-                OnError(new RErrorEventArgs(exception, exception.Message));
-                throw exception;
-            }
-
-            value.Key = key;
-
-            value.Clear();
-
-            if (represent.EndsWith("||}", StringComparison.Ordinal))
-                return value;
-
-            int divideIndex = typeDivide + 1;
-            divideIndex -= key.Length != 0 ? key.Length + 2 : 0 ;
-
-            do
-            {
-                if (represent[divideIndex + 1] == '\"')
-                {
-                    var (partRepresent, partEndIndex) = GetRepresentPart(
-                        represent, divideIndex + 1);
-
-                    TValue result = default(TValue);
-
-                    if (partRepresent.Contains("::"))
-                    {
-                        int resultKeyDivide = partRepresent.IndexOf("::", 0, StringComparison.Ordinal);
-                        string resultKey = FromStringRepresentDictionary(partRepresent.Substring(0, resultKeyDivide));
-
-                        partRepresent = $"{partRepresent.Substring(resultKeyDivide + 2)}";
-
-                        value.Add(resultKey, FromStringRepresent(partRepresent, ref result));
-                    }
-                    else
-                    {
-                        value.Add(FromStringRepresent(partRepresent, ref result));
-                    }
-
-                    divideIndex = partEndIndex;
-                }
-                else if (represent[divideIndex + 1] == '[')
-                {
-                    var (partRepresent, partEndIndex) = GetRepresentPart(
-                        represent, divideIndex + 1);
-
-                    TValue[] result = Array.Empty<TValue>();
-
-                    if (partRepresent.Contains("::"))
-                    {
-                        int resultKeyDivide = partRepresent.IndexOf("::", 1, StringComparison.Ordinal);
-                        string resultKey = FromStringRepresentDictionary(partRepresent.Substring(1, resultKeyDivide - 1));
-
-                        partRepresent = $"[{partRepresent.Substring(resultKeyDivide + 2)}";
-
-                        value.Add(resultKey, FromStringRepresent(partRepresent, ref result));
-                    }
-                    else
-                    {
-                        value.Add(FromStringRepresent(partRepresent, ref result));
-                    }
-
-                    divideIndex = partEndIndex;
-                }
-                else if (represent[divideIndex + 1] == '{')
-                {
-                    var (partRepresent, partEndIndex) = GetRepresentPart(
-                        represent, divideIndex + 1);
-
-                    if (partRepresent.Contains("::"))
-                    {
-                        int resultKeyDivide = partRepresent.IndexOf("::", 1, StringComparison.Ordinal);
-                        string resultKey = FromStringRepresentDictionary(partRepresent.Substring(1, resultKeyDivide - 1));
-                        int resultTypeDivide = partRepresent.IndexOf("||", resultKeyDivide + 2, StringComparison.Ordinal);
-                        string resultType = partRepresent.Substring(resultKeyDivide + 2, resultTypeDivide - resultKeyDivide - 2);
-
-                        (INestableCollection<TValue> result, CollectionGeneralType generalType) =
-                            CreateCollectionByType<TValue>(GetCollectionType(resultType));
-                        value.Add(resultKey, FromStringRepresent<TValue>(partRepresent, result));
-                    }
-                    else
-                    {
-                        int collectionTypeDivide = partRepresent.IndexOf("||", 1, StringComparison.Ordinal);
-                        string collectionType = partRepresent.Substring(1, collectionTypeDivide - 1);
-
-                        (INestableCollection<TValue> result, CollectionGeneralType generalType) =
-                            CreateCollectionByType<TValue>(GetCollectionType(collectionType));
-                        value.Add(FromStringRepresent<TValue>(partRepresent, result));
-                    }
-
-                    divideIndex = partEndIndex;
-                }
-            } while (divideIndex != -1
-                     && divideIndex != represent.Length - 1
-                     && (divideIndex = represent.IndexOf(',', divideIndex + 1)) != -1);
-
-            return value;
-        }
+        // ReSharper restore PossibleNullReferenceException
 
 
 
-        public static IEnumerable<TValue> Enumerate<TValue>(NestedElement<TValue> value)
+        public static IEnumerable<TValue> Enumerate<TValue>(
+            NestedElement<TValue> value)
         {
             switch (value.Type)
             {
                 case NestedType.Element:
-                    return Enumerate(value.GetElement());
+                    return new[] { value.GetElement() };
                 case NestedType.Array:
-                    return Enumerate(value.GetArray());
+                    var array = value.GetArray();
+
+                    return array != null
+                        ? value.GetArray()
+                        : Array.Empty<TValue>();
                 case NestedType.Collection:
                     return Enumerate(value.GetCollection());
+                case NestedType.Unknown:
                 default:
-                    var exception =
-                        new ArgumentException("Недопустимое значение поля Type в [NestedElement] для старта перечисления", nameof(value));
-                    Events.OnError(new RErrorEventArgs(exception, exception.Message));
-                    OnError(new RErrorEventArgs(exception, exception.Message));
+                    var exception = new ArgumentException(
+                        "Недопустимое значение поля Type в [NestedElement] для старта перечисления",
+                        nameof(value));
+                    Events.OnError(
+                        new RErrorEventArgs(exception, exception.Message));
+                    OnError(
+                        new RErrorEventArgs(exception, exception.Message));
                     throw exception;
             }
         }
-        private static IEnumerable<TValue> Enumerate<TValue>(TValue value)
+        public static IEnumerable<TValue> Enumerate<TValue>(
+            INestableCollection<TValue> value)
         {
-            yield return value;
-        }
-        private static IEnumerable<TValue> Enumerate<TValue>(TValue[] value)
-        {
-            for (int i = 0; i < value.Length; ++i)
-            {
-                yield return value[i];
-            }
-        }
-        public static IEnumerable<TValue> Enumerate<TValue>(INestableCollection<TValue> value)
-        {
-            RuntimeHelpers.EnsureSufficientExecutionStack();
+            if (value == null)
+                return Array.Empty<TValue>();
 
-            for (int i = 0; i < value.Length; ++i)
+            var valueType =
+                typeof(TValue);
+            var result =
+                new ChunkedArrayL<TValue>();
+            var collectionFrames =
+                new ChunkedArrayL<NestableCollectionEnumerateFrame<TValue>>(0, 32);
+
+            collectionFrames.Push(
+                new NestableCollectionEnumerateFrame<TValue>(value));
+
+            // Label
+            StartNextCollectionProcessing:
+
+
+
+            ref var currentCollectionInfo = ref collectionFrames.PeekRef();
+            ref var currentCollection = ref currentCollectionInfo.Collection;
+            ref var currentIndex = ref currentCollectionInfo.Index;
+
+            currentIndex = 0;
+
+            if (currentCollection.Length == 0)
+                goto FinishCollectionProcessing;
+
+            // Label
+            ContinuePreviousCollectionProcessing:
+
+
+
+            while (currentIndex < currentCollection.Length)
             {
-                switch (value[i].Type)
+                ref var currentElement = ref currentCollection.GetRef(currentIndex);
+
+                if (currentElement.Type == NestedType.Element)
                 {
-                    case NestedType.Element:
-                        foreach (var element in Enumerate(value[i].GetElement()))
-                        {
-                            yield return element;
-                        }
-                        break;
-                    case NestedType.Array:
-                        foreach (var element in Enumerate(value[i].GetArray()))
-                        {
-                            yield return element;
-                        }
-                        break;
-                    case NestedType.Collection:
-                        foreach (var element in Enumerate(value[i].GetCollection()))
-                        {
-                            yield return element;
-                        }
-                        break;
-                    default:
-                        var exception =
-                            new Exception("Недопустимое значение поля Type в [NestedElement]");
-                        Events.OnError(new RErrorEventArgs(exception, exception.Message));
-                        OnError(new RErrorEventArgs(exception, exception.Message));
-                        throw exception;
+                    result.Add(currentElement.GetElement());
                 }
+                else if (currentElement.Type == NestedType.Array)
+                {
+                    var array = currentElement.GetArray();
+
+                    if (array == null)
+                    {
+                        if (!valueType.IsValueType)
+                            result.Add(default);
+
+                        goto StartNewIteration;
+                    }
+
+                    foreach (var element in array)
+                    {
+                        result.Add(element);
+                    }
+                }
+                else if (currentElement.Type == NestedType.Collection)
+                {
+                    var collection = currentElement.GetCollection();
+
+                    if (collection == null)
+                    {
+                        if (!valueType.IsValueType)
+                            result.Add(default);
+
+                        goto StartNewIteration;
+                    }
+
+                    collectionFrames.Push(
+                        new NestableCollectionEnumerateFrame<TValue>(collection));
+
+                    ++currentIndex;
+
+                    goto StartNextCollectionProcessing;
+                }
+
+                // Label
+                StartNewIteration:
+
+
+
+                ++currentIndex;
             }
+
+            // Label
+            FinishCollectionProcessing:
+
+
+
+            _ = collectionFrames.Pop();
+
+            if (collectionFrames.IsEmpty())
+                return result;
+
+            currentCollectionInfo = ref collectionFrames.PeekRef();
+            currentCollection = ref currentCollectionInfo.Collection;
+            currentIndex = ref currentCollectionInfo.Index;
+
+            goto ContinuePreviousCollectionProcessing;
         }
     }
 }

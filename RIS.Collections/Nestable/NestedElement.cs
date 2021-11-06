@@ -18,7 +18,7 @@ namespace RIS.Collections.Nestable
             {
                 if (value == null)
                 {
-                    Type = NestedType.Element;
+                    Type = NestedType.Unknown;
                     _value = null;
 
                     return;
@@ -36,9 +36,10 @@ namespace RIS.Collections.Nestable
                         Type = NestedType.Collection;
                         break;
                     default:
-                        var exception =
-                            new Exception("Поле Value в [NestedElement] не может содержать значение переданного типа");
-                        Events.OnError(this, new RErrorEventArgs(exception, exception.Message));
+                        var exception = new Exception(
+                            "Поле Value в [NestedElement] не может содержать значение переданного типа");
+                        Events.OnError(this,
+                            new RErrorEventArgs(exception, exception.Message));
                         throw exception;
                 }
 
@@ -47,18 +48,25 @@ namespace RIS.Collections.Nestable
         }
         public NestedType Type { get; private set; }
 
-        public NestedElement(T value) : this()
+
+
+        public NestedElement(T value)
+            : this()
         {
-            Value = value;
+            Set(value);
         }
-        public NestedElement(T[] value) : this()
+        public NestedElement(T[] value)
+            : this()
         {
-            Value = value;
+            Set(value);
         }
-        public NestedElement(INestableCollection<T> value) : this()
+        public NestedElement(INestableCollection<T> value)
+            : this()
         {
-            Value = value;
+            Set(value);
         }
+
+
 
         public void Set(NestedElement<T> value)
         {
@@ -67,83 +75,105 @@ namespace RIS.Collections.Nestable
         }
         public void Set(T value)
         {
+            if (value == null)
+            {
+                Type = NestedType.Element;
+                _value = null;
+
+                return;
+            }
+
             Value = value;
         }
         public void Set(T[] value)
         {
+            if (value == null)
+            {
+                Type = NestedType.Array;
+                _value = null;
+
+                return;
+            }
+
             Value = value;
         }
         public void Set(INestableCollection<T> value)
         {
+            if (value == null)
+            {
+                var exception = new ArgumentNullException(
+                    nameof(value),
+                    "Передаваемая коллекция не может быть равна null");
+                Events.OnError(this,
+                    new RErrorEventArgs(exception, exception.Message));
+                throw exception;
+            }
+
             Value = value;
         }
 
         public T GetElement()
         {
-            if (Value == null)
-                return default;
-
             if (Type != NestedType.Element)
             {
-                var exception =
-                    new InvalidCastException("Невозможно получить значение [NestedElement], так как оно содержит не тип Element");
-                Events.OnError(this, new RErrorEventArgs(exception, exception.Message));
+                var exception = new InvalidCastException(
+                    "Невозможно получить значение [NestedElement], так как оно содержит не тип Element");
+                Events.OnError(this,
+                    new RErrorEventArgs(exception, exception.Message));
                 throw exception;
             }
+
+            if (Value == null)
+                return default;
 
             return (T)Value;
         }
         public T[] GetArray()
         {
-            if (Value == null)
-                return null;
-
             if (Type != NestedType.Array)
             {
-                var exception =
-                    new InvalidCastException("Невозможно получить значение [NestedElement], так как оно содержит не тип Array");
-                Events.OnError(this, new RErrorEventArgs(exception, exception.Message));
+                var exception = new InvalidCastException(
+                    "Невозможно получить значение [NestedElement], так как оно содержит не тип Array");
+                Events.OnError(this,
+                    new RErrorEventArgs(exception, exception.Message));
                 throw exception;
             }
+
+            if (Value == null)
+                return null;
 
             return (T[])Value;
         }
         public INestableCollection<T> GetCollection()
         {
-            if (Value == null)
-                return null;
-
             if (Type != NestedType.Collection)
             {
-                var exception =
-                    new InvalidCastException("Невозможно получить значение [NestedElement], так как оно содержит не тип NestableCollection");
-                Events.OnError(this, new RErrorEventArgs(exception, exception.Message));
+                var exception = new InvalidCastException(
+                    "Невозможно получить значение [NestedElement], так как оно содержит не тип Collection");
+                Events.OnError(this,
+                    new RErrorEventArgs(exception, exception.Message));
                 throw exception;
             }
+
+            if (Value == null)
+                return null;
 
             return (INestableCollection<T>)Value;
         }
 
+
+
         public override bool Equals(object element)
         {
             if (element == null)
-            {
-                var exception = new ArgumentNullException(nameof(element), "Невозможно сравнить [NestedElement] и null");
-                Events.OnError(this, new RErrorEventArgs(exception, exception.Message));
-                throw exception;
-            }
+                return false;
+            else if (!(element is NestedElement<T>))
+                return false;
 
-            if (!(element is NestedElement<T>))
-            {
-                var exception = new ArgumentNullException(nameof(element), "Невозможно сравнить [NestedElement] и другой тип");
-                Events.OnError(this, new RErrorEventArgs(exception, exception.Message));
-                throw exception;
-            }
-
-            NestedElement<T> nestedElement = (NestedElement<T>)element;
+            var nestedElement = (NestedElement<T>)element;
 
             return Type == nestedElement.Type
-                   &&_value.Equals(nestedElement._value);
+                   && _value.Equals(nestedElement._value);
         }
         public bool Equals(NestedElement<T> nestedElement)
         {
@@ -151,15 +181,21 @@ namespace RIS.Collections.Nestable
                    && _value.Equals(nestedElement._value);
         }
 
+#pragma warning disable SS008 // GetHashCode() refers to mutable, static, or constant member
+        // ReSharper disable NonReadonlyMemberInGetHashCode
         public override int GetHashCode()
         {
             return Value?.GetHashCode() ?? 0;
         }
+        // ReSharper restore NonReadonlyMemberInGetHashCode
+#pragma warning restore SS008 // GetHashCode() refers to mutable, static, or constant member
 
         public override string ToString()
         {
             return NestableHelper.ToStringRepresent(this);
         }
+
+
 
         public static bool operator ==(NestedElement<T> element1, NestedElement<T> element2)
         {
@@ -170,36 +206,30 @@ namespace RIS.Collections.Nestable
             return !element1.Equals(element2);
         }
 
+
+
         public static explicit operator T(NestedElement<T> param)
         {
-            if (param.Value == null)
-                return default;
-
-            if (param.Type != NestedType.Element)
-            {
-                var exception =
-                    new InvalidCastException("Невозможно преобразовать [NestedElement] к типу Element");
-                Events.OnError(new RErrorEventArgs(exception, exception.Message));
-                throw exception;
-            }
-
-            return (T)param.Value;
+            return param.GetElement();
         }
         public static explicit operator T[](NestedElement<T> param)
         {
-            if (param.Value == null)
-                return null;
-
-            if (param.Type != NestedType.Array)
-            {
-                var exception =
-                    new InvalidCastException("Невозможно преобразовать [NestedElement] к типу Array");
-                Events.OnError(new RErrorEventArgs(exception, exception.Message));
-                throw exception;
-            }
-
-            return (T[])param.Value;
+            return param.GetArray();
         }
+        public static explicit operator NestableArrayCAL<T>(NestedElement<T> param)
+        {
+            return (NestableArrayCAL<T>)param.GetCollection();
+        }
+        public static explicit operator NestableDictionaryL<T>(NestedElement<T> param)
+        {
+            return (NestableDictionaryL<T>)param.GetCollection();
+        }
+        public static explicit operator NestableListL<T>(NestedElement<T> param)
+        {
+            return (NestableListL<T>)param.GetCollection();
+        }
+
+
 
         public static explicit operator NestedElement<T>(T param)
         {

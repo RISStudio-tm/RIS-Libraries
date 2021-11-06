@@ -113,7 +113,7 @@ namespace RIS.Reflection.Conversion
 
             return conversionMethods.Any(m => m.ReturnType == to);
         }
-        // ReSharper enable PossibleNullReferenceException
+        // ReSharper restore PossibleNullReferenceException
 
         public static bool CanExplicitCast(Type from, Type to)
         {

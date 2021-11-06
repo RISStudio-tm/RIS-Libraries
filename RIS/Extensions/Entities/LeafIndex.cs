@@ -23,10 +23,13 @@ namespace RIS.Extensions.Entities
 
         public static LeafIndex FromStrings(IEnumerable<string> strings)
         {
-            return FromStrings(strings as string[] ?? strings.ToArray());
+            return FromStrings(strings as string[] ?? strings?.ToArray());
         }
         public static LeafIndex FromStrings(params string[] strings)
         {
+            if (strings == null || strings.Length == 0)
+                return null;
+
             var multipleChars = strings
                 .Where(s => !string.IsNullOrEmpty(s))
                 .ToLookup(s => s[0], s => s.Substring(1))

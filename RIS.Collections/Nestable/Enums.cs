@@ -7,6 +7,7 @@ namespace RIS.Collections.Nestable
 {
     public enum NestedType : byte
     {
+        Unknown = 0,
         Element = 1,
         Array = 2,
         Collection = 3
@@ -14,6 +15,7 @@ namespace RIS.Collections.Nestable
 
     public enum NestableCollectionType : byte
     {
+        Unknown = 0,
         NestableArrayCAL = 1,
         NestableDictionaryL = 2,
         NestableListL = 3

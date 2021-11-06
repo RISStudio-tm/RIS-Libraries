@@ -99,10 +99,8 @@ namespace RIS.Settings
         }
         private static IChunkedCollection<T> FromStringRepresentChunked<T>(string represent)
         {
-            var nestableCollection = new NestableArrayCAL<T>();
-
-            nestableCollection.FromStringRepresent(represent);
-
+            var nestableCollection = new NestableArrayCAL<T>(
+                represent);
             var collection = new ChunkedArrayL<T>(nestableCollection.Length);
 
             for (int i = 0; i < nestableCollection.Length; ++i)
@@ -114,10 +112,8 @@ namespace RIS.Settings
         }
         private static IDictionary<string, T> FromStringRepresentDictionary<T>(string represent)
         {
-            var nestableCollection = new NestableDictionaryL<T>();
-
-            nestableCollection.FromStringRepresent(represent);
-
+            var nestableCollection = new NestableDictionaryL<T>(
+                represent);
             var collection = new Dictionary<string, T>(nestableCollection.Length);
 
             for (int i = 0; i < nestableCollection.Length; ++i)
@@ -130,10 +126,8 @@ namespace RIS.Settings
         }
         private static ICollection<T> FromStringRepresentArray<T>(string represent)
         {
-            var nestableCollection = new NestableArrayCAL<T>();
-
-            nestableCollection.FromStringRepresent(represent);
-
+            var nestableCollection = new NestableArrayCAL<T>(
+                represent);
             var collection = new T[nestableCollection.Length];
 
             for (int i = 0; i < nestableCollection.Length; ++i)
@@ -145,10 +139,8 @@ namespace RIS.Settings
         }
         private static ICollection<T> FromStringRepresentCollection<T>(string represent)
         {
-            var nestableCollection = new NestableArrayCAL<T>();
-
-            nestableCollection.FromStringRepresent(represent);
-
+            var nestableCollection = new NestableArrayCAL<T>(
+                represent);
             var collection = new List<T>(nestableCollection.Length);
 
             for (int i = 0; i < nestableCollection.Length; ++i)
@@ -160,10 +152,8 @@ namespace RIS.Settings
         }
         private static IEnumerable<T> FromStringRepresentEnumerable<T>(string represent)
         {
-            var nestableCollection = new NestableArrayCAL<T>();
-
-            nestableCollection.FromStringRepresent(represent);
-
+            var nestableCollection = new NestableArrayCAL<T>(
+                represent);
             var collection = new List<T>(nestableCollection.Length);
 
             for (int i = 0; i < nestableCollection.Length; ++i)

@@ -257,7 +257,7 @@ namespace RIS.Localization.Entities
         {
             return HashCode.Combine(CultureName);
         }
-        // ReSharper enable NonReadonlyMemberInGetHashCode
+        // ReSharper restore NonReadonlyMemberInGetHashCode
 #pragma warning restore SS008 // GetHashCode() refers to mutable, static, or constant member
 
         public override bool Equals(object obj)

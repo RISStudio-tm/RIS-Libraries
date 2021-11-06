@@ -14,6 +14,8 @@ namespace RIS.Collections.Nestable
         public event EventHandler<RWarningEventArgs> Warning;
         public event EventHandler<RErrorEventArgs> Error;
 
+
+
         public NestedElement<T> this[int index]
         {
             get
@@ -37,6 +39,17 @@ namespace RIS.Collections.Nestable
             }
         }
 
+
+
+        private const string DefaultKey = "Dictionary";
+
+
+
+        // ReSharper disable once StaticMemberInGenericType
+        private static readonly NestableCollectionType CollectionTypeStatic;
+
+
+
         private List<(string Key, NestedElementNode<T> Node)> ValuesCollection { get; }
         private Dictionary<string, (int Index, NestedElementNode<T> Node)> KeysCollection { get; }
         private ulong _nextRandomKey;
@@ -50,8 +63,14 @@ namespace RIS.Collections.Nestable
             }
         }
 
+        public NestableCollectionType CollectionType
+        {
+            get
+            {
+                return CollectionTypeStatic;
+            }
+        }
         public int Length { get; private set; }
-        public NestableCollectionType CollectionType { get; }
         private string _key;
         public string Key
         {
@@ -63,7 +82,7 @@ namespace RIS.Collections.Nestable
             {
                 if (string.IsNullOrWhiteSpace(value))
                 {
-                    _key = NextRandomKey;
+                    _key = DefaultKey;
                     return;
                 }
 
@@ -80,15 +99,27 @@ namespace RIS.Collections.Nestable
             }
         }
 
+
+
+        static NestableDictionaryL()
+        {
+            CollectionTypeStatic = NestableCollectionType.NestableDictionaryL;
+        }
+
+
+
         public NestableDictionaryL()
             : this(0)
         {
 
         }
-        public NestableDictionaryL(string key)
-            : this(key, 0)
+        public NestableDictionaryL(string represent)
+            : this(null, 0)
         {
+            if (string.IsNullOrEmpty(represent))
+                return;
 
+            FromStringRepresent(represent);
         }
         public NestableDictionaryL(int length)
             : this(null, length)
@@ -99,9 +130,13 @@ namespace RIS.Collections.Nestable
         {
             if (length < 0)
             {
-                var exception = new ArgumentOutOfRangeException(nameof(length), "Длина коллекции не может быть меньше 0");
-                Events.OnError(this, new RErrorEventArgs(exception, exception.Message));
-                OnError(new RErrorEventArgs(exception, exception.Message));
+                var exception = new ArgumentOutOfRangeException(
+                    nameof(length),
+                    "Длина коллекции не может быть меньше 0");
+                Events.OnError(this,
+                    new RErrorEventArgs(exception, exception.Message));
+                OnError(
+                    new RErrorEventArgs(exception, exception.Message));
                 throw exception;
             }
 
@@ -109,7 +144,6 @@ namespace RIS.Collections.Nestable
             IsSynchronized = false;
 
             Length = length;
-            CollectionType = NestableHelper.GetCollectionType(GetType().Name);
             Key = key;
 
             ValuesCollection = new List<(string Key, NestedElementNode<T> Element)>(length);
@@ -117,13 +151,15 @@ namespace RIS.Collections.Nestable
 
             for (int i = 0; i < Length; ++i)
             {
-                string nodeKey = NextRandomKey;
-                NestedElementNode<T> node = new NestedElementNode<T>(new NestedElement<T>());
+                var nodeKey = NextRandomKey;
+                var nodeValue = new NestedElementNode<T>(new NestedElement<T>());
 
-                ValuesCollection.Add((nodeKey, node));
-                KeysCollection.Add(nodeKey, (i, node));
+                ValuesCollection.Add((nodeKey, nodeValue));
+                KeysCollection.Add(nodeKey, (i, nodeValue));
             }
         }
+
+
 
         public void OnInformation(RInformationEventArgs e)
         {
@@ -152,20 +188,28 @@ namespace RIS.Collections.Nestable
             Error?.Invoke(sender, e);
         }
 
+
+
         public string GetKey(int index)
         {
             if (index < 0)
             {
-                var exception = new IndexOutOfRangeException("Индекс не может быть меньше 0");
-                Events.OnError(this, new RErrorEventArgs(exception, exception.Message));
-                OnError(new RErrorEventArgs(exception, exception.Message));
+                var exception = new IndexOutOfRangeException(
+                    "Индекс не может быть меньше 0");
+                Events.OnError(this,
+                    new RErrorEventArgs(exception, exception.Message));
+                OnError(
+                    new RErrorEventArgs(exception, exception.Message));
                 throw exception;
             }
             else if (index > Length - 1)
             {
-                var exception = new IndexOutOfRangeException("Индекс не может быть больше длины коллекции");
-                Events.OnError(this, new RErrorEventArgs(exception, exception.Message));
-                OnError(new RErrorEventArgs(exception, exception.Message));
+                var exception = new IndexOutOfRangeException(
+                    "Индекс не может быть больше длины коллекции");
+                Events.OnError(this,
+                    new RErrorEventArgs(exception, exception.Message));
+                OnError(
+                    new RErrorEventArgs(exception, exception.Message));
                 throw exception;
             }
 
@@ -176,9 +220,12 @@ namespace RIS.Collections.Nestable
         {
             if (!KeysCollection.ContainsKey(key))
             {
-                var exception = new KeyNotFoundException("Коллекция не содержит элемент с указанным ключом");
-                Events.OnError(this, new RErrorEventArgs(exception, exception.Message));
-                OnError(new RErrorEventArgs(exception, exception.Message));
+                var exception = new KeyNotFoundException(
+                    "Коллекция не содержит элемент с указанным ключом");
+                Events.OnError(this,
+                    new RErrorEventArgs(exception, exception.Message));
+                OnError(
+                    new RErrorEventArgs(exception, exception.Message));
                 throw exception;
             }
 
@@ -189,16 +236,22 @@ namespace RIS.Collections.Nestable
         {
             if (index < 0)
             {
-                var exception = new IndexOutOfRangeException("Индекс не может быть меньше 0");
-                Events.OnError(this, new RErrorEventArgs(exception, exception.Message));
-                OnError(new RErrorEventArgs(exception, exception.Message));
+                var exception = new IndexOutOfRangeException(
+                    "Индекс не может быть меньше 0");
+                Events.OnError(this,
+                    new RErrorEventArgs(exception, exception.Message));
+                OnError(
+                    new RErrorEventArgs(exception, exception.Message));
                 throw exception;
             }
             else if (index > Length - 1)
             {
-                var exception = new IndexOutOfRangeException("Индекс не может быть больше длины коллекции");
-                Events.OnError(this, new RErrorEventArgs(exception, exception.Message));
-                OnError(new RErrorEventArgs(exception, exception.Message));
+                var exception = new IndexOutOfRangeException(
+                    "Индекс не может быть больше длины коллекции");
+                Events.OnError(this,
+                    new RErrorEventArgs(exception, exception.Message));
+                OnError(
+                    new RErrorEventArgs(exception, exception.Message));
                 throw exception;
             }
 
@@ -208,9 +261,12 @@ namespace RIS.Collections.Nestable
         {
             if (!KeysCollection.ContainsKey(key))
             {
-                var exception = new KeyNotFoundException("Коллекция не содержит элемент с указанным ключом");
-                Events.OnError(this, new RErrorEventArgs(exception, exception.Message));
-                OnError(new RErrorEventArgs(exception, exception.Message));
+                var exception = new KeyNotFoundException(
+                    "Коллекция не содержит элемент с указанным ключом");
+                Events.OnError(this,
+                    new RErrorEventArgs(exception, exception.Message));
+                OnError(
+                    new RErrorEventArgs(exception, exception.Message));
                 throw exception;
             }
 
@@ -221,16 +277,22 @@ namespace RIS.Collections.Nestable
         {
             if (index < 0)
             {
-                var exception = new IndexOutOfRangeException("Индекс не может быть меньше 0");
-                Events.OnError(this, new RErrorEventArgs(exception, exception.Message));
-                OnError(new RErrorEventArgs(exception, exception.Message));
+                var exception = new IndexOutOfRangeException(
+                    "Индекс не может быть меньше 0");
+                Events.OnError(this,
+                    new RErrorEventArgs(exception, exception.Message));
+                OnError(
+                    new RErrorEventArgs(exception, exception.Message));
                 throw exception;
             }
             else if (index > Length - 1)
             {
-                var exception = new IndexOutOfRangeException("Индекс не может быть больше длины коллекции");
-                Events.OnError(this, new RErrorEventArgs(exception, exception.Message));
-                OnError(new RErrorEventArgs(exception, exception.Message));
+                var exception = new IndexOutOfRangeException(
+                    "Индекс не может быть больше длины коллекции");
+                Events.OnError(this,
+                    new RErrorEventArgs(exception, exception.Message));
+                OnError(
+                    new RErrorEventArgs(exception, exception.Message));
                 throw exception;
             }
 
@@ -240,9 +302,12 @@ namespace RIS.Collections.Nestable
         {
             if (!KeysCollection.ContainsKey(key))
             {
-                var exception = new KeyNotFoundException("Коллекция не содержит элемент с указанным ключом");
-                Events.OnError(this, new RErrorEventArgs(exception, exception.Message));
-                OnError(new RErrorEventArgs(exception, exception.Message));
+                var exception = new KeyNotFoundException(
+                    "Коллекция не содержит элемент с указанным ключом");
+                Events.OnError(this,
+                    new RErrorEventArgs(exception, exception.Message));
+                OnError(
+                    new RErrorEventArgs(exception, exception.Message));
                 throw exception;
             }
 
@@ -253,27 +318,33 @@ namespace RIS.Collections.Nestable
         {
             if (index < 0)
             {
-                var exception = new IndexOutOfRangeException("Индекс не может быть меньше 0");
-                Events.OnError(this, new RErrorEventArgs(exception, exception.Message));
-                OnError(new RErrorEventArgs(exception, exception.Message));
+                var exception = new IndexOutOfRangeException(
+                    "Индекс не может быть меньше 0");
+                Events.OnError(this,
+                    new RErrorEventArgs(exception, exception.Message));
+                OnError(
+                    new RErrorEventArgs(exception, exception.Message));
                 throw exception;
             }
             else if (index > Length - 1)
             {
-                var exception = new IndexOutOfRangeException("Индекс не может быть больше длины коллекции");
-                Events.OnError(this, new RErrorEventArgs(exception, exception.Message));
-                OnError(new RErrorEventArgs(exception, exception.Message));
+                var exception = new IndexOutOfRangeException(
+                    "Индекс не может быть больше длины коллекции");
+                Events.OnError(this,
+                    new RErrorEventArgs(exception, exception.Message));
+                OnError(
+                    new RErrorEventArgs(exception, exception.Message));
                 throw exception;
             }
 
-            (string key, NestedElementNode<T> node) = ValuesCollection[index];
+            var (key, node) = ValuesCollection[index];
 
             node.Set(value);
 
             if (value.Type != NestedType.Collection)
                 return;
 
-            INestableCollection<T> valueCollection = value.GetCollection();
+            var valueCollection = value.GetCollection();
 
             switch (NestableHelper.GetGeneralType(valueCollection))
             {
@@ -285,10 +356,13 @@ namespace RIS.Collections.Nestable
                     break;
                 case CollectionGeneralType.Unknown:
                 default:
-                    var exception =
-                        new ArgumentException("Недопустимое значение CollectionGeneralType у коллекции", nameof(value));
-                    Events.OnError(this, new RErrorEventArgs(exception, exception.Message));
-                    OnError(new RErrorEventArgs(exception, exception.Message));
+                    var exception = new ArgumentException(
+                        "Недопустимое значение CollectionGeneralType у коллекции",
+                        nameof(value));
+                    Events.OnError(this,
+                        new RErrorEventArgs(exception, exception.Message));
+                    OnError(
+                        new RErrorEventArgs(exception, exception.Message));
                     throw exception;
             }
         }
@@ -296,9 +370,12 @@ namespace RIS.Collections.Nestable
         {
             if (!KeysCollection.ContainsKey(key))
             {
-                var exception = new KeyNotFoundException("Коллекция не содержит элемент с указанным ключом");
-                Events.OnError(this, new RErrorEventArgs(exception, exception.Message));
-                OnError(new RErrorEventArgs(exception, exception.Message));
+                var exception = new KeyNotFoundException(
+                    "Коллекция не содержит элемент с указанным ключом");
+                Events.OnError(this,
+                    new RErrorEventArgs(exception, exception.Message));
+                OnError(
+                    new RErrorEventArgs(exception, exception.Message));
                 throw exception;
             }
 
@@ -307,7 +384,7 @@ namespace RIS.Collections.Nestable
             if (value.Type != NestedType.Collection)
                 return;
 
-            INestableCollection<T> valueCollection = value.GetCollection();
+            var valueCollection = value.GetCollection();
 
             switch (NestableHelper.GetGeneralType(valueCollection))
             {
@@ -319,10 +396,13 @@ namespace RIS.Collections.Nestable
                     break;
                 case CollectionGeneralType.Unknown:
                 default:
-                    var exception =
-                        new ArgumentException("Недопустимое значение CollectionGeneralType у коллекции", nameof(value));
-                    Events.OnError(this, new RErrorEventArgs(exception, exception.Message));
-                    OnError(new RErrorEventArgs(exception, exception.Message));
+                    var exception = new ArgumentException(
+                        "Недопустимое значение CollectionGeneralType у коллекции",
+                        nameof(value));
+                    Events.OnError(this,
+                        new RErrorEventArgs(exception, exception.Message));
+                    OnError(
+                        new RErrorEventArgs(exception, exception.Message));
                     throw exception;
             }
         }
@@ -330,16 +410,22 @@ namespace RIS.Collections.Nestable
         {
             if (index < 0)
             {
-                var exception = new IndexOutOfRangeException("Индекс не может быть меньше 0");
-                Events.OnError(this, new RErrorEventArgs(exception, exception.Message));
-                OnError(new RErrorEventArgs(exception, exception.Message));
+                var exception = new IndexOutOfRangeException(
+                    "Индекс не может быть меньше 0");
+                Events.OnError(this,
+                    new RErrorEventArgs(exception, exception.Message));
+                OnError(
+                    new RErrorEventArgs(exception, exception.Message));
                 throw exception;
             }
             else if (index > Length - 1)
             {
-                var exception = new IndexOutOfRangeException("Индекс не может быть больше длины коллекции");
-                Events.OnError(this, new RErrorEventArgs(exception, exception.Message));
-                OnError(new RErrorEventArgs(exception, exception.Message));
+                var exception = new IndexOutOfRangeException(
+                    "Индекс не может быть больше длины коллекции");
+                Events.OnError(this,
+                    new RErrorEventArgs(exception, exception.Message));
+                OnError(
+                    new RErrorEventArgs(exception, exception.Message));
                 throw exception;
             }
 
@@ -349,9 +435,12 @@ namespace RIS.Collections.Nestable
         {
             if (!KeysCollection.ContainsKey(key))
             {
-                var exception = new KeyNotFoundException("Коллекция не содержит элемент с указанным ключом");
-                Events.OnError(this, new RErrorEventArgs(exception, exception.Message));
-                OnError(new RErrorEventArgs(exception, exception.Message));
+                var exception = new KeyNotFoundException(
+                    "Коллекция не содержит элемент с указанным ключом");
+                Events.OnError(this,
+                    new RErrorEventArgs(exception, exception.Message));
+                OnError(
+                    new RErrorEventArgs(exception, exception.Message));
                 throw exception;
             }
 
@@ -361,16 +450,22 @@ namespace RIS.Collections.Nestable
         {
             if (index < 0)
             {
-                var exception = new IndexOutOfRangeException("Индекс не может быть меньше 0");
-                Events.OnError(this, new RErrorEventArgs(exception, exception.Message));
-                OnError(new RErrorEventArgs(exception, exception.Message));
+                var exception = new IndexOutOfRangeException(
+                    "Индекс не может быть меньше 0");
+                Events.OnError(this,
+                    new RErrorEventArgs(exception, exception.Message));
+                OnError(
+                    new RErrorEventArgs(exception, exception.Message));
                 throw exception;
             }
             else if (index > Length - 1)
             {
-                var exception = new IndexOutOfRangeException("Индекс не может быть больше длины коллекции");
-                Events.OnError(this, new RErrorEventArgs(exception, exception.Message));
-                OnError(new RErrorEventArgs(exception, exception.Message));
+                var exception = new IndexOutOfRangeException(
+                    "Индекс не может быть больше длины коллекции");
+                Events.OnError(this,
+                    new RErrorEventArgs(exception, exception.Message));
+                OnError(
+                    new RErrorEventArgs(exception, exception.Message));
                 throw exception;
             }
 
@@ -380,9 +475,12 @@ namespace RIS.Collections.Nestable
         {
             if (!KeysCollection.ContainsKey(key))
             {
-                var exception = new KeyNotFoundException("Коллекция не содержит элемент с указанным ключом");
-                Events.OnError(this, new RErrorEventArgs(exception, exception.Message));
-                OnError(new RErrorEventArgs(exception, exception.Message));
+                var exception = new KeyNotFoundException(
+                    "Коллекция не содержит элемент с указанным ключом");
+                Events.OnError(this,
+                    new RErrorEventArgs(exception, exception.Message));
+                OnError(
+                    new RErrorEventArgs(exception, exception.Message));
                 throw exception;
             }
 
@@ -392,20 +490,26 @@ namespace RIS.Collections.Nestable
         {
             if (index < 0)
             {
-                var exception = new IndexOutOfRangeException("Индекс не может быть меньше 0");
-                Events.OnError(this, new RErrorEventArgs(exception, exception.Message));
-                OnError(new RErrorEventArgs(exception, exception.Message));
+                var exception = new IndexOutOfRangeException(
+                    "Индекс не может быть меньше 0");
+                Events.OnError(this,
+                    new RErrorEventArgs(exception, exception.Message));
+                OnError(
+                    new RErrorEventArgs(exception, exception.Message));
                 throw exception;
             }
             else if (index > Length - 1)
             {
-                var exception = new IndexOutOfRangeException("Индекс не может быть больше длины коллекции");
-                Events.OnError(this, new RErrorEventArgs(exception, exception.Message));
-                OnError(new RErrorEventArgs(exception, exception.Message));
+                var exception = new IndexOutOfRangeException(
+                    "Индекс не может быть больше длины коллекции");
+                Events.OnError(this,
+                    new RErrorEventArgs(exception, exception.Message));
+                OnError(
+                    new RErrorEventArgs(exception, exception.Message));
                 throw exception;
             }
 
-            (string key, NestedElementNode<T> node) = ValuesCollection[index];
+            var (key, node) = ValuesCollection[index];
 
             node.Set(value);
 
@@ -419,10 +523,13 @@ namespace RIS.Collections.Nestable
                     break;
                 case CollectionGeneralType.Unknown:
                 default:
-                    var exception =
-                        new ArgumentException("Недопустимое значение CollectionGeneralType у коллекции", nameof(value));
-                    Events.OnError(this, new RErrorEventArgs(exception, exception.Message));
-                    OnError(new RErrorEventArgs(exception, exception.Message));
+                    var exception = new ArgumentException(
+                        "Недопустимое значение CollectionGeneralType у коллекции",
+                        nameof(value));
+                    Events.OnError(this,
+                        new RErrorEventArgs(exception, exception.Message));
+                    OnError(
+                        new RErrorEventArgs(exception, exception.Message));
                     throw exception;
             }
         }
@@ -430,9 +537,12 @@ namespace RIS.Collections.Nestable
         {
             if (!KeysCollection.ContainsKey(key))
             {
-                var exception = new KeyNotFoundException("Коллекция не содержит элемент с указанным ключом");
-                Events.OnError(this, new RErrorEventArgs(exception, exception.Message));
-                OnError(new RErrorEventArgs(exception, exception.Message));
+                var exception = new KeyNotFoundException(
+                    "Коллекция не содержит элемент с указанным ключом");
+                Events.OnError(this,
+                    new RErrorEventArgs(exception, exception.Message));
+                OnError(
+                    new RErrorEventArgs(exception, exception.Message));
                 throw exception;
             }
 
@@ -448,10 +558,13 @@ namespace RIS.Collections.Nestable
                     break;
                 case CollectionGeneralType.Unknown:
                 default:
-                    var exception =
-                        new ArgumentException("Недопустимое значение CollectionGeneralType у коллекции", nameof(value));
-                    Events.OnError(this, new RErrorEventArgs(exception, exception.Message));
-                    OnError(new RErrorEventArgs(exception, exception.Message));
+                    var exception = new ArgumentException(
+                        "Недопустимое значение CollectionGeneralType у коллекции",
+                        nameof(value));
+                    Events.OnError(this,
+                        new RErrorEventArgs(exception, exception.Message));
+                    OnError(
+                        new RErrorEventArgs(exception, exception.Message));
                     throw exception;
             }
         }
@@ -460,38 +573,47 @@ namespace RIS.Collections.Nestable
         {
             if (!KeysCollection.ContainsKey(oldKey))
             {
-                var exception = new KeyNotFoundException("Коллекция не содержит элемент с указанным старым ключом");
-                Events.OnError(this, new RErrorEventArgs(exception, exception.Message));
-                OnError(new RErrorEventArgs(exception, exception.Message));
+                var exception = new KeyNotFoundException(
+                    "Коллекция не содержит элемент с указанным старым ключом");
+                Events.OnError(this,
+                    new RErrorEventArgs(exception, exception.Message));
+                OnError(
+                    new RErrorEventArgs(exception, exception.Message));
                 throw exception;
             }
 
             if (string.IsNullOrEmpty(newKey) || string.IsNullOrWhiteSpace(newKey))
             {
-                var exception = new Exception("Новый ключ не может быть null, пустым или содержать только пробелы");
-                Events.OnError(this, new RErrorEventArgs(exception, exception.Message));
-                OnError(new RErrorEventArgs(exception, exception.Message));
+                var exception = new Exception(
+                    "Новый ключ не может быть null, пустым или содержать только пробелы");
+                Events.OnError(this,
+                    new RErrorEventArgs(exception, exception.Message));
+                OnError(
+                    new RErrorEventArgs(exception, exception.Message));
                 throw exception;
             }
             else if (KeysCollection.ContainsKey(newKey))
             {
-                var exception = new KeyNotFoundException("Коллекция уже содержит элемент с указанным новым ключом");
-                Events.OnError(this, new RErrorEventArgs(exception, exception.Message));
-                OnError(new RErrorEventArgs(exception, exception.Message));
+                var exception = new Exception(
+                    "Коллекция уже содержит элемент с указанным новым ключом");
+                Events.OnError(this,
+                    new RErrorEventArgs(exception, exception.Message));
+                OnError(
+                    new RErrorEventArgs(exception, exception.Message));
                 throw exception;
             }
 
-            (int index, NestedElementNode<T> node) = KeysCollection[oldKey];
+            var (index, node) = KeysCollection[oldKey];
 
             KeysCollection.Add(newKey, (index, node));
             ValuesCollection[index] = (newKey, node);
 
             KeysCollection.Remove(oldKey);
 
-            if (node.NestedElementRef.Type != NestedType.Collection)
+            if (node.Type != NestedType.Collection)
                 return true;
 
-            INestableCollection<T> valueCollection = node.NestedElementRef.GetCollection();
+            var valueCollection = node.GetCollection();
 
             switch (NestableHelper.GetGeneralType(valueCollection))
             {
@@ -503,10 +625,13 @@ namespace RIS.Collections.Nestable
                     break;
                 case CollectionGeneralType.Unknown:
                 default:
-                    var exception =
-                        new ArgumentException("Недопустимое значение CollectionGeneralType у коллекции", nameof(node.NestedElement));
-                    Events.OnError(this, new RErrorEventArgs(exception, exception.Message));
-                    OnError(new RErrorEventArgs(exception, exception.Message));
+                    var exception = new ArgumentException(
+                        "Недопустимое значение CollectionGeneralType у коллекции",
+                        nameof(node.NestedElement));
+                    Events.OnError(this,
+                        new RErrorEventArgs(exception, exception.Message));
+                    OnError(
+                        new RErrorEventArgs(exception, exception.Message));
                     throw exception;
             }
 
@@ -520,17 +645,52 @@ namespace RIS.Collections.Nestable
 
         public string ToStringRepresent()
         {
-            return NestableHelper.ToStringRepresent<T>(this);
+            return NestableHelper.ToStringRepresent<T>(
+                this);
         }
 
-        public void FromStringRepresent(string represent)
+        INestableCollection INestableCollection.FromStringRepresent(string represent)
         {
-            NestableHelper.FromStringRepresent<T>(represent, this);
+            NestableHelper.FromStringRepresent<T>(
+                represent, this);
+
+            return this;
+        }
+        INestableCollection<T> INestableCollection<T>.FromStringRepresent(string represent)
+        {
+            NestableHelper.FromStringRepresent<T>(
+                represent, this);
+
+            return this;
+        }
+
+        INestableDictionary INestableDictionary.FromStringRepresent(string represent)
+        {
+            NestableHelper.FromStringRepresent<T>(
+                represent, this);
+
+            return this;
+        }
+        INestableDictionary<T> INestableDictionary<T>.FromStringRepresent(string represent)
+        {
+            NestableHelper.FromStringRepresent<T>(
+                represent, this);
+
+            return this;
+        }
+
+        public NestableDictionaryL<T> FromStringRepresent(string represent)
+        {
+            NestableHelper.FromStringRepresent<T>(
+                represent, this);
+
+            return this;
         }
 
         public IEnumerable<T> Enumerate()
         {
-            return NestableHelper.Enumerate<T>(this);
+            return NestableHelper.Enumerate<T>(
+                this);
         }
 
         IEnumerator<NestedElement<T>> IEnumerable<NestedElement<T>>.GetEnumerator()
@@ -548,6 +708,32 @@ namespace RIS.Collections.Nestable
             }
         }
 
+        IEnumerator<KeyValuePair<string, NestedElement<T>>> IKeyedEnumerable<string, NestedElement<T>>.GetEnumerator()
+        {
+            foreach (var (key, node) in ValuesCollection)
+            {
+                yield return new KeyValuePair<string, NestedElement<T>>(
+                    key, node.NestedElement);
+            }
+        }
+        IEnumerator<KeyValuePair<object, object>> IKeyedEnumerable.GetEnumerator()
+        {
+            foreach (var (key, node) in ValuesCollection)
+            {
+                yield return new KeyValuePair<object, object>(
+                    key, node.NestedElement);
+            }
+        }
+
+        public IEnumerable<KeyValuePair<string, NestedElement<T>>> AsKeyedEnumerable()
+        {
+            foreach (var (key, node) in ValuesCollection)
+            {
+                yield return new KeyValuePair<string, NestedElement<T>>(
+                    key, node.NestedElement);
+            }
+        }
+
         public bool Add(NestedElement<T> value)
         {
             return Add(NextRandomKey, value);
@@ -556,38 +742,48 @@ namespace RIS.Collections.Nestable
         {
             if (string.IsNullOrEmpty(key) || string.IsNullOrWhiteSpace(key))
             {
-                var exception = new Exception("Ключ не может быть null, пустым или содержать только пробелы");
-                Events.OnError(this, new RErrorEventArgs(exception, exception.Message));
-                OnError(new RErrorEventArgs(exception, exception.Message));
+                var exception = new Exception(
+                    "Ключ не может быть null, пустым или содержать только пробелы");
+                Events.OnError(this,
+                    new RErrorEventArgs(exception, exception.Message));
+                OnError(
+                    new RErrorEventArgs(exception, exception.Message));
                 throw exception;
             }
             else if (KeysCollection.ContainsKey(key))
             {
-                var exception = new KeyNotFoundException("Коллекция уже содержит элемент с указанным ключом");
-                Events.OnError(this, new RErrorEventArgs(exception, exception.Message));
-                OnError(new RErrorEventArgs(exception, exception.Message));
+                var exception = new Exception(
+                    "Коллекция уже содержит элемент с указанным ключом");
+                Events.OnError(this,
+                    new RErrorEventArgs(exception, exception.Message));
+                OnError(
+                    new RErrorEventArgs(exception, exception.Message));
                 throw exception;
             }
 
             if (Length == int.MaxValue)
             {
-                var exception = new Exception("Нельзя добавить элемент, так как коллекция уже содержит максимальное их количество");
-                Events.OnError(this, new RErrorEventArgs(exception, exception.Message));
-                OnError(new RErrorEventArgs(exception, exception.Message));
+                var exception = new Exception(
+                    "Нельзя добавить элемент, так как коллекция уже содержит максимальное их количество");
+                Events.OnError(this,
+                    new RErrorEventArgs(exception, exception.Message));
+                OnError(
+                    new RErrorEventArgs(exception, exception.Message));
                 throw exception;
             }
 
-            int index = Length;
-            NestedElementNode<T> node = new NestedElementNode<T>(value);
+            var index = Length;
+            var node = new NestedElementNode<T>(value);
 
             ValuesCollection.Add((key, node));
             KeysCollection.Add(key, (index, node));
+
             ++Length;
 
             if (value.Type != NestedType.Collection)
                 return true;
 
-            INestableCollection<T> valueCollection = value.GetCollection();
+            var valueCollection = value.GetCollection();
 
             switch (NestableHelper.GetGeneralType(valueCollection))
             {
@@ -599,10 +795,13 @@ namespace RIS.Collections.Nestable
                     break;
                 case CollectionGeneralType.Unknown:
                 default:
-                    var exception =
-                        new ArgumentException("Недопустимое значение CollectionGeneralType у коллекции", nameof(value));
-                    Events.OnError(this, new RErrorEventArgs(exception, exception.Message));
-                    OnError(new RErrorEventArgs(exception, exception.Message));
+                    var exception = new ArgumentException(
+                        "Недопустимое значение CollectionGeneralType у коллекции",
+                        nameof(value));
+                    Events.OnError(this,
+                        new RErrorEventArgs(exception, exception.Message));
+                    OnError(
+                        new RErrorEventArgs(exception, exception.Message));
                     throw exception;
             }
 
@@ -616,32 +815,42 @@ namespace RIS.Collections.Nestable
         {
             if (string.IsNullOrEmpty(key) || string.IsNullOrWhiteSpace(key))
             {
-                var exception = new Exception("Ключ не может быть null, пустым или содержать только пробелы");
-                Events.OnError(this, new RErrorEventArgs(exception, exception.Message));
-                OnError(new RErrorEventArgs(exception, exception.Message));
+                var exception = new Exception(
+                    "Ключ не может быть null, пустым или содержать только пробелы");
+                Events.OnError(this,
+                    new RErrorEventArgs(exception, exception.Message));
+                OnError(
+                    new RErrorEventArgs(exception, exception.Message));
                 throw exception;
             }
             else if (KeysCollection.ContainsKey(key))
             {
-                var exception = new KeyNotFoundException("Коллекция уже содержит элемент с указанным ключом");
-                Events.OnError(this, new RErrorEventArgs(exception, exception.Message));
-                OnError(new RErrorEventArgs(exception, exception.Message));
+                var exception = new Exception(
+                    "Коллекция уже содержит элемент с указанным ключом");
+                Events.OnError(this,
+                    new RErrorEventArgs(exception, exception.Message));
+                OnError(
+                    new RErrorEventArgs(exception, exception.Message));
                 throw exception;
             }
 
             if (Length == int.MaxValue)
             {
-                var exception = new Exception("Нельзя добавить элемент, так как коллекция уже содержит максимальное их количество");
-                Events.OnError(this, new RErrorEventArgs(exception, exception.Message));
-                OnError(new RErrorEventArgs(exception, exception.Message));
+                var exception = new Exception(
+                    "Нельзя добавить элемент, так как коллекция уже содержит максимальное их количество");
+                Events.OnError(this,
+                    new RErrorEventArgs(exception, exception.Message));
+                OnError(
+                    new RErrorEventArgs(exception, exception.Message));
                 throw exception;
             }
 
-            int index = Length;
-            NestedElementNode<T> node = new NestedElementNode<T>(value);
+            var index = Length;
+            var node = new NestedElementNode<T>(value);
 
             ValuesCollection.Add((key, node));
             KeysCollection.Add(key, (index, node));
+
             ++Length;
 
             return true;
@@ -654,32 +863,42 @@ namespace RIS.Collections.Nestable
         {
             if (string.IsNullOrEmpty(key) || string.IsNullOrWhiteSpace(key))
             {
-                var exception = new Exception("Ключ не может быть null, пустым или содержать только пробелы");
-                Events.OnError(this, new RErrorEventArgs(exception, exception.Message));
-                OnError(new RErrorEventArgs(exception, exception.Message));
+                var exception = new Exception(
+                    "Ключ не может быть null, пустым или содержать только пробелы");
+                Events.OnError(this,
+                    new RErrorEventArgs(exception, exception.Message));
+                OnError(
+                    new RErrorEventArgs(exception, exception.Message));
                 throw exception;
             }
             else if (KeysCollection.ContainsKey(key))
             {
-                var exception = new KeyNotFoundException("Коллекция уже содержит элемент с указанным ключом");
-                Events.OnError(this, new RErrorEventArgs(exception, exception.Message));
-                OnError(new RErrorEventArgs(exception, exception.Message));
+                var exception = new Exception(
+                    "Коллекция уже содержит элемент с указанным ключом");
+                Events.OnError(this,
+                    new RErrorEventArgs(exception, exception.Message));
+                OnError(
+                    new RErrorEventArgs(exception, exception.Message));
                 throw exception;
             }
 
             if (Length == int.MaxValue)
             {
-                var exception = new Exception("Нельзя добавить элемент, так как коллекция уже содержит максимальное их количество");
-                Events.OnError(this, new RErrorEventArgs(exception, exception.Message));
-                OnError(new RErrorEventArgs(exception, exception.Message));
+                var exception = new Exception(
+                    "Нельзя добавить элемент, так как коллекция уже содержит максимальное их количество");
+                Events.OnError(this,
+                    new RErrorEventArgs(exception, exception.Message));
+                OnError(
+                    new RErrorEventArgs(exception, exception.Message));
                 throw exception;
             }
 
-            int index = Length;
-            NestedElementNode<T> node = new NestedElementNode<T>(value);
+            var index = Length;
+            var node = new NestedElementNode<T>(value);
 
             ValuesCollection.Add((key, node));
             KeysCollection.Add(key, (index, node));
+
             ++Length;
 
             return true;
@@ -692,32 +911,42 @@ namespace RIS.Collections.Nestable
         {
             if (string.IsNullOrEmpty(key) || string.IsNullOrWhiteSpace(key))
             {
-                var exception = new Exception("Ключ не может быть null, пустым или содержать только пробелы");
-                Events.OnError(this, new RErrorEventArgs(exception, exception.Message));
-                OnError(new RErrorEventArgs(exception, exception.Message));
+                var exception = new Exception(
+                    "Ключ не может быть null, пустым или содержать только пробелы");
+                Events.OnError(this,
+                    new RErrorEventArgs(exception, exception.Message));
+                OnError(
+                    new RErrorEventArgs(exception, exception.Message));
                 throw exception;
             }
             else if (KeysCollection.ContainsKey(key))
             {
-                var exception = new KeyNotFoundException("Коллекция уже содержит элемент с указанным ключом");
-                Events.OnError(this, new RErrorEventArgs(exception, exception.Message));
-                OnError(new RErrorEventArgs(exception, exception.Message));
+                var exception = new Exception(
+                    "Коллекция уже содержит элемент с указанным ключом");
+                Events.OnError(this,
+                    new RErrorEventArgs(exception, exception.Message));
+                OnError(
+                    new RErrorEventArgs(exception, exception.Message));
                 throw exception;
             }
 
             if (Length == int.MaxValue)
             {
-                var exception = new Exception("Нельзя добавить элемент, так как коллекция уже содержит максимальное их количество");
-                Events.OnError(this, new RErrorEventArgs(exception, exception.Message));
-                OnError(new RErrorEventArgs(exception, exception.Message));
+                var exception = new Exception(
+                    "Нельзя добавить элемент, так как коллекция уже содержит максимальное их количество");
+                Events.OnError(this,
+                    new RErrorEventArgs(exception, exception.Message));
+                OnError(
+                    new RErrorEventArgs(exception, exception.Message));
                 throw exception;
             }
 
-            int index = Length;
-            NestedElementNode<T> node = new NestedElementNode<T>(value);
+            var index = Length;
+            var node = new NestedElementNode<T>(value);
 
             ValuesCollection.Add((key, node));
             KeysCollection.Add(key, (index, node));
+
             ++Length;
 
             switch (NestableHelper.GetGeneralType(value))
@@ -730,10 +959,13 @@ namespace RIS.Collections.Nestable
                     break;
                 case CollectionGeneralType.Unknown:
                 default:
-                    var exception =
-                        new ArgumentException("Недопустимое значение CollectionGeneralType у коллекции", nameof(value));
-                    Events.OnError(this, new RErrorEventArgs(exception, exception.Message));
-                    OnError(new RErrorEventArgs(exception, exception.Message));
+                    var exception = new ArgumentException(
+                        "Недопустимое значение CollectionGeneralType у коллекции",
+                        nameof(value));
+                    Events.OnError(this,
+                        new RErrorEventArgs(exception, exception.Message));
+                    OnError(
+                        new RErrorEventArgs(exception, exception.Message));
                     throw exception;
             }
 
@@ -748,58 +980,75 @@ namespace RIS.Collections.Nestable
         {
             if (index < 0)
             {
-                var exception = new IndexOutOfRangeException("Индекс не может быть меньше 0");
-                Events.OnError(this, new RErrorEventArgs(exception, exception.Message));
-                OnError(new RErrorEventArgs(exception, exception.Message));
+                var exception = new IndexOutOfRangeException(
+                    "Индекс не может быть меньше 0");
+                Events.OnError(this,
+                    new RErrorEventArgs(exception, exception.Message));
+                OnError(
+                    new RErrorEventArgs(exception, exception.Message));
                 throw exception;
             }
             else if (index > Length - 1)
             {
-                var exception = new IndexOutOfRangeException("Индекс не может быть больше длины коллекции");
-                Events.OnError(this, new RErrorEventArgs(exception, exception.Message));
-                OnError(new RErrorEventArgs(exception, exception.Message));
+                var exception = new IndexOutOfRangeException(
+                    "Индекс не может быть больше длины коллекции");
+                Events.OnError(this,
+                    new RErrorEventArgs(exception, exception.Message));
+                OnError(
+                    new RErrorEventArgs(exception, exception.Message));
                 throw exception;
             }
 
             if (string.IsNullOrEmpty(key) || string.IsNullOrWhiteSpace(key))
             {
-                var exception = new Exception("Ключ не может быть null, пустым или содержать только пробелы");
-                Events.OnError(this, new RErrorEventArgs(exception, exception.Message));
-                OnError(new RErrorEventArgs(exception, exception.Message));
+                var exception = new Exception(
+                    "Ключ не может быть null, пустым или содержать только пробелы");
+                Events.OnError(this,
+                    new RErrorEventArgs(exception, exception.Message));
+                OnError(
+                    new RErrorEventArgs(exception, exception.Message));
                 throw exception;
             }
             else if (KeysCollection.ContainsKey(key))
             {
-                var exception = new KeyNotFoundException("Коллекция уже содержит элемент с указанным ключом");
-                Events.OnError(this, new RErrorEventArgs(exception, exception.Message));
-                OnError(new RErrorEventArgs(exception, exception.Message));
+                var exception = new Exception(
+                    "Коллекция уже содержит элемент с указанным ключом");
+                Events.OnError(this,
+                    new RErrorEventArgs(exception, exception.Message));
+                OnError(
+                    new RErrorEventArgs(exception, exception.Message));
                 throw exception;
             }
 
             if (Length == int.MaxValue)
             {
-                var exception = new Exception("Нельзя добавить элемент, так как коллекция уже содержит максимальное их количество");
-                Events.OnError(this, new RErrorEventArgs(exception, exception.Message));
-                OnError(new RErrorEventArgs(exception, exception.Message));
+                var exception = new Exception(
+                    "Нельзя добавить элемент, так как коллекция уже содержит максимальное их количество");
+                Events.OnError(this,
+                    new RErrorEventArgs(exception, exception.Message));
+                OnError(
+                    new RErrorEventArgs(exception, exception.Message));
                 throw exception;
             }
 
-            NestedElementNode<T> node = new NestedElementNode<T>(value);
+            var node = new NestedElementNode<T>(value);
 
             ValuesCollection.Insert(index, (key, node));
             KeysCollection.Add(key, (index, node));
+
             ++Length;
 
             for (int i = index + 1; i < ValuesCollection.Count; ++i)
             {
-                (string nodeKey, NestedElementNode<T> nodeValue) = ValuesCollection[i];
+                var (nodeKey, nodeValue) = ValuesCollection[i];
+
                 KeysCollection[nodeKey] = (i, nodeValue);
             }
 
             if (value.Type != NestedType.Collection)
                 return true;
 
-            INestableCollection<T> valueCollection = value.GetCollection();
+            var valueCollection = value.GetCollection();
 
             switch (NestableHelper.GetGeneralType(valueCollection))
             {
@@ -811,10 +1060,13 @@ namespace RIS.Collections.Nestable
                     break;
                 case CollectionGeneralType.Unknown:
                 default:
-                    var exception =
-                        new ArgumentException("Недопустимое значение CollectionGeneralType у коллекции", nameof(value));
-                    Events.OnError(this, new RErrorEventArgs(exception, exception.Message));
-                    OnError(new RErrorEventArgs(exception, exception.Message));
+                    var exception = new ArgumentException(
+                        "Недопустимое значение CollectionGeneralType у коллекции",
+                        nameof(value));
+                    Events.OnError(this,
+                        new RErrorEventArgs(exception, exception.Message));
+                    OnError(
+                        new RErrorEventArgs(exception, exception.Message));
                     throw exception;
             }
 
@@ -828,51 +1080,68 @@ namespace RIS.Collections.Nestable
         {
             if (index < 0)
             {
-                var exception = new IndexOutOfRangeException("Индекс не может быть меньше 0");
-                Events.OnError(this, new RErrorEventArgs(exception, exception.Message));
-                OnError(new RErrorEventArgs(exception, exception.Message));
+                var exception = new IndexOutOfRangeException(
+                    "Индекс не может быть меньше 0");
+                Events.OnError(this,
+                    new RErrorEventArgs(exception, exception.Message));
+                OnError(
+                    new RErrorEventArgs(exception, exception.Message));
                 throw exception;
             }
             else if (index > Length - 1)
             {
-                var exception = new IndexOutOfRangeException("Индекс не может быть больше длины коллекции");
-                Events.OnError(this, new RErrorEventArgs(exception, exception.Message));
-                OnError(new RErrorEventArgs(exception, exception.Message));
+                var exception = new IndexOutOfRangeException(
+                    "Индекс не может быть больше длины коллекции");
+                Events.OnError(this,
+                    new RErrorEventArgs(exception, exception.Message));
+                OnError(
+                    new RErrorEventArgs(exception, exception.Message));
                 throw exception;
             }
 
             if (string.IsNullOrEmpty(key) || string.IsNullOrWhiteSpace(key))
             {
-                var exception = new Exception("Ключ не может быть null, пустым или содержать только пробелы");
-                Events.OnError(this, new RErrorEventArgs(exception, exception.Message));
-                OnError(new RErrorEventArgs(exception, exception.Message));
+                var exception = new Exception(
+                    "Ключ не может быть null, пустым или содержать только пробелы");
+                Events.OnError(this,
+                    new RErrorEventArgs(exception, exception.Message));
+                OnError(
+                    new RErrorEventArgs(exception, exception.Message));
                 throw exception;
             }
             else if (KeysCollection.ContainsKey(key))
             {
-                var exception = new KeyNotFoundException("Коллекция уже содержит элемент с указанным ключом");
-                Events.OnError(this, new RErrorEventArgs(exception, exception.Message));
-                OnError(new RErrorEventArgs(exception, exception.Message));
+                var exception = new Exception(
+                    "Коллекция уже содержит элемент с указанным ключом");
+                Events.OnError(this,
+                    new RErrorEventArgs(exception, exception.Message));
+                OnError(
+                    new RErrorEventArgs(exception, exception.Message));
                 throw exception;
             }
 
             if (Length == int.MaxValue)
             {
-                var exception = new Exception("Нельзя добавить элемент, так как коллекция уже содержит максимальное их количество");
-                Events.OnError(this, new RErrorEventArgs(exception, exception.Message));
-                OnError(new RErrorEventArgs(exception, exception.Message));
+                var exception = new Exception(
+                    "Нельзя добавить элемент, так как коллекция уже содержит максимальное их количество");
+                Events.OnError(this,
+                    new RErrorEventArgs(exception, exception.Message));
+                OnError(
+                    new RErrorEventArgs(exception, exception.Message));
                 throw exception;
             }
 
-            NestedElementNode<T> node = new NestedElementNode<T>(value);
+            var node = new NestedElementNode<T>(value);
 
             ValuesCollection.Insert(index, (key, node));
             KeysCollection.Add(key, (index, node));
+
             ++Length;
 
             for (int i = index + 1; i < ValuesCollection.Count; ++i)
             {
-                (string nodeKey, NestedElementNode<T> nodeValue) = ValuesCollection[i];
+                var (nodeKey, nodeValue) = ValuesCollection[i];
+
                 KeysCollection[nodeKey] = (i, nodeValue);
             }
 
@@ -886,51 +1155,68 @@ namespace RIS.Collections.Nestable
         {
             if (index < 0)
             {
-                var exception = new IndexOutOfRangeException("Индекс не может быть меньше 0");
-                Events.OnError(this, new RErrorEventArgs(exception, exception.Message));
-                OnError(new RErrorEventArgs(exception, exception.Message));
+                var exception = new IndexOutOfRangeException(
+                    "Индекс не может быть меньше 0");
+                Events.OnError(this,
+                    new RErrorEventArgs(exception, exception.Message));
+                OnError(
+                    new RErrorEventArgs(exception, exception.Message));
                 throw exception;
             }
             else if (index > Length - 1)
             {
-                var exception = new IndexOutOfRangeException("Индекс не может быть больше длины коллекции");
-                Events.OnError(this, new RErrorEventArgs(exception, exception.Message));
-                OnError(new RErrorEventArgs(exception, exception.Message));
+                var exception = new IndexOutOfRangeException(
+                    "Индекс не может быть больше длины коллекции");
+                Events.OnError(this,
+                    new RErrorEventArgs(exception, exception.Message));
+                OnError(
+                    new RErrorEventArgs(exception, exception.Message));
                 throw exception;
             }
 
             if (string.IsNullOrEmpty(key) || string.IsNullOrWhiteSpace(key))
             {
-                var exception = new Exception("Ключ не может быть null, пустым или содержать только пробелы");
-                Events.OnError(this, new RErrorEventArgs(exception, exception.Message));
-                OnError(new RErrorEventArgs(exception, exception.Message));
+                var exception = new Exception(
+                    "Ключ не может быть null, пустым или содержать только пробелы");
+                Events.OnError(this,
+                    new RErrorEventArgs(exception, exception.Message));
+                OnError(
+                    new RErrorEventArgs(exception, exception.Message));
                 throw exception;
             }
             else if (KeysCollection.ContainsKey(key))
             {
-                var exception = new KeyNotFoundException("Коллекция уже содержит элемент с указанным ключом");
-                Events.OnError(this, new RErrorEventArgs(exception, exception.Message));
-                OnError(new RErrorEventArgs(exception, exception.Message));
+                var exception = new Exception(
+                    "Коллекция уже содержит элемент с указанным ключом");
+                Events.OnError(this,
+                    new RErrorEventArgs(exception, exception.Message));
+                OnError(
+                    new RErrorEventArgs(exception, exception.Message));
                 throw exception;
             }
 
             if (Length == int.MaxValue)
             {
-                var exception = new Exception("Нельзя добавить элемент, так как коллекция уже содержит максимальное их количество");
-                Events.OnError(this, new RErrorEventArgs(exception, exception.Message));
-                OnError(new RErrorEventArgs(exception, exception.Message));
+                var exception = new Exception(
+                    "Нельзя добавить элемент, так как коллекция уже содержит максимальное их количество");
+                Events.OnError(this,
+                    new RErrorEventArgs(exception, exception.Message));
+                OnError(
+                    new RErrorEventArgs(exception, exception.Message));
                 throw exception;
             }
 
-            NestedElementNode<T> node = new NestedElementNode<T>(value);
+            var node = new NestedElementNode<T>(value);
 
             ValuesCollection.Insert(index, (key, node));
             KeysCollection.Add(key, (index, node));
+
             ++Length;
 
             for (int i = index + 1; i < ValuesCollection.Count; ++i)
             {
-                (string nodeKey, NestedElementNode<T> nodeValue) = ValuesCollection[i];
+                var (nodeKey, nodeValue) = ValuesCollection[i];
+
                 KeysCollection[nodeKey] = (i, nodeValue);
             }
 
@@ -944,51 +1230,68 @@ namespace RIS.Collections.Nestable
         {
             if (index < 0)
             {
-                var exception = new IndexOutOfRangeException("Индекс не может быть меньше 0");
-                Events.OnError(this, new RErrorEventArgs(exception, exception.Message));
-                OnError(new RErrorEventArgs(exception, exception.Message));
+                var exception = new IndexOutOfRangeException(
+                    "Индекс не может быть меньше 0");
+                Events.OnError(this,
+                    new RErrorEventArgs(exception, exception.Message));
+                OnError(
+                    new RErrorEventArgs(exception, exception.Message));
                 throw exception;
             }
             else if (index > Length - 1)
             {
-                var exception = new IndexOutOfRangeException("Индекс не может быть больше длины коллекции");
-                Events.OnError(this, new RErrorEventArgs(exception, exception.Message));
-                OnError(new RErrorEventArgs(exception, exception.Message));
+                var exception = new IndexOutOfRangeException(
+                    "Индекс не может быть больше длины коллекции");
+                Events.OnError(this,
+                    new RErrorEventArgs(exception, exception.Message));
+                OnError(
+                    new RErrorEventArgs(exception, exception.Message));
                 throw exception;
             }
 
             if (string.IsNullOrEmpty(key) || string.IsNullOrWhiteSpace(key))
             {
-                var exception = new Exception("Ключ не может быть null, пустым или содержать только пробелы");
-                Events.OnError(this, new RErrorEventArgs(exception, exception.Message));
-                OnError(new RErrorEventArgs(exception, exception.Message));
+                var exception = new Exception(
+                    "Ключ не может быть null, пустым или содержать только пробелы");
+                Events.OnError(this,
+                    new RErrorEventArgs(exception, exception.Message));
+                OnError(
+                    new RErrorEventArgs(exception, exception.Message));
                 throw exception;
             }
             else if (KeysCollection.ContainsKey(key))
             {
-                var exception = new KeyNotFoundException("Коллекция уже содержит элемент с указанным ключом");
-                Events.OnError(this, new RErrorEventArgs(exception, exception.Message));
-                OnError(new RErrorEventArgs(exception, exception.Message));
+                var exception = new Exception(
+                    "Коллекция уже содержит элемент с указанным ключом");
+                Events.OnError(this,
+                    new RErrorEventArgs(exception, exception.Message));
+                OnError(
+                    new RErrorEventArgs(exception, exception.Message));
                 throw exception;
             }
 
             if (Length == int.MaxValue)
             {
-                var exception = new Exception("Нельзя вставить элемент, так как коллекция уже содержит максимальное их количество");
-                Events.OnError(this, new RErrorEventArgs(exception, exception.Message));
-                OnError(new RErrorEventArgs(exception, exception.Message));
+                var exception = new Exception(
+                    "Нельзя вставить элемент, так как коллекция уже содержит максимальное их количество");
+                Events.OnError(this,
+                    new RErrorEventArgs(exception, exception.Message));
+                OnError(
+                    new RErrorEventArgs(exception, exception.Message));
                 throw exception;
             }
 
-            NestedElementNode<T> node = new NestedElementNode<T>(value);
+            var node = new NestedElementNode<T>(value);
 
             ValuesCollection.Insert(index, (key, node));
             KeysCollection.Add(key, (index, node));
+
             ++Length;
 
             for (int i = index + 1; i < ValuesCollection.Count; ++i)
             {
-                (string nodeKey, NestedElementNode<T> nodeValue) = ValuesCollection[i];
+                var (nodeKey, nodeValue) = ValuesCollection[i];
+
                 KeysCollection[nodeKey] = (i, nodeValue);
             }
 
@@ -1002,10 +1305,13 @@ namespace RIS.Collections.Nestable
                     break;
                 case CollectionGeneralType.Unknown:
                 default:
-                    var exception =
-                        new ArgumentException("Недопустимое значение CollectionGeneralType у коллекции", nameof(value));
-                    Events.OnError(this, new RErrorEventArgs(exception, exception.Message));
-                    OnError(new RErrorEventArgs(exception, exception.Message));
+                    var exception = new ArgumentException(
+                        "Недопустимое значение CollectionGeneralType у коллекции",
+                        nameof(value));
+                    Events.OnError(this,
+                        new RErrorEventArgs(exception, exception.Message));
+                    OnError(
+                        new RErrorEventArgs(exception, exception.Message));
                     throw exception;
             }
 
@@ -1016,16 +1322,20 @@ namespace RIS.Collections.Nestable
         {
             if (Length < 1)
             {
-                var exception = new Exception("Нельзя удалить элемент, так как коллекция уже пустая");
-                Events.OnError(this, new RErrorEventArgs(exception, exception.Message));
-                OnError(new RErrorEventArgs(exception, exception.Message));
+                var exception = new Exception(
+                    "Нельзя удалить элемент, так как коллекция уже пустая");
+                Events.OnError(this,
+                    new RErrorEventArgs(exception, exception.Message));
+                OnError(
+                    new RErrorEventArgs(exception, exception.Message));
                 throw exception;
             }
 
-            int index = ValuesCollection.Count - 1;
+            var index = ValuesCollection.Count - 1;
 
             KeysCollection.Remove(ValuesCollection[index].Key);
             ValuesCollection.RemoveAt(index);
+
             --Length;
 
             return true;
@@ -1034,36 +1344,47 @@ namespace RIS.Collections.Nestable
         {
             if (index < 0)
             {
-                var exception = new IndexOutOfRangeException("Индекс не может быть меньше 0");
-                Events.OnError(this, new RErrorEventArgs(exception, exception.Message));
-                OnError(new RErrorEventArgs(exception, exception.Message));
+                var exception = new IndexOutOfRangeException(
+                    "Индекс не может быть меньше 0");
+                Events.OnError(this,
+                    new RErrorEventArgs(exception, exception.Message));
+                OnError(
+                    new RErrorEventArgs(exception, exception.Message));
                 throw exception;
             }
             else if (index > Length - 1)
             {
-                var exception = new IndexOutOfRangeException("Индекс не может быть больше длины коллекции");
-                Events.OnError(this, new RErrorEventArgs(exception, exception.Message));
-                OnError(new RErrorEventArgs(exception, exception.Message));
+                var exception = new IndexOutOfRangeException(
+                    "Индекс не может быть больше длины коллекции");
+                Events.OnError(this,
+                    new RErrorEventArgs(exception, exception.Message));
+                OnError(
+                    new RErrorEventArgs(exception, exception.Message));
                 throw exception;
             }
 
             if (Length < 1)
             {
-                var exception = new Exception("Нельзя удалить элемент, так как коллекция уже пустая");
-                Events.OnError(this, new RErrorEventArgs(exception, exception.Message));
-                OnError(new RErrorEventArgs(exception, exception.Message));
+                var exception = new Exception(
+                    "Нельзя удалить элемент, так как коллекция уже пустая");
+                Events.OnError(this,
+                    new RErrorEventArgs(exception, exception.Message));
+                OnError(
+                    new RErrorEventArgs(exception, exception.Message));
                 throw exception;
             }
 
-            string key = ValuesCollection[index].Key;
+            var key = ValuesCollection[index].Key;
 
             ValuesCollection.RemoveAt(index);
             KeysCollection.Remove(key);
+
             --Length;
 
             for (int i = index; i < ValuesCollection.Count; ++i)
             {
-                (string nodeKey, NestedElementNode<T> nodeValue) = ValuesCollection[i];
+                var (nodeKey, nodeValue) = ValuesCollection[i];
+
                 KeysCollection[nodeKey] = (i, nodeValue);
             }
 
@@ -1073,29 +1394,37 @@ namespace RIS.Collections.Nestable
         {
             if (!KeysCollection.ContainsKey(key))
             {
-                var exception = new KeyNotFoundException("Коллекция не содержит элемент с указанным ключом");
-                Events.OnError(this, new RErrorEventArgs(exception, exception.Message));
-                OnError(new RErrorEventArgs(exception, exception.Message));
+                var exception = new KeyNotFoundException(
+                    "Коллекция не содержит элемент с указанным ключом");
+                Events.OnError(this,
+                    new RErrorEventArgs(exception, exception.Message));
+                OnError(
+                    new RErrorEventArgs(exception, exception.Message));
                 throw exception;
             }
 
             if (Length < 1)
             {
-                var exception = new Exception("Нельзя удалить элемент, так как коллекция уже пустая");
-                Events.OnError(this, new RErrorEventArgs(exception, exception.Message));
-                OnError(new RErrorEventArgs(exception, exception.Message));
+                var exception = new Exception(
+                    "Нельзя удалить элемент, так как коллекция уже пустая");
+                Events.OnError(this,
+                    new RErrorEventArgs(exception, exception.Message));
+                OnError(
+                    new RErrorEventArgs(exception, exception.Message));
                 throw exception;
             }
 
-            int index = KeysCollection[key].Index;
+            var index = KeysCollection[key].Index;
 
             ValuesCollection.RemoveAt(index);
             KeysCollection.Remove(key);
+
             --Length;
 
             for (int i = index; i < ValuesCollection.Count; ++i)
             {
-                (string nodeKey, NestedElementNode<T> nodeValue) = ValuesCollection[i];
+                var (nodeKey, nodeValue) = ValuesCollection[i];
+
                 KeysCollection[nodeKey] = (i, nodeValue);
             }
 
@@ -1105,6 +1434,7 @@ namespace RIS.Collections.Nestable
         public void Clear()
         {
             Length = 0;
+
             KeysCollection.Clear();
             ValuesCollection.Clear();
         }
@@ -1113,62 +1443,64 @@ namespace RIS.Collections.Nestable
         {
             if (array != null && array.Rank != 1)
             {
-                var exception = new RankException("Копирование в многомерные массивы не поддерживается");
-                Events.OnError(this, new RErrorEventArgs(exception, exception.Message));
-                OnError(new RErrorEventArgs(exception, exception.Message));
+                var exception = new RankException(
+                    "Копирование в многомерные массивы не поддерживается");
+                Events.OnError(this,
+                    new RErrorEventArgs(exception, exception.Message));
+                OnError(
+                    new RErrorEventArgs(exception, exception.Message));
                 throw exception;
             }
             if (array.GetType().GetElementType() != typeof(T))
             {
-                var exception = new ArrayTypeMismatchException("Для копирования тип целевого массива не может отличаться от типа текущей коллекции");
-                Events.OnError(this, new RErrorEventArgs(exception, exception.Message));
-                OnError(new RErrorEventArgs(exception, exception.Message));
+                var exception = new ArrayTypeMismatchException(
+                    "Для копирования тип целевого массива не может отличаться от типа текущей коллекции");
+                Events.OnError(this,
+                    new RErrorEventArgs(exception, exception.Message));
+                OnError(
+                    new RErrorEventArgs(exception, exception.Message));
                 throw exception;
             }
 
-            List<T> thisCollection = Enumerate().ToList();
+            var thisCollection = Enumerate()
+                .ToList();
 
-            if (thisCollection.Count < 1)
-            {
-                var exception = new Exception("Нельзя скопировать пустую коллекцию");
-                Events.OnError(this, new RErrorEventArgs(exception, exception.Message));
-                OnError(new RErrorEventArgs(exception, exception.Message));
-                throw exception;
-            }
             if (array.Length - index < thisCollection.Count)
             {
-                var exception = new Exception("Для копирования длина целевого массива, начиная с указанного индекса, не может быть меньше длины текущей коллекции");
-                Events.OnError(this, new RErrorEventArgs(exception, exception.Message));
-                OnError(new RErrorEventArgs(exception, exception.Message));
+                var exception = new Exception(
+                    "Для копирования длина целевого массива, начиная с указанного индекса, не может быть меньше длины текущей коллекции");
+                Events.OnError(this,
+                    new RErrorEventArgs(exception, exception.Message));
+                OnError(
+                    new RErrorEventArgs(exception, exception.Message));
                 throw exception;
             }
 
-            int arrayIndex = index;
+            var arrayIndex = index;
+
             for (int i = 0; i < thisCollection.Count; ++i)
             {
                 array.SetValue(thisCollection[i], arrayIndex);
+
                 ++arrayIndex;
             }
         }
-        public void CopyTo(IList<T> collection, bool clearBeforeCopy)
+        public void CopyTo(ICollection<T> collection, bool clearBeforeCopy)
         {
             if (collection == null)
             {
-                var exception = new ArgumentNullException(nameof(collection), "Целевая коллекция не может быть равна null");
-                Events.OnError(this, new RErrorEventArgs(exception, exception.Message));
-                OnError(new RErrorEventArgs(exception, exception.Message));
+                var exception = new ArgumentNullException(
+                    nameof(collection),
+                    "Целевая коллекция не может быть равна null");
+                Events.OnError(this,
+                    new RErrorEventArgs(exception, exception.Message));
+                OnError(
+                    new RErrorEventArgs(exception, exception.Message));
                 throw exception;
             }
 
-            List<T> thisCollection = Enumerate().ToList();
-
-            if (thisCollection.Count < 1)
-            {
-                var exception = new Exception("Нельзя скопировать пустую коллекцию");
-                Events.OnError(this, new RErrorEventArgs(exception, exception.Message));
-                OnError(new RErrorEventArgs(exception, exception.Message));
-                throw exception;
-            }
+            var thisCollection = Enumerate()
+                .ToList();
 
             if (clearBeforeCopy)
                 collection.Clear();
@@ -1176,6 +1508,62 @@ namespace RIS.Collections.Nestable
             for (int i = 0; i < thisCollection.Count; ++i)
             {
                 collection.Add(thisCollection[i]);
+            }
+        }
+        public void CopyTo(ICollection<KeyValuePair<string, T>> collection, bool clearBeforeCopy)
+        {
+            if (collection == null)
+            {
+                var exception = new ArgumentNullException(
+                    nameof(collection),
+                    "Целевая коллекция не может быть равна null");
+                Events.OnError(this,
+                    new RErrorEventArgs(exception, exception.Message));
+                OnError(
+                    new RErrorEventArgs(exception, exception.Message));
+                throw exception;
+            }
+
+            if (clearBeforeCopy)
+                collection.Clear();
+
+            for (int i = 0; i < Length; ++i)
+            {
+                ref var item = ref GetRef(i);
+
+                if (item.Type != NestedType.Element)
+                    continue;
+
+                collection.Add(new KeyValuePair<string, T>(
+                    GetKey(i), item.GetElement()));
+            }
+        }
+        public void CopyTo(IDictionary<string, T> collection, bool clearBeforeCopy)
+        {
+            if (collection == null)
+            {
+                var exception = new ArgumentNullException(
+                    nameof(collection),
+                    "Целевая коллекция не может быть равна null");
+                Events.OnError(this,
+                    new RErrorEventArgs(exception, exception.Message));
+                OnError(
+                    new RErrorEventArgs(exception, exception.Message));
+                throw exception;
+            }
+
+            if (clearBeforeCopy)
+                collection.Clear();
+
+            for (int i = 0; i < Length; ++i)
+            {
+                ref var item = ref GetRef(i);
+
+                if (item.Type != NestedType.Element)
+                    continue;
+
+                collection.Add(new KeyValuePair<string, T>(
+                    GetKey(i), item.GetElement()));
             }
         }
     }

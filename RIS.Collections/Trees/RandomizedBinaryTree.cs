@@ -12,10 +12,8 @@ namespace RIS.Collections.Trees
     {
         private sealed class Node
         {
-            internal Node Left, Right;
-            /// <summary>
-            /// Count of nodes in the subtree (including this)
-            /// </summary>
+            internal Node Left;
+            internal Node Right;
             internal int Count;
             internal TKey Key;
             internal TValue Value;

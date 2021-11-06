@@ -43,8 +43,6 @@ namespace RIS.Collections.Chunked
 
     public interface ISyncChunkedCollection : IChunkedCollection
     {
-        new object SyncRoot { get; }
-
         object GetChunkSyncRootForElement(long index);
         object GetChunkSyncRoot(int chunkIndex);
     }

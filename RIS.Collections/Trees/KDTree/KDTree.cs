@@ -18,10 +18,10 @@ namespace RIS.Collections.Trees
         }
         private sealed class PointAndValueComparer : IComparer<KeyValuePair<TPoint, TValue>>
         {
-            private readonly IKDPoinTComparer<TPoint> _comparer;
+            private readonly IKDPointComparer<TPoint> _comparer;
             private readonly int _dimension;
 
-            public PointAndValueComparer(IKDPoinTComparer<TPoint> comparer, int dimension)
+            public PointAndValueComparer(IKDPointComparer<TPoint> comparer, int dimension)
             {
                 _comparer = comparer;
                 _dimension = dimension;
@@ -33,17 +33,17 @@ namespace RIS.Collections.Trees
             }
         }
 
-        private readonly IKDPoinTComparer<TPoint> _comparer;
+        private readonly IKDPointComparer<TPoint> _comparer;
         private PointAndValueComparer[] _singleDimensionComparers;
         private Node _root;
 
         public int Count { get; private set; }
 
-        public KDTree(IKDPoinTComparer<TPoint> comparer = null)
+        public KDTree(IKDPointComparer<TPoint> comparer = null)
         {
             _comparer = comparer;
         }
-        public KDTree(IEnumerable<KeyValuePair<TPoint, TValue>> points, IKDPoinTComparer<TPoint> comparer)
+        public KDTree(IEnumerable<KeyValuePair<TPoint, TValue>> points, IKDPointComparer<TPoint> comparer)
             : this(comparer)
         {
             if (points == null)
@@ -272,7 +272,7 @@ namespace RIS.Collections.Trees
             if (_singleDimensionComparers != null)
                 return;
 
-            (_comparer as INeedsInitializationKDPoinTComparer<TPoint>)?.InitializeFrom(point);
+            (_comparer as IInitializableKDPointComparer<TPoint>)?.InitializeFrom(point);
             _singleDimensionComparers = Enumerable.Range(0, _comparer.Dimensions)
                 .Select(i => new PointAndValueComparer(_comparer, i))
                 .ToArray();

@@ -126,7 +126,7 @@ namespace RIS.Collections.Chunked
 
         }
         public ChunkedArrayLog2L(long length)
-            : this(length, Environment.GCLOHThresholdSize / Environment.GetSize<T>())
+            : this(length, Environment.GCLOHThresholdSize / (uint)Environment.GetSize<T>())
         {
 
         }

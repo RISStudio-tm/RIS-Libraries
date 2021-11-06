@@ -127,7 +127,7 @@ namespace RIS.Collections.Chunked
 
         }
         public SyncChunkedArrayL(long length)
-            : this(length, Environment.GCLOHThresholdSize / Environment.GetSize<T>())
+            : this(length, Environment.GCLOHThresholdSize / (uint)Environment.GetSize<T>())
         {
 
         }

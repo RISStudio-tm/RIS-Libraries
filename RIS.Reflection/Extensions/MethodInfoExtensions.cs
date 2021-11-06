@@ -86,6 +86,6 @@ namespace RIS.Reflection.Extensions
 
             return lambda.Type;
         }
-        // ReSharper enable CoVariantArrayConversion
+        // ReSharper restore CoVariantArrayConversion
     }
 }

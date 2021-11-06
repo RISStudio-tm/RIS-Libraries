@@ -126,7 +126,7 @@ namespace RIS.Collections.Chunked
 
         }
         public ChunkedArraySD(long length)
-            : this(length, Environment.GCLOHThresholdSize / Environment.GetSize<T>())
+            : this(length, Environment.GCLOHThresholdSize / (uint)Environment.GetSize<T>())
         {
 
         }

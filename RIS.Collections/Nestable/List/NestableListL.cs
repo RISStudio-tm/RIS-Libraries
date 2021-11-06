@@ -14,6 +14,8 @@ namespace RIS.Collections.Nestable
         public event EventHandler<RWarningEventArgs> Warning;
         public event EventHandler<RErrorEventArgs> Error;
 
+
+
         public NestedElement<T> this[int index]
         {
             get
@@ -26,10 +28,23 @@ namespace RIS.Collections.Nestable
             }
         }
 
+
+
+        // ReSharper disable once StaticMemberInGenericType
+        private static readonly NestableCollectionType CollectionTypeStatic;
+
+
+
         private List<NestedElementNode<T>> ValuesCollection { get; }
 
+        public NestableCollectionType CollectionType
+        {
+            get
+            {
+                return CollectionTypeStatic;
+            }
+        }
         public int Length { get; private set; }
-        public NestableCollectionType CollectionType { get; }
         public object SyncRoot { get; }
         public bool IsSynchronized { get; }
         int ICollection.Count
@@ -40,18 +55,39 @@ namespace RIS.Collections.Nestable
             }
         }
 
+
+
+        static NestableListL()
+        {
+            CollectionTypeStatic = NestableCollectionType.NestableListL;
+        }
+
+
+
         public NestableListL()
             : this(0)
         {
 
         }
+        public NestableListL(string represent)
+            : this(0)
+        {
+            if (string.IsNullOrEmpty(represent))
+                return;
+
+            FromStringRepresent(represent);
+        }
         public NestableListL(int length)
         {
             if (length < 0)
             {
-                var exception = new ArgumentOutOfRangeException(nameof(length), "Длина коллекции не может быть меньше 0");
-                Events.OnError(this, new RErrorEventArgs(exception, exception.Message));
-                OnError(new RErrorEventArgs(exception, exception.Message));
+                var exception = new ArgumentOutOfRangeException(
+                    nameof(length),
+                    "Длина коллекции не может быть меньше 0");
+                Events.OnError(this,
+                    new RErrorEventArgs(exception, exception.Message));
+                OnError(
+                    new RErrorEventArgs(exception, exception.Message));
                 throw exception;
             }
 
@@ -59,7 +95,6 @@ namespace RIS.Collections.Nestable
             IsSynchronized = false;
 
             Length = length;
-            CollectionType = NestableHelper.GetCollectionType(GetType().Name);
 
             ValuesCollection = new List<NestedElementNode<T>>(length);
 
@@ -68,6 +103,8 @@ namespace RIS.Collections.Nestable
                 ValuesCollection.Add(new NestedElementNode<T>(new NestedElement<T>()));
             }
         }
+
+
 
         public void OnInformation(RInformationEventArgs e)
         {
@@ -96,20 +133,28 @@ namespace RIS.Collections.Nestable
             Error?.Invoke(sender, e);
         }
 
+
+
         public NestedElement<T> Get(int index)
         {
             if (index < 0)
             {
-                var exception = new IndexOutOfRangeException("Индекс не может быть меньше 0");
-                Events.OnError(this, new RErrorEventArgs(exception, exception.Message));
-                OnError(new RErrorEventArgs(exception, exception.Message));
+                var exception = new IndexOutOfRangeException(
+                    "Индекс не может быть меньше 0");
+                Events.OnError(this,
+                    new RErrorEventArgs(exception, exception.Message));
+                OnError(
+                    new RErrorEventArgs(exception, exception.Message));
                 throw exception;
             }
             else if (index > Length - 1)
             {
-                var exception = new IndexOutOfRangeException("Индекс не может быть больше длины коллекции");
-                Events.OnError(this, new RErrorEventArgs(exception, exception.Message));
-                OnError(new RErrorEventArgs(exception, exception.Message));
+                var exception = new IndexOutOfRangeException(
+                    "Индекс не может быть больше длины коллекции");
+                Events.OnError(this,
+                    new RErrorEventArgs(exception, exception.Message));
+                OnError(
+                    new RErrorEventArgs(exception, exception.Message));
                 throw exception;
             }
 
@@ -120,16 +165,22 @@ namespace RIS.Collections.Nestable
         {
             if (index < 0)
             {
-                var exception = new IndexOutOfRangeException("Индекс не может быть меньше 0");
-                Events.OnError(this, new RErrorEventArgs(exception, exception.Message));
-                OnError(new RErrorEventArgs(exception, exception.Message));
+                var exception = new IndexOutOfRangeException(
+                    "Индекс не может быть меньше 0");
+                Events.OnError(this,
+                    new RErrorEventArgs(exception, exception.Message));
+                OnError(
+                    new RErrorEventArgs(exception, exception.Message));
                 throw exception;
             }
             else if (index > Length - 1)
             {
-                var exception = new IndexOutOfRangeException("Индекс не может быть больше длины коллекции");
-                Events.OnError(this, new RErrorEventArgs(exception, exception.Message));
-                OnError(new RErrorEventArgs(exception, exception.Message));
+                var exception = new IndexOutOfRangeException(
+                    "Индекс не может быть больше длины коллекции");
+                Events.OnError(this,
+                    new RErrorEventArgs(exception, exception.Message));
+                OnError(
+                    new RErrorEventArgs(exception, exception.Message));
                 throw exception;
             }
 
@@ -140,16 +191,22 @@ namespace RIS.Collections.Nestable
         {
             if (index < 0)
             {
-                var exception = new IndexOutOfRangeException("Индекс не может быть меньше 0");
-                Events.OnError(this, new RErrorEventArgs(exception, exception.Message));
-                OnError(new RErrorEventArgs(exception, exception.Message));
+                var exception = new IndexOutOfRangeException(
+                    "Индекс не может быть меньше 0");
+                Events.OnError(this,
+                    new RErrorEventArgs(exception, exception.Message));
+                OnError(
+                    new RErrorEventArgs(exception, exception.Message));
                 throw exception;
             }
             else if (index > Length - 1)
             {
-                var exception = new IndexOutOfRangeException("Индекс не может быть больше длины коллекции");
-                Events.OnError(this, new RErrorEventArgs(exception, exception.Message));
-                OnError(new RErrorEventArgs(exception, exception.Message));
+                var exception = new IndexOutOfRangeException(
+                    "Индекс не может быть больше длины коллекции");
+                Events.OnError(this,
+                    new RErrorEventArgs(exception, exception.Message));
+                OnError(
+                    new RErrorEventArgs(exception, exception.Message));
                 throw exception;
             }
 
@@ -159,16 +216,22 @@ namespace RIS.Collections.Nestable
         {
             if (index < 0)
             {
-                var exception = new IndexOutOfRangeException("Индекс не может быть меньше 0");
-                Events.OnError(this, new RErrorEventArgs(exception, exception.Message));
-                OnError(new RErrorEventArgs(exception, exception.Message));
+                var exception = new IndexOutOfRangeException(
+                    "Индекс не может быть меньше 0");
+                Events.OnError(this,
+                    new RErrorEventArgs(exception, exception.Message));
+                OnError(
+                    new RErrorEventArgs(exception, exception.Message));
                 throw exception;
             }
             else if (index > Length - 1)
             {
-                var exception = new IndexOutOfRangeException("Индекс не может быть больше длины коллекции");
-                Events.OnError(this, new RErrorEventArgs(exception, exception.Message));
-                OnError(new RErrorEventArgs(exception, exception.Message));
+                var exception = new IndexOutOfRangeException(
+                    "Индекс не может быть больше длины коллекции");
+                Events.OnError(this,
+                    new RErrorEventArgs(exception, exception.Message));
+                OnError(
+                    new RErrorEventArgs(exception, exception.Message));
                 throw exception;
             }
 
@@ -178,16 +241,22 @@ namespace RIS.Collections.Nestable
         {
             if (index < 0)
             {
-                var exception = new IndexOutOfRangeException("Индекс не может быть меньше 0");
-                Events.OnError(this, new RErrorEventArgs(exception, exception.Message));
-                OnError(new RErrorEventArgs(exception, exception.Message));
+                var exception = new IndexOutOfRangeException(
+                    "Индекс не может быть меньше 0");
+                Events.OnError(this,
+                    new RErrorEventArgs(exception, exception.Message));
+                OnError(
+                    new RErrorEventArgs(exception, exception.Message));
                 throw exception;
             }
             else if (index > Length - 1)
             {
-                var exception = new IndexOutOfRangeException("Индекс не может быть больше длины коллекции");
-                Events.OnError(this, new RErrorEventArgs(exception, exception.Message));
-                OnError(new RErrorEventArgs(exception, exception.Message));
+                var exception = new IndexOutOfRangeException(
+                    "Индекс не может быть больше длины коллекции");
+                Events.OnError(this,
+                    new RErrorEventArgs(exception, exception.Message));
+                OnError(
+                    new RErrorEventArgs(exception, exception.Message));
                 throw exception;
             }
 
@@ -197,16 +266,22 @@ namespace RIS.Collections.Nestable
         {
             if (index < 0)
             {
-                var exception = new IndexOutOfRangeException("Индекс не может быть меньше 0");
-                Events.OnError(this, new RErrorEventArgs(exception, exception.Message));
-                OnError(new RErrorEventArgs(exception, exception.Message));
+                var exception = new IndexOutOfRangeException(
+                    "Индекс не может быть меньше 0");
+                Events.OnError(this,
+                    new RErrorEventArgs(exception, exception.Message));
+                OnError(
+                    new RErrorEventArgs(exception, exception.Message));
                 throw exception;
             }
             else if (index > Length - 1)
             {
-                var exception = new IndexOutOfRangeException("Индекс не может быть больше длины коллекции");
-                Events.OnError(this, new RErrorEventArgs(exception, exception.Message));
-                OnError(new RErrorEventArgs(exception, exception.Message));
+                var exception = new IndexOutOfRangeException(
+                    "Индекс не может быть больше длины коллекции");
+                Events.OnError(this,
+                    new RErrorEventArgs(exception, exception.Message));
+                OnError(
+                    new RErrorEventArgs(exception, exception.Message));
                 throw exception;
             }
 
@@ -215,17 +290,52 @@ namespace RIS.Collections.Nestable
 
         public string ToStringRepresent()
         {
-            return NestableHelper.ToStringRepresent<T>(this);
+            return NestableHelper.ToStringRepresent<T>(
+                this);
         }
 
-        public void FromStringRepresent(string represent)
+        INestableCollection INestableCollection.FromStringRepresent(string represent)
         {
-            NestableHelper.FromStringRepresent<T>(represent, this);
+            NestableHelper.FromStringRepresent<T>(
+                represent, this);
+
+            return this;
+        }
+        INestableCollection<T> INestableCollection<T>.FromStringRepresent(string represent)
+        {
+            NestableHelper.FromStringRepresent<T>(
+                represent, this);
+
+            return this;
+        }
+
+        INestableList INestableList.FromStringRepresent(string represent)
+        {
+            NestableHelper.FromStringRepresent<T>(
+                represent, this);
+
+            return this;
+        }
+        INestableList<T> INestableList<T>.FromStringRepresent(string represent)
+        {
+            NestableHelper.FromStringRepresent<T>(
+                represent, this);
+
+            return this;
+        }
+
+        public NestableListL<T> FromStringRepresent(string represent)
+        {
+            NestableHelper.FromStringRepresent<T>(
+                represent, this);
+
+            return this;
         }
 
         public IEnumerable<T> Enumerate()
         {
-            return NestableHelper.Enumerate<T>(this);
+            return NestableHelper.Enumerate<T>(
+                this);
         }
 
         IEnumerator<NestedElement<T>> IEnumerable<NestedElement<T>>.GetEnumerator()
@@ -247,13 +357,18 @@ namespace RIS.Collections.Nestable
         {
             if (Length == int.MaxValue)
             {
-                var exception = new Exception("Нельзя добавить элемент, так как коллекция уже содержит максимальное их количество");
-                Events.OnError(this, new RErrorEventArgs(exception, exception.Message));
-                OnError(new RErrorEventArgs(exception, exception.Message));
+                var exception = new Exception(
+                    "Нельзя добавить элемент, так как коллекция уже содержит максимальное их количество");
+                Events.OnError(this,
+                    new RErrorEventArgs(exception, exception.Message));
+                OnError(
+                    new RErrorEventArgs(exception, exception.Message));
                 throw exception;
             }
 
-            ValuesCollection.Add(new NestedElementNode<T>(value));
+            ValuesCollection.Add(
+                new NestedElementNode<T>(value));
+
             ++Length;
 
             return true;
@@ -262,13 +377,18 @@ namespace RIS.Collections.Nestable
         {
             if (Length == int.MaxValue)
             {
-                var exception = new Exception("Нельзя добавить элемент, так как коллекция уже содержит максимальное их количество");
-                Events.OnError(this, new RErrorEventArgs(exception, exception.Message));
-                OnError(new RErrorEventArgs(exception, exception.Message));
+                var exception = new Exception(
+                    "Нельзя добавить элемент, так как коллекция уже содержит максимальное их количество");
+                Events.OnError(this,
+                    new RErrorEventArgs(exception, exception.Message));
+                OnError(
+                    new RErrorEventArgs(exception, exception.Message));
                 throw exception;
             }
 
-            ValuesCollection.Add(new NestedElementNode<T>(value));
+            ValuesCollection.Add(
+                new NestedElementNode<T>(value));
+
             ++Length;
 
             return true;
@@ -277,13 +397,18 @@ namespace RIS.Collections.Nestable
         {
             if (Length == int.MaxValue)
             {
-                var exception = new Exception("Нельзя добавить элемент, так как коллекция уже содержит максимальное их количество");
-                Events.OnError(this, new RErrorEventArgs(exception, exception.Message));
-                OnError(new RErrorEventArgs(exception, exception.Message));
+                var exception = new Exception(
+                    "Нельзя добавить элемент, так как коллекция уже содержит максимальное их количество");
+                Events.OnError(this,
+                    new RErrorEventArgs(exception, exception.Message));
+                OnError(
+                    new RErrorEventArgs(exception, exception.Message));
                 throw exception;
             }
 
-            ValuesCollection.Add(new NestedElementNode<T>(value));
+            ValuesCollection.Add(
+                new NestedElementNode<T>(value));
+
             ++Length;
 
             return true;
@@ -292,13 +417,18 @@ namespace RIS.Collections.Nestable
         {
             if (Length == int.MaxValue)
             {
-                var exception = new Exception("Нельзя добавить элемент, так как коллекция уже содержит максимальное их количество");
-                Events.OnError(this, new RErrorEventArgs(exception, exception.Message));
-                OnError(new RErrorEventArgs(exception, exception.Message));
+                var exception = new Exception(
+                    "Нельзя добавить элемент, так как коллекция уже содержит максимальное их количество");
+                Events.OnError(this,
+                    new RErrorEventArgs(exception, exception.Message));
+                OnError(
+                    new RErrorEventArgs(exception, exception.Message));
                 throw exception;
             }
 
-            ValuesCollection.Add(new NestedElementNode<T>(value));
+            ValuesCollection.Add(
+                new NestedElementNode<T>(value));
+
             ++Length;
 
             return true;
@@ -308,28 +438,39 @@ namespace RIS.Collections.Nestable
         {
             if (index < 0)
             {
-                var exception = new IndexOutOfRangeException("Индекс не может быть меньше 0");
-                Events.OnError(this, new RErrorEventArgs(exception, exception.Message));
-                OnError(new RErrorEventArgs(exception, exception.Message));
+                var exception = new IndexOutOfRangeException(
+                    "Индекс не может быть меньше 0");
+                Events.OnError(this,
+                    new RErrorEventArgs(exception, exception.Message));
+                OnError(
+                    new RErrorEventArgs(exception, exception.Message));
                 throw exception;
             }
             else if (index > Length - 1)
             {
-                var exception = new IndexOutOfRangeException("Индекс не может быть больше длины коллекции");
-                Events.OnError(this, new RErrorEventArgs(exception, exception.Message));
-                OnError(new RErrorEventArgs(exception, exception.Message));
+                var exception = new IndexOutOfRangeException(
+                    "Индекс не может быть больше длины коллекции");
+                Events.OnError(this,
+                    new RErrorEventArgs(exception, exception.Message));
+                OnError(
+                    new RErrorEventArgs(exception, exception.Message));
                 throw exception;
             }
 
             if (Length == int.MaxValue)
             {
-                var exception = new Exception("Нельзя добавить элемент, так как коллекция уже содержит максимальное их количество");
-                Events.OnError(this, new RErrorEventArgs(exception, exception.Message));
-                OnError(new RErrorEventArgs(exception, exception.Message));
+                var exception = new Exception(
+                    "Нельзя добавить элемент, так как коллекция уже содержит максимальное их количество");
+                Events.OnError(this,
+                    new RErrorEventArgs(exception, exception.Message));
+                OnError(
+                    new RErrorEventArgs(exception, exception.Message));
                 throw exception;
             }
 
-            ValuesCollection.Insert(index, new NestedElementNode<T>(value));
+            ValuesCollection.Insert(index,
+                new NestedElementNode<T>(value));
+
             ++Length;
 
             return true;
@@ -338,28 +479,39 @@ namespace RIS.Collections.Nestable
         {
             if (index < 0)
             {
-                var exception = new IndexOutOfRangeException("Индекс не может быть меньше 0");
-                Events.OnError(this, new RErrorEventArgs(exception, exception.Message));
-                OnError(new RErrorEventArgs(exception, exception.Message));
+                var exception = new IndexOutOfRangeException(
+                    "Индекс не может быть меньше 0");
+                Events.OnError(this,
+                    new RErrorEventArgs(exception, exception.Message));
+                OnError(
+                    new RErrorEventArgs(exception, exception.Message));
                 throw exception;
             }
             else if (index > Length - 1)
             {
-                var exception = new IndexOutOfRangeException("Индекс не может быть больше длины коллекции");
-                Events.OnError(this, new RErrorEventArgs(exception, exception.Message));
-                OnError(new RErrorEventArgs(exception, exception.Message));
+                var exception = new IndexOutOfRangeException(
+                    "Индекс не может быть больше длины коллекции");
+                Events.OnError(this,
+                    new RErrorEventArgs(exception, exception.Message));
+                OnError(
+                    new RErrorEventArgs(exception, exception.Message));
                 throw exception;
             }
 
             if (Length == int.MaxValue)
             {
-                var exception = new Exception("Нельзя добавить элемент, так как коллекция уже содержит максимальное их количество");
-                Events.OnError(this, new RErrorEventArgs(exception, exception.Message));
-                OnError(new RErrorEventArgs(exception, exception.Message));
+                var exception = new Exception(
+                    "Нельзя добавить элемент, так как коллекция уже содержит максимальное их количество");
+                Events.OnError(this,
+                    new RErrorEventArgs(exception, exception.Message));
+                OnError(
+                    new RErrorEventArgs(exception, exception.Message));
                 throw exception;
             }
 
-            ValuesCollection.Insert(index, new NestedElementNode<T>(value));
+            ValuesCollection.Insert(index,
+                new NestedElementNode<T>(value));
+
             ++Length;
 
             return true;
@@ -368,28 +520,39 @@ namespace RIS.Collections.Nestable
         {
             if (index < 0)
             {
-                var exception = new IndexOutOfRangeException("Индекс не может быть меньше 0");
-                Events.OnError(this, new RErrorEventArgs(exception, exception.Message));
-                OnError(new RErrorEventArgs(exception, exception.Message));
+                var exception = new IndexOutOfRangeException(
+                    "Индекс не может быть меньше 0");
+                Events.OnError(this,
+                    new RErrorEventArgs(exception, exception.Message));
+                OnError(
+                    new RErrorEventArgs(exception, exception.Message));
                 throw exception;
             }
             else if (index > Length - 1)
             {
-                var exception = new IndexOutOfRangeException("Индекс не может быть больше длины коллекции");
-                Events.OnError(this, new RErrorEventArgs(exception, exception.Message));
-                OnError(new RErrorEventArgs(exception, exception.Message));
+                var exception = new IndexOutOfRangeException(
+                    "Индекс не может быть больше длины коллекции");
+                Events.OnError(this,
+                    new RErrorEventArgs(exception, exception.Message));
+                OnError(
+                    new RErrorEventArgs(exception, exception.Message));
                 throw exception;
             }
 
             if (Length == int.MaxValue)
             {
-                var exception = new Exception("Нельзя добавить элемент, так как коллекция уже содержит максимальное их количество");
-                Events.OnError(this, new RErrorEventArgs(exception, exception.Message));
-                OnError(new RErrorEventArgs(exception, exception.Message));
+                var exception = new Exception(
+                    "Нельзя добавить элемент, так как коллекция уже содержит максимальное их количество");
+                Events.OnError(this,
+                    new RErrorEventArgs(exception, exception.Message));
+                OnError(
+                    new RErrorEventArgs(exception, exception.Message));
                 throw exception;
             }
 
-            ValuesCollection.Insert(index, new NestedElementNode<T>(value));
+            ValuesCollection.Insert(index,
+                new NestedElementNode<T>(value));
+
             ++Length;
 
             return true;
@@ -398,28 +561,39 @@ namespace RIS.Collections.Nestable
         {
             if (index < 0)
             {
-                var exception = new IndexOutOfRangeException("Индекс не может быть меньше 0");
-                Events.OnError(this, new RErrorEventArgs(exception, exception.Message));
-                OnError(new RErrorEventArgs(exception, exception.Message));
+                var exception = new IndexOutOfRangeException(
+                    "Индекс не может быть меньше 0");
+                Events.OnError(this,
+                    new RErrorEventArgs(exception, exception.Message));
+                OnError(
+                    new RErrorEventArgs(exception, exception.Message));
                 throw exception;
             }
             else if (index > Length - 1)
             {
-                var exception = new IndexOutOfRangeException("Индекс не может быть больше длины коллекции");
-                Events.OnError(this, new RErrorEventArgs(exception, exception.Message));
-                OnError(new RErrorEventArgs(exception, exception.Message));
+                var exception = new IndexOutOfRangeException(
+                    "Индекс не может быть больше длины коллекции");
+                Events.OnError(this,
+                    new RErrorEventArgs(exception, exception.Message));
+                OnError(
+                    new RErrorEventArgs(exception, exception.Message));
                 throw exception;
             }
 
             if (Length == int.MaxValue)
             {
-                var exception = new Exception("Нельзя вставить элемент, так как коллекция уже содержит максимальное их количество");
-                Events.OnError(this, new RErrorEventArgs(exception, exception.Message));
-                OnError(new RErrorEventArgs(exception, exception.Message));
+                var exception = new Exception(
+                    "Нельзя вставить элемент, так как коллекция уже содержит максимальное их количество");
+                Events.OnError(this,
+                    new RErrorEventArgs(exception, exception.Message));
+                OnError(
+                    new RErrorEventArgs(exception, exception.Message));
                 throw exception;
             }
 
-            ValuesCollection.Insert(index, new NestedElementNode<T>(value));
+            ValuesCollection.Insert(index,
+                new NestedElementNode<T>(value));
+
             ++Length;
 
             return true;
@@ -429,13 +603,17 @@ namespace RIS.Collections.Nestable
         {
             if (Length < 1)
             {
-                var exception = new Exception("Нельзя удалить элемент, так как коллекция уже пустая");
-                Events.OnError(this, new RErrorEventArgs(exception, exception.Message));
-                OnError(new RErrorEventArgs(exception, exception.Message));
+                var exception = new Exception(
+                    "Нельзя удалить элемент, так как коллекция уже пустая");
+                Events.OnError(this,
+                    new RErrorEventArgs(exception, exception.Message));
+                OnError(
+                    new RErrorEventArgs(exception, exception.Message));
                 throw exception;
             }
 
             ValuesCollection.RemoveAt(ValuesCollection.Count - 1);
+
             --Length;
 
             return true;
@@ -444,28 +622,38 @@ namespace RIS.Collections.Nestable
         {
             if (index < 0)
             {
-                var exception = new IndexOutOfRangeException("Индекс не может быть меньше 0");
-                Events.OnError(this, new RErrorEventArgs(exception, exception.Message));
-                OnError(new RErrorEventArgs(exception, exception.Message));
+                var exception = new IndexOutOfRangeException(
+                    "Индекс не может быть меньше 0");
+                Events.OnError(this,
+                    new RErrorEventArgs(exception, exception.Message));
+                OnError(
+                    new RErrorEventArgs(exception, exception.Message));
                 throw exception;
             }
             else if (index > Length - 1)
             {
-                var exception = new IndexOutOfRangeException("Индекс не может быть больше длины коллекции");
-                Events.OnError(this, new RErrorEventArgs(exception, exception.Message));
-                OnError(new RErrorEventArgs(exception, exception.Message));
+                var exception = new IndexOutOfRangeException(
+                    "Индекс не может быть больше длины коллекции");
+                Events.OnError(this,
+                    new RErrorEventArgs(exception, exception.Message));
+                OnError(
+                    new RErrorEventArgs(exception, exception.Message));
                 throw exception;
             }
 
             if (Length < 1)
             {
-                var exception = new Exception("Нельзя удалить элемент, так как коллекция уже пустая");
-                Events.OnError(this, new RErrorEventArgs(exception, exception.Message));
-                OnError(new RErrorEventArgs(exception, exception.Message));
+                var exception = new Exception(
+                    "Нельзя удалить элемент, так как коллекция уже пустая");
+                Events.OnError(this,
+                    new RErrorEventArgs(exception, exception.Message));
+                OnError(
+                    new RErrorEventArgs(exception, exception.Message));
                 throw exception;
             }
 
             ValuesCollection.RemoveAt(index);
+
             --Length;
 
             return true;
@@ -474,6 +662,7 @@ namespace RIS.Collections.Nestable
         public void Clear()
         {
             Length = 0;
+
             ValuesCollection.Clear();
         }
 
@@ -481,62 +670,64 @@ namespace RIS.Collections.Nestable
         {
             if (array != null && array.Rank != 1)
             {
-                var exception = new RankException("Копирование в многомерные массивы не поддерживается");
-                Events.OnError(this, new RErrorEventArgs(exception, exception.Message));
-                OnError(new RErrorEventArgs(exception, exception.Message));
+                var exception = new RankException(
+                    "Копирование в многомерные массивы не поддерживается");
+                Events.OnError(this,
+                    new RErrorEventArgs(exception, exception.Message));
+                OnError(
+                    new RErrorEventArgs(exception, exception.Message));
                 throw exception;
             }
             if (array.GetType().GetElementType() != typeof(T))
             {
-                var exception = new ArrayTypeMismatchException("Для копирования тип целевого массива не может отличаться от типа текущей коллекции");
-                Events.OnError(this, new RErrorEventArgs(exception, exception.Message));
-                OnError(new RErrorEventArgs(exception, exception.Message));
+                var exception = new ArrayTypeMismatchException(
+                    "Для копирования тип целевого массива не может отличаться от типа текущей коллекции");
+                Events.OnError(this,
+                    new RErrorEventArgs(exception, exception.Message));
+                OnError(
+                    new RErrorEventArgs(exception, exception.Message));
                 throw exception;
             }
 
-            List<T> thisCollection = Enumerate().ToList();
+            var thisCollection = Enumerate()
+                .ToList();
 
-            if (thisCollection.Count < 1)
-            {
-                var exception = new Exception("Нельзя скопировать пустую коллекцию");
-                Events.OnError(this, new RErrorEventArgs(exception, exception.Message));
-                OnError(new RErrorEventArgs(exception, exception.Message));
-                throw exception;
-            }
             if (array.Length - index < thisCollection.Count)
             {
-                var exception = new Exception("Для копирования длина целевого массива, начиная с указанного индекса, не может быть меньше длины текущей коллекции");
-                Events.OnError(this, new RErrorEventArgs(exception, exception.Message));
-                OnError(new RErrorEventArgs(exception, exception.Message));
+                var exception = new Exception(
+                    "Для копирования длина целевого массива, начиная с указанного индекса, не может быть меньше длины текущей коллекции");
+                Events.OnError(this,
+                    new RErrorEventArgs(exception, exception.Message));
+                OnError(
+                    new RErrorEventArgs(exception, exception.Message));
                 throw exception;
             }
 
-            int arrayIndex = index;
+            var arrayIndex = index;
+
             for (int i = 0; i < thisCollection.Count; ++i)
             {
                 array.SetValue(thisCollection[i], arrayIndex);
+
                 ++arrayIndex;
             }
         }
-        public void CopyTo(IList<T> collection, bool clearBeforeCopy)
+        public void CopyTo(ICollection<T> collection, bool clearBeforeCopy)
         {
             if (collection == null)
             {
-                var exception = new ArgumentNullException(nameof(collection), "Целевая коллекция не может быть равна null");
-                Events.OnError(this, new RErrorEventArgs(exception, exception.Message));
-                OnError(new RErrorEventArgs(exception, exception.Message));
+                var exception = new ArgumentNullException(
+                    nameof(collection),
+                    "Целевая коллекция не может быть равна null");
+                Events.OnError(this,
+                    new RErrorEventArgs(exception, exception.Message));
+                OnError(
+                    new RErrorEventArgs(exception, exception.Message));
                 throw exception;
             }
 
-            List<T> thisCollection = Enumerate().ToList();
-
-            if (thisCollection.Count < 1)
-            {
-                var exception = new Exception("Нельзя скопировать пустую коллекцию");
-                Events.OnError(this, new RErrorEventArgs(exception, exception.Message));
-                OnError(new RErrorEventArgs(exception, exception.Message));
-                throw exception;
-            }
+            var thisCollection = Enumerate()
+                .ToList();
 
             if (clearBeforeCopy)
                 collection.Clear();

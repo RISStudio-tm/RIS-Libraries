@@ -3,11 +3,11 @@
 
 using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
+using RIS.Collections.Trees;
 
-namespace RIS.Collections.Nestable
+namespace RIS.Collections.Nestable.Entities
 {
-    internal class RepresentPartParseInfo
+    internal readonly struct RepresentPartParseInfo
     {
         private const char ElementStartValue = '\"';
         private const char ArrayStartValue = '[';
@@ -23,10 +23,8 @@ namespace RIS.Collections.Nestable
 
         public readonly NestedType Type;
         public readonly char StartValue;
-        public readonly string[] EndValues;
-        public readonly int ExcludedStart;
-        public readonly int ExcludedEnd;
-        public readonly ReadOnlyDictionary<char, char> ParenthesesMap;
+        public readonly Trie EndValuesTrie;
+        public readonly KeyValuePair<char, char> ParenthesesMap;
 
 
 
@@ -35,64 +33,49 @@ namespace RIS.Collections.Nestable
             ElementInfo = new RepresentPartParseInfo(
                 NestedType.Element,
                 '\"',
-                new[]
+                new ReadOnlySpan<char[]>(new[]
                 {
-                    "\",",
-                    "\"}"
-                },
-                1,
-                1,
-                new Dictionary<char, char>
-                {
-                    { '\"', '\"' }
-                });
+                    new[] { '\"', ',' },
+                    new[] { '\"', '}' }
+                }),
+                new KeyValuePair<char, char>('\"', '\"'));
             ArrayInfo = new RepresentPartParseInfo(
                 NestedType.Array,
                 '[',
-                new[]
+                new ReadOnlySpan<char[]>(new[]
                 {
-                    "],",
-                    "]}"
-                },
-                0,
-                -1,
-                new Dictionary<char, char>
-                {
-                    { ']', '[' }
-                });
+                    new[] { ']', ',' },
+                    new[] { ']', '}' }
+                }),
+                new KeyValuePair<char, char>('[', ']'));
             CollectionInfo = new RepresentPartParseInfo(
                 NestedType.Collection,
                 '{',
-                new[]
+                new ReadOnlySpan<char[]>(new []
                 {
-                    "},",
-                    "}}"
-                },
-                0,
-                -1,
-                new Dictionary<char, char>
-                {
-                    { '}', '{' }
-                });
+                    new[] { '}', ',' },
+                    new[] { '}', '}' }
+                }),
+                new KeyValuePair<char, char>('{', '}'));
         }
 
+
+
         private RepresentPartParseInfo(NestedType type,
-            char startValue, string[] endValues,
-            int excludedStart, int excludedEnd,
-            Dictionary<char, char> parenthesesMap)
+            char startValue, ReadOnlySpan<char[]> endValues,
+            KeyValuePair<char, char> parenthesesMap)
         {
             Type = type;
             StartValue = startValue;
-            EndValues = endValues;
-            ExcludedStart = excludedStart;
-            ExcludedEnd = excludedEnd;
-            ParenthesesMap = new ReadOnlyDictionary<char, char>(
-                parenthesesMap);
+            EndValuesTrie = new Trie(
+                endValues);
+            ParenthesesMap = parenthesesMap;
         }
 
 
 
-        public static RepresentPartParseInfo Get(NestedType type)
+        public static RepresentPartParseInfo Get(
+            NestedType type)
         {
             switch (type)
             {
@@ -102,15 +85,18 @@ namespace RIS.Collections.Nestable
                     return ArrayInfo;
                 case NestedType.Collection:
                     return CollectionInfo;
+                case NestedType.Unknown:
                 default:
                     var exception = new ArgumentException(
                         $"Invalid value for the {nameof(type)} parameter",
                         nameof(type));
-                    Events.OnError(new RErrorEventArgs(exception, exception.Message));
+                    Events.OnError(
+                        new RErrorEventArgs(exception, exception.Message));
                     throw exception;
             }
         }
-        public static RepresentPartParseInfo Get(char startChar)
+        public static RepresentPartParseInfo Get(
+            char startChar)
         {
             switch (startChar)
             {
@@ -124,24 +110,47 @@ namespace RIS.Collections.Nestable
                     var exception = new ArgumentException(
                         $"{nameof(startChar)}[{startChar}] is an unknown character of the beginning of the representation",
                         nameof(startChar));
-                    Events.OnError(new RErrorEventArgs(exception, exception.Message));
+                    Events.OnError(
+                        new RErrorEventArgs(exception, exception.Message));
                     throw exception;
             }
         }
-        public static RepresentPartParseInfo Get(string represent, int startIndex)
+        public static RepresentPartParseInfo Get(
+            string represent, int startIndex)
         {
             if (string.IsNullOrEmpty(represent))
             {
-                var exception =
-                    new ArgumentOutOfRangeException(nameof(startIndex), $"{nameof(startIndex)} cannot be null or empty");
-                Events.OnError(new RErrorEventArgs(exception, exception.Message));
+                var exception = new ArgumentException(
+                    $"{nameof(represent)} cannot be null or empty",
+                    nameof(represent));
+                Events.OnError(
+                    new RErrorEventArgs(exception, exception.Message));
                 throw exception;
             }
+
+            return Get(represent.AsSpan(),
+                startIndex);
+        }
+        public static RepresentPartParseInfo Get(
+            ReadOnlySpan<char> represent, int startIndex)
+        {
+            if (represent == null)
+            {
+                var exception = new ArgumentException(
+                    $"{nameof(represent)} cannot be null",
+                    nameof(represent));
+                Events.OnError(
+                    new RErrorEventArgs(exception, exception.Message));
+                throw exception;
+            }
+
             if (startIndex < 0)
             {
-                var exception =
-                    new ArgumentOutOfRangeException(nameof(startIndex), $"{nameof(startIndex)} cannot be less than zero");
-                Events.OnError(new RErrorEventArgs(exception, exception.Message));
+                var exception = new ArgumentOutOfRangeException(
+                    nameof(startIndex),
+                    $"{nameof(startIndex)} cannot be less than zero");
+                Events.OnError(
+                    new RErrorEventArgs(exception, exception.Message));
                 throw exception;
             }
 
@@ -157,7 +166,8 @@ namespace RIS.Collections.Nestable
                     var exception = new ArgumentException(
                         $"{nameof(startIndex)}[{startIndex}] indicates an unknown character of the beginning of the representation",
                         nameof(startIndex));
-                    Events.OnError(new RErrorEventArgs(exception, exception.Message));
+                    Events.OnError(
+                        new RErrorEventArgs(exception, exception.Message));
                     throw exception;
             }
         }

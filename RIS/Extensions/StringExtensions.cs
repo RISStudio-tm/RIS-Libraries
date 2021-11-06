@@ -2,8 +2,10 @@
 // Licensed under the Apache License, Version 2.0. See LICENSE file in the project root for license information. 
 
 using System;
+using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
+using RIS.Collections.Trees;
 using RIS.Extensions.Entities;
 
 namespace RIS.Extensions
@@ -11,39 +13,77 @@ namespace RIS.Extensions
     public static class StringExtensions
     {
         public static (int Index, int Count) IndexOfAny(this string source,
-            string[] values, int startIndex = 0)
+            string[] values, int startIndex = 0, int length = -1)
         {
-            var rootIndex = RootIndex.FromStrings(values);
+            return IndexOfAnyTrie(source,
+                values, startIndex, length);
+        }
 
-            while (startIndex < source.Length)
+        public static (int Index, int Count) IndexOfAnyLinq(this string source,
+            string[] values, int startIndex = 0, int length = -1)
+        {
+            var rootIndex = RootIndex
+                .FromStrings(values);
+
+            return IndexOfAnyLinq(source,
+                rootIndex, startIndex, length);
+        }
+        public static (int Index, int Count) IndexOfAnyLinq(this string source,
+            IEnumerable<string> values, int startIndex = 0, int length = -1)
+        {
+            var rootIndex = RootIndex
+                .FromStrings(values);
+
+            return IndexOfAnyLinq(source,
+                rootIndex, startIndex, length);
+        }
+        public static (int Index, int Count) IndexOfAnyLinq(this string source,
+            RootIndex rootIndex, int startIndex = 0, int length = -1)
+        {
+            if (rootIndex == null)
+                return (-1, 0);
+
+            if (startIndex > source.Length - 1)
+                startIndex = source.Length - 1;
+            if (startIndex < 0)
+                startIndex = 0;
+            if (length > source.Length - startIndex)
+                length = source.Length - startIndex;
+            if (length < 0)
+                length = source.Length - startIndex;
+
+            var index = startIndex;
+            var endIndex = startIndex + length;
+
+            while (index < endIndex)
             {
-                var index = source.IndexOfAny(rootIndex.Chars, startIndex);
+                var occurrenceIndex = source.IndexOfAny(rootIndex.Chars, index);
 
-                if (index < 0)
-                    return (index, 0);
+                if (occurrenceIndex < 0)
+                    return (occurrenceIndex, 0);
 
-                var @char = source[index];
+                var @char = source[occurrenceIndex];
 
                 // only one character available
-                if (source.Length == index + 1)
+                if (source.Length == occurrenceIndex + 1)
                 {
                     if (rootIndex.SingleChars.Contains(@char))
-                        return (index, 1);
+                        return (occurrenceIndex, 1);
 
                     return (-1, 0);
                 }
 
                 var leafIndex = rootIndex.MultipleChars[@char];
-                var nextChar = source[index + 1];
+                var nextChar = source[occurrenceIndex + 1];
 
                 // only two characters available
-                if (source.Length == index + 2)
+                if (source.Length == occurrenceIndex + 2)
                 {
                     if (leafIndex.SingleChars.Contains(nextChar))
-                        return (index, 2);
+                        return (occurrenceIndex, 2);
 
                     if (rootIndex.Chars.Contains(nextChar))
-                        return (index + 1, 1);
+                        return (occurrenceIndex + 1, 1);
 
                     return (-1, 0);
                 }
@@ -53,22 +93,52 @@ namespace RIS.Extensions
                 {
                     foreach (var @string in leafIndex.MultipleChars[nextChar])
                     {
-                        if (string.CompareOrdinal(source, index + 2, @string, 0, @string.Length) == 0)
-                            return (index, @string.Length + 2);
+                        if (string.CompareOrdinal(source, occurrenceIndex + 2, @string, 0, @string.Length) == 0)
+                            return (occurrenceIndex, @string.Length + 2);
                     }
                 }
 
                 if (leafIndex.SingleChars.Contains(nextChar))
-                    return (index, 2);
+                    return (occurrenceIndex, 2);
 
                 if (rootIndex.SingleChars.Contains(@char))
-                    return (index, 1);
+                    return (occurrenceIndex, 1);
 
-                startIndex = index + 1;
+                index = occurrenceIndex + 1;
             }
 
             return (-1, 0);
         }
+
+        public static (int Index, int Count) IndexOfAnyTrie(this string source,
+            string[] values, int startIndex = 0, int length = -1)
+        {
+            var trie = new Trie(
+                values);
+
+            return IndexOfAnyTrie(source,
+                trie, startIndex, length);
+        }
+        public static (int Index, int Count) IndexOfAnyTrie(this string source,
+            IEnumerable<string> values, int startIndex = 0, int length = -1)
+        {
+            var trie = new Trie(
+                values);
+
+            return IndexOfAnyTrie(source,
+                trie, startIndex, length);
+        }
+        public static (int Index, int Count) IndexOfAnyTrie(this string source,
+            Trie trie, int startIndex = 0, int length = -1)
+        {
+            if (trie == null)
+                return (-1, 0);
+
+            return trie.IndexOfAny(source,
+                startIndex, length);
+        }
+
+
 
         public static string ReplaceEOLChars(
             this string source, string newValue)
