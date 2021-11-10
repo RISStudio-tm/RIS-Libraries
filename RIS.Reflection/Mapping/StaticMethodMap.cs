@@ -3,8 +3,8 @@
 
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
-using System.Linq.Expressions;
 using System.Reflection;
 
 namespace RIS.Reflection.Mapping
@@ -15,37 +15,52 @@ namespace RIS.Reflection.Mapping
         public event EventHandler<RWarningEventArgs> Warning;
         public event EventHandler<RErrorEventArgs> Error;
 
+
+
         private readonly Type _instanceType;
-        private readonly Type _targetType;
-        private readonly Dictionary<string, Delegate> _map;
+        private readonly Type[] _targetArgsTypes;
+        private readonly Type _targetReturnType;
+        private readonly Dictionary<string, MethodInfo> _mappings;
 
-        public StaticMethodMap(Type instance, Delegate target)
+        public ReadOnlyDictionary<string, MethodInfo> Mappings { get; }
+
+
+
+        public StaticMethodMap(Type instanceType, Delegate target)
         {
-            _instanceType = instance;
-            _targetType = target.GetType();
-            _map = new Dictionary<string, Delegate>();
+            _instanceType = instanceType;
+            _targetArgsTypes = target.Method
+                .GetParameters()
+                .Select(parameter => parameter.ParameterType)
+                .ToArray();
+            _targetReturnType = target.Method
+                .ReturnType;
+            _mappings = new Dictionary<string, MethodInfo>();
 
-            CreateMapping();
+            CreateMappings();
+
+            Mappings = new ReadOnlyDictionary<string, MethodInfo>(
+                _mappings);
         }
-        public StaticMethodMap(Type instance, Type[] argsTypes)
-            : this(instance, argsTypes, typeof(void))
+        public StaticMethodMap(Type instanceType, Type[] argsTypes)
+            : this(instanceType, argsTypes, typeof(void))
         {
 
         }
-        public StaticMethodMap(Type instance, Type[] argsTypes, Type returnType)
+        public StaticMethodMap(Type instanceType, Type[] argsTypes, Type returnType)
         {
-            _instanceType = instance;
+            _instanceType = instanceType;
+            _targetArgsTypes = argsTypes;
+            _targetReturnType = returnType;
+            _mappings = new Dictionary<string, MethodInfo>();
 
-            Type[] argsTypesCopy = new Type[argsTypes.Length + 1];
+            CreateMappings();
 
-            argsTypes.CopyTo(argsTypesCopy, 0);
-            argsTypesCopy[argsTypes.Length] = returnType;
-
-            _targetType = Expression.GetDelegateType(argsTypesCopy);
-            _map = new Dictionary<string, Delegate>();
-
-            CreateMapping();
+            Mappings = new ReadOnlyDictionary<string, MethodInfo>(
+                _mappings);
         }
+
+
 
         public void OnInformation(RInformationEventArgs e)
         {
@@ -76,39 +91,59 @@ namespace RIS.Reflection.Mapping
 
 
 
-        private void CreateMapping()
+        // ReSharper disable RedundantJumpStatement
+        private void CreateMappings()
         {
-            foreach (MethodInfo method in _instanceType.GetMethods(BindingFlags.NonPublic
-                                                                   | BindingFlags.Public | BindingFlags.Static))
+            foreach (var method in _instanceType.GetMethods(BindingFlags.NonPublic
+                                                            | BindingFlags.Public
+                                                            | BindingFlags.Static))
             {
-                var mappedAttributes = method.GetCustomAttributes<MappedMethodAttribute>();
+                var mappedAttributes = method
+                    .GetCustomAttributes<MappedMethodAttribute>();
 
                 foreach (var mappedAttribute in mappedAttributes)
                 {
-                    string name = method.Name;
+                    var name = method.Name;
 
                     if (!string.IsNullOrEmpty(mappedAttribute.Name))
                         name = mappedAttribute.Name;
 
-                    var methodDelegate = Delegate.CreateDelegate(
-                        _targetType,
-                        null,
-                        method,
-                        false);
+                    var parameters = method
+                        .GetParameters();
 
-                    if (methodDelegate == null)
-                        continue;
+                    if (parameters.Length != _targetArgsTypes.Length)
+                        goto NotEqualToTarget;
 
-                    _map.Add(name, methodDelegate);
+                    for (int i = 0; i < parameters.Length; ++i)
+                    {
+                        ref var parameter = ref parameters[i];
+                        ref var targetParameterType = ref _targetArgsTypes[i];
+
+                        if (parameter.ParameterType != targetParameterType)
+                            goto NotEqualToTarget;
+                        if (parameter.IsOut)
+                            goto NotEqualToTarget;
+                    }
+
+                    if (method.ReturnType != _targetReturnType)
+                        goto NotEqualToTarget;
+
+                    _mappings.Add(name, method);
+
+                    continue;
+
+                    // Label
+                    NotEqualToTarget:
+
+
+
+                    continue;
                 }
             }
         }
+        // ReSharper restore RedundantJumpStatement
 
-        public string[] GetMappedNames()
-        {
-            return _map.Keys
-                .ToArray();
-        }
+
 
         public void InvokeVoid(string name, params object[] args)
         {
@@ -139,15 +174,19 @@ namespace RIS.Reflection.Mapping
                 throw exception;
             }
 
-            if (!_map.ContainsKey(name))
+            if (!_mappings.ContainsKey(name))
             {
-                var exception = new KeyNotFoundException($"Method with name '{name}' not found");
+                var exception = new KeyNotFoundException($"Method with mapped name '{name}' not found");
                 Events.OnError(this, new RErrorEventArgs(exception, exception.Message));
                 OnError(new RErrorEventArgs(exception, exception.Message));
                 throw exception;
             }
 
-            return _map[name].DynamicInvoke(args);
+            var method = _mappings[name];
+
+            return method.Invoke(
+                null,
+                args);
         }
     }
 }

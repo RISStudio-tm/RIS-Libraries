@@ -1,15 +1,15 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFrameworks>netcoreapp3.1</TargetFrameworks>
     <Configurations>Debug;Release;Release Nuget</Configurations>
     <RootNamespace>RIS.Localization</RootNamespace>
     <AssemblyName>RIS.Localization</AssemblyName>
-    <AssemblyVersion>1.2.2.0</AssemblyVersion>
-    <FileVersion>1.2.2.0</FileVersion>
+    <AssemblyVersion>1.3.0.0</AssemblyVersion>
+    <FileVersion>1.3.0.0</FileVersion>
     <PackageId>RIS.Localization</PackageId>
     <Product>RIS.Localization</Product>
-    <Version>1.2.2</Version>
+    <Version>1.3.0</Version>
     <Description>A library designed for various types of tasks. Part of the RIS "ecosystem".</Description>
     <PackageTags>dotnet, dotnetcore, netframework, netcore, library</PackageTags>
     <Authors>Dmitry Ponomarev</Authors>
