@@ -27,13 +27,11 @@ namespace RIS.Localization.UI.WPF.Controls
 
 
 
-        private void LocalizationManager_LocalizationsLoaded(object sender, LocalizationLoadedEventArgs e)
+        public void UpdateLocalizations()
         {
             var factory = LocalizationManager.CurrentUIFactory;
 
             if (factory == null)
-                return;
-            if (e.Factory.AssemblyName != factory.AssemblyName)
                 return;
 
             using var @lock = factory.SyncRoot.Lock();
@@ -51,24 +49,25 @@ namespace RIS.Localization.UI.WPF.Controls
             SelectionChanged -= Button_SelectionChanged;
 
             if (factory.CurrentLocalization != null
-                && e.Localizations.TryGetValue(factory.CurrentLocalization.CultureName, out var localizationModule))
+                && factory.Localizations.TryGetValue(factory.CurrentLocalization.CultureName, out var localizationModule))
             {
                 SelectedItem = new KeyValuePair<string, ILocalizationModule>(
                     factory.CurrentLocalization.CultureName, localizationModule);
             }
-            else if (e.Localizations.TryGetValue(factory.DefaultCulture.Name, out localizationModule))
+            else if (factory.Localizations.TryGetValue(factory.DefaultCulture.Name, out localizationModule))
             {
                 SelectedItem = new KeyValuePair<string, ILocalizationModule>(
                     factory.DefaultCulture.Name, localizationModule);
             }
-            else if (e.Localizations.TryGetValue("en-US", out localizationModule))
+            else if (factory.Localizations.TryGetValue("en-US", out localizationModule))
             {
                 SelectedItem = new KeyValuePair<string, ILocalizationModule>(
                     "en-US", localizationModule);
             }
             else
             {
-                SelectedItem = e.Localizations.FirstOrDefault();
+                SelectedItem = factory.Localizations
+                    .FirstOrDefault();
             }
 
             SelectionChanged += Button_SelectionChanged;
@@ -83,6 +82,31 @@ namespace RIS.Localization.UI.WPF.Controls
 
             factory.SwitchLocalization(
                 cultureName);
+        }
+
+
+
+        protected override void OnInitialized(EventArgs e)
+        {
+            base.OnInitialized(e);
+
+            UpdateLocalizations();
+        }
+
+
+
+        private void LocalizationManager_LocalizationsLoaded(object sender, LocalizationLoadedEventArgs e)
+        {
+            var factory = LocalizationManager.CurrentUIFactory;
+
+            if (factory == null)
+                return;
+            if (e.Factory.AssemblyName != factory.AssemblyName)
+                return;
+
+            using var @lock = factory.SyncRoot.Lock();
+
+            UpdateLocalizations();
         }
 
         private void LocalizationManager_LocalizationChanged(object sender, LocalizationChangedEventArgs e)
