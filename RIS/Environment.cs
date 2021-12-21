@@ -5,6 +5,7 @@ using System;
 using System.Configuration;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
@@ -40,9 +41,9 @@ namespace RIS
         public static string ExecProcessAssemblyFilePath { get; }
         public static string ExecProcessAssemblyFileName { get; }
         public static string ExecProcessAssemblyFileNameWithoutExtension { get; }
+#if NETCOREAPP
         public static bool IsStandalone { get; }
         public static bool IsSingleFile { get; }
-#if NETCOREAPP
         public static string RuntimeName { get; }
         public static string RuntimeVersion { get; }
         public static string RuntimeIdentifier { get; }
@@ -115,34 +116,11 @@ namespace RIS
             ExecProcessAssemblyFileNameWithoutExtension = ValidateFileName(
                 Path.GetFileNameWithoutExtension(ExecProcessAssemblyFileName));
 
-#if NETFRAMEWORK
-
-            IsStandalone = false;
-
-#elif NETCOREAPP
-
-            if (File.Exists(Path.Combine(ExecAppDirectoryName, "hostfxr.dll"))
-                && File.Exists(Path.Combine(ExecAppDirectoryName, "hostpolicy.dll")))
-            {
-                IsStandalone = true;
-            }
-
-#endif
-
-#if NETFRAMEWORK
-
-            IsSingleFile = false;
-
-#elif NETCOREAPP
-
-            if (!File.Exists(ExecProcessAssemblyFilePath))
-                IsSingleFile = true;
-
-#endif
-
 #if NETCOREAPP
 
             (RuntimeName, RuntimeVersion, RuntimeIdentifier) = GetRuntimeInfo();
+            IsStandalone = GetIsStandalone();
+            IsSingleFile = GetIsSingleFile();
 
 #endif
 
@@ -248,57 +226,120 @@ namespace RIS
 
         private static (string RuntimeName, string RuntimeVersion, string RuntimeIdentifier) GetRuntimeInfo()
         {
-            string path = Path.Combine(ExecAppDirectoryName,
+            var path = Path.Combine(ExecAppDirectoryName,
                 $"{ExecAppAssemblyFileNameWithoutExtension}.deps.json");
 
             if (!File.Exists(path))
                 return ("unknown", "unknown", "unknown");
 
-            JObject config;
+            JObject file;
 
-            using (StreamReader reader = File.OpenText(path))
+            using (var reader = File.OpenText(path))
             {
-                config = (JObject)JToken.ReadFrom(new JsonTextReader(reader));
+                file = (JObject)JToken.ReadFrom(
+                    new JsonTextReader(reader));
             }
 
-            foreach (JToken token in config.Root.Children())
+            var runtimeFullName = file.Root
+                .SelectToken("runtimeTarget.name")?
+                .Value<string>();
+
+            if (string.IsNullOrEmpty(runtimeFullName))
+                return ("unknown", "unknown", "unknown");
+
+            var runtimeFullNameComponents = runtimeFullName
+                .Split(',');
+
+            if (runtimeFullNameComponents.Length == 0)
+                return ("unknown", "unknown", "unknown");
+
+            var runtimeName = runtimeFullNameComponents[0];
+
+            if (runtimeFullNameComponents.Length == 1)
+                return (runtimeName, "unknown", "unknown");
+
+            if (runtimeFullNameComponents[1].Length > 8)
             {
-                string tokenJsonPath = $"${token.Path}";
-                string tokenName;
-
-                if (tokenJsonPath[tokenJsonPath.Length - 1] == ']')
-                {
-                    tokenName = tokenJsonPath.Substring(tokenJsonPath.LastIndexOf('[') + 2,
-                        tokenJsonPath.Length - tokenJsonPath.LastIndexOf('[') - 4);
-                }
-                else
-                {
-                    tokenName = tokenJsonPath.Substring(tokenJsonPath.LastIndexOfAny(new[] { '.', '$' }) + 1);
-                }
-
-                if (tokenName != "runtimeTarget")
-                    continue;
-
-                JToken runtimeFullName = token.First?.Value<string>("name");
-
-                if (runtimeFullName == null)
-                    return ("unknown", "unknown", "unknown");
-
-                string[] runtimeFullNameComponents = runtimeFullName.Value<string>()?.Split('/');
-                string[] runtimeNameComponents = runtimeFullNameComponents?[0].Split(',');
-
-                string runtimeName = runtimeNameComponents?[0];
-                string runtimeVersion = runtimeNameComponents?[1].Substring(8);
-
-                if (runtimeFullNameComponents?.Length < 2)
-                    return (runtimeName, runtimeVersion, "any");
-
-                string runtimeIdentifier = runtimeFullNameComponents?[1];
-
-                return (runtimeName, runtimeVersion, runtimeIdentifier);
+                runtimeFullNameComponents[1] = runtimeFullNameComponents[1]
+                    .Substring(8);
             }
 
-            return ("unknown", "unknown", "unknown");
+            var runtimeVersionComponents = runtimeFullNameComponents[1]
+                .Split('/');
+
+            if (runtimeVersionComponents.Length == 0)
+                return (runtimeName, "unknown", "unknown");
+
+            var runtimeVersion = runtimeVersionComponents[0];
+
+            if (runtimeVersionComponents.Length == 1)
+                return (runtimeName, runtimeVersion, "any");
+
+            var runtimeIdentifier = runtimeVersionComponents[1];
+
+            return (runtimeName, runtimeVersion, runtimeIdentifier);
+        }
+
+        private static bool GetIsStandalone()
+        {
+            if (File.Exists(Path.Combine(ExecAppDirectoryName, "hostfxr.dll"))
+                && File.Exists(Path.Combine(ExecAppDirectoryName, "hostpolicy.dll")))
+            {
+                return true;
+            }
+            else if (File.Exists(Path.Combine(ExecAppDirectoryName, "clrjit.dll"))
+                && File.Exists(Path.Combine(ExecAppDirectoryName, "coreclr.dll")))
+            {
+                return true;
+            }
+
+            var path = Path.Combine(ExecAppDirectoryName,
+                $"{ExecAppAssemblyFileNameWithoutExtension}.deps.json");
+
+            if (!File.Exists(path))
+                return false;
+
+            JObject file;
+
+            using (var reader = File.OpenText(path))
+            {
+                file = (JObject)JToken.ReadFrom(
+                    new JsonTextReader(reader));
+            }
+
+            var runtimeFullName = file.Root
+                .SelectToken("runtimeTarget.name")?
+                .Value<string>();
+
+            if (runtimeFullName == null)
+                return false;
+
+            var runtimePackDependencyToken = file.Root
+                .SelectToken("targets")?
+                .Value<JToken>()?
+                .Children<JProperty>()
+                .FirstOrDefault(token =>
+                    token.Name == runtimeFullName)?
+                .Value
+                .Children<JProperty>()
+                .FirstOrDefault(token =>
+                    token.Name.StartsWith(
+                        ExecAppAssemblyFileNameWithoutExtension))?
+                .Value
+                .SelectToken("dependencies")?
+                .Value<JToken>()?
+                .Children<JProperty>()
+                .FirstOrDefault(token =>
+                    token.Name.StartsWith(
+                        "runtimepack"));
+
+            return runtimePackDependencyToken != null;
+        }
+
+        private static bool GetIsSingleFile()
+        {
+            return !File.Exists(
+                ExecProcessAssemblyFilePath);
         }
 
 #endif
