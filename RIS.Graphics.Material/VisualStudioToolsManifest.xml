@@ -1,0 +1,6 @@
+<FileList>
+  <File Reference="RIS.Graphics.Material.dll">
+    <ToolboxItems VSCategory="RIS.Graphics.Material" BlendCategory="RIS.Graphics.Material">
+    </ToolboxItems>
+  </File>
+</FileList>

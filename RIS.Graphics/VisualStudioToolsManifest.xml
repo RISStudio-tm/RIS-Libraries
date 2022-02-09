@@ -1,9 +1,9 @@
 <FileList>
   <File Reference="RIS.Graphics.dll">
     <ToolboxItems VSCategory="RIS.Graphics" BlendCategory="RIS.Graphics">
-      <Item Type="RIS.Graphics.WPF.Controls.Indicators.Loading.LoadingIndicator"/>
-      <Item Type="RIS.Graphics.WPF.Controls.ExtendedPasswordBox"/>
-      <Item Type="RIS.Graphics.WPF.Controls.ExtendedScrollViewer"/>
+      <Item Type="RIS.Graphics.Controls.LoadingIndicator"/>
+      <Item Type="RIS.Graphics.Controls.ExtendedPasswordBox"/>
+      <Item Type="RIS.Graphics.Controls.ExtendedScrollViewer"/>
     </ToolboxItems>
   </File>
 </FileList>

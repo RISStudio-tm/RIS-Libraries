@@ -8,11 +8,19 @@ namespace RIS.Localization.Providers
 {
     internal static class LocalizationProviderStorage
     {
-        private static readonly Dictionary<Type, ILocalizationProvider> Storage = new Dictionary<Type, ILocalizationProvider>();
+        private static readonly Dictionary<Type, ILocalizationProvider> Storage;
 
 
 
-        private static ILocalizationProvider FindProvider(Type type)
+        static LocalizationProviderStorage()
+        {
+            Storage = new Dictionary<Type, ILocalizationProvider>();
+        }
+
+
+
+        private static ILocalizationProvider FindProvider(
+            Type type)
         {
             if (!typeof(ILocalizationProvider).IsAssignableFrom(type))
             {
@@ -25,12 +33,14 @@ namespace RIS.Localization.Providers
                 throw exception;
             }
 
-            Storage.TryGetValue(type, out ILocalizationProvider page);
+            Storage.TryGetValue(
+                type, out var provider);
 
-            return page ?? CreateProvider(type);
+            return provider ?? CreateProvider(type);
         }
 
-        private static ILocalizationProvider CreateProvider(Type type)
+        private static ILocalizationProvider CreateProvider(
+            Type type)
         {
             if (!typeof(ILocalizationProvider).IsAssignableFrom(type))
             {
@@ -47,7 +57,8 @@ namespace RIS.Localization.Providers
 
             try
             {
-                provider = Activator.CreateInstance(type, true) as ILocalizationProvider;
+                provider = Activator
+                    .CreateInstance(type, true) as ILocalizationProvider;
 
                 if (provider == null)
                     throw new TypeLoadException();
@@ -61,7 +72,8 @@ namespace RIS.Localization.Providers
                 throw exception;
             }
 
-            Storage.Add(type, provider);
+            Storage.Add(
+                type, provider);
 
             return provider;
         }

@@ -1,8 +1,7 @@
 <FileList>
   <File Reference="RIS.Localization.UI.WPF.dll">
     <ToolboxItems VSCategory="RIS.Localization.UI.WPF" BlendCategory="RIS.Localization.UI.WPF">
-      <Item Type="RIS.Localization.UI.WPF.Controls.LocalizationSplitButton"/>
-      <Item Type="RIS.Localization.UI.WPF.Controls.MetroLocalizationSplitButton"/>
+      <Item Type="RIS.Localization.UI.WPF.Controls.LocalizationButton"/>
     </ToolboxItems>
   </File>
 </FileList>

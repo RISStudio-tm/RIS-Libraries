@@ -1,0 +1,7 @@
+<FileList>
+  <File Reference="RIS.Localization.UI.WPF.Metro.dll">
+    <ToolboxItems VSCategory="RIS.Localization.UI.WPF.Metro" BlendCategory="RIS.Localization.UI.WPF.Metro">
+      <Item Type="RIS.Localization.UI.WPF.Controls.MetroLocalizationButton"/>
+    </ToolboxItems>
+  </File>
+</FileList>

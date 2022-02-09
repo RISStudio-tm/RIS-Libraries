@@ -1,0 +1,6 @@
+<FileList>
+  <File Reference="RIS.Graphics.Metro.dll">
+    <ToolboxItems VSCategory="RIS.Graphics.Metro" BlendCategory="RIS.Graphics.Metro">
+    </ToolboxItems>
+  </File>
+</FileList>

@@ -3,8 +3,9 @@
 
 <ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-                    xmlns:local="clr-namespace:RIS.Graphics.WPF.Controls.Indicators.Loading">
+                    xmlns:controls="clr-namespace:RIS.Graphics.Controls">
 
     <!-- #1BA1E2 -->
-    <SolidColorBrush x:Key="{ComponentResourceKey TypeInTargetAssembly=local:LoadingIndicator, ResourceId=LoadingAccentColorBrush}" Color="#CC119EDA"/>
+    <SolidColorBrush x:Key="{ComponentResourceKey TypeInTargetAssembly=controls:LoadingIndicator, ResourceId=LoadingAccentColorBrush}"
+                     Color="#CC119EDA"/>
 </ResourceDictionary>
