@@ -24,6 +24,14 @@
     [![Nuget](https://img.shields.io/nuget/v/RIS.Graphics?style=flat)](https://www.nuget.org/packages/RIS.Graphics)
     [![Nuget](https://img.shields.io/nuget/dt/RIS.Graphics?style=flat)](https://www.nuget.org/packages/RIS.Graphics)
     
+- **[RIS.Graphics](https://www.nuget.org/packages/RIS.Graphics.Metro)**<br/>
+    [![Nuget](https://img.shields.io/nuget/v/RIS.Graphics.Metro?style=flat)](https://www.nuget.org/packages/RIS.Graphics.Metro)
+    [![Nuget](https://img.shields.io/nuget/dt/RIS.Graphics.Metro?style=flat)](https://www.nuget.org/packages/RIS.Graphics.Metro)
+    
+- **[RIS.Graphics](https://www.nuget.org/packages/RIS.Graphics.Material)**<br/>
+    [![Nuget](https://img.shields.io/nuget/v/RIS.Graphics.Material?style=flat)](https://www.nuget.org/packages/RIS.Graphics.Material)
+    [![Nuget](https://img.shields.io/nuget/dt/RIS.Graphics.Material?style=flat)](https://www.nuget.org/packages/RIS.Graphics.Material)
+    
 - **[RIS.Localization](https://www.nuget.org/packages/RIS.Localization)**<br/>
     [![Nuget](https://img.shields.io/nuget/v/RIS.Localization?style=flat)](https://www.nuget.org/packages/RIS.Localization)
     [![Nuget](https://img.shields.io/nuget/dt/RIS.Localization?style=flat)](https://www.nuget.org/packages/RIS.Localization)
@@ -31,6 +39,10 @@
 - **[RIS.Localization.UI.WPF](https://www.nuget.org/packages/RIS.Localization.UI.WPF)**<br/>
     [![Nuget](https://img.shields.io/nuget/v/RIS.Localization.UI.WPF?style=flat)](https://www.nuget.org/packages/RIS.Localization.UI.WPF)
     [![Nuget](https://img.shields.io/nuget/dt/RIS.Localization.UI.WPF?style=flat)](https://www.nuget.org/packages/RIS.Localization.UI.WPF)
+    
+- **[RIS.Localization.UI.WPF](https://www.nuget.org/packages/RIS.Localization.UI.WPF.Metro)**<br/>
+    [![Nuget](https://img.shields.io/nuget/v/RIS.Localization.UI.WPF.Metro?style=flat)](https://www.nuget.org/packages/RIS.Localization.UI.WPF.Metro)
+    [![Nuget](https://img.shields.io/nuget/dt/RIS.Localization.UI.WPF.Metro?style=flat)](https://www.nuget.org/packages/RIS.Localization.UI.WPF.Metro)
     
 - **[RIS.Localization.Xaml](https://www.nuget.org/packages/RIS.Localization.Xaml)**<br/>
     [![Nuget](https://img.shields.io/nuget/v/RIS.Localization.Xaml?style=flat)](https://www.nuget.org/packages/RIS.Localization.Xaml)
