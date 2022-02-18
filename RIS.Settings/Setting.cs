@@ -8,6 +8,7 @@ using System.Globalization;
 using System.Reflection;
 using RIS.Collections.Chunked;
 using RIS.Collections.Nestable;
+using RIS.Extensions;
 
 namespace RIS.Settings
 {
@@ -35,13 +36,19 @@ namespace RIS.Settings
             }
         }
         public string CategoryName { get; }
+        public object DefaultValue { get; internal set; }
 
-        public Setting(SettingsBase settings, PropertyInfo propertyInfo, string category = null)
+        public Setting(
+            SettingsBase settings,
+            PropertyInfo propertyInfo,
+            string category = null,
+            string defaultValue = null)
         {
             _settingsBase = settings;
             _propertyInfo = propertyInfo;
 
             CategoryName = category;
+            DefaultValue = defaultValue;
         }
 
         private static string ToStringRepresent<T>(INestableCollection<T> collection)
@@ -193,13 +200,22 @@ namespace RIS.Settings
                 case string _:
                     return value.ToString();
                 case float settingValue:
-                    return settingValue.ToString(CultureInfo.InvariantCulture);
+                    return settingValue.ToString(
+                        CultureInfo.InvariantCulture);
                 case double settingValue:
-                    return settingValue.ToString(CultureInfo.InvariantCulture);
+                    return settingValue.ToString(
+                        CultureInfo.InvariantCulture);
                 case decimal settingValue:
-                    return settingValue.ToString(CultureInfo.InvariantCulture);
+                    return settingValue.ToString(
+                        CultureInfo.InvariantCulture);
                 case DateTime settingValue:
-                    return settingValue.ToString(CultureInfo.InvariantCulture);
+                    return settingValue.ToString(
+                        CultureInfo.InvariantCulture);
+                case Enum settingValue:
+                    return Enum.Format(
+                        settingValue.GetType(),
+                        settingValue,
+                        "d");
                 case INestableCollection collectionValue:
                     switch (collectionValue)
                     {
@@ -407,13 +423,16 @@ namespace RIS.Settings
 
         public void SetValue(object value)
         {
-            if (value == null)
-                return;
-
             try
             {
                 if (!_propertyInfo.CanWrite)
                     return;
+
+                if (Type.IsEnum
+                    && !Enum.IsDefined(Type, value))
+                {
+                    value = DefaultValue;
+                }
 
                 _propertyInfo.SetValue(_settingsBase,
                     Convert.ChangeType(value, Type, CultureInfo.InvariantCulture),
@@ -427,6 +446,7 @@ namespace RIS.Settings
             }
         }
 
+#pragma warning disable SS018 // Add cases for missing enum member.
         public void SetValueFromString(string value)
         {
             if (value == null)
@@ -441,6 +461,68 @@ namespace RIS.Settings
             {
                 SetValue(DateTime.Parse(value,
                     CultureInfo.InvariantCulture));
+            }
+            else if (Type.IsEnum)
+            {
+#if NETCOREAPP
+
+                if (Enum.TryParse(Type, value, true, out var enumValue))
+                {
+                    SetValue(enumValue);
+                }
+                else
+                {
+                    SetValue(DefaultValue);
+                }
+
+#elif NETFRAMEWORK
+
+                var underlyingType = Type
+                    .GetEnumUnderlyingType();
+
+                object integerValue = null;
+
+                switch (Type.GetTypeCode(underlyingType))
+                {
+                    case TypeCode.SByte:
+                        integerValue = value.ToSbyte();
+                        break;
+                    case TypeCode.Byte:
+                        integerValue = value.ToByte();
+                        break;
+                    case TypeCode.Int16:
+                        integerValue = value.ToShort();
+                        break;
+                    case TypeCode.UInt16:
+                        integerValue = value.ToUShort();
+                        break;
+                    case TypeCode.Int32:
+                        integerValue = value.ToInt();
+                        break;
+                    case TypeCode.UInt32:
+                        integerValue = value.ToUInt();
+                        break;
+                    case TypeCode.Int64:
+                        integerValue = value.ToLong();
+                        break;
+                    case TypeCode.UInt64:
+                        integerValue = value.ToULong();
+                        break;
+                    default:
+                        break;
+                }
+
+                if (integerValue != null
+                    && Enum.IsDefined(Type, integerValue))
+                {
+                    SetValue(Enum.Parse(Type, value));
+                }
+                else
+                {
+                    SetValue(DefaultValue);
+                }
+
+#endif
             }
             else if (typeof(INestableCollection).IsAssignableFrom(Type))
             {
@@ -681,5 +763,6 @@ namespace RIS.Settings
                 SetValue(value);
             }
         }
+#pragma warning restore SS018 // Add cases for missing enum member.
     }
 }

@@ -164,7 +164,8 @@ namespace RIS.Configuration
 
                         using (StreamWriter writer = File.CreateText(ConfigPath))
                         {
-                            Config.Root.WriteTo(new JsonTextWriter(writer));
+                            writer.Write(
+                                Config.ToString(Formatting.Indented));
                         }
 
                         StartConfigWatcher();

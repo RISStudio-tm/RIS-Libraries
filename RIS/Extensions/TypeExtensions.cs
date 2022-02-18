@@ -2,6 +2,7 @@
 // Licensed under the Apache License, Version 2.0. See LICENSE file in the project root for license information. 
 
 using System;
+using System.Reflection;
 using System.Text;
 using RIS.Extensions.Frames;
 
@@ -113,5 +114,74 @@ namespace RIS.Extensions
 
             goto ContinuePreviousTypeProcessing;
         }
+
+
+
+#pragma warning disable IDE0060 // Удалите неиспользуемый параметр
+        // ReSharper disable UnusedParameter.Global
+        public static T GetEnumDefaultValue<T>(this Type enumType)
+            where T : struct, Enum
+        {
+            return (T)GetEnumDefaultValue(typeof(T));
+        }
+        // ReSharper restore UnusedParameter.Global
+#pragma warning restore IDE0060 // Удалите неиспользуемый параметр
+
+#pragma warning disable SS018 // Add cases for missing enum member.
+        public static Enum GetEnumDefaultValue(this Type enumType)
+        {
+            var attribute = enumType
+                .GetCustomAttribute<DefaultEnumValueAttribute>();
+
+            if (attribute != null)
+                return attribute.DefaultValue;
+
+            var underlyingType = enumType
+                .GetEnumUnderlyingType();
+
+            var zero = Activator.CreateInstance(
+                underlyingType);
+
+            if (zero != null
+                && enumType.IsEnumDefined(zero))
+            {
+                return (Enum)Enum.Parse(
+                    enumType,
+                    zero.ToString());
+            }
+
+            object minusOne = null;
+
+            switch (Type.GetTypeCode(underlyingType))
+            {
+                case TypeCode.SByte:
+                    minusOne = (sbyte)-1;
+                    break;
+                case TypeCode.Int16:
+                    minusOne = (short)-1;
+                    break;
+                case TypeCode.Int32:
+                    minusOne = (int)-1;
+                    break;
+                case TypeCode.Int64:
+                    minusOne = (long)-1;
+                    break;
+                default:
+                    break;
+            }
+
+            if (minusOne != null
+                && enumType.IsEnumDefined(minusOne))
+            {
+                return (Enum)Enum.Parse(
+                    enumType,
+                    minusOne.ToString());
+            }
+
+            return (Enum)Enum
+                .GetValues(enumType)
+                .GetValue(0);
+        }
+#pragma warning restore SS018 // Add cases for missing enum member.
     }
 }

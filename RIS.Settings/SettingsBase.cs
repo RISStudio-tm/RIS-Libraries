@@ -24,6 +24,7 @@ namespace RIS.Settings
         public object SyncRoot { get; }
 
         [SettingCategory("Version")]
+        [DefaultSettingValue("0.0.0")]
         public string AppVersion { get; private set; }
 
         protected SettingsBase()
@@ -31,12 +32,12 @@ namespace RIS.Settings
             _settingsList = BuildSettingsList();
 
             SyncRoot = new object();
-
-            AppVersion = "0.0.0";
         }
 
         private IEnumerable<Setting> BuildSettingsList()
         {
+            var settings = new List<Setting>(10);
+
             string category = null;
 
             foreach (PropertyInfo property in GetType().GetProperties(BindingFlags.Instance
@@ -50,10 +51,46 @@ namespace RIS.Settings
                 if (Attribute.IsDefined(property, typeof(ExcludedSettingAttribute)))
                     continue;
                 
-                var declaringProperty = property.GetDeclaring();
+                var declaringProperty = property
+                    .GetDeclaring();
+                var setting = new Setting(this,
+                    declaringProperty, category);
 
-                yield return new Setting(this, declaringProperty, category);
+                if (Attribute.IsDefined(property, typeof(DefaultSettingValueAttribute)))
+                {
+                    setting.DefaultValue = ((DefaultSettingValueAttribute)property.GetCustomAttribute(typeof(DefaultSettingValueAttribute)))?.DefaultValue;
+                }
+                else if (setting.Type.IsEnum)
+                {
+                    setting.DefaultValue = setting.Type
+                        .GetEnumDefaultValue();
+                }
+                else
+                {
+                    setting.DefaultValue = setting.Type.IsValueType
+                        ? Activator.CreateInstance(setting.Type)
+                        : null;
+                }
+
+                if (setting.Type.IsPrimitive
+                    || setting.Type.IsArray
+                    || setting.Type.IsEnum
+                    || setting.Type == typeof(decimal)
+                    || setting.Type == typeof(DateTime))
+                {
+                    setting.SetValue(
+                        setting.DefaultValue);
+                }
+                else
+                {
+                    setting.SetValueFromString(
+                        setting.DefaultValue?.ToString());
+                }
+
+                settings.Add(setting);
             }
+
+            return settings;
         }
 
         protected abstract void OnLoadSettings(IEnumerable<Setting> settings,

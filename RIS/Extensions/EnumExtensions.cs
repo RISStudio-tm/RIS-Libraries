@@ -19,5 +19,20 @@ namespace RIS.Extensions
                 .GetCustomAttribute<DescriptionAttribute>()?
                 .Description;
         }
+
+
+
+        public static T GetDefaultValue<T>(this Enum target)
+            where T : struct, Enum
+        {
+            return (T)GetDefaultValue(target);
+        }
+
+        public static Enum GetDefaultValue(this Enum target)
+        {
+            return target
+                .GetType()
+                .GetEnumDefaultValue();
+        }
     }
 }
