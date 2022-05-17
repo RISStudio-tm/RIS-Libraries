@@ -8,6 +8,10 @@
     [![Nuget](https://img.shields.io/nuget/v/RIS?style=flat)](https://www.nuget.org/packages/RIS)
     [![Nuget](https://img.shields.io/nuget/dt/RIS?style=flat)](https://www.nuget.org/packages/RIS)
     
+- **[RIS.Unions.Generator](https://www.nuget.org/packages/RIS.Unions.Generator)**<br/>
+    [![Nuget](https://img.shields.io/nuget/v/RIS.Unions.Generator?style=flat)](https://www.nuget.org/packages/RIS.Unions.Generator)
+    [![Nuget](https://img.shields.io/nuget/dt/RIS.Unions.Generator?style=flat)](https://www.nuget.org/packages/RIS.Unions.Generator)
+    
 - **[RIS.Collections](https://www.nuget.org/packages/RIS.Collections)**<br/>
     [![Nuget](https://img.shields.io/nuget/v/RIS.Collections?style=flat)](https://www.nuget.org/packages/RIS.Collections)
     [![Nuget](https://img.shields.io/nuget/dt/RIS.Collections?style=flat)](https://www.nuget.org/packages/RIS.Collections)
