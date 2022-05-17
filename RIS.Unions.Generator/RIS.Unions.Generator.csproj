@@ -1,0 +1,86 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <Configurations>Debug;Release;Release Nuget</Configurations>
+    <IsRoslynComponent>True</IsRoslynComponent>
+    <LangVersion>preview</LangVersion>
+    <Nullable>Enable</Nullable>
+    <RootNamespace>RIS.Unions.Generator</RootNamespace>
+    <AssemblyName>RIS.Unions.Generator</AssemblyName>
+    <AssemblyVersion>1.0.0.0</AssemblyVersion>
+    <FileVersion>1.0.0.0</FileVersion>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <PackageId>RIS.Unions.Generator</PackageId>
+    <Product>RIS.Unions.Generator</Product>
+    <Version>1.0.0</Version>
+    <Description>A source generator for automaticly implements RIS.Unions.UnionBase hierarchies, etc. Part of the RIS "ecosystem".</Description>
+    <PackageTags>dotnet, dotnetcore, netframework, netcore, generator, source generator</PackageTags>
+    <Authors>Dmitry Ponomarev</Authors>
+    <Company>RISStudio</Company>
+    <Copyright>Copyright (c) RISStudio, 2020</Copyright>
+    <PackageLicenseFile>LICENSE</PackageLicenseFile>
+    <PackageIcon>RISStudio-icon-1.png</PackageIcon>
+    <PackageProjectUrl>https://github.com/RISStudio-tm/RIS-Libraries</PackageProjectUrl>
+    <RepositoryType>git</RepositoryType>
+    <RepositoryUrl>https://github.com/RISStudio-tm/RIS-Libraries</RepositoryUrl>
+  </PropertyGroup>
+  
+  <PropertyGroup>
+    <NoWarn>$(NoWarn);CS0067;SS003;SS004;U2U1009</NoWarn>
+  </PropertyGroup>
+  
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release Nuget|AnyCPU'">
+    <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+    <IncludeBuildOutput>False</IncludeBuildOutput>
+  </PropertyGroup>
+  
+  <Target Name="PreBuild" BeforeTargets="BeforeBuild" Condition="'$(Configuration)|$(Platform)'=='Release Nuget|AnyCPU'">
+
+  </Target>
+
+  <Target Name="PostPack" AfterTargets="Pack" Condition="'$(Configuration)|$(Platform)'=='Release Nuget|AnyCPU'">
+    <Exec Command="&quot;CopyPackage.exe&quot; &quot;..\..\_packages&quot; &quot;$(MSBuildProjectFullPath)&quot; &quot;$(Configuration)&quot;" WorkingDirectory="..\_tools\CopyPackage" />
+  </Target>
+  
+  <ItemGroup>
+    <None Include="..\LICENSE">
+      <Pack>True</Pack>
+      <PackagePath></PackagePath>
+    </None>
+    <None Include="..\_resources\RISStudio-icon-1.png">
+      <Pack>True</Pack>
+      <PackagePath></PackagePath>
+    </None>
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="$(OutputPath)\$(AssemblyName).dll">
+      <Pack>True</Pack>
+      <PackagePath>analyzers/dotnet/cs</PackagePath>
+      <Visible>False</Visible>
+    </None>
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="Resources\Scripts\install.ps1">
+      <Pack>True</Pack>
+      <PackagePath>tools</PackagePath>
+    </None>
+    <None Include="Resources\Scripts\uninstall.ps1">
+      <Pack>True</Pack>
+      <PackagePath>tools</PackagePath>
+    </None>
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.CodeAnalysis.Analyzers" Version="3.3.3">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="3.11.0">
+      <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
+  </ItemGroup>
+
+</Project>
