@@ -40,6 +40,14 @@
     [![Nuget](https://img.shields.io/nuget/v/RIS.Localization?style=flat)](https://www.nuget.org/packages/RIS.Localization)
     [![Nuget](https://img.shields.io/nuget/dt/RIS.Localization?style=flat)](https://www.nuget.org/packages/RIS.Localization)
     
+- **[RIS.Localization.Json](https://www.nuget.org/packages/RIS.Localization.Json)**<br/>
+    [![Nuget](https://img.shields.io/nuget/v/RIS.Localization.Json?style=flat)](https://www.nuget.org/packages/RIS.Localization.Json)
+    [![Nuget](https://img.shields.io/nuget/dt/RIS.Localization.Json?style=flat)](https://www.nuget.org/packages/RIS.Localization.Json)
+    
+- **[RIS.Localization.Xaml](https://www.nuget.org/packages/RIS.Localization.Xaml)**<br/>
+    [![Nuget](https://img.shields.io/nuget/v/RIS.Localization.Xaml?style=flat)](https://www.nuget.org/packages/RIS.Localization.Xaml)
+    [![Nuget](https://img.shields.io/nuget/dt/RIS.Localization.Xaml?style=flat)](https://www.nuget.org/packages/RIS.Localization.Xaml)
+    
 - **[RIS.Localization.UI.WPF](https://www.nuget.org/packages/RIS.Localization.UI.WPF)**<br/>
     [![Nuget](https://img.shields.io/nuget/v/RIS.Localization.UI.WPF?style=flat)](https://www.nuget.org/packages/RIS.Localization.UI.WPF)
     [![Nuget](https://img.shields.io/nuget/dt/RIS.Localization.UI.WPF?style=flat)](https://www.nuget.org/packages/RIS.Localization.UI.WPF)
@@ -47,10 +55,6 @@
 - **[RIS.Localization.UI.WPF.Metro](https://www.nuget.org/packages/RIS.Localization.UI.WPF.Metro)**<br/>
     [![Nuget](https://img.shields.io/nuget/v/RIS.Localization.UI.WPF.Metro?style=flat)](https://www.nuget.org/packages/RIS.Localization.UI.WPF.Metro)
     [![Nuget](https://img.shields.io/nuget/dt/RIS.Localization.UI.WPF.Metro?style=flat)](https://www.nuget.org/packages/RIS.Localization.UI.WPF.Metro)
-    
-- **[RIS.Localization.Xaml](https://www.nuget.org/packages/RIS.Localization.Xaml)**<br/>
-    [![Nuget](https://img.shields.io/nuget/v/RIS.Localization.Xaml?style=flat)](https://www.nuget.org/packages/RIS.Localization.Xaml)
-    [![Nuget](https://img.shields.io/nuget/dt/RIS.Localization.Xaml?style=flat)](https://www.nuget.org/packages/RIS.Localization.Xaml)
     
 - **[RIS.Logging](https://www.nuget.org/packages/RIS.Logging)**<br/>
     [![Nuget](https://img.shields.io/nuget/v/RIS.Logging?style=flat)](https://www.nuget.org/packages/RIS.Logging)
