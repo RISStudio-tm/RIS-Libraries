@@ -135,7 +135,7 @@ namespace RIS.Logging
 
                 return LogFactory.Configuration
                     .Variables[nameof(AppDirectoryName)]
-                    .Text;
+                    .ToString();
             }
             set
             {
