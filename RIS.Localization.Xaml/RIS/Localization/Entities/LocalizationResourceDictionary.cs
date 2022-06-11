@@ -7,10 +7,11 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Windows;
+using RIS.Extensions;
 
 namespace RIS.Localization.Entities
 {
-    public sealed class LocalizationResourceDictionary : ILocalizationDictionary, IEnumerable<KeyValuePair<object, object>>
+    public sealed class LocalizationResourceDictionary : ILocalizationDictionary
     {
         public object this[object key]
         {
@@ -41,18 +42,18 @@ namespace RIS.Localization.Entities
         }
 
 
-        public ICollection Keys
+        public ICollection<object> Keys
         {
             get
             {
-                return Source.Keys;
+                return (ICollection<object>)Source.Keys;
             }
         }
-        public ICollection Values
+        public ICollection<object> Values
         {
             get
             {
-                return Source.Values;
+                return (ICollection<object>)Source.Values;
             }
         }
 
@@ -72,22 +73,8 @@ namespace RIS.Localization.Entities
         }
 
 
-        bool ICollection.IsSynchronized
-        {
-            get
-            {
-                return ((ICollection)Source).IsSynchronized;
-            }
-        }
 
-        bool IDictionary.IsFixedSize
-        {
-            get
-            {
-                return Source.IsFixedSize;
-            }
-        }
-        bool IDictionary.IsReadOnly
+        bool ICollection<KeyValuePair<object, object>>.IsReadOnly
         {
             get
             {
@@ -181,14 +168,74 @@ namespace RIS.Localization.Entities
             Source.Add(key, value);
         }
 
-        public void Remove(object key)
+        public bool Remove(object key)
         {
+            if (!Source.Contains(key))
+                return false;
+
             Source.Remove(key);
+
+            return true;
         }
 
-        public bool Contains(object key)
+        public bool ContainsKey(object key)
         {
             return Source.Contains(key);
+        }
+
+        public bool TryGetValue(object key, out object value)
+        {
+            static int IndexOfInternal(ICollection<object> keys, object targetKey)
+            {
+                for (int i = 0; i < keys.Count; ++i)
+                {
+                    var indexes = keys
+                        .IndexesWhere(elementKey => elementKey == targetKey)
+                        .ToArray();
+
+                    if (indexes.Length != 0)
+                        return indexes[0];
+                }
+
+                return -1;
+            }
+
+            static bool TryGetValueInternal(IDictionary<object, object> dictionary, object key, out object value) 
+            {
+                var index = IndexOfInternal(dictionary.Keys, key);
+
+                if (index >= 0)
+                {
+                    value = dictionary.Values.ElementAt(index);
+
+                    return true;
+                }
+
+                value = default;
+
+                return false;
+            }
+
+
+
+            if (TryGetValueInternal(this, key, out value))
+                return true;
+
+            var mergedDictionaries = MergedDictionaries;
+
+            for (int i = mergedDictionaries.Count - 1; i > -1; --i)
+            {
+                var mergedDictionary = mergedDictionaries[i];
+
+                if (mergedDictionary == null)
+                    continue;
+                if (!mergedDictionary.TryGetValue(key, out value))
+                    continue;
+
+                return true;
+            }
+
+            return false;
         }
 
         public void Clear()
@@ -199,7 +246,24 @@ namespace RIS.Localization.Entities
 
         public IDictionaryEnumerator GetEnumerator()
         {
-            return Source.GetEnumerator();
+            return (IDictionaryEnumerator)((IEnumerable)this).GetEnumerator();
+        }
+
+
+
+        void ICollection<KeyValuePair<object, object>>.Add(KeyValuePair<object, object> element)
+        {
+            Add(element.Key, element.Value);
+        }
+
+        bool ICollection<KeyValuePair<object, object>>.Remove(KeyValuePair<object, object> element)
+        {
+            return Remove(element.Key);
+        }
+
+        bool ICollection<KeyValuePair<object, object>>.Contains(KeyValuePair<object, object> element)
+        {
+            return ContainsKey(element.Key);
         }
 
 
@@ -224,7 +288,7 @@ namespace RIS.Localization.Entities
         }
 
 
-        void ICollection.CopyTo(Array array, int index)
+        void ICollection<KeyValuePair<object, object>>.CopyTo(KeyValuePair<object, object>[] array, int index)
         {
             ((ICollection)Source).CopyTo(array, index);
         }

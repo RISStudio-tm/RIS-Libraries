@@ -29,6 +29,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RIS.Localization", "RIS.Loc
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RIS.Localization.Xaml", "RIS.Localization.Xaml\RIS.Localization.Xaml.csproj", "{FB7AD17B-6DDF-4ACD-A96B-E5597BAF76DB}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RIS.Localization.Json", "RIS.Localization.Json\RIS.Localization.Json.csproj", "{9AC76224-B8DA-4175-B432-9D13A31FA6B9}"
+EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RIS.Localization.UI.WPF", "RIS.Localization.UI.WPF\RIS.Localization.UI.WPF.csproj", "{C0126D77-DBBB-459E-B8E5-A2C97493AF07}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RIS.Localization.UI.WPF.Metro", "RIS.Localization.UI.WPF.Metro\RIS.Localization.UI.WPF.Metro.csproj", "{5857E358-013E-46F8-9D1F-B32B5EE301DC}"
@@ -120,6 +122,12 @@ Global
 		{FB7AD17B-6DDF-4ACD-A96B-E5597BAF76DB}.Release Nuget|Any CPU.Build.0 = Release Nuget|Any CPU
 		{FB7AD17B-6DDF-4ACD-A96B-E5597BAF76DB}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{FB7AD17B-6DDF-4ACD-A96B-E5597BAF76DB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9AC76224-B8DA-4175-B432-9D13A31FA6B9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9AC76224-B8DA-4175-B432-9D13A31FA6B9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9AC76224-B8DA-4175-B432-9D13A31FA6B9}.Release Nuget|Any CPU.ActiveCfg = Release Nuget|Any CPU
+		{9AC76224-B8DA-4175-B432-9D13A31FA6B9}.Release Nuget|Any CPU.Build.0 = Release Nuget|Any CPU
+		{9AC76224-B8DA-4175-B432-9D13A31FA6B9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9AC76224-B8DA-4175-B432-9D13A31FA6B9}.Release|Any CPU.Build.0 = Release|Any CPU
 		{C0126D77-DBBB-459E-B8E5-A2C97493AF07}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{C0126D77-DBBB-459E-B8E5-A2C97493AF07}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C0126D77-DBBB-459E-B8E5-A2C97493AF07}.Release Nuget|Any CPU.ActiveCfg = Release Nuget|Any CPU

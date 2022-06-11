@@ -5,12 +5,16 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
-using System.Windows;
+using Newtonsoft.Json;
 
 namespace RIS.Localization.Entities
 {
-    public class XamlLocalizationFile : ILocalizationFile, IEquatable<XamlLocalizationFile>
+    public class JsonLocalizationFile : ILocalizationFile, IEquatable<JsonLocalizationFile>
     {
+        private static readonly JsonSerializer Serializer;
+
+
+
         public string Path { get; private set; }
         public string Name { get; private set; }
         public string Extension { get; private set; }
@@ -40,7 +44,13 @@ namespace RIS.Localization.Entities
 
 
 
-        public XamlLocalizationFile(string filePath)
+        static JsonLocalizationFile()
+        {
+            Serializer = JsonSerializer
+                .CreateDefault();
+        }
+
+        public JsonLocalizationFile(string filePath)
         {
             Load(filePath);
         }
@@ -89,10 +99,10 @@ namespace RIS.Localization.Entities
                     exception, exception.Message));
                 throw exception;
             }
-            if (extension != ".xaml")
+            if (extension != ".json")
             {
                 var exception = new ArgumentException(
-                    $"File['{path}'] must have an extension '.xaml'",
+                    $"File['{path}'] must have an extension '.json'",
                     nameof(path));
                 Events.OnError(new RErrorEventArgs(
                     exception, exception.Message));
@@ -147,14 +157,15 @@ namespace RIS.Localization.Entities
             CultureName = cultureName;
             CultureNativeName = culture.NativeName;
 
-            ResourceDictionary dictionary;
+            Dictionary<object, object> dictionary;
 
             try
             {
-                dictionary = new ResourceDictionary
+                using (var reader = File.OpenText(Path))
                 {
-                    Source = new Uri(path)
-                };
+                    dictionary = Serializer.Deserialize<Dictionary<object, object>>(
+                        new JsonTextReader(reader));
+                }
             }
             catch (Exception ex)
             {
@@ -163,34 +174,43 @@ namespace RIS.Localization.Entities
                 throw;
             }
 
-            Dictionary = LocalizationResourceDictionary.From(
-                dictionary);
-
-            if (!dictionary.Contains("ResourceDictionaryName"))
+            if (dictionary == null)
             {
-                var exception = new KeyNotFoundException(
-                    $"Dictionary file['{path}'] does not contain 'ResourceDictionaryName' definition");
+                var exception = new FileLoadException(
+                    $"Failed to load dictionary file['{path}']");
                 Events.OnError(new RErrorEventArgs(
                     exception, exception.Message));
                 throw exception;
             }
 
-            var dictionaryName = dictionary["ResourceDictionaryName"]
+            Dictionary = LocalizationDictionary.From(
+                dictionary);
+
+            if (!dictionary.ContainsKey("DictionaryName"))
+            {
+                var exception = new KeyNotFoundException(
+                    $"Dictionary file['{path}'] does not contain 'DictionaryName' definition");
+                Events.OnError(new RErrorEventArgs(
+                    exception, exception.Message));
+                throw exception;
+            }
+
+            var dictionaryName = dictionary["DictionaryName"]
                 .ToString();
 
             if (string.IsNullOrWhiteSpace(dictionaryName))
             {
                 var exception = new Exception(
-                    $"ResourceDictionaryName value in file['{path}'] must not be null or empty");
+                    $"DictionaryName value in file['{path}'] must not be null or empty");
                 Events.OnError(new RErrorEventArgs(
                     exception, exception.Message));
                 throw exception;
             }
-            if (dictionaryName != "localization-xaml")
+            if (dictionaryName != "localization-json")
             {
                 var exception = new Exception(
                     $"The dictionary file['{path}'] is not a localization dictionary " +
-                    "(The ResourceDictionaryName value must be 'localization-xaml')");
+                    "(The DictionaryName value must be 'localization-json')");
                 Events.OnError(new RErrorEventArgs(
                     exception, exception.Message));
                 throw exception;
@@ -216,7 +236,7 @@ namespace RIS.Localization.Entities
             if (GetType() != obj.GetType())
                 return false;
 
-            return Equals((XamlLocalizationFile)obj);
+            return Equals((JsonLocalizationFile)obj);
         }
         public bool Equals(ILocalizationFile obj)
         {
@@ -225,9 +245,9 @@ namespace RIS.Localization.Entities
             if (GetType() != obj.GetType())
                 return false;
 
-            return Equals((XamlLocalizationFile)obj);
+            return Equals((JsonLocalizationFile)obj);
         }
-        public bool Equals(XamlLocalizationFile obj)
+        public bool Equals(JsonLocalizationFile obj)
         {
             if (ReferenceEquals(null, obj))
                 return false;
@@ -242,11 +262,11 @@ namespace RIS.Localization.Entities
 
 
 
-        public static bool operator ==(XamlLocalizationFile obj1, XamlLocalizationFile obj2)
+        public static bool operator ==(JsonLocalizationFile obj1, JsonLocalizationFile obj2)
         {
             return obj1?.Equals(obj2) ?? false;
         }
-        public static bool operator !=(XamlLocalizationFile obj1, XamlLocalizationFile obj2)
+        public static bool operator !=(JsonLocalizationFile obj1, JsonLocalizationFile obj2)
         {
             return !(obj1 == obj2);
         }

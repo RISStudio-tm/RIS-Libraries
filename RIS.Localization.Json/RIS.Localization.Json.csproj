@@ -3,12 +3,12 @@
   <PropertyGroup>
     <TargetFrameworks>netcoreapp3.1</TargetFrameworks>
     <Configurations>Debug;Release;Release Nuget</Configurations>
-    <RootNamespace>RIS.Localization</RootNamespace>
-    <AssemblyName>RIS.Localization</AssemblyName>
+    <RootNamespace>RIS.Localization.Json</RootNamespace>
+    <AssemblyName>RIS.Localization.Json</AssemblyName>
     <AssemblyVersion>1.4.1.0</AssemblyVersion>
     <FileVersion>1.4.1.0</FileVersion>
-    <PackageId>RIS.Localization</PackageId>
-    <Product>RIS.Localization</Product>
+    <PackageId>RIS.Localization.Json</PackageId>
+    <Product>RIS.Localization.Json</Product>
     <Version>1.4.1</Version>
     <Description>A library designed for various types of tasks. Part of the RIS "ecosystem".</Description>
     <PackageTags>dotnet, dotnetcore, netframework, netcore, library</PackageTags>
@@ -48,18 +48,25 @@
       <PackagePath></PackagePath>
     </None>
   </ItemGroup>
-  
+
+  <ItemGroup>
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
+  </ItemGroup>
+
   <ItemGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
     <ProjectReference Include="..\RIS\RIS.csproj" />
+    <ProjectReference Include="..\RIS.Localization\RIS.Localization.csproj" />
   </ItemGroup>
   
   <ItemGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
     <ProjectReference Include="..\RIS\RIS.csproj" />
+    <ProjectReference Include="..\RIS.Localization\RIS.Localization.csproj" />
   </ItemGroup>
   
   <ItemGroup Condition="'$(Configuration)|$(Platform)'=='Release Nuget|AnyCPU'">
     <!--For NuGet Package-->
     <ProjectReference Include="..\RIS\RIS.csproj" />
+    <ProjectReference Include="..\RIS.Localization\RIS.Localization.csproj" />
   </ItemGroup>
 
 </Project>

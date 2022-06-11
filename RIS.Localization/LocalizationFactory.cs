@@ -512,13 +512,13 @@ namespace RIS.Localization
                 return null;
 
             if (CurrentLocalization != null
-                && CurrentLocalization.Dictionary.Contains(key))
+                && CurrentLocalization.Dictionary.ContainsKey(key))
             {
                 return (string)CurrentLocalization.Dictionary[key];
             }
 
             if (CurrentDefaultLocalization != null
-                && CurrentDefaultLocalization.Dictionary.Contains(key))
+                && CurrentDefaultLocalization.Dictionary.ContainsKey(key))
             {
                 return (string)CurrentDefaultLocalization.Dictionary[key];
             }
@@ -535,7 +535,7 @@ namespace RIS.Localization
                 return false;
 
             if (CurrentLocalization != null
-                && CurrentLocalization.Dictionary.Contains(key))
+                && CurrentLocalization.Dictionary.ContainsKey(key))
             {
                 try
                 {
@@ -550,7 +550,7 @@ namespace RIS.Localization
             }
 
             if (CurrentDefaultLocalization != null
-                && CurrentDefaultLocalization.Dictionary.Contains(key))
+                && CurrentDefaultLocalization.Dictionary.ContainsKey(key))
             {
                 try
                 {
