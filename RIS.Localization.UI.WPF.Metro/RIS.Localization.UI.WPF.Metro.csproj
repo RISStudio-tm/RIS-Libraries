@@ -1,16 +1,16 @@
-<Project Sdk="Microsoft.NET.Sdk.WindowsDesktop">
+﻿<Project Sdk="Microsoft.NET.Sdk.WindowsDesktop">
 
   <PropertyGroup>
     <TargetFrameworks>netcoreapp3.1</TargetFrameworks>
     <Configurations>Debug;Release;Release Nuget</Configurations>
     <RootNamespace>RIS.Localization.UI.WPF.Metro</RootNamespace>
     <AssemblyName>RIS.Localization.UI.WPF.Metro</AssemblyName>
-    <AssemblyVersion>1.4.1.0</AssemblyVersion>
-    <FileVersion>1.4.1.0</FileVersion>
+    <AssemblyVersion>1.4.2.0</AssemblyVersion>
+    <FileVersion>1.4.2.0</FileVersion>
     <UseWPF>true</UseWPF>
     <PackageId>RIS.Localization.UI.WPF.Metro</PackageId>
     <Product>RIS.Localization.UI.WPF.Metro</Product>
-    <Version>1.4.1</Version>
+    <Version>1.4.2</Version>
     <Description>A library designed for various types of tasks. Part of the RIS "ecosystem".</Description>
     <PackageTags>dotnet, dotnetcore, netframework, netcore, library</PackageTags>
     <Authors>Dmitry Ponomarev</Authors>
