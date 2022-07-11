@@ -8,7 +8,9 @@ using System.Globalization;
 using System.Reflection;
 using RIS.Collections.Chunked;
 using RIS.Collections.Nestable;
+#if NETFRAMEWORK
 using RIS.Extensions;
+#endif
 
 namespace RIS.Settings
 {
@@ -42,7 +44,7 @@ namespace RIS.Settings
             SettingsBase settings,
             PropertyInfo propertyInfo,
             string category = null,
-            string defaultValue = null)
+            object defaultValue = null)
         {
             _settingsBase = settings;
             _propertyInfo = propertyInfo;
