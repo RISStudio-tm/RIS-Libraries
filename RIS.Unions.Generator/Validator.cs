@@ -9,6 +9,11 @@ namespace RIS.Unions.Generator
 {
     internal static class Validator
     {
+        private const string UnionBaseTypeNamespace = "RIS.Unions";
+        private const string UnionBaseTypeName = "UnionBase";
+
+
+
         public static bool ValidateClass(
             this GeneratorExecutionContext context,
             ITypeSymbol classSymbol,
@@ -23,7 +28,7 @@ namespace RIS.Unions.Generator
             if (!classSymbol.ContainingSymbol.Equals(classSymbol.ContainingNamespace, SymbolEqualityComparer.Default))
                 diagnostics.Add(Diagnostic.Create(DiagnosticErrors.TopLevelError, attributeLocation, classSymbol.Name));
 
-            if (classSymbol.BaseType is null || classSymbol.BaseType.Name != "UnionBase" || classSymbol.BaseType.ContainingNamespace.ToString() != "RIS.Unions")
+            if (classSymbol.BaseType is null || classSymbol.BaseType.Name != UnionBaseTypeName || classSymbol.BaseType.ContainingNamespace.ToString() != UnionBaseTypeNamespace)
                 diagnostics.Add(Diagnostic.Create(DiagnosticErrors.WrongBaseType, attributeLocation, classSymbol.Name));
 
             if (classSymbol.DeclaredAccessibility != Accessibility.Public)
@@ -47,7 +52,7 @@ namespace RIS.Unions.Generator
                     .GetLocation();
 
             if (typeArguments.Any(x => x.Name == nameof(Object)))
-                diagnostics.Add(Diagnostic.Create(DiagnosticErrors.ObjectIsOneOfType, attributeLocation, classSymbol.Name));
+                diagnostics.Add(Diagnostic.Create(DiagnosticErrors.ObjectIsUnionType, attributeLocation, classSymbol.Name));
 
             return diagnostics.ReportIfAny(
                 context);

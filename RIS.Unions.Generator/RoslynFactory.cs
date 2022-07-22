@@ -4,6 +4,7 @@ using System.Linq;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace RIS.Unions.Generator
 {
@@ -14,21 +15,21 @@ namespace RIS.Unions.Generator
             ITypeSymbol arg,
             TypedConstant name)
         {
-            return SyntaxFactory.PropertyDeclaration(
-                    SyntaxFactory.PredefinedType(
-                        SyntaxFactory.Token(SyntaxKind.BoolKeyword)),
-                    SyntaxFactory.Identifier("Is" + name.Value))
+            return PropertyDeclaration(
+                    PredefinedType(
+                        Token(SyntaxKind.BoolKeyword)),
+                    Identifier("Is" + name.Value))
                 .WithModifiers(
-                    SyntaxFactory.TokenList(
-                        SyntaxFactory.Token(SyntaxKind.PublicKeyword)))
+                    TokenList(
+                        Token(SyntaxKind.PublicKeyword)))
                 .WithExpressionBody(
-                    SyntaxFactory.ArrowExpressionClause(
-                        SyntaxFactory.MemberAccessExpression(
+                    ArrowExpressionClause(
+                        MemberAccessExpression(
                             SyntaxKind.SimpleMemberAccessExpression,
-                            SyntaxFactory.ThisExpression(),
-                            SyntaxFactory.IdentifierName("Is" + param.Name))))
+                            ThisExpression(),
+                            IdentifierName("Is" + param.Name))))
                 .WithSemicolonToken(
-                    SyntaxFactory.Token(SyntaxKind.SemicolonToken))
+                    Token(SyntaxKind.SemicolonToken))
                 .NormalizeWhitespace();
         }
 
@@ -37,20 +38,20 @@ namespace RIS.Unions.Generator
             ITypeSymbol arg,
             TypedConstant name)
         {
-            return SyntaxFactory.PropertyDeclaration(
-                    SyntaxFactory.IdentifierName(arg.ToDisplayString()),
-                    SyntaxFactory.Identifier("As" + name.Value))
+            return PropertyDeclaration(
+                    IdentifierName(arg.ToDisplayString()),
+                    Identifier("As" + name.Value))
                 .WithModifiers(
-                    SyntaxFactory.TokenList(
-                        SyntaxFactory.Token(SyntaxKind.PublicKeyword)))
+                    TokenList(
+                        Token(SyntaxKind.PublicKeyword)))
                 .WithExpressionBody(
-                    SyntaxFactory.ArrowExpressionClause(
-                        SyntaxFactory.MemberAccessExpression(
+                    ArrowExpressionClause(
+                        MemberAccessExpression(
                             SyntaxKind.SimpleMemberAccessExpression,
-                            SyntaxFactory.ThisExpression(),
-                            SyntaxFactory.IdentifierName("As" + param.Name))))
+                            ThisExpression(),
+                            IdentifierName("As" + param.Name))))
                 .WithSemicolonToken(
-                    SyntaxFactory.Token(SyntaxKind.SemicolonToken))
+                    Token(SyntaxKind.SemicolonToken))
                 .NormalizeWhitespace();
         }
 
@@ -63,7 +64,7 @@ namespace RIS.Unions.Generator
             var remainderArgs = paramArgsPairs
                 .Except(new[] { (param, arg) })
                 .Select(x => x.arg.ToDisplayString())
-                .Select(x => SyntaxFactory.IdentifierName(x))
+                .Select(x => IdentifierName(x))
                 .ToArray();
             TypeSyntax remainderType = remainderArgs.Count() > 1
                 ? SyntaxFactory.GenericName(SyntaxFactory.Identifier("Union"))
@@ -71,49 +72,49 @@ namespace RIS.Unions.Generator
                         SyntaxFactory.SeparatedList<TypeSyntax>(remainderArgs)))
                 : remainderArgs.Single();
 
-            return SyntaxFactory.MethodDeclaration(
-                    SyntaxFactory.PredefinedType(
-                        SyntaxFactory.Token(SyntaxKind.BoolKeyword)),
-                    SyntaxFactory.Identifier("TryPick" + name.Value))
+            return MethodDeclaration(
+                    PredefinedType(
+                        Token(SyntaxKind.BoolKeyword)),
+                    Identifier("TryPick" + name.Value))
                 .WithModifiers(
-                    SyntaxFactory.TokenList(
-                        SyntaxFactory.Token(SyntaxKind.PublicKeyword)))
+                    TokenList(
+                        Token(SyntaxKind.PublicKeyword)))
                 .WithParameterList(
-                    SyntaxFactory.ParameterList(
-                        SyntaxFactory.SeparatedList<ParameterSyntax>(
+                    ParameterList(
+                        SeparatedList<ParameterSyntax>(
                             new SyntaxNodeOrToken[]{
-                                SyntaxFactory.Parameter(SyntaxFactory.Identifier("value"))
+                                Parameter(Identifier("value"))
                                     .WithModifiers(
-                                        SyntaxFactory.TokenList(
-                                            SyntaxFactory.Token(SyntaxKind.OutKeyword)))
-                                    .WithType(SyntaxFactory.IdentifierName(arg.ToDisplayString())),
-                                SyntaxFactory.Token(SyntaxKind.CommaToken),
-                                SyntaxFactory.Parameter(SyntaxFactory.Identifier("remainder"))
+                                        TokenList(
+                                            Token(SyntaxKind.OutKeyword)))
+                                    .WithType(IdentifierName(arg.ToDisplayString())),
+                                Token(SyntaxKind.CommaToken),
+                                Parameter(Identifier("remainder"))
                                     .WithModifiers(
-                                        SyntaxFactory.TokenList(
-                                            SyntaxFactory.Token(SyntaxKind.OutKeyword)))
+                                        TokenList(
+                                            Token(SyntaxKind.OutKeyword)))
                                     .WithType(remainderType)})))
                 .WithExpressionBody(
-                    SyntaxFactory.ArrowExpressionClause(
-                        SyntaxFactory.InvocationExpression(
-                            SyntaxFactory.MemberAccessExpression(
+                    ArrowExpressionClause(
+                        InvocationExpression(
+                            MemberAccessExpression(
                                 SyntaxKind.SimpleMemberAccessExpression,
-                                SyntaxFactory.ThisExpression(),
-                                SyntaxFactory.IdentifierName("TryPick" + param.Name)))
+                                ThisExpression(),
+                                IdentifierName("TryPick" + param.Name)))
                         .WithArgumentList(
-                            SyntaxFactory.ArgumentList(
-                                SyntaxFactory.SeparatedList<ArgumentSyntax>(
+                            ArgumentList(
+                                SeparatedList<ArgumentSyntax>(
                                     new SyntaxNodeOrToken[]{
-                            SyntaxFactory.Argument(
-                                SyntaxFactory.IdentifierName("value"))
+                            Argument(
+                                IdentifierName("value"))
                             .WithRefOrOutKeyword(
-                                SyntaxFactory.Token(SyntaxKind.OutKeyword)),
-                            SyntaxFactory.Token(SyntaxKind.CommaToken),
-                            SyntaxFactory.Argument(SyntaxFactory.IdentifierName("remainder"))
+                                Token(SyntaxKind.OutKeyword)),
+                            Token(SyntaxKind.CommaToken),
+                            Argument(IdentifierName("remainder"))
                             .WithRefOrOutKeyword(
-                                SyntaxFactory.Token(SyntaxKind.OutKeyword))})))))
+                                Token(SyntaxKind.OutKeyword))})))))
                 .WithSemicolonToken(
-                    SyntaxFactory.Token(SyntaxKind.SemicolonToken))
+                    Token(SyntaxKind.SemicolonToken))
                 .NormalizeWhitespace();
         }
     }

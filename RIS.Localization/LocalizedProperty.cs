@@ -4,12 +4,14 @@
 using System;
 using System.Globalization;
 using System.Reflection;
+using RIS.Extensions;
 
 namespace RIS.Localization
 {
     internal sealed class LocalizedProperty
     {
         private const BindingFlags AccessBindingFlags = BindingFlags.Instance
+                                                        | BindingFlags.Static
                                                         | BindingFlags.Public
                                                         | BindingFlags.NonPublic;
 
@@ -17,6 +19,8 @@ namespace RIS.Localization
 
         private readonly LocalizedListBase _localizedListBase;
         private readonly PropertyInfo _propertyInfo;
+
+        private readonly object _source;
 
 
 
@@ -34,6 +38,8 @@ namespace RIS.Localization
                 return _propertyInfo.PropertyType;
             }
         }
+
+        public bool IsStatic { get; }
         public string LocalizationKey { get; }
         public object NonLocalizedValue { get; }
 
@@ -48,8 +54,13 @@ namespace RIS.Localization
             _localizedListBase = localizedList;
             _propertyInfo = propertyInfo;
 
+            IsStatic = _propertyInfo.IsStatic();
             LocalizationKey = localizationKey;
             NonLocalizedValue = nonLocalizedValue;
+
+            _source = !IsStatic
+                ? _localizedListBase
+                : null;
         }
 
 
@@ -61,7 +72,7 @@ namespace RIS.Localization
                 if (!_propertyInfo.CanRead)
                     return null;
 
-                return _propertyInfo.GetValue(_localizedListBase,
+                return _propertyInfo.GetValue(_source,
                     AccessBindingFlags, null, null,
                     CultureInfo.InvariantCulture);
             }
@@ -80,7 +91,7 @@ namespace RIS.Localization
                 if (!_propertyInfo.CanWrite)
                     return;
 
-                _propertyInfo.SetValue(_localizedListBase,
+                _propertyInfo.SetValue(_source,
                     Convert.ChangeType(value, Type, CultureInfo.InvariantCulture),
                     AccessBindingFlags, null, null,
                     CultureInfo.InvariantCulture);

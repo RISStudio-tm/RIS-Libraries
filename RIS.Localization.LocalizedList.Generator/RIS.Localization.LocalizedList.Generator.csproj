@@ -6,15 +6,15 @@
     <IsRoslynComponent>True</IsRoslynComponent>
     <LangVersion>preview</LangVersion>
     <Nullable>Enable</Nullable>
-    <RootNamespace>RIS.Unions.Generator</RootNamespace>
-    <AssemblyName>RIS.Unions.Generator</AssemblyName>
-    <AssemblyVersion>1.1.0.0</AssemblyVersion>
-    <FileVersion>1.1.0.0</FileVersion>
+    <RootNamespace>RIS.Localization.LocalizedList.Generator</RootNamespace>
+    <AssemblyName>RIS.Localization.LocalizedList.Generator</AssemblyName>
+    <AssemblyVersion>1.0.0.0</AssemblyVersion>
+    <FileVersion>1.0.0.0</FileVersion>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <PackageId>RIS.Unions.Generator</PackageId>
-    <Product>RIS.Unions.Generator</Product>
-    <Version>1.1.0</Version>
-    <Description>A source generator for automaticly implements RIS.Unions.UnionBase hierarchies, etc. Part of the RIS "ecosystem".</Description>
+    <PackageId>RIS.Localization.LocalizedList.Generator</PackageId>
+    <Product>RIS.Localization.LocalizedList.Generator</Product>
+    <Version>1.0.0</Version>
+    <Description>A source generator for automaticly implements RIS.Localization.LocalizedListBase hierarchies, etc. Part of the RIS "ecosystem".</Description>
     <PackageTags>dotnet, dotnetcore, netframework, netcore, generator, source generator</PackageTags>
     <Authors>Dmitry Ponomarev</Authors>
     <Company>RISStudio</Company>

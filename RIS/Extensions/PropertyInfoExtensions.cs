@@ -8,6 +8,15 @@ namespace RIS.Extensions
 {
     public static class PropertyInfoExtensions
     {
+        public static bool IsStatic(this PropertyInfo propertyInfo)
+        {
+            var method = propertyInfo.GetMethod
+                         ?? propertyInfo.SetMethod;
+
+            return method != null
+                   && method.IsStatic;
+        }
+
         public static PropertyInfo GetDeclaring(this PropertyInfo propertyInfo)
         {
             try

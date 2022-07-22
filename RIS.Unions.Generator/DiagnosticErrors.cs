@@ -8,16 +8,16 @@ namespace RIS.Unions.Generator
         public static readonly DiagnosticDescriptor TopLevelError = new(
             "UNIONGEN001",
             "Class must be top level",
-            "Class '{0}' using OneOfGenerator must be top level",
-            "OneOfGenerator",
+            "Class '{0}' using UnionGenerator must be top level",
+            "UnionGenerator",
             DiagnosticSeverity.Error,
             true);
 
         public static readonly DiagnosticDescriptor WrongBaseType = new(
             "UNIONGEN002",
-            "Class must inherit from OneOfBase",
-            "Class '{0}' does not inherit from OneOfBase",
-            "OneOfGenerator",
+            "Class must inherit from UnionBase",
+            "Class '{0}' does not inherit from UnionBase",
+            "UnionGenerator",
             DiagnosticSeverity.Error,
             true);
 
@@ -25,15 +25,15 @@ namespace RIS.Unions.Generator
             "UNIONGEN003",
             "Class must be public",
             "Class '{0}' is not public",
-            "OneOfGenerator",
+            "UnionGenerator",
             DiagnosticSeverity.Error,
             true);
 
-        public static readonly DiagnosticDescriptor ObjectIsOneOfType = new(
+        public static readonly DiagnosticDescriptor ObjectIsUnionType = new(
             "UNIONGEN004",
             "Object is not a valid type parameter",
             "Defined conversions to or from a base type are not allowed for class '{0}'",
-            "OneOfGenerator",
+            "UnionGenerator",
             DiagnosticSeverity.Error,
             true);
 
@@ -41,7 +41,7 @@ namespace RIS.Unions.Generator
             "UNIONGEN005",
             "Wrong number of names",
             "Expected zero or {0} names but got {1}",
-            "OneOfGenerator",
+            "UnionGenerator",
             DiagnosticSeverity.Error,
             true);
 
@@ -49,7 +49,7 @@ namespace RIS.Unions.Generator
             "UNIONGEN006",
             "Name cannot be null or empty",
             "Name at position {0} cannot be null or empty",
-            "OneOfGenerator",
+            "UnionGenerator",
             DiagnosticSeverity.Error,
             true);
 
@@ -57,7 +57,7 @@ namespace RIS.Unions.Generator
             "UNIONGEN007",
             "Invalid name",
             "The name '{0}' cannot produce valid property or method names",
-            "OneOfGenerator",
+            "UnionGenerator",
             DiagnosticSeverity.Error,
             true);
     }
