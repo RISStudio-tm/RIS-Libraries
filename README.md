@@ -40,6 +40,10 @@
     [![Nuget](https://img.shields.io/nuget/v/RIS.Localization?style=flat)](https://www.nuget.org/packages/RIS.Localization)
     [![Nuget](https://img.shields.io/nuget/dt/RIS.Localization?style=flat)](https://www.nuget.org/packages/RIS.Localization)
     
+- **[RIS.Localization.LocalizedList.Generator](https://www.nuget.org/packages/RIS.Localization.LocalizedList.Generator)**<br/>
+    [![Nuget](https://img.shields.io/nuget/v/RIS.Localization.LocalizedList.Generator?style=flat)](https://www.nuget.org/packages/RIS.Localization.LocalizedList.Generator)
+    [![Nuget](https://img.shields.io/nuget/dt/RIS.Localization.LocalizedList.Generator?style=flat)](https://www.nuget.org/packages/RIS.Localization.LocalizedList.Generator)
+    
 - **[RIS.Localization.Json](https://www.nuget.org/packages/RIS.Localization.Json)**<br/>
     [![Nuget](https://img.shields.io/nuget/v/RIS.Localization.Json?style=flat)](https://www.nuget.org/packages/RIS.Localization.Json)
     [![Nuget](https://img.shields.io/nuget/dt/RIS.Localization.Json?style=flat)](https://www.nuget.org/packages/RIS.Localization.Json)
