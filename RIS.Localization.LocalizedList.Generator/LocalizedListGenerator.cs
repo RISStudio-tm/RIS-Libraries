@@ -34,34 +34,43 @@ namespace RIS.Localization.LocalizedList.Generator
             var compilation =
                 context.Compilation;
 
-            List<(INamedTypeSymbol, ClassDeclarationSyntax?)> namedTypeSymbols = new();
+            List<(INamedTypeSymbol, ClassDeclarationSyntax?)> classSymbols = new();
 
             foreach (var classDeclaration in receiver.CandidateClasses)
             {
                 var model = compilation.GetSemanticModel(
                     classDeclaration.SyntaxTree);
-                var namedTypeSymbol = model.GetDeclaredSymbol(
+                var classSymbol = model.GetDeclaredSymbol(
                     classDeclaration);
+                var baseClassSymbol = classSymbol;
 
-                if (namedTypeSymbol?.BaseType is null
-                    || namedTypeSymbol.BaseType.Name != LocalizedListBaseTypeName
-                    || namedTypeSymbol.BaseType.ContainingNamespace.ToString() != LocalizedListBaseTypeNamespace)
+                do
+                {
+                    baseClassSymbol = baseClassSymbol?.BaseType;
+                } while (baseClassSymbol?.BaseType != null
+                         && baseClassSymbol.BaseType?.SpecialType != SpecialType.System_Object);
+
+                if (classSymbol is null
+                    || classSymbol.IsAbstract
+                    || baseClassSymbol is null
+                    || baseClassSymbol.Name != LocalizedListBaseTypeName
+                    || baseClassSymbol.ContainingNamespace.ToString() != LocalizedListBaseTypeNamespace)
                 {
                     continue;
                 }
 
-                namedTypeSymbols.Add((namedTypeSymbol!, classDeclaration));
+                classSymbols.Add((classSymbol!, classDeclaration));
             }
 
-            foreach (var (namedSymbol, classDeclaration) in namedTypeSymbols)
+            foreach (var (classSymbol, classDeclaration) in classSymbols)
             {
                 var classSource = ProcessClass(
-                    namedSymbol, context, classDeclaration!);
+                    classSymbol, context, classDeclaration!);
 
                 if (classSource is null)
                     continue;
 
-                context.AddSource($"{namedSymbol.ContainingNamespace}_{namedSymbol.Name}.g.cs",
+                context.AddSource($"{classSymbol.ContainingNamespace}_{classSymbol.Name}.g.cs",
                     SourceText.From(classSource, Encoding.UTF8));
             }
         }

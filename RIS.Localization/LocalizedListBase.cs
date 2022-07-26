@@ -49,6 +49,8 @@ namespace RIS.Localization
                 CreateInstances(Types);
         }
 
+
+
         protected LocalizedListBase(
             LocalizationFactory factory,
             bool notifyPerProperty = false)
@@ -272,8 +274,18 @@ namespace RIS.Localization
                         .CreateInstance(
                             type, true);
                 }
-                catch (Exception)
+                catch (MissingMethodException e)
                 {
+                    Events.OnError(null, new RErrorEventArgs(e,
+                        $"Failed to create an instance of the '{type}' class. Classes which inherit from 'LocalizedListBase' class should have a default constructor."));
+
+                    continue;
+                }
+                catch (Exception e)
+                {
+                    Events.OnError(null, new RErrorEventArgs(e,
+                        $"Failed to create an instance of the '{type}' class."));
+
                     continue;
                 }
 
