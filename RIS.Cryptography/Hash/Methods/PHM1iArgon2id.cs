@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using RIS.Cryptography.Cipher.Methods;
+using RIS.Cryptography.Hash.Methods.Entities;
 using RIS.Randomizing;
 
 namespace RIS.Cryptography.Hash.Methods

@@ -223,7 +223,7 @@ namespace RIS.Cryptography
             if (compareFunction == null)
                 return false;
 
-            var minLength = System.Math.Min(
+            var minLength = Math.Min(
                 left.Length, right.Length);
             var difference =
                 left.Length - right.Length;
@@ -295,7 +295,7 @@ namespace RIS.Cryptography
 
             if (ignoreCase)
             {
-                var minLength = System.Math.Max(
+                var minLength = Math.Min(
                     left.Length, right.Length);
 
                 for (int i = 0; i < minLength; ++i)
@@ -334,7 +334,7 @@ namespace RIS.Cryptography
             {
                 var newLeft = new char[left.Length];
                 var newRight = new char[right.Length];
-                var minLength = System.Math.Max(
+                var minLength = Math.Min(
                     left.Length, right.Length);
 
                 for (int i = 0; i < minLength; ++i)
@@ -385,7 +385,7 @@ namespace RIS.Cryptography
             if (left == null || right == null)
                 return false;
 
-            var minLength = System.Math.Min(
+            var minLength = Math.Min(
                 left.Length, right.Length);
             var lengthDifference =
                 left.Length - right.Length;
@@ -469,7 +469,7 @@ namespace RIS.Cryptography
             if (left == null || right == null)
                 return false;
 
-            var minLength = System.Math.Min(
+            var minLength = Math.Min(
                 left.Length, right.Length);
             var lengthDifference =
                 left.Length - right.Length;

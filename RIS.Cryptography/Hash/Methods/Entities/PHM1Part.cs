@@ -3,7 +3,7 @@
 
 using System;
 
-namespace RIS.Cryptography.Hash.Methods
+namespace RIS.Cryptography.Hash.Methods.Entities
 {
     public sealed class PHM1Part
     {
