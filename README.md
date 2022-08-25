@@ -75,6 +75,3 @@
 - **[RIS.Text](https://www.nuget.org/packages/RIS.Text)**<br/>
     [![Nuget](https://img.shields.io/nuget/v/RIS.Text?style=flat)](https://www.nuget.org/packages/RIS.Text)
     [![Nuget](https://img.shields.io/nuget/dt/RIS.Text?style=flat)](https://www.nuget.org/packages/RIS.Text)
-
----
-
