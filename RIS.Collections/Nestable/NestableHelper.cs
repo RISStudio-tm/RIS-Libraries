@@ -226,17 +226,23 @@ namespace RIS.Collections.Nestable
         public static NestableCollectionType GetCollectionType(
             string typeName)
         {
-            if (string.IsNullOrEmpty(typeName))
+            return GetCollectionType(
+                typeName.AsSpan());
+        }
+        public static NestableCollectionType GetCollectionType(
+            ReadOnlySpan<char> typeName)
+        {
+            if (typeName == null || typeName.IsEmpty)
                 return NestableCollectionType.Unknown;
 
             if (typeName.IndexOf('`') >= 0)
-                typeName = typeName.Substring(0, typeName.Length - 2);
+                typeName = typeName.Slice(0, typeName.Length - 2);
             else if (typeName.IndexOf('[') >= 0)
-                typeName = typeName.Substring(0, typeName.Length - 3);
+                typeName = typeName.Slice(0, typeName.Length - 3);
             else if (typeName.IndexOf('<') >= 0)
-                typeName = typeName.Substring(0, typeName.Length - 3);
+                typeName = typeName.Slice(0, typeName.Length - 3);
 
-            if (CollectionsTypes.TryGetValue(typeName, out var type))
+            if (CollectionsTypes.TryGetValue(typeName.ToString(), out var type))
                 return type;
 
             return NestableCollectionType.Unknown;
@@ -482,7 +488,8 @@ namespace RIS.Collections.Nestable
             ref var currentIndex = ref currentCollectionInfo.Index;
             ref var currentGeneralType = ref currentCollectionInfo.GeneralType;
 
-            var currentDictionary = currentGeneralType == CollectionGeneralType.Dictionary
+            var currentCollectionIsDictionary = currentGeneralType == CollectionGeneralType.Dictionary;
+            var currentDictionary = currentCollectionIsDictionary
                 ? (INestableDictionary<TValue>)currentCollection
                 : null;
 
@@ -510,7 +517,7 @@ namespace RIS.Collections.Nestable
 
             builder.Append('{');
 
-            if (currentGeneralType == CollectionGeneralType.Dictionary)
+            if (currentCollectionIsDictionary)
             {
                 var key = currentDictionary.Key;
 
@@ -545,7 +552,7 @@ namespace RIS.Collections.Nestable
 
                 if (currentElement.Type == NestedType.Element)
                 {
-                    if (currentGeneralType == CollectionGeneralType.Dictionary)
+                    if (currentCollectionIsDictionary)
                     {
                         ToStringRepresent(
                             ref builder,
@@ -563,7 +570,7 @@ namespace RIS.Collections.Nestable
                 }
                 else if (currentElement.Type == NestedType.Array)
                 {
-                    if (currentGeneralType == CollectionGeneralType.Dictionary)
+                    if (currentCollectionIsDictionary)
                     {
                         ToStringRepresent(
                             ref builder,
@@ -628,7 +635,8 @@ namespace RIS.Collections.Nestable
             currentIndex = ref currentCollectionInfo.Index;
             currentGeneralType = ref currentCollectionInfo.GeneralType;
 
-            currentDictionary = currentGeneralType == CollectionGeneralType.Dictionary
+            currentCollectionIsDictionary = currentGeneralType == CollectionGeneralType.Dictionary;
+            currentDictionary = currentCollectionIsDictionary
                 ? (INestableDictionary<TValue>)currentCollection
                 : null;
 
@@ -841,7 +849,7 @@ namespace RIS.Collections.Nestable
             }
 
             int keyDivide;
-            string type;
+            ReadOnlySpan<char> type;
 
             var typeDivide = represent.IndexOf(
                 "||", 1, represent.Length - 1,
@@ -852,13 +860,15 @@ namespace RIS.Collections.Nestable
                 StringComparison.Ordinal)) != -1)
             {
                 type = represent
-                    .Substring(keyDivide + 2,
+                    .AsSpan()
+                    .Slice(keyDivide + 2,
                         typeDivide - keyDivide - 2);
             }
             else
             {
                 type = represent
-                    .Substring(1,
+                    .AsSpan()
+                    .Slice(1,
                         typeDivide - 1);
             }
 
@@ -894,7 +904,8 @@ namespace RIS.Collections.Nestable
             ref var currentDivideIndex = ref currentCollectionInfo.DivideIndex;
             ref var currentGeneralType = ref currentCollectionInfo.GeneralType;
 
-            var currentDictionary = currentGeneralType == CollectionGeneralType.Dictionary
+            var currentCollectionIsDictionary = currentGeneralType == CollectionGeneralType.Dictionary;
+            var currentDictionary = currentCollectionIsDictionary
                 ? (INestableDictionary<TValue>)currentCollection
                 : null;
 
@@ -929,7 +940,7 @@ namespace RIS.Collections.Nestable
             }
 
             int keyDivide;
-            string type;
+            ReadOnlySpan<char> type;
 
             var typeDivide = represent.IndexOf(
                 "||", currentStartIndex + 1, currentLength - 1,
@@ -943,17 +954,19 @@ namespace RIS.Collections.Nestable
                     .Substring(currentStartIndex + 1,
                         keyDivide - currentStartIndex - 1));
 
-                if (currentGeneralType == CollectionGeneralType.Dictionary)
+                if (currentCollectionIsDictionary)
                     currentDictionary.Key = key;
 
                 type = represent
-                    .Substring(keyDivide + 2,
+                    .AsSpan()
+                    .Slice(keyDivide + 2,
                         typeDivide - keyDivide - 2);
             }
             else
             {
                 type = represent
-                    .Substring(currentStartIndex + 1,
+                    .AsSpan()
+                    .Slice(currentStartIndex + 1,
                         typeDivide - currentStartIndex - 1);
             }
 
@@ -996,48 +1009,48 @@ namespace RIS.Collections.Nestable
                         partStartIndex + 1, partEndIndex - (partStartIndex + 1));
 
                     var result = default(TValue);
-                    var node = FromStringRepresent(
+                    var (resultKey, resultValue) = FromStringRepresent(
                         ref partRepresent, ref result,
-                        currentGeneralType == CollectionGeneralType.Dictionary,
+                        currentCollectionIsDictionary,
                         false);
 
-                    if (currentGeneralType == CollectionGeneralType.Dictionary)
+                    if (currentCollectionIsDictionary)
                     {
                         currentDictionary.Add(
-                            node.Key,
-                            node.Value);
+                            resultKey,
+                            resultValue);
                     }
                     else
                     {
                         currentCollection.Add(
-                            node.Value);
+                            resultValue);
                     }
                 }
                 else if (partType == NestedType.Array)
                 {
                     var result = Array.Empty<TValue>();
-                    var node = FromStringRepresent(
+                    var (resultKey, resultValue) = FromStringRepresent(
                         ref represent, ref result,
                         partStartIndex, partEndIndex, partLength,
-                        currentGeneralType == CollectionGeneralType.Dictionary);
+                        currentCollectionIsDictionary);
 
-                    if (currentGeneralType == CollectionGeneralType.Dictionary)
+                    if (currentCollectionIsDictionary)
                     {
                         currentDictionary.Add(
-                            node.Key,
-                            node.Value);
+                            resultKey,
+                            resultValue);
                     }
                     else
                     {
                         currentCollection.Add(
-                            node.Value);
+                            resultValue);
                     }
                 }
                 else if (partType == NestedType.Collection)
                 {
                     int resultKeyDivide;
                     string resultKey = null;
-                    string resultType;
+                    ReadOnlySpan<char> resultType;
 
                     var resultTypeDivide = represent.IndexOf(
                         "||", partStartIndex + 1, partLength - 1,
@@ -1051,13 +1064,15 @@ namespace RIS.Collections.Nestable
                             .Substring(partStartIndex + 1,
                                 resultKeyDivide - partStartIndex - 1));
                         resultType = represent
-                            .Substring(resultKeyDivide + 2,
+                            .AsSpan()
+                            .Slice(resultKeyDivide + 2,
                                 resultTypeDivide - resultKeyDivide - 2);
                     }
                     else
                     {
                         resultType = represent
-                            .Substring(partStartIndex + 1,
+                            .AsSpan()
+                            .Slice(partStartIndex + 1,
                                 resultTypeDivide - partStartIndex - 1);
                     }
 
@@ -1065,7 +1080,7 @@ namespace RIS.Collections.Nestable
                             GetCollectionType(resultType))
                         .Collection;
 
-                    if (currentGeneralType == CollectionGeneralType.Dictionary)
+                    if (currentCollectionIsDictionary)
                     {
                         currentDictionary.Add(
                             resultKey,
@@ -1109,7 +1124,8 @@ namespace RIS.Collections.Nestable
             currentDivideIndex = ref currentCollectionInfo.DivideIndex;
             currentGeneralType = ref currentCollectionInfo.GeneralType;
 
-            currentDictionary = currentGeneralType == CollectionGeneralType.Dictionary
+            currentCollectionIsDictionary = currentGeneralType == CollectionGeneralType.Dictionary;
+            currentDictionary = currentCollectionIsDictionary
                 ? (INestableDictionary<TValue>)currentCollection
                 : null;
 

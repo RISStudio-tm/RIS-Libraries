@@ -390,53 +390,26 @@ namespace RIS.Cryptography
             var lengthDifference =
                 left.Length - right.Length;
 
-            if ((minLength & sizeof(long) - 1) == 0)
+            var length = minLength - (minLength % sizeof(long));
+
+            fixed (byte* leftPointer = left)
+            fixed (byte* rightPointer = right)
             {
-                fixed (byte* leftPointer = left)
-                fixed (byte* rightPointer = right)
+                long difference = lengthDifference;
+
+                for (var i = 0; i < length; i += sizeof(long))
                 {
-                    long difference = lengthDifference;
-
-                    for (int i = 0; i < minLength; i += sizeof(long))
-                    {
-                        difference |=
-                            *(long*)(leftPointer + i) - *(long*)(rightPointer + i);
-                    }
-
-                    return difference == 0;
+                    difference |=
+                        *(long*)(leftPointer + i) - *(long*)(rightPointer + i);
                 }
-            }
-            else if ((minLength & sizeof(int) - 1) == 0)
-            {
-                fixed (byte* leftPointer = left)
-                fixed (byte* rightPointer = right)
+
+                for (var i = length; i < minLength; ++i)
                 {
-                    int difference = lengthDifference;
-
-                    for (int i = 0; i < minLength; i += sizeof(int))
-                    {
-                        difference |=
-                            *(int*)(leftPointer + i) - *(int*)(rightPointer + i);
-                    }
-
-                    return difference == 0;
+                    difference |=
+                        (long)(*(leftPointer + i) - *(rightPointer + i));
                 }
-            }
-            else
-            {
-                fixed (byte* leftPointer = left)
-                fixed (byte* rightPointer = right)
-                {
-                    int difference = lengthDifference;
 
-                    for (int i = 0; i < minLength; ++i)
-                    {
-                        difference |=
-                            *(leftPointer + i) - *(rightPointer + i);
-                    }
-
-                    return difference == 0;
-                }
+                return difference == 0;
             }
         }
 
@@ -474,53 +447,26 @@ namespace RIS.Cryptography
             var lengthDifference =
                 left.Length - right.Length;
 
-            if ((minLength & sizeof(long) - 1) == 0)
+            var length = minLength - (minLength % sizeof(long));
+
+            fixed (T* leftPointer = left)
+            fixed (T* rightPointer = right)
             {
-                fixed (T* leftPointer = left)
-                fixed (T* rightPointer = right)
+                long difference = lengthDifference;
+
+                for (var i = 0; i < length; i += sizeof(long))
                 {
-                    long difference = lengthDifference;
-
-                    for (int i = 0; i < minLength; i += sizeof(long))
-                    {
-                        difference |=
-                            *(long*)(leftPointer + i) - *(long*)(rightPointer + i);
-                    }
-
-                    return difference == 0;
+                    difference |=
+                        *(long*)(leftPointer + i) - *(long*)(rightPointer + i);
                 }
-            }
-            else if ((minLength & sizeof(int) - 1) == 0)
-            {
-                fixed (T* leftPointer = left)
-                fixed (T* rightPointer = right)
+
+                for (var i = length; i < minLength; ++i)
                 {
-                    int difference = lengthDifference;
-
-                    for (int i = 0; i < minLength; i += sizeof(int))
-                    {
-                        difference |=
-                            *(int*)(leftPointer + i) - *(int*)(rightPointer + i);
-                    }
-
-                    return difference == 0;
+                    difference |=
+                        (long)(*(byte*)(leftPointer + i) - *(byte*)(rightPointer + i));
                 }
-            }
-            else
-            {
-                fixed (T* leftPointer = left)
-                fixed (T* rightPointer = right)
-                {
-                    int difference = lengthDifference;
 
-                    for (int i = 0; i < minLength; ++i)
-                    {
-                        difference |=
-                            *(byte*)(leftPointer + i) - *(byte*)(rightPointer + i);
-                    }
-
-                    return difference == 0;
-                }
+                return difference == 0;
             }
         }
     }
