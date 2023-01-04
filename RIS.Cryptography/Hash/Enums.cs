@@ -41,7 +41,12 @@ namespace RIS.Cryptography.Hash
         Argon2dWP = 22,
         Argon2idRaw = 23,
         Argon2idWNP = 24,
-        Argon2idWP = 25
+        Argon2idWP = 25,
+        PHM1iArgon2id = 26,
+        XXHash32 = 27,
+        XXHash64 = 28,
+        XXHash3b64 = 29,
+        XXHash3b128 = 30
     }
 
     public enum BCryptHashType : sbyte
