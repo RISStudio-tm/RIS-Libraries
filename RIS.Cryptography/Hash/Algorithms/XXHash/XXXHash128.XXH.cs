@@ -1,5 +1,5 @@
 // Copyright (c) RISStudio, 2020. All rights reserved.
-// Licensed under the Apache License, Version 2.0. See LICENSE file in the project root for license information. 
+// Licensed under the Apache License, Version 2.0. See LICENSE file in the project root for license information.
 
 using System;
 using System.Runtime.CompilerServices;
@@ -12,7 +12,7 @@ using RIS.Cryptography.Entities;
 namespace RIS.Cryptography.Hash.Algorithms
 {
     // ReSharper disable InconsistentNaming
-    public static partial class XXHash3
+    public static partial class XXHash128
     {
         private static readonly ulong XXH_PRIME64_1 = 11400714785074694791UL;
         private static readonly ulong XXH_PRIME64_2 = 14029467366897019727UL;
@@ -27,10 +27,10 @@ namespace RIS.Cryptography.Hash.Algorithms
         private static readonly uint XXH_PRIME32_5 = 374761393U;
 
         private static readonly int XXH_STRIPE_LEN = 64;
-        private static readonly int XXH_ACC_NB = XXH_STRIPE_LEN / 8;
+        private static readonly int XXH_ACC_NB = 8;
         private static readonly int XXH_SECRET_CONSUME_RATE = 8;
-        private static readonly int XXH_SECRET_DEFAULT_SIZE = 192;
         private static readonly int XXH_SECRET_MERGEACCS_START = 11;
+        private static readonly int XXH_SECRET_DEFAULT_SIZE = 192;
         private static readonly int XXH_SECRET_LASTACC_START = 7;
 
         private static readonly byte MM_SHUFFLE_0_3_0_1 = 0b0011_0001;
@@ -44,6 +44,13 @@ namespace RIS.Cryptography.Hash.Algorithms
 #endif
 
 
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private static uint XXH_rotl32(
+            uint x, int r)
+        {
+            return (x << r) | (x >> (32 - r));
+        }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static ulong XXH_rotl64(
@@ -85,33 +92,33 @@ namespace RIS.Cryptography.Hash.Algorithms
         {
             return v64 ^ (v64 >> shift);
         }
-
+        
 
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static uint XXH_swap32(
             uint x)
         {
-            return ((x << 24) & 0xff000000) |
-                   ((x << 8) & 0x00ff0000) |
-                   ((x >> 8) & 0x0000ff00) |
-                   ((x >> 24) & 0x000000ff);
+            return ((x << 24) & 0xff000000 ) | 
+                   ((x <<  8) & 0x00ff0000 ) | 
+                   ((x >>  8) & 0x0000ff00 ) | 
+                   ((x >> 24) & 0x000000ff );
         }
-
+        
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static ulong XXH_swap64(
             ulong x)
         {
-            return ((x << 56) & 0xff00000000000000UL) |
-                   ((x << 40) & 0x00ff000000000000UL) |
-                   ((x << 24) & 0x0000ff0000000000UL) |
-                   ((x << 8) & 0x000000ff00000000UL) |
-                   ((x >> 8) & 0x00000000ff000000UL) |
-                   ((x >> 24) & 0x0000000000ff0000UL) |
-                   ((x >> 40) & 0x000000000000ff00UL) |
+            return ((x << 56) & 0xff00000000000000UL) | 
+                   ((x << 40) & 0x00ff000000000000UL) | 
+                   ((x << 24) & 0x0000ff0000000000UL) | 
+                   ((x << 8)  & 0x000000ff00000000UL) | 
+                   ((x >> 8)  & 0x00000000ff000000UL) | 
+                   ((x >> 24) & 0x0000000000ff0000UL) | 
+                   ((x >> 40) & 0x000000000000ff00UL) | 
                    ((x >> 56) & 0x00000000000000ffUL);
         }
-
+        
 
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -120,8 +127,7 @@ namespace RIS.Cryptography.Hash.Algorithms
         {
             return (ulong)(uint)(x) * (ulong)(uint)(y);
         }
-
-
+        
 
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -132,7 +138,7 @@ namespace RIS.Cryptography.Hash.Algorithms
             if (Bmi2.IsSupported)
                 return XXH_mult64to128_bmi2(lhs, rhs);
 #endif
-
+            
             return XXH_mult64to128_scalar(lhs, rhs);
         }
 
@@ -153,12 +159,12 @@ namespace RIS.Cryptography.Hash.Algorithms
             ulong lhs, ulong rhs)
         {
             var lo_lo = XXH_mult32to64(lhs & 0xFFFFFFFF, rhs & 0xFFFFFFFF);
-            var hi_lo = XXH_mult32to64(lhs >> 32, rhs & 0xFFFFFFFF);
+            var hi_lo = XXH_mult32to64(lhs >> 32,        rhs & 0xFFFFFFFF);
             var lo_hi = XXH_mult32to64(lhs & 0xFFFFFFFF, rhs >> 32);
-            var hi_hi = XXH_mult32to64(lhs >> 32, rhs >> 32);
-
+            var hi_hi = XXH_mult32to64(lhs >> 32,        rhs >> 32);
+            
             var cross = (lo_lo >> 32) + (hi_lo & 0xFFFFFFFF) + lo_hi;
-            var upper = (hi_lo >> 32) + (cross >> 32) + hi_hi;
+            var upper = (hi_lo >> 32) + (cross >> 32)        + hi_hi;
             var lower = (cross << 32) | (lo_lo & 0xFFFFFFFF);
 
             return new UInt128(upper, lower);
