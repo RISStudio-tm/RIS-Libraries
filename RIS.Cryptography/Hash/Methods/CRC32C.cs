@@ -50,7 +50,7 @@ namespace RIS.Cryptography.Hash.Methods
 
                     hashValue ^= 0xFFFFFFFF;
 
-                    return BitConverter.GetBytes(
+                    return BytesUtils.ToBytesBE(
                         (uint)hashValue);
                 };
             }
@@ -81,7 +81,7 @@ namespace RIS.Cryptography.Hash.Methods
 
                     hashValue ^= 0xFFFFFFFF;
 
-                    return BitConverter.GetBytes(
+                    return BytesUtils.ToBytesBE(
                         hashValue);
                 };
             }

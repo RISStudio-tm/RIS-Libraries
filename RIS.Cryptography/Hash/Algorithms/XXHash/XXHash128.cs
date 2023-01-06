@@ -57,43 +57,6 @@ namespace RIS.Cryptography.Hash.Algorithms
                 return UnsafeComputeHash(ptr, length, seed);
             }
         }
-        
-
-        public static unsafe byte[] ComputeHashBytes(
-            byte[] data, int length, ulong seed = 0)
-        {
-            fixed (byte* ptr = &data[0])
-            {
-                return UnsafeComputeHash(ptr, length, seed).ToBytes();
-            }
-        }
-        public static unsafe byte[] ComputeHashBytes(
-            Span<byte> data, int length, ulong seed = 0)
-        {
-            fixed (byte* ptr = &data[0])
-            {
-                return UnsafeComputeHash(ptr, length, seed).ToBytes();
-            }
-        }
-        public static unsafe byte[] ComputeHashBytes(
-            ReadOnlySpan<byte> data, int length, ulong seed = 0)
-        {
-            fixed (byte* ptr = &data[0])
-            {
-                return UnsafeComputeHash(ptr, length, seed).ToBytes();
-            }
-        }
-        public static unsafe byte[] ComputeHashBytes(
-            string data, ulong seed = 0)
-        {
-            fixed (char* c = data)
-            {
-                var ptr = (byte*) c;
-                var length = data.Length * 2;
-                
-                return UnsafeComputeHash(ptr, length, seed).ToBytes();
-            }
-        }
     }
     // ReSharper restore InconsistentNaming
 }

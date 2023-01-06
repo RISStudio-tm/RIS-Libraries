@@ -164,7 +164,7 @@ namespace RIS.Cryptography.Hash.Algorithms
 
         protected override byte[] HashFinal()
         {
-            return BitConverter.GetBytes(CurrentInitial);
+            return BytesUtils.ToBytesBE(CurrentInitial);
         }
     }
 }

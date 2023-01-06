@@ -2,7 +2,10 @@
 // Licensed under the Apache License, Version 2.0. See LICENSE file in the project root for license information.
 
 using System;
+using System.Buffers.Binary;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
+using RIS.Cryptography.Entities;
 
 namespace RIS.Cryptography
 {
@@ -235,6 +238,262 @@ namespace RIS.Cryptography
 
                 goto Table32C;
             }
+        }
+
+
+
+        public static byte[] ToBytes(UInt128 source)
+        {
+            var bytes = new byte[sizeof(ulong) * 2];
+
+            Unsafe.As<byte, ulong>(ref bytes[0]) = source.Lower;
+            Unsafe.As<byte, ulong>(ref bytes[8]) = source.Upper;
+
+            return bytes;
+        }
+        public static byte[] ToBytesLE(UInt128 source)
+        {
+            var buffer = new byte[sizeof(ulong) * 2];
+
+            ToBytesLEUnsafe(source, buffer);
+
+            return buffer;
+        }
+        public static bool ToBytesLE(UInt128 source, Span<byte> buffer)
+        {
+            if (buffer.Length < UInt128.Size)
+                return false;
+
+            ToBytesLEUnsafe(source, buffer);
+
+            return true;
+        }
+        public static void ToBytesLEUnsafe(UInt128 source, Span<byte> buffer)
+        {
+            var lower = source.Lower;
+            var upper = source.Upper;
+
+            if (!BitConverter.IsLittleEndian)
+            {
+                lower = BinaryPrimitives
+                    .ReverseEndianness(lower);
+                upper = BinaryPrimitives
+                    .ReverseEndianness(upper);
+            }
+
+            ref var address =
+                ref MemoryMarshal.GetReference(
+                    buffer);
+
+            Unsafe.WriteUnaligned(
+                ref address,
+                lower);
+            Unsafe.WriteUnaligned(
+                ref Unsafe.AddByteOffset(
+                    ref address,
+                    sizeof(ulong)),
+                upper);
+        }
+        public static byte[] ToBytesBE(UInt128 source)
+        {
+            var buffer = new byte[sizeof(ulong) * 2];
+
+            ToBytesBEUnsafe(source, buffer);
+
+            return buffer;
+        }
+        public static bool ToBytesBE(UInt128 source, Span<byte> buffer)
+        {
+            if (buffer.Length < UInt128.Size)
+                return false;
+
+            ToBytesBEUnsafe(source, buffer);
+
+            return true;
+        }
+        public static void ToBytesBEUnsafe(UInt128 source, Span<byte> buffer)
+        {
+            var lower = source.Lower;
+            var upper = source.Upper;
+
+            if (BitConverter.IsLittleEndian)
+            {
+                lower = BinaryPrimitives
+                    .ReverseEndianness(lower);
+                upper = BinaryPrimitives
+                    .ReverseEndianness(upper);
+            }
+
+            ref var address =
+                ref MemoryMarshal.GetReference(
+                    buffer);
+
+            Unsafe.WriteUnaligned(
+                ref address,
+                upper);
+            Unsafe.WriteUnaligned(
+                ref Unsafe.AddByteOffset(
+                    ref address,
+                    sizeof(ulong)),
+                lower);
+        }
+
+        public static byte[] ToBytes(ulong source)
+        {
+            var bytes = new byte[sizeof(ulong)];
+
+            Unsafe.As<byte, ulong>(ref bytes[0]) = source;
+
+            return bytes;
+        }
+        public static byte[] ToBytesLE(ulong source)
+        {
+            var buffer = new byte[sizeof(ulong)];
+
+            ToBytesLEUnsafe(source, buffer);
+
+            return buffer;
+        }
+        public static bool ToBytesLE(ulong source, Span<byte> buffer)
+        {
+            if (buffer.Length < sizeof(ulong))
+                return false;
+
+            ToBytesLEUnsafe(source, buffer);
+
+            return true;
+        }
+        public static void ToBytesLEUnsafe(ulong source, Span<byte> buffer)
+        {
+            var value = source;
+
+            if (!BitConverter.IsLittleEndian)
+            {
+                value = BinaryPrimitives
+                    .ReverseEndianness(value);
+            }
+
+            ref var address =
+                ref MemoryMarshal.GetReference(
+                    buffer);
+
+            Unsafe.WriteUnaligned(
+                ref address,
+                value);
+        }
+        public static byte[] ToBytesBE(ulong source)
+        {
+            var buffer = new byte[sizeof(ulong)];
+
+            ToBytesBEUnsafe(source, buffer);
+
+            return buffer;
+        }
+        public static bool ToBytesBE(ulong source, Span<byte> buffer)
+        {
+            if (buffer.Length < sizeof(ulong))
+                return false;
+
+            ToBytesBEUnsafe(source, buffer);
+
+            return true;
+        }
+        public static void ToBytesBEUnsafe(ulong source, Span<byte> buffer)
+        {
+            var value = source;
+
+            if (BitConverter.IsLittleEndian)
+            {
+                value = BinaryPrimitives
+                    .ReverseEndianness(value);
+            }
+
+            ref var address =
+                ref MemoryMarshal.GetReference(
+                    buffer);
+
+            Unsafe.WriteUnaligned(
+                ref address,
+                value);
+        }
+
+        public static byte[] ToBytes(uint source)
+        {
+            var bytes = new byte[sizeof(uint)];
+
+            Unsafe.As<byte, uint>(ref bytes[0]) = source;
+
+            return bytes;
+        }
+        public static byte[] ToBytesLE(uint source)
+        {
+            var buffer = new byte[sizeof(uint)];
+
+            ToBytesLEUnsafe(source, buffer);
+
+            return buffer;
+        }
+        public static bool ToBytesLE(uint source, Span<byte> buffer)
+        {
+            if (buffer.Length < sizeof(uint))
+                return false;
+
+            ToBytesLEUnsafe(source, buffer);
+
+            return true;
+        }
+        public static void ToBytesLEUnsafe(uint source, Span<byte> buffer)
+        {
+            var value = source;
+
+            if (!BitConverter.IsLittleEndian)
+            {
+                value = BinaryPrimitives
+                    .ReverseEndianness(value);
+            }
+
+            ref var address =
+                ref MemoryMarshal.GetReference(
+                    buffer);
+
+            Unsafe.WriteUnaligned(
+                ref address,
+                value);
+        }
+        public static byte[] ToBytesBE(uint source)
+        {
+            var buffer = new byte[sizeof(uint)];
+
+            ToBytesBEUnsafe(source, buffer);
+
+            return buffer;
+        }
+        public static bool ToBytesBE(uint source, Span<byte> buffer)
+        {
+            if (buffer.Length < sizeof(uint))
+                return false;
+
+            ToBytesBEUnsafe(source, buffer);
+
+            return true;
+        }
+        public static void ToBytesBEUnsafe(uint source, Span<byte> buffer)
+        {
+            var value = source;
+
+            if (BitConverter.IsLittleEndian)
+            {
+                value = BinaryPrimitives
+                    .ReverseEndianness(value);
+            }
+
+            ref var address =
+                ref MemoryMarshal.GetReference(
+                    buffer);
+
+            Unsafe.WriteUnaligned(
+                ref address,
+                value);
         }
     }
 }

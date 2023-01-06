@@ -2,8 +2,8 @@
 // Licensed under the Apache License, Version 2.0. See LICENSE file in the project root for license information.
 
 using System;
+using System.Buffers.Binary;
 using System.Numerics;
-using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
 namespace RIS.Cryptography.Entities
@@ -11,6 +11,10 @@ namespace RIS.Cryptography.Entities
     [StructLayout(LayoutKind.Sequential)]
     public readonly struct UInt128 : IEquatable<UInt128>
     {
+        public const int Size = 16; // bytes
+
+
+
         public readonly ulong Lower;
         public readonly ulong Upper;
 
@@ -29,18 +33,29 @@ namespace RIS.Cryptography.Entities
 #pragma warning disable SS010 // Attempted to create empty guid
         public Guid ToGuid()
         {
-            var a = (int)(Lower);
-            var b = (short)(Lower >> 32);
-            var c = (short)(Lower >> 48);
+            var lower = Lower;
+            var upper = Upper;
 
-            var d = (byte)(Upper);
-            var e = (byte)(Upper >> 8);
-            var f = (byte)(Upper >> 16);
-            var g = (byte)(Upper >> 24);
-            var h = (byte)(Upper >> 32);
-            var i = (byte)(Upper >> 40);
-            var j = (byte)(Upper >> 48);
-            var k = (byte)(Upper >> 56);
+            if (!BitConverter.IsLittleEndian)
+            {
+                lower = BinaryPrimitives
+                    .ReverseEndianness(Upper);
+                upper = BinaryPrimitives
+                    .ReverseEndianness(Lower);
+            }
+
+            var a = (int)(lower);
+            var b = (short)(lower >> 32);
+            var c = (short)(lower >> 48);
+
+            var d = (byte)(upper);
+            var e = (byte)(upper >> 8);
+            var f = (byte)(upper >> 16);
+            var g = (byte)(upper >> 24);
+            var h = (byte)(upper >> 32);
+            var i = (byte)(upper >> 40);
+            var j = (byte)(upper >> 48);
+            var k = (byte)(upper >> 56);
 
             return new Guid(
                 a, b, c, d, e, f, g, h, i, j, k);
@@ -49,27 +64,11 @@ namespace RIS.Cryptography.Entities
 
         public byte[] ToBytes()
         {
-            var bytes = new byte[sizeof(ulong) * 2];
-
-            Unsafe.As<byte, ulong>(ref bytes[0]) = Lower;
-            Unsafe.As<byte, ulong>(ref bytes[8]) = Upper;
-
-            return bytes;
+            return BytesUtils.ToBytesLE(this);
         }
-        public void ToBytes(Span<byte> buffer)
+        public bool ToBytes(Span<byte> buffer)
         {
-            ref var address =
-                ref MemoryMarshal.GetReference(
-                    buffer);
-
-            Unsafe.WriteUnaligned(
-                ref address,
-                Lower);
-            Unsafe.WriteUnaligned(
-                ref Unsafe.AddByteOffset(
-                    ref address,
-                    sizeof(ulong)),
-                Upper);
+            return BytesUtils.ToBytesLE(this, buffer);
         }
 
 

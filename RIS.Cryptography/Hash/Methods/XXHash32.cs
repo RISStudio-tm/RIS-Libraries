@@ -47,7 +47,7 @@ namespace RIS.Cryptography.Hash.Methods
             byte[] hashBytes = GetHashBytes(plainText);
             StringBuilder hashText = new StringBuilder(hashBytes.Length * 2);
 
-            for (int i = hashBytes.Length - 1; i >= 0; --i)
+            for (int i = 0; i < hashBytes.Length; ++i)
             {
                 hashText.Append(hashBytes[i].ToString(
                     "x2", CultureInfo.InvariantCulture));
@@ -60,7 +60,7 @@ namespace RIS.Cryptography.Hash.Methods
             byte[] hashBytes = GetHashBytes(data);
             StringBuilder hashText = new StringBuilder(hashBytes.Length * 2);
 
-            for (int i = hashBytes.Length - 1; i >= 0; --i)
+            for (int i = 0; i < hashBytes.Length; ++i)
             {
                 hashText.Append(hashBytes[i].ToString(
                     "x2", CultureInfo.InvariantCulture));
@@ -71,11 +71,11 @@ namespace RIS.Cryptography.Hash.Methods
 
         public byte[] GetHashBytes(string plainText)
         {
-            return BitConverter.GetBytes(Algorithms.XXHash32.ComputeHash(plainText, Seed));
+            return BytesUtils.ToBytesBE(Algorithms.XXHash32.ComputeHash(plainText, Seed));
         }
         public byte[] GetHashBytes(byte[] data)
         {
-            return BitConverter.GetBytes(Algorithms.XXHash32.ComputeHash(data, data.Length, Seed));
+            return BytesUtils.ToBytesBE(Algorithms.XXHash32.ComputeHash(data, data.Length, Seed));
         }
 
         public bool VerifyHash(string plainText, string hashText)
