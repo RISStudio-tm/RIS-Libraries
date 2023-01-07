@@ -3,6 +3,7 @@
 
 using System;
 using System.Text.RegularExpressions;
+using RIS.Cryptography.Hash.Methods;
 using RIS.Text.Encoding.Base;
 
 namespace RIS.Cryptography.Hash.Metadata
