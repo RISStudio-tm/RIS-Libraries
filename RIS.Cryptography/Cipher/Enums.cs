@@ -9,6 +9,8 @@ namespace RIS.Cryptography.Cipher
     {
         Rijndael = 1,
         RSAiCSP = 2,
+#if NETFRAMEWORK
         RSAiCNG = 3
+#endif
     }
 }

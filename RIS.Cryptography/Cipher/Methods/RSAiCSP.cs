@@ -75,7 +75,7 @@ namespace RIS.Cryptography.Cipher.Methods
         {
             try
             {
-                RSACng rsaService = new RSACng();
+                RSACryptoServiceProvider rsaService = new RSACryptoServiceProvider();
                 KeySizes keySizes = rsaService.LegalKeySizes[0];
                 int countSizes = ((keySizes.MaxSize - keySizes.MinSize) / keySizes.SkipSize) + 1;
                 int size = keySizes.MinSize;
@@ -109,7 +109,7 @@ namespace RIS.Cryptography.Cipher.Methods
 
                 RSAServiceEncryptor = new RSACryptoServiceProvider(publicKeySize);
 
-                Padding = RSAEncryptionPadding.OaepSHA384;
+                Padding = RSAEncryptionPadding.OaepSHA1;
                 ReverseBytes = false;
                 Initialized = true;
             }
@@ -130,7 +130,7 @@ namespace RIS.Cryptography.Cipher.Methods
         {
             try
             {
-                RSACng rsaService = new RSACng();
+                RSACryptoServiceProvider rsaService = new RSACryptoServiceProvider();
                 KeySizes keySizes = rsaService.LegalKeySizes[0];
                 int countSizes = ((keySizes.MaxSize - keySizes.MinSize) / keySizes.SkipSize) + 1;
                 int size = keySizes.MinSize;

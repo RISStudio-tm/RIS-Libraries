@@ -6,6 +6,9 @@ using System.Security.Cryptography;
 
 namespace RIS.Cryptography.Cipher.Methods
 {
+
+#if NETFRAMEWORK
+
     public sealed class RSAiCNG : ICipherMethod
     {
         public event EventHandler<RInformationEventArgs> Information;
@@ -403,4 +406,7 @@ namespace RIS.Cryptography.Cipher.Methods
             }
         }
     }
+
+#endif
+
 }
