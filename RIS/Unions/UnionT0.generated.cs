@@ -4,7 +4,7 @@ using static RIS.Unions.UnionsHelper;
 
 namespace RIS.Unions
 {
-    public struct Union<T0> : IUnion
+    public readonly struct Union<T0> : IUnion
     {
         readonly T0 _value0;
         readonly int _index;

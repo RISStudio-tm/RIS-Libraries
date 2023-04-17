@@ -99,7 +99,7 @@ using {LocalizedListBaseTypeNamespace};
 
 namespace {classSymbol.ContainingNamespace.ToDisplayString()}
 {{
-    public partial class {classNameWithGenericTypes}
+    partial class {classNameWithGenericTypes}
     {{
         {RoslynFactory.CreateEventStaticPropertyChanged()}
 ");

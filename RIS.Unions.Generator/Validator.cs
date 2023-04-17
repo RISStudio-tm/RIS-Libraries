@@ -31,8 +31,8 @@ namespace RIS.Unions.Generator
             if (classSymbol.BaseType is null || classSymbol.BaseType.Name != UnionBaseTypeName || classSymbol.BaseType.ContainingNamespace.ToString() != UnionBaseTypeNamespace)
                 diagnostics.Add(Diagnostic.Create(DiagnosticErrors.WrongBaseType, attributeLocation, classSymbol.Name));
 
-            if (classSymbol.DeclaredAccessibility != Accessibility.Public)
-                diagnostics.Add(Diagnostic.Create(DiagnosticErrors.ClassIsNotPublic, attributeLocation, classSymbol.Name));
+            //if (classSymbol.DeclaredAccessibility != Accessibility.Public)
+            //    diagnostics.Add(Diagnostic.Create(DiagnosticErrors.ClassIsNotPublic, attributeLocation, classSymbol.Name));
 
             return diagnostics.ReportIfAny(
                 context);
@@ -51,8 +51,14 @@ namespace RIS.Unions.Generator
                     .GetSyntax()?
                     .GetLocation();
 
-            if (typeArguments.Any(x => x.Name == nameof(Object)))
-                diagnostics.Add(Diagnostic.Create(DiagnosticErrors.ObjectIsUnionType, attributeLocation, classSymbol.Name));
+            foreach (var typeSymbol in typeArguments)
+            {
+                if (typeSymbol.Name == nameof(Object))
+                    diagnostics.Add(Diagnostic.Create(DiagnosticErrors.ObjectIsUnionType, attributeLocation, classSymbol.Name));
+
+                if (typeSymbol.TypeKind == TypeKind.Interface)
+                    diagnostics.Add(Diagnostic.Create(DiagnosticErrors.UserDefinedConversionsToOrFromAnInterfaceAreNotAllowed, attributeLocation, classSymbol.Name));
+            }
 
             return diagnostics.ReportIfAny(
                 context);

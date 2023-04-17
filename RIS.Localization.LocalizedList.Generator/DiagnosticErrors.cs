@@ -13,13 +13,13 @@ namespace RIS.Localization.LocalizedList.Generator
             DiagnosticSeverity.Error,
             true);
 
-        public static readonly DiagnosticDescriptor ClassIsNotPublic = new(
-            "LOCLISTGEN002",
-            "Class must be public",
-            "Class '{0}' is not public",
-            "LocalizedListGenerator",
-            DiagnosticSeverity.Error,
-            true);
+        //public static readonly DiagnosticDescriptor ClassIsNotPublic = new(
+        //    "LOCLISTGEN002",
+        //    "Class must be public",
+        //    "Class '{0}' is not public",
+        //    "LocalizedListGenerator",
+        //    DiagnosticSeverity.Error,
+        //    true);
 
         public static readonly DiagnosticDescriptor ClassIsNotPartial = new(
             "LOCLISTGEN003",

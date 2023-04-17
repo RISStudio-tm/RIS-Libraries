@@ -23,8 +23,8 @@ namespace RIS.Localization.LocalizedList.Generator
             if (!classSymbol.ContainingSymbol.Equals(classSymbol.ContainingNamespace, SymbolEqualityComparer.Default))
                 diagnostics.Add(Diagnostic.Create(DiagnosticErrors.TopLevelError, classLocation, classSymbol.Name));
 
-            if (classSymbol.DeclaredAccessibility != Accessibility.Public)
-                diagnostics.Add(Diagnostic.Create(DiagnosticErrors.ClassIsNotPublic, classLocation, classSymbol.Name));
+            //if (classSymbol.DeclaredAccessibility != Accessibility.Public)
+            //    diagnostics.Add(Diagnostic.Create(DiagnosticErrors.ClassIsNotPublic, classLocation, classSymbol.Name));
 
             if (!classDeclaration.Modifiers.Any(SyntaxKind.PartialKeyword))
                 diagnostics.Add(Diagnostic.Create(DiagnosticErrors.ClassIsNotPartial, classLocation, classSymbol.Name));

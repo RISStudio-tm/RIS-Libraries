@@ -5,7 +5,6 @@ using System.Linq;
 using System.Text;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
-using Microsoft.CodeAnalysis.Text;
 
 namespace RIS.Unions.Generator
 {
@@ -34,31 +33,25 @@ namespace {AttributeNamespace}
             this.TypeNames = typeNames;
         }}
     }}
-}}
-        ";
+}}";
 
 
 
         public void Initialize(GeneratorInitializationContext context)
         {
+            context.RegisterForPostInitialization(contextPost =>
+                contextPost.AddSource($"{AttributeName}.g.cs", AttributeText));
             context.RegisterForSyntaxNotifications(() =>
                 new UnionSyntaxReceiver());
         }
 
         public void Execute(GeneratorExecutionContext context)
         {
-            context.AddSource($"{AttributeName}.g.cs",
-                SourceText.From(AttributeText, Encoding.UTF8));
-
             if (context.SyntaxReceiver is not UnionSyntaxReceiver receiver)
                 return;
-            if ((context.Compilation as CSharpCompilation)?.SyntaxTrees[0].Options is not CSharpParseOptions options)
-                return;
 
-            var compilation =
-                context.Compilation.AddSyntaxTrees(
-                    CSharpSyntaxTree.ParseText(
-                        SourceText.From(AttributeText, Encoding.UTF8), options));
+            var compilation = context.Compilation;
+
             var attributeSymbol =
                 compilation.GetTypeByMetadataName(
                     $"{AttributeNamespace}.{AttributeName}");
@@ -95,7 +88,7 @@ namespace {AttributeNamespace}
                     continue;
 
                 context.AddSource($"{namedSymbol.ContainingNamespace}_{namedSymbol.Name}.g.cs",
-                    SourceText.From(classSource, Encoding.UTF8));
+                    classSource);
             }
         }
 
@@ -148,7 +141,7 @@ using {UnionBaseTypeNamespace};
 
 namespace {classSymbol.ContainingNamespace.ToDisplayString()}
 {{
-    public partial class {classNameWithGenericTypes}");
+    partial class {classNameWithGenericTypes}");
 
             source.Append($@"
     {{

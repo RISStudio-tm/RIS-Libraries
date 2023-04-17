@@ -5,13 +5,13 @@
     <Configurations>Debug;Release;Release Nuget</Configurations>
     <RootNamespace>RIS.Graphics</RootNamespace>
     <AssemblyName>RIS.Graphics</AssemblyName>
-    <AssemblyVersion>3.0.1.0</AssemblyVersion>
-    <FileVersion>3.0.1.0</FileVersion>
+    <AssemblyVersion>3.0.4.0</AssemblyVersion>
+    <FileVersion>3.0.4.0</FileVersion>
     <UseWPF>true</UseWPF>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <PackageId>RIS.Graphics</PackageId>
     <Product>RIS.Graphics</Product>
-    <Version>3.0.1</Version>
+    <Version>3.0.4</Version>
     <Description>A library designed for various types of tasks. Part of the RIS "ecosystem".</Description>
     <PackageTags>dotnet, dotnetcore, netframework, netcore, library</PackageTags>
     <Authors>Dmitry Ponomarev</Authors>
@@ -80,7 +80,7 @@
   </ItemGroup>
   
   <ItemGroup>
-    <PackageReference Include="CoreCLR-NCalc" Version="2.2.101" />
+    <PackageReference Include="CoreCLR-NCalc" Version="2.2.113" />
   </ItemGroup>
   
   <ItemGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">

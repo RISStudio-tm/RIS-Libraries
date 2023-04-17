@@ -21,13 +21,13 @@ namespace RIS.Unions.Generator
             DiagnosticSeverity.Error,
             true);
 
-        public static readonly DiagnosticDescriptor ClassIsNotPublic = new(
-            "UNIONGEN003",
-            "Class must be public",
-            "Class '{0}' is not public",
-            "UnionGenerator",
-            DiagnosticSeverity.Error,
-            true);
+        //public static readonly DiagnosticDescriptor ClassIsNotPublic = new(
+        //    "UNIONGEN003",
+        //    "Class must be public",
+        //    "Class '{0}' is not public",
+        //    "UnionGenerator",
+        //    DiagnosticSeverity.Error,
+        //    true);
 
         public static readonly DiagnosticDescriptor ObjectIsUnionType = new(
             "UNIONGEN004",
@@ -57,6 +57,13 @@ namespace RIS.Unions.Generator
             "UNIONGEN007",
             "Invalid name",
             "The name '{0}' cannot produce valid property or method names",
+            "UnionGenerator",
+            DiagnosticSeverity.Error,
+            true);
+        public static readonly DiagnosticDescriptor UserDefinedConversionsToOrFromAnInterfaceAreNotAllowed = new(
+            "UNIONGEN008",
+            "User-defined conversions to or from an interface are not allowed",
+            "User-defined conversions to or from an interface are not allowed",
             "UnionGenerator",
             DiagnosticSeverity.Error,
             true);

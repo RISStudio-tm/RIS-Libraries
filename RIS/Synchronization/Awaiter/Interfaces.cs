@@ -6,27 +6,34 @@ using System.Runtime.CompilerServices;
 
 namespace RIS.Synchronization
 {
-    public interface IAwaiter : ICriticalNotifyCompletion
+    public interface IAwaiterCore : ICriticalNotifyCompletion
     {
         bool IsCompleted { get; }
+    }
 
+
+
+    public interface IAwaiter : IAwaiterCore
+    {
         void GetResult();
     }
 
-    public interface IAwaiter<out TResult> : ICriticalNotifyCompletion
+    public interface IAwaiter<out T> : IAwaiterCore
     {
-        bool IsCompleted { get; }
-
-        TResult GetResult();
+        T GetResult();
     }
 
-    public interface IAwaitable
+
+
+    public interface IAwaitable<out TAwaiter>
+        where TAwaiter : IAwaiter
     {
-        IAwaiter GetAwaiter();
+        TAwaiter GetAwaiter();
     }
 
-    public interface IAwaitable<out TResult>
+    public interface IAwaitable<TResult, out TAwaiter>
+        where TAwaiter : IAwaiter<TResult>
     {
-        IAwaiter<TResult> GetAwaiter();
+        TAwaiter GetAwaiter();
     }
 }
