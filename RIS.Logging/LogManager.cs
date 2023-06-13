@@ -322,10 +322,14 @@ namespace RIS.Logging
             }
         }
 
+
         public static IDisposable Pause()
         {
             lock (SyncRoot)
             {
+                if (Disposed)
+                    return null;
+
                 var result = LogFactory.SuspendLogging();
 
                 LoggingPaused?.Invoke(
@@ -339,12 +343,16 @@ namespace RIS.Logging
         {
             lock (SyncRoot)
             {
+                if (Disposed)
+                    return;
+
                 LogFactory.ResumeLogging();
 
                 LoggingResumed?.Invoke(
                     null, EventArgs.Empty);
             }
         }
+
 
         public static bool IsEnabled()
         {
@@ -356,6 +364,7 @@ namespace RIS.Logging
                 return LogFactory.IsLoggingEnabled();
             }
         }
+
 
         public static void Flush()
         {

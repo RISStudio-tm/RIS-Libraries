@@ -13,13 +13,22 @@ namespace RIS.Extensions
         }
         private static Exception UnwrapFirstInternal(this AggregateException exception)
         {
-            if (exception.InnerExceptions.Count == 1)
-                return exception.InnerExceptions[0];
+            Exception result = exception;
 
-            return UnwrapFirstInternal(exception);
+            while (result is AggregateException aggregateException)
+            {
+                if (aggregateException.InnerExceptions.Count == 0)
+                    return result;
+
+                result = aggregateException.InnerExceptions[0];
+            }
+
+            return result;
         }
 
-        public static void ThrowUnwrapFirst(this AggregateException exception)
+
+
+        public static void ThrowFirst(this AggregateException exception)
         {
             throw UnwrapFirst(exception);
         }
