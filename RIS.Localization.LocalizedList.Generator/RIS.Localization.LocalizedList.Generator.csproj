@@ -8,12 +8,12 @@
     <Nullable>Enable</Nullable>
     <RootNamespace>RIS.Localization.LocalizedList.Generator</RootNamespace>
     <AssemblyName>RIS.Localization.LocalizedList.Generator</AssemblyName>
-    <AssemblyVersion>1.1.3.0</AssemblyVersion>
-    <FileVersion>1.1.3.0</FileVersion>
+    <AssemblyVersion>1.1.4.0</AssemblyVersion>
+    <FileVersion>1.1.4.0</FileVersion>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <PackageId>RIS.Localization.LocalizedList.Generator</PackageId>
     <Product>RIS.Localization.LocalizedList.Generator</Product>
-    <Version>1.1.3</Version>
+    <Version>1.1.4</Version>
     <Description>A source generator for automaticly implements RIS.Localization.LocalizedListBase hierarchies, etc. Part of the RIS "ecosystem".</Description>
     <PackageTags>dotnet, dotnetcore, netframework, netcore, generator, source generator</PackageTags>
     <Authors>Dmitry Ponomarev</Authors>
@@ -25,16 +25,16 @@
     <RepositoryType>git</RepositoryType>
     <RepositoryUrl>https://github.com/RISStudio-tm/RIS-Libraries</RepositoryUrl>
   </PropertyGroup>
-  
+
   <PropertyGroup>
     <NoWarn>$(NoWarn);CS0067;SS003;SS004;U2U1009</NoWarn>
   </PropertyGroup>
-  
+
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release Nuget|AnyCPU'">
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
     <IncludeBuildOutput>False</IncludeBuildOutput>
   </PropertyGroup>
-  
+
   <Target Name="PreBuild" BeforeTargets="BeforeBuild" Condition="'$(Configuration)|$(Platform)'=='Release Nuget|AnyCPU'">
 
   </Target>
@@ -42,7 +42,7 @@
   <Target Name="PostPack" AfterTargets="Pack" Condition="'$(Configuration)|$(Platform)'=='Release Nuget|AnyCPU'">
     <Exec Command="&quot;CopyPackage.exe&quot; &quot;..\..\_packages&quot; &quot;$(MSBuildProjectFullPath)&quot; &quot;$(Configuration)&quot;" WorkingDirectory="..\_tools\CopyPackage" />
   </Target>
-  
+
   <ItemGroup>
     <None Include="..\LICENSE">
       <Pack>True</Pack>

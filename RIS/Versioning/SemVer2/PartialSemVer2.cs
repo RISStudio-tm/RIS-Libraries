@@ -1,5 +1,5 @@
-// Copyright (c) RISStudio, 2020. All rights reserved.
-// Licensed under the Apache License, Version 2.0. See LICENSE file in the project root for license information. 
+п»ї// Copyright (c) RISStudio, 2020. All rights reserved.
+// Licensed under the Apache License, Version 2.0. See LICENSE file in the project root for license information.
 
 using System;
 using System.Collections.ObjectModel;
@@ -70,7 +70,7 @@ namespace RIS.Versioning
         {
             if (version == null)
             {
-                var exception = new ArgumentNullException(nameof(version), $"{nameof(version)} не должен быть равен null");
+                var exception = new ArgumentNullException(nameof(version), $"{nameof(version)} РЅРµ РґРѕР»Р¶РµРЅ Р±С‹С‚СЊ СЂР°РІРµРЅ null");
                 Events.OnError(new RErrorEventArgs(exception, exception.Message));
                 throw exception;
             }
@@ -82,8 +82,8 @@ namespace RIS.Versioning
             if (!match.Success)
             {
                 var exception = allowZerosVersion
-                    ? new FormatException($"Не удалось распознать формат Semanic Version 2.0.0 (с поддержкой нулевой версии и с поддержкой wildcards) в строке [{version}]")
-                    : new FormatException($"Не удалось распознать формат Semanic Version 2.0.0 (без поддержки нулевой версии и с поддержкой wildcards) в строке [{version}]");
+                    ? new FormatException($"РќРµ СѓРґР°Р»РѕСЃСЊ СЂР°СЃРїРѕР·РЅР°С‚СЊ С„РѕСЂРјР°С‚ Semanic Version 2.0.0 (СЃ РїРѕРґРґРµСЂР¶РєРѕР№ РЅСѓР»РµРІРѕР№ РІРµСЂСЃРёРё Рё СЃ РїРѕРґРґРµСЂР¶РєРѕР№ wildcards) РІ СЃС‚СЂРѕРєРµ [{version}]")
+                    : new FormatException($"РќРµ СѓРґР°Р»РѕСЃСЊ СЂР°СЃРїРѕР·РЅР°С‚СЊ С„РѕСЂРјР°С‚ Semanic Version 2.0.0 (Р±РµР· РїРѕРґРґРµСЂР¶РєРё РЅСѓР»РµРІРѕР№ РІРµСЂСЃРёРё Рё СЃ РїРѕРґРґРµСЂР¶РєРѕР№ wildcards) РІ СЃС‚СЂРѕРєРµ [{version}]");
                 Events.OnError(new RErrorEventArgs(exception, exception.Message));
                 throw exception;
             }

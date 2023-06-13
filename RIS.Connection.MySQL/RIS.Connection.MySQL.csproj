@@ -5,11 +5,11 @@
     <Configurations>Debug;Release;Release Nuget</Configurations>
     <RootNamespace>RIS.Connection.MySQL</RootNamespace>
     <AssemblyName>RIS.Connection.MySQL</AssemblyName>
-    <AssemblyVersion>4.8.0.0</AssemblyVersion>
-    <FileVersion>4.8.0.0</FileVersion>
+    <AssemblyVersion>4.8.1.0</AssemblyVersion>
+    <FileVersion>4.8.1.0</FileVersion>
     <PackageId>RIS.Connection.MySQL</PackageId>
     <Product>RIS.Connection.MySQL</Product>
-    <Version>4.8.0</Version>
+    <Version>4.8.1</Version>
     <Description>A library designed for various types of tasks. Part of the RIS "ecosystem".</Description>
     <PackageTags>dotnet, dotnetcore, netframework, netcore, library</PackageTags>
     <Authors>Dmitry Ponomarev</Authors>
@@ -21,12 +21,12 @@
     <RepositoryType>git</RepositoryType>
     <RepositoryUrl>https://github.com/RISStudio-tm/RIS-Libraries</RepositoryUrl>
   </PropertyGroup>
-  
+
   <PropertyGroup>
     <DocumentationFile>RIS.Connection.MySQL.xml</DocumentationFile>
     <NoWarn>$(NoWarn);U2U1016;CA2100;CS0067;SS003;SS004;U2U1009</NoWarn>
   </PropertyGroup>
-  
+
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release Nuget|AnyCPU'">
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
   </PropertyGroup>
@@ -38,7 +38,7 @@
   <Target Name="PostPack" AfterTargets="Pack" Condition="'$(Configuration)|$(Platform)'=='Release Nuget|AnyCPU'">
     <Exec Command="&quot;CopyPackage.exe&quot; &quot;..\..\_packages&quot; &quot;$(MSBuildProjectFullPath)&quot; &quot;$(Configuration)&quot;" WorkingDirectory="..\_tools\CopyPackage" />
   </Target>
-  
+
   <ItemGroup>
     <None Include="..\LICENSE">
       <Pack>True</Pack>
@@ -49,22 +49,22 @@
       <PackagePath></PackagePath>
     </None>
   </ItemGroup>
-  
+
   <ItemGroup>
     <PackageReference Include="MySqlConnector" Version="2.2.5" />
   </ItemGroup>
-  
+
   <ItemGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
     <ProjectReference Include="..\RIS\RIS.csproj" />
   </ItemGroup>
-  
+
   <ItemGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
     <ProjectReference Include="..\RIS\RIS.csproj" />
   </ItemGroup>
-  
+
   <ItemGroup Condition="'$(Configuration)|$(Platform)'=='Release Nuget|AnyCPU'">
     <!--For NuGet Package-->
     <ProjectReference Include="..\RIS\RIS.csproj" />
   </ItemGroup>
-  
+
 </Project>

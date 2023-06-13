@@ -1,5 +1,5 @@
-// Copyright (c) RISStudio, 2020. All rights reserved.
-// Licensed under the Apache License, Version 2.0. See LICENSE file in the project root for license information. 
+п»ї// Copyright (c) RISStudio, 2020. All rights reserved.
+// Licensed under the Apache License, Version 2.0. See LICENSE file in the project root for license information.
 
 using System;
 using System.Collections.Generic;
@@ -58,7 +58,7 @@ namespace RIS.Versioning
 
                 if (position == startPosition)
                 {
-                    var exception = new FormatException($"Недопустимый шаблон диапазона [{pattern}]");
+                    var exception = new FormatException($"РќРµРґРѕРїСѓСЃС‚РёРјС‹Р№ С€Р°Р±Р»РѕРЅ РґРёР°РїР°Р·РѕРЅР° [{pattern}]");
                     Events.OnError(new RErrorEventArgs(exception, exception.Message));
                     throw exception;
                 }

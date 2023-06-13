@@ -1,5 +1,5 @@
-// Copyright (c) RISStudio, 2020. All rights reserved.
-// Licensed under the Apache License, Version 2.0. See LICENSE file in the project root for license information. 
+п»ї// Copyright (c) RISStudio, 2020. All rights reserved.
+// Licensed under the Apache License, Version 2.0. See LICENSE file in the project root for license information.
 
 using System;
 using System.Collections.Generic;
@@ -16,7 +16,7 @@ namespace RIS.Versioning
         {
             if (pattern == null)
             {
-                var exception = new ArgumentNullException(nameof(pattern), $"{nameof(pattern)} не должен быть равен null");
+                var exception = new ArgumentNullException(nameof(pattern), $"{nameof(pattern)} РЅРµ РґРѕР»Р¶РµРЅ Р±С‹С‚СЊ СЂР°РІРµРЅ null");
                 Events.OnError(new RErrorEventArgs(exception, exception.Message));
                 throw exception;
             }

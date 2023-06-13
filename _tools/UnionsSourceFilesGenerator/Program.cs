@@ -1,4 +1,7 @@
-﻿using System;
+﻿// Copyright (c) RISStudio, 2020. All rights reserved.
+// Licensed under the Apache License, Version 2.0. See LICENSE file in the project root for license information.
+
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
@@ -12,38 +15,70 @@ var sourceRoot = GetFullPath(Combine(
     GetDirectoryName(GetExecutingAssembly().Location)!,
     @"..\..\..\..\.."));
 
-for (var i = 1; i < 10; ++i) {
-    var output = GetContent(true, i);
-    var outpath = Combine(sourceRoot, $@"RIS\Unions\UnionT{i - 1}.generated.cs");
-    File.WriteAllText(outpath, output);
+for (var i = 1; i < 10; ++i)
+{
+    var content1 = GetContent(
+        true, i);
+    var path1 = Combine(sourceRoot,
+        $@"RIS\Unions\UnionT{i - 1}.generated.cs");
 
-    var output2 = GetContent(false, i);
-    var outpath2 = Combine(sourceRoot, $@"RIS\Unions\UnionBaseT{i - 1}.generated.cs");
-    File.WriteAllText(outpath2, output2);
+    File.WriteAllText(
+        path1, content1,
+        Encoding.UTF8);
+
+    var content2 = GetContent(
+        false, i);
+    var path2 = Combine(sourceRoot,
+        $@"RIS\Unions\UnionBaseT{i - 1}.generated.cs");
+
+    File.WriteAllText(
+        path2, content2,
+        Encoding.UTF8);
 }
 
-for (var i = 10; i < 33; ++i) {
-    var output3 = GetContent(true, i);
-    var outpath3 = Combine(sourceRoot, $@"RIS\Unions\UnionT{i - 1}.generated.cs");
-    File.WriteAllText(outpath3, output3);
+for (var i = 10; i < 33; ++i)
+{
+    var content1 = GetContent(
+        true, i);
+    var path1 = Combine(sourceRoot,
+        $@"RIS\Unions\UnionT{i - 1}.generated.cs");
 
-    var output4 = GetContent(false, i);
-    var outpath4 = Combine(sourceRoot, $@"RIS\Unions\UnionBaseT{i - 1}.generated.cs");
-    File.WriteAllText(outpath4, output4);
+    File.WriteAllText(
+        path1, content1,
+        Encoding.UTF8);
+
+    var content2 = GetContent(
+        false, i);
+    var path2 = Combine(sourceRoot,
+        $@"RIS\Unions\UnionBaseT{i - 1}.generated.cs");
+
+    File.WriteAllText(
+        path2, content2,
+        Encoding.UTF8);
 }
 
 
 
-string GetContent(bool isStruct, int i) {
-    string RangeJoined(string delimiter, Func<int, string> selector) => Range(0, i).Joined(delimiter, selector);
-    string IfStruct(string s, string s2 = "") => isStruct ? s : s2;
+string GetContent(bool isStruct, int i)
+{
+    string RangeJoined(string delimiter, Func<int, string> selector) =>
+        Range(0, i).Joined(delimiter, selector);
+    string IfStruct(string s1, string s2 = "") =>
+        isStruct ? s1 : s2;
 
-    var className = isStruct ? "Union" : "UnionBase";
-    var genericArgs = Range(0, i).Select(e => $"T{e}").ToList();
-    var genericArg = genericArgs.Joined(", ");
+    var className =
+        isStruct ? "Union" : "UnionBase";
+    var genericArgs = Range(0, i)
+        .Select(e => $"T{e}")
+        .ToList();
+    var genericArg = genericArgs
+        .Joined(", ");
     var sb = new StringBuilder();
 
-    sb.Append(@$"using System;
+    sb.Append(@$"// Copyright (c) RISStudio, 2020. All rights reserved.
+// Licensed under the Apache License, Version 2.0. See LICENSE file in the project root for license information.
+
+using System;
 using System.Threading.Tasks;
 using static RIS.Unions.UnionsHelper;
 
@@ -106,12 +141,12 @@ namespace RIS.Unions
             }}")}
             throw new InvalidOperationException();
         }}
-        
+
         public Task Switch({RangeJoined(", ", e => $"Func<T{e}, Task> f{e}")})
         {{
             {RangeJoined(@"
             ", j => @$"if (_index == {j} && f{j} != null)
-            {{                
+            {{
                 return f{j}(_value{j});
             }}")}
             throw new InvalidOperationException();
@@ -237,35 +272,38 @@ namespace RIS.Unions
 
 public static class Extensions
 {
-    public static string Joined<T>(this IEnumerable<T> source,
+    public static string Joined<T>(this IEnumerable<T>? source,
         string delimiter, Func<T, string>? selector = null)
     {
         if (source == null)
             return "";
         if (selector == null)
             return string.Join(delimiter, source);
-        
+
         return string.Join(delimiter,
             source.Select(selector));
     }
-    
-    public static string Joined<T>(this IEnumerable<T> source,
+
+    public static string Joined<T>(this IEnumerable<T>? source,
         string delimiter, Func<T, int, string> selector)
     {
         if (source == null)
             return "";
-        
+
         return string.Join(delimiter,
             source.Select(selector));
     }
-    
+
     public static IEnumerable<T> ExceptSingle<T>(
-        this IEnumerable<T> source, T single)
+        this IEnumerable<T>? source, T single)
     {
+        if (source == null)
+            return Empty<T>();
+
         return source.Except(
             Repeat(single, 1));
     }
-    
+
     public static void AppendLineTo(
         this string? source, StringBuilder builder)
     {
