@@ -313,7 +313,19 @@ namespace RIS.Logging
 
                 Default.Info("Shutdown");
 
-                Default.Info($"Exit code - {System.Environment.ExitCode}");
+                var lifetime =
+                    DateTime.Now -
+                    Environment.Process.StartTime
+                        .ToLocalTime();
+
+                GlobalDiagnosticsContext.Set(
+                    "RIS-AppLifetime",
+                    lifetime.ToString(@"ddd\.hh\:mm\:ss\.ffffff",
+                        CultureInfo.InvariantCulture));
+
+                GlobalDiagnosticsContext.Set(
+                    "RIS-AppExitCode",
+                    System.Environment.ExitCode);
 
                 LogFactory.Shutdown();
 
