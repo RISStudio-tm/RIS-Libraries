@@ -4,16 +4,17 @@
     <TargetFramework>netstandard2.0</TargetFramework>
     <Configurations>Debug;Release;Release Nuget</Configurations>
     <IsRoslynComponent>True</IsRoslynComponent>
+    <EnforceExtendedAnalyzerRules>True</EnforceExtendedAnalyzerRules>
     <LangVersion>preview</LangVersion>
     <Nullable>Enable</Nullable>
     <RootNamespace>RIS.Unions.Generator</RootNamespace>
     <AssemblyName>RIS.Unions.Generator</AssemblyName>
-    <AssemblyVersion>1.1.4.0</AssemblyVersion>
-    <FileVersion>1.1.4.0</FileVersion>
+    <AssemblyVersion>1.1.5.0</AssemblyVersion>
+    <FileVersion>1.1.5.0</FileVersion>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <PackageId>RIS.Unions.Generator</PackageId>
     <Product>RIS.Unions.Generator</Product>
-    <Version>1.1.4</Version>
+    <Version>1.1.5</Version>
     <Description>A source generator for automaticly implements RIS.Unions.UnionBase hierarchies, etc. Part of the RIS "ecosystem".</Description>
     <PackageTags>dotnet, dotnetcore, netframework, netcore, generator, source generator</PackageTags>
     <Authors>Dmitry Ponomarev</Authors>
@@ -27,7 +28,7 @@
   </PropertyGroup>
 
   <PropertyGroup>
-    <NoWarn>$(NoWarn);CS0067;SS003;SS004;U2U1009</NoWarn>
+    <NoWarn>$(NoWarn);CS0067;SS003;SS004;U2U1009;RS2008</NoWarn>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release Nuget|AnyCPU'">
