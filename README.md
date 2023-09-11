@@ -8,10 +8,6 @@
     [![Nuget](https://img.shields.io/nuget/v/RIS?style=flat)](https://www.nuget.org/packages/RIS)
     [![Nuget](https://img.shields.io/nuget/dt/RIS?style=flat)](https://www.nuget.org/packages/RIS)
     
-- **[RIS.Unions.Generator](https://www.nuget.org/packages/RIS.Unions.Generator)**<br/>
-    [![Nuget](https://img.shields.io/nuget/v/RIS.Unions.Generator?style=flat)](https://www.nuget.org/packages/RIS.Unions.Generator)
-    [![Nuget](https://img.shields.io/nuget/dt/RIS.Unions.Generator?style=flat)](https://www.nuget.org/packages/RIS.Unions.Generator)
-    
 - **[RIS.Collections](https://www.nuget.org/packages/RIS.Collections)**<br/>
     [![Nuget](https://img.shields.io/nuget/v/RIS.Collections?style=flat)](https://www.nuget.org/packages/RIS.Collections)
     [![Nuget](https://img.shields.io/nuget/dt/RIS.Collections?style=flat)](https://www.nuget.org/packages/RIS.Collections)
@@ -75,3 +71,15 @@
 - **[RIS.Text](https://www.nuget.org/packages/RIS.Text)**<br/>
     [![Nuget](https://img.shields.io/nuget/v/RIS.Text?style=flat)](https://www.nuget.org/packages/RIS.Text)
     [![Nuget](https://img.shields.io/nuget/dt/RIS.Text?style=flat)](https://www.nuget.org/packages/RIS.Text)
+
+- **[RIS.Unions](https://www.nuget.org/packages/RIS.Unions)**<br/>
+    [![Nuget](https://img.shields.io/nuget/v/RIS.Unions?style=flat)](https://www.nuget.org/packages/RIS.Unions)
+    [![Nuget](https://img.shields.io/nuget/dt/RIS.Unions?style=flat)](https://www.nuget.org/packages/RIS.Unions)
+
+- **[RIS.Unions.Extended](https://www.nuget.org/packages/RIS.Unions.Extended)**<br/>
+    [![Nuget](https://img.shields.io/nuget/v/RIS.Unions.Extended?style=flat)](https://www.nuget.org/packages/RIS.Unions.Extended)
+    [![Nuget](https://img.shields.io/nuget/dt/RIS.Unions.Extended?style=flat)](https://www.nuget.org/packages/RIS.Unions.Extended)
+    
+- **[RIS.Unions.Generator](https://www.nuget.org/packages/RIS.Unions.Generator)**<br/>
+    [![Nuget](https://img.shields.io/nuget/v/RIS.Unions.Generator?style=flat)](https://www.nuget.org/packages/RIS.Unions.Generator)
+    [![Nuget](https://img.shields.io/nuget/dt/RIS.Unions.Generator?style=flat)](https://www.nuget.org/packages/RIS.Unions.Generator)
