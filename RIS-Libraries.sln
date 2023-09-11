@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 16
-VisualStudioVersion = 16.0.29025.244
+# Visual Studio Version 17
+VisualStudioVersion = 17.5.33530.505
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RIS", "RIS\RIS.csproj", "{A2DEB365-3D26-49DB-9C3E-339FF2C9110B}"
 EndProject
@@ -38,6 +38,10 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RIS.Unions.Generator", "RIS.Unions.Generator\RIS.Unions.Generator.csproj", "{30ECCB08-9C14-4379-8A54-E114F7C6F709}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RIS.Localization.LocalizedList.Generator", "RIS.Localization.LocalizedList.Generator\RIS.Localization.LocalizedList.Generator.csproj", "{64AAE838-0248-4B96-B9E5-93067E11AE1B}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RIS.Unions", "RIS.Unions\RIS.Unions.csproj", "{1339EC3A-B3CA-4B2B-868E-C403EC0048D2}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RIS.Unions.Extended", "RIS.Unions.Extended\RIS.Unions.Extended.csproj", "{4942043C-E58C-40EB-AF03-DB6F6B225294}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -154,6 +158,18 @@ Global
 		{64AAE838-0248-4B96-B9E5-93067E11AE1B}.Release Nuget|Any CPU.Build.0 = Release Nuget|Any CPU
 		{64AAE838-0248-4B96-B9E5-93067E11AE1B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{64AAE838-0248-4B96-B9E5-93067E11AE1B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1339EC3A-B3CA-4B2B-868E-C403EC0048D2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1339EC3A-B3CA-4B2B-868E-C403EC0048D2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1339EC3A-B3CA-4B2B-868E-C403EC0048D2}.Release Nuget|Any CPU.ActiveCfg = Release|Any CPU
+		{1339EC3A-B3CA-4B2B-868E-C403EC0048D2}.Release Nuget|Any CPU.Build.0 = Release|Any CPU
+		{1339EC3A-B3CA-4B2B-868E-C403EC0048D2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1339EC3A-B3CA-4B2B-868E-C403EC0048D2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4942043C-E58C-40EB-AF03-DB6F6B225294}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4942043C-E58C-40EB-AF03-DB6F6B225294}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4942043C-E58C-40EB-AF03-DB6F6B225294}.Release Nuget|Any CPU.ActiveCfg = Release|Any CPU
+		{4942043C-E58C-40EB-AF03-DB6F6B225294}.Release Nuget|Any CPU.Build.0 = Release|Any CPU
+		{4942043C-E58C-40EB-AF03-DB6F6B225294}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4942043C-E58C-40EB-AF03-DB6F6B225294}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -4,15 +4,14 @@
     <TargetFrameworks>netcoreapp3.1;net48</TargetFrameworks>
     <Configurations>Debug;Release;Release Nuget</Configurations>
     <LangVersion>9.0</LangVersion>
-    <RootNamespace>RIS</RootNamespace>
-    <AssemblyName>RIS</AssemblyName>
-    <AssemblyVersion>3.19.0.0</AssemblyVersion>
-    <FileVersion>3.19.0.0</FileVersion>
-    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <PackageId>RIS</PackageId>
-    <Product>RIS</Product>
-    <Version>3.19.0</Version>
-    <Description>A library designed for various types of tasks. The core of the RIS "ecosystem".</Description>
+    <RootNamespace>RIS.Unions</RootNamespace>
+    <AssemblyName>RIS.Unions.Extended</AssemblyName>
+    <AssemblyVersion>1.0.0.0</AssemblyVersion>
+    <FileVersion>1.0.0.0</FileVersion>
+    <PackageId>RIS.Unions.Extended</PackageId>
+    <Product>RIS.Unions.Extended</Product>
+    <Version>1.0.0</Version>
+    <Description>A library designed for various types of tasks. Part of the RIS "ecosystem".</Description>
     <PackageTags>dotnet, dotnetcore, netframework, netcore, library</PackageTags>
     <Authors>Dmitry Ponomarev</Authors>
     <Company>RISStudio</Company>
@@ -51,14 +50,20 @@
     </None>
   </ItemGroup>
 
-  <ItemGroup>
-    <PackageReference Include="GrEmit" Version="3.4.10" />
-    <PackageReference Include="Microsoft.Bcl.AsyncInterfaces" Version="7.0.0" />
-    <PackageReference Include="Microsoft.Extensions.FileProviders.Embedded" Version="7.0.7" />
-    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
-    <PackageReference Include="System.Configuration.ConfigurationManager" Version="7.0.0" />
-    <PackageReference Include="System.Memory" Version="4.5.5" />
-    <PackageReference Include="System.Threading.Tasks.Dataflow" Version="7.0.0" />
+  <ItemGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <ProjectReference Include="..\RIS\RIS.csproj" />
+    <ProjectReference Include="..\RIS.Unions\RIS.Unions.csproj" />
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <ProjectReference Include="..\RIS\RIS.csproj" />
+    <ProjectReference Include="..\RIS.Unions\RIS.Unions.csproj" />
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(Configuration)|$(Platform)'=='Release Nuget|AnyCPU'">
+    <!--For NuGet Package-->
+    <ProjectReference Include="..\RIS\RIS.csproj" />
+    <ProjectReference Include="..\RIS.Unions\RIS.Unions.csproj" />
   </ItemGroup>
 
 </Project>

@@ -5,7 +5,7 @@ using System;
 
 namespace RIS.Unions.Types
 {
-    public class TrueOrFalse : UnionBase<True, False> 
+    public class TrueOrFalse : UnionBase<True, False>
     {
         protected TrueOrFalse(Union<True, False> _)
             : base(_)

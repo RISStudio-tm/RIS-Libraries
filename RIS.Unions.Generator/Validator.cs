@@ -18,49 +18,43 @@ namespace RIS.Unions.Generator
 
 
         public static bool ValidateClass(
-            this GeneratorExecutionContext context,
-            ITypeSymbol classSymbol,
-            AttributeData attributeData)
+            this SourceProductionContext context,
+            ITypeSymbol classSymbol)
         {
             var diagnostics = new List<Diagnostic>();
-            var attributeLocation =
-                attributeData
-                    .GetSyntax()?
-                    .GetLocation();
+            var location = classSymbol.Locations.FirstOrDefault()
+                          ?? Location.None;
 
             if (!classSymbol.ContainingSymbol.Equals(classSymbol.ContainingNamespace, SymbolEqualityComparer.Default))
-                diagnostics.Add(Diagnostic.Create(DiagnosticErrors.TopLevelError, attributeLocation, classSymbol.Name));
+                diagnostics.Add(Diagnostic.Create(DiagnosticErrors.TopLevelError, location, classSymbol.Name));
 
             if (classSymbol.BaseType is null || classSymbol.BaseType.Name != UnionBaseTypeName || classSymbol.BaseType.ContainingNamespace.ToString() != UnionBaseTypeNamespace)
-                diagnostics.Add(Diagnostic.Create(DiagnosticErrors.WrongBaseType, attributeLocation, classSymbol.Name));
+                diagnostics.Add(Diagnostic.Create(DiagnosticErrors.WrongBaseType, location, classSymbol.Name));
 
             //if (classSymbol.DeclaredAccessibility != Accessibility.Public)
-            //    diagnostics.Add(Diagnostic.Create(DiagnosticErrors.ClassIsNotPublic, attributeLocation, classSymbol.Name));
+            //    diagnostics.Add(Diagnostic.Create(DiagnosticErrors.ClassIsNotPublic, location, classSymbol.Name));
 
             return diagnostics.ReportIfAny(
                 context);
         }
 
         public static bool ValidateTypeArguments(
-            this GeneratorExecutionContext context,
-            ITypeSymbol classSymbol,
-            AttributeData attributeData)
+            this SourceProductionContext context,
+            ITypeSymbol classSymbol)
         {
             var diagnostics = new List<Diagnostic>();
             var typeArguments =
                 classSymbol.BaseType!.TypeArguments;
-            var attributeLocation =
-                attributeData
-                    .GetSyntax()?
-                    .GetLocation();
+            var location = classSymbol.Locations.FirstOrDefault()
+                           ?? Location.None;
 
             foreach (var typeSymbol in typeArguments)
             {
                 if (typeSymbol.Name == nameof(Object))
-                    diagnostics.Add(Diagnostic.Create(DiagnosticErrors.ObjectIsUnionType, attributeLocation, classSymbol.Name));
+                    diagnostics.Add(Diagnostic.Create(DiagnosticErrors.ObjectIsUnionType, location, classSymbol.Name));
 
                 if (typeSymbol.TypeKind == TypeKind.Interface)
-                    diagnostics.Add(Diagnostic.Create(DiagnosticErrors.UserDefinedConversionsToOrFromAnInterfaceAreNotAllowed, attributeLocation, classSymbol.Name));
+                    diagnostics.Add(Diagnostic.Create(DiagnosticErrors.UserDefinedConversionsToOrFromAnInterfaceAreNotAllowed, location, classSymbol.Name));
             }
 
             return diagnostics.ReportIfAny(
@@ -68,7 +62,7 @@ namespace RIS.Unions.Generator
         }
 
         public static bool ValidateTypeNames(
-            this GeneratorExecutionContext context,
+            this SourceProductionContext context,
             ITypeSymbol classSymbol,
             AttributeData attributeData)
         {
@@ -82,32 +76,32 @@ namespace RIS.Unions.Generator
             var attributeSyntax =
                 attributeData
                     .GetSyntax();
-            var attributeLocation =
-                attributeSyntax?
-                    .GetLocation();
+            var location = classSymbol.Locations.FirstOrDefault()
+                           ?? Location.None;
 
             if (typeNames.Length > 0 && typeNames.Length != typeArguments.Length)
-                diagnostics.Add(Diagnostic.Create(DiagnosticErrors.WrongNumberOfTypeNames, attributeLocation, typeArguments.Length, typeNames.Length));
+                diagnostics.Add(Diagnostic.Create(DiagnosticErrors.WrongNumberOfTypeNames, location, typeArguments.Length, typeNames.Length));
 
-            var typeNameSyntaxes = attributeSyntax?.ArgumentList?.Arguments
+            var typeNameLocations = attributeSyntax?.ArgumentList?.Arguments
                 .Where(x => x.NameEquals == null)
                 .Select(x => x.Expression.GetLocation())
                 .ToArray();
 
             foreach (var (name, nameIndex) in typeNames.Select((x, i) => (x, i)))
             {
-                var location = nameIndex < typeNameSyntaxes?.Length
-                    ? typeNameSyntaxes[nameIndex]
-                    : attributeLocation;
+                var typeNameLocation = nameIndex < typeNameLocations?.Length
+                    ? typeNameLocations[nameIndex]
+                    : location;
 
                 if (string.IsNullOrEmpty(name.Value as string))
-                    diagnostics.Add(Diagnostic.Create(DiagnosticErrors.TypeNameCannotBeNullOrEmpty, location, nameIndex + 1));
+                    diagnostics.Add(Diagnostic.Create(DiagnosticErrors.TypeNameCannotBeNullOrEmpty, typeNameLocation, nameIndex + 1));
 
                 if (!SyntaxFacts.IsValidIdentifier("_" + name.Value))
-                    diagnostics.Add(Diagnostic.Create(DiagnosticErrors.InvalidTypeName, location, name.Value));
+                    diagnostics.Add(Diagnostic.Create(DiagnosticErrors.InvalidTypeName, typeNameLocation, name.Value));
             }
 
-            return diagnostics.ReportIfAny(context);
+            return diagnostics.ReportIfAny(
+                context);
         }
     }
 }

@@ -2,92 +2,115 @@
 // Licensed under the Apache License, Version 2.0. See LICENSE file in the project root for license information.
 
 using System;
-using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 using System.Text;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using Microsoft.CodeAnalysis.Text;
 
 namespace RIS.Localization.LocalizedList.Generator
 {
     [Generator]
-    public class LocalizedListGenerator : ISourceGenerator
+    public class LocalizedListGenerator : IIncrementalGenerator
     {
         private const string LocalizedListBaseTypeNamespace = "RIS.Localization";
         private const string LocalizedListBaseTypeName = "LocalizedListBase";
 
 
 
-        public void Initialize(GeneratorInitializationContext context)
+        public void Initialize(
+            IncrementalGeneratorInitializationContext context)
         {
-            context.RegisterForSyntaxNotifications(() =>
-                new LocalizedListSyntaxReceiver());
+            context.RegisterSourceOutput(
+                GetTargetClasses(context),
+                Execute);
         }
 
-        public void Execute(GeneratorExecutionContext context)
+        public static void Execute(
+            SourceProductionContext context,
+            ImmutableArray<INamedTypeSymbol?> classSymbols)
         {
-            if (context.SyntaxReceiver is not LocalizedListSyntaxReceiver receiver)
-                return;
-            if ((context.Compilation as CSharpCompilation)?.SyntaxTrees[0].Options is not CSharpParseOptions options)
-                return;
-
-            var compilation =
-                context.Compilation;
-
-            List<(INamedTypeSymbol, ClassDeclarationSyntax?)> classSymbols = new();
-
-            foreach (var classDeclaration in receiver.CandidateClasses)
+            foreach (var classSymbol in classSymbols)
             {
-                var model = compilation.GetSemanticModel(
-                    classDeclaration.SyntaxTree);
-                var classSymbol = model.GetDeclaredSymbol(
-                    classDeclaration);
-                var baseClassSymbol = classSymbol;
-
-                do
-                {
-                    baseClassSymbol = baseClassSymbol?.BaseType;
-                } while (baseClassSymbol?.BaseType != null
-                         && baseClassSymbol.BaseType?.SpecialType != SpecialType.System_Object);
-
-                if (classSymbol is null
-                    || classSymbol.IsAbstract
-                    || baseClassSymbol is null
-                    || baseClassSymbol.Name != LocalizedListBaseTypeName
-                    || baseClassSymbol.ContainingNamespace.ToString() != LocalizedListBaseTypeNamespace)
-                {
+                if (classSymbol == null)
                     continue;
-                }
 
-                classSymbols.Add((classSymbol!, classDeclaration));
-            }
-
-            foreach (var (classSymbol, classDeclaration) in classSymbols)
-            {
                 var classSource = ProcessClass(
-                    classSymbol, context, classDeclaration!);
+                    context, classSymbol);
 
                 if (classSource is null)
                     continue;
 
-                context.AddSource($"{classSymbol.ContainingNamespace}_{classSymbol.Name}.g.cs",
-                    SourceText.From(classSource, Encoding.UTF8));
+                context.AddSource(
+                    $"{classSymbol.ContainingNamespace}_{classSymbol.Name}.g.cs",
+                    classSource);
             }
         }
 
-        private static string? ProcessClass(INamedTypeSymbol classSymbol,
-            GeneratorExecutionContext context, ClassDeclarationSyntax classDeclaration)
-        {
-            if (!context.ValidateClass(classSymbol, classDeclaration))
-                return null;
 
-            return GenerateClassSource(classSymbol);
+
+        private static IncrementalValueProvider<ImmutableArray<INamedTypeSymbol?>> GetTargetClasses(
+            IncrementalGeneratorInitializationContext context)
+        {
+            return context.SyntaxProvider
+                .CreateSyntaxProvider(
+                    static (node, _) => IsSyntaxTarget(node),
+                    (syntaxContext, _) => GetSemanticTarget(syntaxContext))
+                .Where(static classSymbol => classSymbol is not null)
+                .Collect();
         }
 
-        private static string GenerateClassSource(INamedTypeSymbol classSymbol)
+        private static bool IsSyntaxTarget(
+            SyntaxNode node)
+        {
+            return node is ClassDeclarationSyntax { BaseList: { Types: { Count: > 0 } } } classDeclarationSyntax
+                   && classDeclarationSyntax.Modifiers.Any(SyntaxKind.PartialKeyword);
+        }
+
+        private static INamedTypeSymbol? GetSemanticTarget(
+            GeneratorSyntaxContext context)
+        {
+            var symbol = context.SemanticModel
+                .GetDeclaredSymbol(context.Node);
+
+            if (symbol is not INamedTypeSymbol classSymbol)
+                return null;
+
+            var baseClassSymbol = classSymbol;
+
+            do
+            {
+                baseClassSymbol = baseClassSymbol.BaseType;
+            } while (baseClassSymbol?.BaseType != null
+                     && baseClassSymbol.BaseType?.SpecialType != SpecialType.System_Object);
+
+            if (classSymbol.IsAbstract
+                || baseClassSymbol is null
+                || baseClassSymbol.Name != LocalizedListBaseTypeName
+                || baseClassSymbol.ContainingNamespace.ToString() != LocalizedListBaseTypeNamespace)
+            {
+                return null;
+            }
+
+            return classSymbol;
+        }
+
+
+
+        private static string? ProcessClass(
+            SourceProductionContext context,
+            INamedTypeSymbol classSymbol)
+        {
+            if (!context.ValidateClass(classSymbol))
+                return null;
+
+            return GenerateClassSource(
+                classSymbol);
+        }
+
+        private static string GenerateClassSource(
+            INamedTypeSymbol classSymbol)
         {
             var classNameWithGenericTypes =
                 $"{classSymbol.Name}{GetOpenGenericPart(classSymbol)}";
@@ -119,20 +142,22 @@ namespace {classSymbol.ContainingNamespace.ToDisplayString()}
             return source.ToString();
         }
 
+
+
         private static string GetGenericPart(
             ImmutableArray<ITypeSymbol> typeArguments)
         {
             return string.Join(", ",
-                typeArguments.Select(x => x.ToDisplayString()));
+                typeArguments.Select(typeArgument =>
+                    typeArgument.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)));
         }
 
         private static string? GetOpenGenericPart(
             INamedTypeSymbol classSymbol)
         {
-            if (!classSymbol.TypeArguments.Any())
-                return null;
-
-            return $"<{GetGenericPart(classSymbol.TypeArguments)}>";
+            return classSymbol.TypeArguments.Any()
+                ? $"<{GetGenericPart(classSymbol.TypeArguments)}>"
+                : null;
         }
     }
 }

@@ -24,13 +24,13 @@ namespace RIS.Localization.LocalizedList.Generator
         //    DiagnosticSeverity.Error,
         //    true);
 
-        public static readonly DiagnosticDescriptor ClassIsNotPartial = new(
-            "LOCLISTGEN003",
-            "Class must be partial",
-            "Class '{0}' is not partial",
-            "LocalizedListGenerator",
-            DiagnosticSeverity.Error,
-            true);
+        //public static readonly DiagnosticDescriptor ClassIsNotPartial = new(
+        //    "LOCLISTGEN003",
+        //    "Class must be partial",
+        //    "Class '{0}' is not partial",
+        //    "LocalizedListGenerator",
+        //    DiagnosticSeverity.Error,
+        //    true);
 
         public static readonly DiagnosticDescriptor ClassShouldHaveDefaultConstructor = new(
             "LOCLISTGEN004",

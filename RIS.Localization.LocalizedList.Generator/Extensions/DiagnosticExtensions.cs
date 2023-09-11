@@ -12,7 +12,7 @@ namespace RIS.Localization.LocalizedList.Generator.Extensions
     {
         public static bool ReportIfAny(
             this IEnumerable<Diagnostic> diagnostics,
-            GeneratorExecutionContext context)
+            SourceProductionContext context)
         {
             var diagnosticsArray =
                 diagnostics as Diagnostic[] ?? diagnostics.ToArray();

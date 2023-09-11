@@ -10,7 +10,7 @@ namespace RIS.Unions.Types
         protected YesOrNo(Union<Yes, No> _)
             : base(_)
         {
-            
+
         }
 
         public static implicit operator YesOrNo(Yes _)
