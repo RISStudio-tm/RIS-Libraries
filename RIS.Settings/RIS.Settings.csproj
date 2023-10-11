@@ -3,13 +3,14 @@
   <PropertyGroup>
     <TargetFrameworks>netcoreapp3.1;net48</TargetFrameworks>
     <Configurations>Debug;Release;Release Nuget</Configurations>
+    <LangVersion>latest</LangVersion>
     <RootNamespace>RIS.Settings</RootNamespace>
     <AssemblyName>RIS.Settings</AssemblyName>
-    <AssemblyVersion>1.7.6.0</AssemblyVersion>
-    <FileVersion>1.7.6.0</FileVersion>
+    <AssemblyVersion>1.8.0.0</AssemblyVersion>
+    <FileVersion>1.8.0.0</FileVersion>
     <PackageId>RIS.Settings</PackageId>
     <Product>RIS.Settings</Product>
-    <Version>1.7.6</Version>
+    <Version>1.8.0</Version>
     <Description>A library designed for various types of tasks. Part of the RIS "ecosystem".</Description>
     <PackageTags>dotnet, dotnetcore, netframework, netcore, library</PackageTags>
     <Authors>Dmitry Ponomarev</Authors>
@@ -50,19 +51,19 @@
   </ItemGroup>
 
   <ItemGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-    <ProjectReference Include="..\RIS.Collections\RIS.Collections.csproj" />
     <ProjectReference Include="..\RIS\RIS.csproj" />
+    <ProjectReference Include="..\RIS.Collections\RIS.Collections.csproj" />
   </ItemGroup>
 
   <ItemGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
-    <ProjectReference Include="..\RIS.Collections\RIS.Collections.csproj" />
     <ProjectReference Include="..\RIS\RIS.csproj" />
+    <ProjectReference Include="..\RIS.Collections\RIS.Collections.csproj" />
   </ItemGroup>
 
   <ItemGroup Condition="'$(Configuration)|$(Platform)'=='Release Nuget|AnyCPU'">
     <!--For NuGet Package-->
-    <ProjectReference Include="..\RIS.Collections\RIS.Collections.csproj" />
     <ProjectReference Include="..\RIS\RIS.csproj" />
+    <ProjectReference Include="..\RIS.Collections\RIS.Collections.csproj" />
   </ItemGroup>
 
 </Project>

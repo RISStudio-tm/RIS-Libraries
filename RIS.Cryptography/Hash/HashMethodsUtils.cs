@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using RIS.Randomizing;
+using RIS.Randomizing.Secure;
 using RIS.Text.Generating;
 
 namespace RIS.Cryptography.Hash

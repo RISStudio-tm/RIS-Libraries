@@ -9,6 +9,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using RIS.Extensions;
 using RIS.Randomizing;
+using RIS.Randomizing.Secure;
 
 namespace RIS.Text.Generating
 {

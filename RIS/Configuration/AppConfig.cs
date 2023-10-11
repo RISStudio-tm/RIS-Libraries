@@ -33,7 +33,8 @@ namespace RIS.Configuration
 
             try
             {
-                Configuration = ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.None);
+                Configuration = ConfigurationManager
+                    .OpenExeConfiguration(ConfigurationUserLevel.None);
 
                 ConfigurationIsLoaded = true;
             }
@@ -58,7 +59,9 @@ namespace RIS.Configuration
                 return;
             }
 
-            ConfigWatcher = new FileSystemWatcher(Path.GetDirectoryName(Configuration.FilePath), Path.GetFileName(Configuration.FilePath));
+            ConfigWatcher = new FileSystemWatcher(
+                Path.GetDirectoryName(Configuration.FilePath),
+                Path.GetFileName(Configuration.FilePath));
             ConfigWatcher.IncludeSubdirectories = false;
             ConfigWatcher.NotifyFilter = NotifyFilters.LastWrite;
             ConfigWatcher.Changed += ConfigWatcher_Changed;
@@ -110,37 +113,39 @@ namespace RIS.Configuration
             lock (ReadWriteLockObj)
             {
                 Config.Load(Configuration.FilePath);
+
                 ReadChildNodes(Config.DocumentElement, "/");
             }
         }
 
         private static void ReadChildNodes(XmlNode rootNode, string xmlPath)
         {
-            string currentXmlPath = $"{xmlPath}/{rootNode.Name}";
+            var currentXmlPath = $"{xmlPath}/{rootNode.Name}";
 
             foreach (XmlNode node in rootNode.ChildNodes)
             {
-                string nodeXmlPath = $"{currentXmlPath}/{node.Name}";
+                var nodeXmlPath = $"{currentXmlPath}/{node.Name}";
 
-                if (nodeXmlPath == "//configuration/system.runtime.caching"
-                    || nodeXmlPath == "//configuration/system.runtime.remoting"
-                    || nodeXmlPath == "//configuration/system.web"
-                    || nodeXmlPath == "//configuration/system.web.extensions"
-                    || nodeXmlPath == "//configuration/system.identityModel"
-                    || nodeXmlPath == "//configuration/location"
-                    || nodeXmlPath == "//configuration/connectionStrings"
-                    || nodeXmlPath == "//configuration/System.Windows.Forms.ApplicationConfigurationSection"
-                    || nodeXmlPath == "//configuration/appSettings"
-                    || nodeXmlPath == "//configuration/applicationSettings"
-                    || nodeXmlPath == "//configuration/userSettings"
-                    || nodeXmlPath == "//configuration/system.codedom"
-                    || nodeXmlPath == "//configuration/system.diagnostics"
-                    || nodeXmlPath == "//configuration/configSections"
-                    || nodeXmlPath == "//configuration/mscorlib"
-                    || nodeXmlPath == "//configuration/system.net/connectionManagement"
-                    || nodeXmlPath == "//configuration/system.net/authenticationModules"
-                    || nodeXmlPath == "//configuration/system.net/webRequestModules"
-                    || nodeXmlPath == "//configuration/runtime/assemblyBinding")
+                if (nodeXmlPath
+                    is "//configuration/system.runtime.caching"
+                    or "//configuration/system.runtime.remoting"
+                    or "//configuration/system.web"
+                    or "//configuration/system.web.extensions"
+                    or "//configuration/system.identityModel"
+                    or "//configuration/location"
+                    or "//configuration/connectionStrings"
+                    or "//configuration/System.Windows.Forms.ApplicationConfigurationSection"
+                    or "//configuration/appSettings"
+                    or "//configuration/applicationSettings"
+                    or "//configuration/userSettings"
+                    or "//configuration/system.codedom"
+                    or "//configuration/system.diagnostics"
+                    or "//configuration/configSections"
+                    or "//configuration/mscorlib"
+                    or "//configuration/system.net/connectionManagement"
+                    or "//configuration/system.net/authenticationModules"
+                    or "//configuration/system.net/webRequestModules"
+                    or "//configuration/runtime/assemblyBinding")
                 {
                     continue;
                 }
@@ -151,7 +156,11 @@ namespace RIS.Configuration
                 //    continue;
                 //}
 
-                Elements.Add(node.Name, new AppConfigElement(node.Name, nodeXmlPath));
+                Elements.Add(
+                    node.Name,
+                    new AppConfigElement(
+                        node.Name,
+                        nodeXmlPath));
 
                 if (node.HasChildNodes)
                     ReadChildNodes(node, currentXmlPath);
@@ -162,7 +171,7 @@ namespace RIS.Configuration
         {
             if (!ConfigIsLoaded)
             {
-                var exception = new ConfigurationErrorsException("Не удалось сохранить файл конфигурации, так как он не загружен");
+                var exception = new Exception("Не удалось сохранить файл конфигурации, так как он не загружен");
                 Events.OnError(new RErrorEventArgs(exception, exception.Message));
                 OnError(new RErrorEventArgs(exception, exception.Message));
                 throw exception;
@@ -184,7 +193,7 @@ namespace RIS.Configuration
             }
             catch (Exception)
             {
-                var exception = new ConfigurationErrorsException("Не удалось сохранить файл конфигурации");
+                var exception = new Exception("Не удалось сохранить файл конфигурации");
                 Events.OnError(new RErrorEventArgs(exception, exception.Message));
                 OnError(new RErrorEventArgs(exception, exception.Message));
                 throw exception;
@@ -197,7 +206,8 @@ namespace RIS.Configuration
 
             try
             {
-                node = Config.SelectSingleNode(element.XmlPath);
+                node = Config.SelectSingleNode(
+                    element.XmlPath);
 
                 if (node == null)
                     throw new XmlException();

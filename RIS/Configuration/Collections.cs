@@ -16,6 +16,8 @@ namespace RIS.Configuration
         public event EventHandler<RWarningEventArgs> Warning;
         public event EventHandler<RErrorEventArgs> Error;
 
+
+
         public AppConfigElement this[string key]
         {
             get
@@ -29,7 +31,10 @@ namespace RIS.Configuration
             }
         }
 
+
+
         private Dictionary<string, AppConfigElement> Elements { get; }
+
 
         public int Count
         {
@@ -40,11 +45,15 @@ namespace RIS.Configuration
         }
         public bool ThrowExceptions { get; }
 
+
+
         internal AppConfigElementList(bool throwExceptions = true)
         {
             ThrowExceptions = throwExceptions;
             Elements = new Dictionary<string, AppConfigElement>();
         }
+
+
 
         public void OnInformation(RInformationEventArgs e)
         {
@@ -73,6 +82,8 @@ namespace RIS.Configuration
             Error?.Invoke(sender, e);
         }
 
+
+
         private AppConfigElement Get(string key)
         {
             if (!ContainsKey(key))
@@ -90,6 +101,7 @@ namespace RIS.Configuration
             return Elements[key];
         }
 
+
         private void Set(string key, AppConfigElement value)
         {
             if (!ContainsKey(key))
@@ -106,6 +118,8 @@ namespace RIS.Configuration
 
             Elements[key] = value;
         }
+
+
 
         internal bool Add(string key, AppConfigElement value)
         {
@@ -150,6 +164,7 @@ namespace RIS.Configuration
             return true;
         }
 
+
         private bool Remove(string key)
         {
             if (Count < 1)
@@ -193,6 +208,8 @@ namespace RIS.Configuration
             return true;
         }
 
+
+
         public bool ContainsKey(string key)
         {
             if (string.IsNullOrEmpty(key))
@@ -210,16 +227,21 @@ namespace RIS.Configuration
             return Elements.ContainsKey(key);
         }
 
+
         internal void Clear()
         {
             if (Count != 0)
                 Elements.Clear();
         }
 
+
+
         public IEnumerator GetEnumerator()
         {
             return Elements.GetEnumerator();
         }
+
+
 
         public void Dispose()
         {
@@ -235,6 +257,8 @@ namespace RIS.Configuration
         public event EventHandler<RWarningEventArgs> Warning;
         public event EventHandler<RErrorEventArgs> Error;
 
+
+
         public RuntimeConfigElement this[string key]
         {
             get
@@ -248,7 +272,11 @@ namespace RIS.Configuration
             }
         }
 
+
+
         private Dictionary<string, RuntimeConfigElement> Elements { get; }
+
+
         public int Count
         {
             get
@@ -258,11 +286,15 @@ namespace RIS.Configuration
         }
         public bool ThrowExceptions { get; }
 
+
+
         internal RuntimeConfigElementList(bool throwExceptions = true)
         {
             ThrowExceptions = throwExceptions;
             Elements = new Dictionary<string, RuntimeConfigElement>();
         }
+
+
 
         public void OnInformation(RInformationEventArgs e)
         {
@@ -291,6 +323,8 @@ namespace RIS.Configuration
             Error?.Invoke(sender, e);
         }
 
+
+
         private RuntimeConfigElement Get(string key)
         {
             if (!ContainsKey(key))
@@ -308,6 +342,7 @@ namespace RIS.Configuration
             return Elements[key];
         }
 
+
         private void Set(string key, RuntimeConfigElement value)
         {
             if (!ContainsKey(key))
@@ -324,6 +359,8 @@ namespace RIS.Configuration
 
             Elements[key] = value;
         }
+
+
 
         internal bool Add(string key, RuntimeConfigElement value)
         {
@@ -368,6 +405,7 @@ namespace RIS.Configuration
             return true;
         }
 
+
         private bool Remove(string key)
         {
             if (Count < 1)
@@ -411,6 +449,8 @@ namespace RIS.Configuration
             return true;
         }
 
+
+
         public bool ContainsKey(string key)
         {
             if (string.IsNullOrEmpty(key))
@@ -428,16 +468,21 @@ namespace RIS.Configuration
             return Elements.ContainsKey(key);
         }
 
+
         internal void Clear()
         {
             if (Count != 0)
                 Elements.Clear();
         }
 
+
+
         public IEnumerator GetEnumerator()
         {
             return Elements.GetEnumerator();
         }
+
+
 
         public void Dispose()
         {

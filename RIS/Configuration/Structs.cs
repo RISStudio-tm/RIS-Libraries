@@ -12,7 +12,10 @@ namespace RIS.Configuration
         public string Name { get; }
         public string XmlPath { get; }
 
-        internal AppConfigElement(string name, string xmlPath)
+
+
+        internal AppConfigElement(
+            string name, string xmlPath)
         {
             Name = name;
             XmlPath = xmlPath;
@@ -26,7 +29,10 @@ namespace RIS.Configuration
         public string Name { get; }
         public string JsonPath { get; }
 
-        internal RuntimeConfigElement(string name, string jsonPath)
+
+
+        internal RuntimeConfigElement(
+            string name, string jsonPath)
         {
             Name = name;
             JsonPath = jsonPath;

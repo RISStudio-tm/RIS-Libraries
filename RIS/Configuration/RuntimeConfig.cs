@@ -4,7 +4,6 @@
 #if NETCOREAPP
 
 using System;
-using System.Configuration;
 using System.IO;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
@@ -31,7 +30,9 @@ namespace RIS.Configuration
             ReadWriteLockObj = new object();
             ConfigWatcherLockObj = new object();
 
-            ConfigPath = Path.Combine(Environment.ExecAppDirectoryName, $"{Environment.ExecAppFileNameWithoutExtension}.runtimeconfig.json");
+            ConfigPath = Path.Combine(
+                Environment.ExecAppDirectoryName,
+                $"{Environment.ExecAppFileNameWithoutExtension}.runtimeconfig.json");
 
             if (!File.Exists(ConfigPath))
             {
@@ -54,7 +55,9 @@ namespace RIS.Configuration
                 return;
             }
 
-            ConfigWatcher = new FileSystemWatcher(Path.GetDirectoryName(ConfigPath), Path.GetFileName(ConfigPath));
+            ConfigWatcher = new FileSystemWatcher(
+                Path.GetDirectoryName(ConfigPath),
+                Path.GetFileName(ConfigPath));
             ConfigWatcher.IncludeSubdirectories = false;
             ConfigWatcher.NotifyFilter = NotifyFilters.LastWrite;
             ConfigWatcher.Changed += ConfigWatcher_Changed;
@@ -105,9 +108,10 @@ namespace RIS.Configuration
         {
             lock (ReadWriteLockObj)
             {
-                using (StreamReader reader = File.OpenText(ConfigPath))
+                using (var reader = File.OpenText(ConfigPath))
                 {
-                    Config = (JObject)JToken.ReadFrom(new JsonTextReader(reader));
+                    Config = (JObject)JToken.ReadFrom(
+                        new JsonTextReader(reader));
                 }
 
                 ReadChildNodes(Config.Root);
@@ -116,15 +120,22 @@ namespace RIS.Configuration
 
         private static void ReadChildNodes(JToken rootToken)
         {
-            foreach (JToken token in rootToken.Children())
+            foreach (var token in rootToken.Children())
             {
-                string tokenJsonPath = $"${token.Path}";
+                var tokenJsonPath = $"${token.Path}";
                 string tokenName;
 
-                if (tokenJsonPath[tokenJsonPath.Length - 1] == ']')
-                    tokenName = tokenJsonPath.Substring(tokenJsonPath.LastIndexOf('[') + 2, tokenJsonPath.Length - tokenJsonPath.LastIndexOf('[') - 4);
+                if (tokenJsonPath[^1] == ']')
+                {
+                    tokenName = tokenJsonPath.Substring(
+                        tokenJsonPath.LastIndexOf('[') + 2,
+                        tokenJsonPath.Length - tokenJsonPath.LastIndexOf('[') - 4);
+                }
                 else
-                    tokenName = tokenJsonPath.Substring(tokenJsonPath.LastIndexOfAny(new[] { '.', '$' }) + 1);
+                {
+                    tokenName = tokenJsonPath.Substring(
+                        tokenJsonPath.LastIndexOfAny(new[] { '.', '$' }) + 1);
+                }
 
                 if (token.Type == JTokenType.Property)
                 {
@@ -133,7 +144,7 @@ namespace RIS.Configuration
                     if (token.HasValues)
                         ReadChildNodes(token);
                 }
-                
+
                 if (token.Type == JTokenType.Object)
                 {
                     //Elements.Add(tokenName, new RuntimeConfigElement(tokenName, tokenJsonPath));
@@ -148,7 +159,7 @@ namespace RIS.Configuration
         {
             if (!ConfigIsLoaded)
             {
-                var exception = new ConfigurationErrorsException("Не удалось сохранить файл конфигурации, так как он не загружен");
+                var exception = new Exception("Не удалось сохранить файл конфигурации, так как он не загружен");
                 Events.OnError(new RErrorEventArgs(exception, exception.Message));
                 OnError(new RErrorEventArgs(exception, exception.Message));
                 throw exception;
@@ -162,7 +173,7 @@ namespace RIS.Configuration
                     {
                         StopConfigWatcher();
 
-                        using (StreamWriter writer = File.CreateText(ConfigPath))
+                        using (var writer = File.CreateText(ConfigPath))
                         {
                             writer.Write(
                                 Config.ToString(Formatting.Indented));
@@ -174,20 +185,21 @@ namespace RIS.Configuration
             }
             catch (Exception)
             {
-                var exception = new ConfigurationErrorsException("Не удалось сохранить файл конфигурации");
+                var exception = new Exception("Не удалось сохранить файл конфигурации");
                 Events.OnError(new RErrorEventArgs(exception, exception.Message));
                 OnError(new RErrorEventArgs(exception, exception.Message));
                 throw exception;
             }
         }
-        
+
         public static JToken GetJsonElement(RuntimeConfigElement element)
         {
             JToken token;
 
             try
             {
-                token = Config.SelectToken(element.JsonPath.Substring(1), false);
+                token = Config.SelectToken(
+                    element.JsonPath[1..], false);
 
                 if (token == null)
                     throw new JsonException();

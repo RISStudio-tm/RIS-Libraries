@@ -3,14 +3,15 @@
   <PropertyGroup>
     <TargetFrameworks>netcoreapp3.1</TargetFrameworks>
     <Configurations>Debug;Release;Release Nuget</Configurations>
+    <LangVersion>latest</LangVersion>
     <RootNamespace>RIS.Localization.Xaml</RootNamespace>
     <AssemblyName>RIS.Localization.Xaml</AssemblyName>
-    <AssemblyVersion>1.5.6.0</AssemblyVersion>
-    <FileVersion>1.5.6.0</FileVersion>
+    <AssemblyVersion>1.6.0.0</AssemblyVersion>
+    <FileVersion>1.6.0.0</FileVersion>
     <UseWPF>true</UseWPF>
     <PackageId>RIS.Localization.Xaml</PackageId>
     <Product>RIS.Localization.Xaml</Product>
-    <Version>1.5.6</Version>
+    <Version>1.6.0</Version>
     <Description>A library designed for various types of tasks. Part of the RIS "ecosystem".</Description>
     <PackageTags>dotnet, dotnetcore, netframework, netcore, library</PackageTags>
     <Authors>Dmitry Ponomarev</Authors>

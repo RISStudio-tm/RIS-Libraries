@@ -131,36 +131,32 @@ namespace RIS
 
 #if NETFRAMEWORK
 
-            if (AppConfig.ConfigIsLoaded)
+            if (AppConfig.ConfigIsLoaded
+                && AppConfig.Elements.ContainsKey("GCLOHThreshold"))
             {
-                if (AppConfig.Elements.ContainsKey("GCLOHThreshold"))
-                {
-                    XmlNode node = AppConfig.GetXmlElement(AppConfig.Elements["GCLOHThreshold"]);
+                var node = AppConfig.GetXmlElement(AppConfig.Elements["GCLOHThreshold"]);
 
-                    if (node?.Attributes?["enabled"] != null)
-                        GCLOHThresholdSize = Convert.ToUInt32(node.Attributes["enabled"].Value);
-                }
+                if (node?.Attributes?["enabled"] != null)
+                    GCLOHThresholdSize = Convert.ToUInt32(node.Attributes["enabled"].Value);
             }
 
 #elif NETCOREAPP
 
-            if (RuntimeConfig.ConfigIsLoaded)
+            if (RuntimeConfig.ConfigIsLoaded
+                && RuntimeConfig.Elements.ContainsKey("System.GC.LOHThreshold"))
             {
-                if (RuntimeConfig.Elements.ContainsKey("System.GC.LOHThreshold"))
+                var token = RuntimeConfig.GetJsonElement(RuntimeConfig.Elements["System.GC.LOHThreshold"]);
+
+                if (token?.HasValues == false)
                 {
-                    JToken token = RuntimeConfig.GetJsonElement(RuntimeConfig.Elements["System.GC.LOHThreshold"]);
+                    var reader = new JTokenReader(token);
 
-                    if (token?.HasValues == false)
-                    {
-                        JTokenReader reader = new JTokenReader(token);
+                    var value = reader.ReadAsDecimal();
 
-                        decimal? value = reader.ReadAsDecimal();
+                    reader.Close();
 
-                        reader.Close();
-
-                        if (value.HasValue)
-                            GCLOHThresholdSize = Convert.ToUInt32(value.Value);
-                    }
+                    if (value.HasValue)
+                        GCLOHThresholdSize = Convert.ToUInt32(value.Value);
                 }
             }
 
@@ -355,7 +351,7 @@ namespace RIS
             {
                 if (AppConfig.Elements.ContainsKey("GCLOHThreshold"))
                 {
-                    XmlNode node = AppConfig.GetXmlElement(AppConfig.Elements["GCLOHThreshold"]);
+                    var node = AppConfig.GetXmlElement(AppConfig.Elements["GCLOHThreshold"]);
 
                     if (node?.Attributes?["enabled"] != null)
                         node.Attributes["enabled"].Value = sizeInBytes.ToString();
@@ -364,32 +360,23 @@ namespace RIS
                     {
                         AppConfig.SaveConfig();
                     }
-                    catch (ConfigurationErrorsException)
+                    catch (Exception)
                     {
                         if (node?.Attributes?["enabled"] != null)
                             node.Attributes["enabled"].Value = _originalGCLOHThresholdSize.ToString();
 
                         var exception =
-                            new ConfigurationErrorsException(
+                            new Exception(
                                 "Не удалось изменить значение параметра 'GCLOHThreshold' в AppConfig. Ошибка сохранения файла конфигурации");
                         Events.OnError(new RErrorEventArgs(exception, exception.Message));
                         OnError(new RErrorEventArgs(exception, exception.Message));
                         throw exception;
                     }
-                    catch (Exception ex)
-                    {
-                        if (node?.Attributes?["enabled"] != null)
-                            node.Attributes["enabled"].Value = _originalGCLOHThresholdSize.ToString();
-
-                        Events.OnError(new RErrorEventArgs(ex, ex.Message));
-                        OnError(new RErrorEventArgs(ex, ex.Message));
-                        throw;
-                    }
                 }
                 else
                 {
                     var exception =
-                        new ConfigurationErrorsException(
+                        new Exception(
                             "Не удалось изменить значение параметра 'GCLOHThreshold' в AppConfig. Параметр не найден в файле конфигурации");
                     Events.OnError(new RErrorEventArgs(exception, exception.Message));
                     OnError(new RErrorEventArgs(exception, exception.Message));
@@ -399,7 +386,7 @@ namespace RIS
             else
             {
                 var exception =
-                    new ConfigurationErrorsException(
+                    new Exception(
                         "Не удалось изменить значение параметра 'GCLOHThreshold' в AppConfig. Файл конфигурации не загружен");
                 Events.OnError(new RErrorEventArgs(exception, exception.Message));
                 OnError(new RErrorEventArgs(exception, exception.Message));
@@ -424,32 +411,23 @@ namespace RIS
                     {
                         RuntimeConfig.SaveConfig();
                     }
-                    catch (ConfigurationErrorsException)
+                    catch (Exception)
                     {
                         JValue value = new JValue(JValue.CreateString(_originalGCLOHThresholdSize.ToString()));
                         token?.Replace(value);
 
                         var exception =
-                            new ConfigurationErrorsException(
+                            new Exception(
                                 "Не удалось изменить значение параметра 'System.GC.LOHThreshold' в RuntimeConfig. Ошибка сохранения файла конфигурации");
                         Events.OnError(new RErrorEventArgs(exception, exception.Message));
                         OnError(new RErrorEventArgs(exception, exception.Message));
                         throw exception;
                     }
-                    catch (Exception ex)
-                    {
-                        JValue value = new JValue(JValue.CreateString(_originalGCLOHThresholdSize.ToString()));
-                        token?.Replace(value);
-
-                        Events.OnError(new RErrorEventArgs(ex, ex.Message));
-                        OnError(new RErrorEventArgs(ex, ex.Message));
-                        throw;
-                    }
                 }
                 else
                 {
                     var exception =
-                        new ConfigurationErrorsException(
+                        new Exception(
                             "Не удалось изменить значение параметра 'System.GC.LOHThreshold' в RuntimeConfig. Параметр не найден в файле конфигурации");
                     Events.OnError(new RErrorEventArgs(exception, exception.Message));
                     OnError(new RErrorEventArgs(exception, exception.Message));
@@ -459,7 +437,7 @@ namespace RIS
             else
             {
                 var exception =
-                    new ConfigurationErrorsException(
+                    new Exception(
                         "Не удалось изменить значение параметра 'System.GC.LOHThreshold' в RuntimeConfig. Файл конфигурации не загружен");
                 Events.OnError(new RErrorEventArgs(exception, exception.Message));
                 OnError(new RErrorEventArgs(exception, exception.Message));
