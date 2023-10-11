@@ -59,6 +59,10 @@
 - **[RIS.Logging](https://www.nuget.org/packages/RIS.Logging)**<br/>
     [![Nuget](https://img.shields.io/nuget/v/RIS.Logging?style=flat)](https://www.nuget.org/packages/RIS.Logging)
     [![Nuget](https://img.shields.io/nuget/dt/RIS.Logging?style=flat)](https://www.nuget.org/packages/RIS.Logging)
+
+- **[RIS.Randomizing.Secure](https://www.nuget.org/packages/RIS.Randomizing.Secure)**<br/>
+    [![Nuget](https://img.shields.io/nuget/v/RIS.Randomizing.Secure?style=flat)](https://www.nuget.org/packages/RIS.Randomizing.Secure)
+    [![Nuget](https://img.shields.io/nuget/dt/RIS.Randomizing.Secure?style=flat)](https://www.nuget.org/packages/RIS.Randomizing.Secure)
     
 - **[RIS.Reflection](https://www.nuget.org/packages/RIS.Reflection)**<br/>
     [![Nuget](https://img.shields.io/nuget/v/RIS.Reflection?style=flat)](https://www.nuget.org/packages/RIS.Reflection)
@@ -67,6 +71,10 @@
 - **[RIS.Settings](https://www.nuget.org/packages/RIS.Settings)**<br/>
     [![Nuget](https://img.shields.io/nuget/v/RIS.Settings?style=flat)](https://www.nuget.org/packages/RIS.Settings)
     [![Nuget](https://img.shields.io/nuget/dt/RIS.Settings?style=flat)](https://www.nuget.org/packages/RIS.Settings)
+
+- **[RIS.Synchronization](https://www.nuget.org/packages/RIS.Synchronization)**<br/>
+    [![Nuget](https://img.shields.io/nuget/v/RIS.Synchronization?style=flat)](https://www.nuget.org/packages/RIS.Synchronization)
+    [![Nuget](https://img.shields.io/nuget/dt/RIS.Synchronization?style=flat)](https://www.nuget.org/packages/RIS.Synchronization)
     
 - **[RIS.Text](https://www.nuget.org/packages/RIS.Text)**<br/>
     [![Nuget](https://img.shields.io/nuget/v/RIS.Text?style=flat)](https://www.nuget.org/packages/RIS.Text)
@@ -83,3 +91,7 @@
 - **[RIS.Unions.Generator](https://www.nuget.org/packages/RIS.Unions.Generator)**<br/>
     [![Nuget](https://img.shields.io/nuget/v/RIS.Unions.Generator?style=flat)](https://www.nuget.org/packages/RIS.Unions.Generator)
     [![Nuget](https://img.shields.io/nuget/dt/RIS.Unions.Generator?style=flat)](https://www.nuget.org/packages/RIS.Unions.Generator)
+
+- **[RIS.Versioning](https://www.nuget.org/packages/RIS.Versioning)**<br/>
+    [![Nuget](https://img.shields.io/nuget/v/RIS.Versioning?style=flat)](https://www.nuget.org/packages/RIS.Versioning)
+    [![Nuget](https://img.shields.io/nuget/dt/RIS.Versioning?style=flat)](https://www.nuget.org/packages/RIS.Versioning)
