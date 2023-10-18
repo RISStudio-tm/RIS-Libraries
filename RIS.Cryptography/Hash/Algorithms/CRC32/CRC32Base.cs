@@ -3,6 +3,7 @@
 
 using System;
 using System.Security.Cryptography;
+using RIS.Utilities;
 
 namespace RIS.Cryptography.Hash.Algorithms
 {

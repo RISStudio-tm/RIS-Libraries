@@ -3,18 +3,18 @@
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
     <Configurations>Debug;Release;Release Nuget</Configurations>
+    <LangVersion>latest</LangVersion>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <Nullable>Enable</Nullable>
     <IsRoslynComponent>True</IsRoslynComponent>
     <EnforceExtendedAnalyzerRules>True</EnforceExtendedAnalyzerRules>
-    <LangVersion>preview</LangVersion>
-    <Nullable>Enable</Nullable>
     <RootNamespace>RIS.Localization.LocalizedList.Generator</RootNamespace>
     <AssemblyName>RIS.Localization.LocalizedList.Generator</AssemblyName>
-    <AssemblyVersion>1.2.0.0</AssemblyVersion>
-    <FileVersion>1.2.0.0</FileVersion>
-    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <AssemblyVersion>1.2.1.0</AssemblyVersion>
+    <FileVersion>1.2.1.0</FileVersion>
     <PackageId>RIS.Localization.LocalizedList.Generator</PackageId>
     <Product>RIS.Localization.LocalizedList.Generator</Product>
-    <Version>1.2.0</Version>
+    <Version>1.2.1</Version>
     <Description>A source generator for automaticly implements RIS.Localization.LocalizedListBase hierarchies, etc. Part of the RIS "ecosystem".</Description>
     <PackageTags>dotnet, dotnetcore, netframework, netcore, generator, source generator</PackageTags>
     <Authors>Dmitry Ponomarev</Authors>

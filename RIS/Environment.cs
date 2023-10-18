@@ -2,7 +2,6 @@
 // Licensed under the Apache License, Version 2.0. See LICENSE file in the project root for license information.
 
 using System;
-using System.Configuration;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -10,12 +9,8 @@ using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
-#if NETFRAMEWORK
-using System.Xml;
-#elif NETCOREAPP
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
-#endif
 using RIS.Configuration;
 
 namespace RIS
@@ -41,13 +36,11 @@ namespace RIS
         public static string ExecProcessAssemblyFilePath { get; }
         public static string ExecProcessAssemblyFileName { get; }
         public static string ExecProcessAssemblyFileNameWithoutExtension { get; }
-#if NETCOREAPP
         public static bool IsStandalone { get; }
         public static bool IsSingleFile { get; }
         public static string RuntimeName { get; }
         public static string RuntimeVersion { get; }
         public static string RuntimeIdentifier { get; }
-#endif
         public static int PlatformWordSize { get; }
         public static int PlatformWordSizeBits { get; }
 
@@ -82,7 +75,7 @@ namespace RIS
 
         static Environment()
         {
-            Assembly execAppAssembly = Assembly.GetEntryAssembly();
+            var execAppAssembly = Assembly.GetEntryAssembly();
 
             ExecAppDirectoryName = ValidateDirectoryPath(
                 Path.GetDirectoryName(execAppAssembly?.Location));
@@ -116,31 +109,14 @@ namespace RIS
             ExecProcessAssemblyFileNameWithoutExtension = ValidateFileName(
                 Path.GetFileNameWithoutExtension(ExecProcessAssemblyFileName));
 
-#if NETCOREAPP
-
             (RuntimeName, RuntimeVersion, RuntimeIdentifier) = GetRuntimeInfo();
             IsStandalone = GetIsStandalone();
             IsSingleFile = GetIsSingleFile();
-
-#endif
 
             PlatformWordSize = IntPtr.Size;
             PlatformWordSizeBits = PlatformWordSize * 8;
 
             GCLOHThresholdSize = 85000;
-
-#if NETFRAMEWORK
-
-            if (AppConfig.ConfigIsLoaded
-                && AppConfig.Elements.ContainsKey("GCLOHThreshold"))
-            {
-                var node = AppConfig.GetXmlElement(AppConfig.Elements["GCLOHThreshold"]);
-
-                if (node?.Attributes?["enabled"] != null)
-                    GCLOHThresholdSize = Convert.ToUInt32(node.Attributes["enabled"].Value);
-            }
-
-#elif NETCOREAPP
 
             if (RuntimeConfig.ConfigIsLoaded
                 && RuntimeConfig.Elements.ContainsKey("System.GC.LOHThreshold"))
@@ -159,9 +135,6 @@ namespace RIS
                         GCLOHThresholdSize = Convert.ToUInt32(value.Value);
                 }
             }
-
-#endif
-
         }
 
         public static void OnInformation(RInformationEventArgs e)
@@ -217,8 +190,6 @@ namespace RIS
 
             return name;
         }
-
-#if NETCOREAPP
 
         private static (string RuntimeName, string RuntimeVersion, string RuntimeIdentifier) GetRuntimeInfo()
         {
@@ -338,62 +309,10 @@ namespace RIS
                 ExecProcessAssemblyFilePath);
         }
 
-#endif
-
         public static void SetGCLOHThresholdSize(uint sizeInBytes)
         {
             if (sizeInBytes < 85000)
                 sizeInBytes = 85000;
-
-#if NETFRAMEWORK
-
-            if (AppConfig.ConfigIsLoaded)
-            {
-                if (AppConfig.Elements.ContainsKey("GCLOHThreshold"))
-                {
-                    var node = AppConfig.GetXmlElement(AppConfig.Elements["GCLOHThreshold"]);
-
-                    if (node?.Attributes?["enabled"] != null)
-                        node.Attributes["enabled"].Value = sizeInBytes.ToString();
-
-                    try
-                    {
-                        AppConfig.SaveConfig();
-                    }
-                    catch (Exception)
-                    {
-                        if (node?.Attributes?["enabled"] != null)
-                            node.Attributes["enabled"].Value = _originalGCLOHThresholdSize.ToString();
-
-                        var exception =
-                            new Exception(
-                                "Не удалось изменить значение параметра 'GCLOHThreshold' в AppConfig. Ошибка сохранения файла конфигурации");
-                        Events.OnError(new RErrorEventArgs(exception, exception.Message));
-                        OnError(new RErrorEventArgs(exception, exception.Message));
-                        throw exception;
-                    }
-                }
-                else
-                {
-                    var exception =
-                        new Exception(
-                            "Не удалось изменить значение параметра 'GCLOHThreshold' в AppConfig. Параметр не найден в файле конфигурации");
-                    Events.OnError(new RErrorEventArgs(exception, exception.Message));
-                    OnError(new RErrorEventArgs(exception, exception.Message));
-                    throw exception;
-                }
-            }
-            else
-            {
-                var exception =
-                    new Exception(
-                        "Не удалось изменить значение параметра 'GCLOHThreshold' в AppConfig. Файл конфигурации не загружен");
-                Events.OnError(new RErrorEventArgs(exception, exception.Message));
-                OnError(new RErrorEventArgs(exception, exception.Message));
-                throw exception;
-            }
-
-#elif NETCOREAPP
 
             if (RuntimeConfig.ConfigIsLoaded)
             {
@@ -443,8 +362,6 @@ namespace RIS
                 OnError(new RErrorEventArgs(exception, exception.Message));
                 throw exception;
             }
-
-#endif
         }
 
         public static int GetSize<T>()

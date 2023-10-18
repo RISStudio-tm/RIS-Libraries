@@ -37,7 +37,7 @@ namespace RIS.Cryptography.Hash.Algorithms
                     input += 4;
                 } while (input < limit);
 
-                h32 = XXH_rotl32(v1, 1) + 
+                h32 = XXH_rotl32(v1, 1) +
                       XXH_rotl32(v2, 7) +
                       XXH_rotl32(v3, 12) +
                       XXH_rotl32(v4, 18);
@@ -64,7 +64,7 @@ namespace RIS.Cryptography.Hash.Algorithms
 
             return acc;
         }
-        
+
 
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -103,7 +103,7 @@ namespace RIS.Cryptography.Hash.Algorithms
                 hash = XXH_rotl32(hash, 11) * XXH_PRIME32_1;
                 len--;
             }
-            
+
             return XXH32_avalanche(hash);
         }
     }

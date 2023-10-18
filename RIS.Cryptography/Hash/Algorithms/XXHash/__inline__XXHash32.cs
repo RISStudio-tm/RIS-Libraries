@@ -6,8 +6,8 @@ using System.Runtime.CompilerServices;
 
 namespace RIS.Cryptography.Hash.Algorithms
 {
-    // Auto-Generated inline
     // ReSharper disable InconsistentNaming
+    // Auto-Generated inline
     public partial class XXHash32
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -149,7 +149,7 @@ namespace RIS.Cryptography.Hash.Algorithms
 
                 if (length >= 16)
                 {
-                    h32 = ((v1 << 1) | (v1 >> (32 - 1))) +  
+                    h32 = ((v1 << 1) | (v1 >> (32 - 1))) +
                           ((v2 << 7) | (v2 >> (32 - 7))) +
                           ((v3 << 12) | (v3 >> (32 - 12))) +
                           ((v4 << 18) | (v4 >> (32 - 18)));

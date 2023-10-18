@@ -5,6 +5,7 @@ using System;
 using System.Globalization;
 using System.Text;
 using RIS.Randomizing;
+using RIS.Utilities;
 
 namespace RIS.Cryptography.Hash.Methods
 {

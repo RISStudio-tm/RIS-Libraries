@@ -276,15 +276,11 @@ namespace RIS.Logging
                 Default.Info($"Libraries Directory - {Environment.ExecAppDirectoryName}");
                 Default.Info($"Execution File Directory - {Environment.ExecProcessDirectoryName}");
 
-#if NETCOREAPP
-
                 Default.Info($"Is Standalone App - {Environment.IsStandalone}");
                 Default.Info($"Is Single File App - {Environment.IsSingleFile}");
                 Default.Info($"Runtime Name - {Environment.RuntimeName}");
                 Default.Info($"Runtime Version - {Environment.RuntimeVersion}");
                 Default.Info($"Runtime Identifier - {Environment.RuntimeIdentifier}");
-
-#endif
 
                 Default.Info("Startup");
 
@@ -577,19 +573,9 @@ namespace RIS.Logging
                     ? Path.GetFullPath(filesDirectoryPath)
                     : filesDirectoryPath;
 
-#if NETFRAMEWORK
-
-                fileExtension = fileExtension.StartsWith(".")
-                    ? fileExtension
-                    : $".{fileExtension}";
-
-#elif NETCOREAPP
-
                 fileExtension = fileExtension.StartsWith('.')
                     ? fileExtension
                     : $".{fileExtension}";
-
-#endif
 
                 if (retentionDaysPeriod < 0)
                     return 0;

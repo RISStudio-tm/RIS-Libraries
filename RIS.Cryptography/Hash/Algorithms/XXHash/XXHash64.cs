@@ -8,6 +8,7 @@ using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
+using RIS.Utilities;
 
 namespace RIS.Cryptography.Hash.Algorithms
 {
@@ -111,7 +112,7 @@ namespace RIS.Cryptography.Hash.Algorithms
                 ArrayPool<byte>.Shared.Return(buffer);
             }
         }
-        
+
 
         public static ValueTask<ulong> ComputeHashAsync(
             Stream stream, int bufferSize = 8192, ulong seed = 0)

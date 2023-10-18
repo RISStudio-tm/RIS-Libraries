@@ -36,8 +36,8 @@ namespace RIS.Cryptography.Hash.Algorithms
                 h64 = XXH_rotl64(v1, 1) +
                       XXH_rotl64(v2, 7) +
                       XXH_rotl64(v3, 12) +
-                      XXH_rotl64(v4, 18);  
-                
+                      XXH_rotl64(v4, 18);
+
                 h64 = XXH64_mergeRound(h64, v1);
                 h64 = XXH64_mergeRound(h64, v2);
                 h64 = XXH64_mergeRound(h64, v3);
@@ -49,7 +49,7 @@ namespace RIS.Cryptography.Hash.Algorithms
             }
 
             h64 += (ulong)len;
-            
+
             return XXH64_finalize(h64, input, len);
         }
 

@@ -290,10 +290,7 @@ namespace RIS.Synchronization
             var waiter = node.Value;
             var disposer = new OnceDisposer<LinkedListNode<LockWaiterEvent>>(ExitReadLockInternal, node);
 
-#if NETCOREAPP
-            await
-#endif
-            using (cancellation.Register(() => waiter.TrySetResult(LockStatus.Cancelled)))
+            await using (cancellation.Register(() => waiter.TrySetResult(LockStatus.Cancelled)))
             {
                 if (cancellation.IsCancellationRequested)
                     waiter.TrySetResult(LockStatus.Cancelled);
@@ -321,10 +318,7 @@ namespace RIS.Synchronization
             var waiter = node.Value;
             var disposer = new OnceDisposer<LinkedListNode<LockWaiterEvent>>(ExitWriteLockInternal, node);
 
-#if NETCOREAPP
-            await
-#endif
-            using (cancellation.Register(() => waiter.TrySetResult(LockStatus.Cancelled)))
+            await using (cancellation.Register(() => waiter.TrySetResult(LockStatus.Cancelled)))
             {
                 if (cancellation.IsCancellationRequested)
                     waiter.TrySetResult(LockStatus.Cancelled);

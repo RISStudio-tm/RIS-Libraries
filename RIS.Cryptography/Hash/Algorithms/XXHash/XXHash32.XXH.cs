@@ -14,7 +14,7 @@ namespace RIS.Cryptography.Hash.Algorithms
         private static readonly uint XXH_PRIME32_3 = 3266489917U;
         private static readonly uint XXH_PRIME32_4 = 668265263U;
         private static readonly uint XXH_PRIME32_5 = 374761393U;
-        
+
 
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

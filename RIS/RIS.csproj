@@ -1,17 +1,18 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>netcoreapp3.1;net48</TargetFrameworks>
+    <TargetFrameworks>net7.0</TargetFrameworks>
     <Configurations>Debug;Release;Release Nuget</Configurations>
     <LangVersion>latest</LangVersion>
+    <ImplicitUsings>disable</ImplicitUsings>
     <RootNamespace>RIS</RootNamespace>
     <AssemblyName>RIS</AssemblyName>
-    <AssemblyVersion>3.24.0.0</AssemblyVersion>
-    <FileVersion>3.24.0.0</FileVersion>
+    <AssemblyVersion>4.0.0.0</AssemblyVersion>
+    <FileVersion>4.0.0.0</FileVersion>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <PackageId>RIS</PackageId>
     <Product>RIS</Product>
-    <Version>3.24.0</Version>
+    <Version>4.0.0</Version>
     <Description>A library designed for various types of tasks. The core of the RIS "ecosystem".</Description>
     <PackageTags>dotnet, dotnetcore, netframework, netcore, library</PackageTags>
     <Authors>Dmitry Ponomarev</Authors>
@@ -53,11 +54,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="GrEmit" Version="3.4.10" Condition="$([System.Text.RegularExpressions.Regex]::IsMatch($(DefineConstants), '^(.*;)*NETFRAMEWORK(;.*)*$'))" />
-    <PackageReference Include="Microsoft.Bcl.AsyncInterfaces" Version="7.0.0" Condition="$([System.Text.RegularExpressions.Regex]::IsMatch($(DefineConstants), '^(.*;)*NETFRAMEWORK(;.*)*$'))" />
     <PackageReference Include="Microsoft.Extensions.FileProviders.Embedded" Version="7.0.7" />
-    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" Condition="$([System.Text.RegularExpressions.Regex]::IsMatch($(DefineConstants), '^(.*;)*NETCOREAPP(;.*)*$'))" />
-    <PackageReference Include="System.Configuration.ConfigurationManager" Version="7.0.0" Condition="$([System.Text.RegularExpressions.Regex]::IsMatch($(DefineConstants), '^(.*;)*NETFRAMEWORK(;.*)*$'))" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
     <PackageReference Include="System.Memory" Version="4.5.5" />
   </ItemGroup>
 

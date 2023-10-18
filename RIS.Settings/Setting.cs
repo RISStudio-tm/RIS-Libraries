@@ -8,9 +8,6 @@ using System.Globalization;
 using System.Reflection;
 using RIS.Collections.Chunked;
 using RIS.Collections.Nestable;
-#if NETFRAMEWORK
-using RIS.Extensions;
-#endif
 
 namespace RIS.Settings
 {
@@ -466,65 +463,10 @@ namespace RIS.Settings
             }
             else if (Type.IsEnum)
             {
-#if NETCOREAPP
-
                 if (Enum.TryParse(Type, value, true, out var enumValue))
-                {
                     SetValue(enumValue);
-                }
                 else
-                {
                     SetValue(DefaultValue);
-                }
-
-#elif NETFRAMEWORK
-
-                var underlyingType = Type
-                    .GetEnumUnderlyingType();
-
-                object integerValue = null;
-
-                switch (Type.GetTypeCode(underlyingType))
-                {
-                    case TypeCode.SByte:
-                        integerValue = value.ToSbyte();
-                        break;
-                    case TypeCode.Byte:
-                        integerValue = value.ToByte();
-                        break;
-                    case TypeCode.Int16:
-                        integerValue = value.ToShort();
-                        break;
-                    case TypeCode.UInt16:
-                        integerValue = value.ToUShort();
-                        break;
-                    case TypeCode.Int32:
-                        integerValue = value.ToInt();
-                        break;
-                    case TypeCode.UInt32:
-                        integerValue = value.ToUInt();
-                        break;
-                    case TypeCode.Int64:
-                        integerValue = value.ToLong();
-                        break;
-                    case TypeCode.UInt64:
-                        integerValue = value.ToULong();
-                        break;
-                    default:
-                        break;
-                }
-
-                if (integerValue != null
-                    && Enum.IsDefined(Type, integerValue))
-                {
-                    SetValue(Enum.Parse(Type, value));
-                }
-                else
-                {
-                    SetValue(DefaultValue);
-                }
-
-#endif
             }
             else if (typeof(INestableCollection).IsAssignableFrom(Type))
             {

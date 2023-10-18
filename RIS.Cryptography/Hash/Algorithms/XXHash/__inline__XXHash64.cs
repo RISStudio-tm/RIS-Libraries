@@ -6,8 +6,8 @@ using System.Runtime.CompilerServices;
 
 namespace RIS.Cryptography.Hash.Algorithms
 {
-    // Auto-Generated inline
     // ReSharper disable InconsistentNaming
+    // Auto-Generated inline
     public partial class XXHash64
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

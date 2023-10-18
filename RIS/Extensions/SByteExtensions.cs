@@ -40,5 +40,17 @@ namespace RIS.Extensions
 
             return true;
         }
+
+
+
+#pragma warning disable IDE0060 // Удалите неиспользуемый параметр
+        // ReSharper disable UnusedParameter.Global
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static int GetSize(this sbyte source)
+        {
+            return sizeof(sbyte);
+        }
+        // ReSharper restore UnusedParameter.Global
+#pragma warning restore IDE0060 // Удалите неиспользуемый параметр
     }
 }

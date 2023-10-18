@@ -3,6 +3,7 @@
 
 using System;
 using System.Runtime.CompilerServices;
+using RIS.Utilities;
 
 namespace RIS.Extensions
 {
@@ -39,6 +40,53 @@ namespace RIS.Extensions
             }
 
             return true;
+        }
+
+
+
+#pragma warning disable IDE0060 // Удалите неиспользуемый параметр
+        // ReSharper disable UnusedParameter.Global
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static int GetSize(this ulong source)
+        {
+            return sizeof(ulong);
+        }
+        // ReSharper restore UnusedParameter.Global
+#pragma warning restore IDE0060 // Удалите неиспользуемый параметр
+
+
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static byte[] ToBytes(this ulong source)
+        {
+            return BytesUtils.ToBytes(source);
+        }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool ToBytes(this ulong source, Span<byte> buffer)
+        {
+            return BytesUtils.ToBytes(source, buffer);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static byte[] ToBytesLE(this ulong source)
+        {
+            return BytesUtils.ToBytesLE(source);
+        }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool ToBytesLE(this ulong source, Span<byte> buffer)
+        {
+            return BytesUtils.ToBytesLE(source, buffer);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static byte[] ToBytesBE(this ulong source)
+        {
+            return BytesUtils.ToBytesBE(source);
+        }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool ToBytesBE(this ulong source, Span<byte> buffer)
+        {
+            return BytesUtils.ToBytesBE(source, buffer);
         }
     }
 }

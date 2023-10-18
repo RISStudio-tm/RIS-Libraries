@@ -53,15 +53,7 @@ namespace RIS.Cryptography
         }
         public static string FromRawBytes(ReadOnlySpan<byte> bytes)
         {
-#if NETFRAMEWORK
-
-            return new string(MemoryMarshal.Cast<byte, char>(bytes).ToArray());
-
-#elif NETCOREAPP
-
             return new string(MemoryMarshal.Cast<byte, char>(bytes));
-
-#endif
         }
         public static char[] FromCharsRawBytesArray(byte[] bytes)
         {

@@ -3,10 +3,9 @@
 
 using System;
 using System.Runtime.CompilerServices;
-#if NETCOREAPP
 using System.Runtime.Intrinsics;
 using System.Runtime.Intrinsics.X86;
-#endif
+using RIS.Extensions;
 
 namespace RIS.Cryptography.Hash.Algorithms
 {
@@ -228,7 +227,9 @@ namespace RIS.Cryptography.Hash.Algorithms
         {
             var product = XXH_mult64to128(lhs, rhs);
 
-            return product.Lower ^ product.Upper;
+            ref var productSplit = ref product.AsSplit();
+
+            return productSplit.Lower ^ productSplit.Upper;
         }
 
 
@@ -339,17 +340,14 @@ namespace RIS.Cryptography.Hash.Algorithms
         private static unsafe void XXH3_accumulate_512(
             ulong* acc, byte* input, byte* secret)
         {
-#if NETCOREAPP
             if (Avx2.IsSupported)
                 XXH3_accumulate_512_avx2(acc, input, secret);
             else if (Sse2.IsSupported)
                 XXH3_accumulate_512_sse2(acc, input, secret);
             else
-#endif
                 XXH3_accumulate_512_scalar(acc, input, secret);
         }
 
-#if NETCOREAPP
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static unsafe void XXH3_accumulate_512_avx2(
             ulong* acc, byte* input, byte* secret)
@@ -439,7 +437,6 @@ namespace RIS.Cryptography.Hash.Algorithms
             Unsafe.Write(acc + 4, result2);
             Unsafe.Write(acc + 6, result3);
         }
-#endif
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static unsafe void XXH3_accumulate_512_scalar(
@@ -474,17 +471,14 @@ namespace RIS.Cryptography.Hash.Algorithms
         private static unsafe void XXH3_scrambleAcc(
             ulong* acc, byte* secret)
         {
-#if NETCOREAPP
             if (Avx2.IsSupported)
                 XXH3_scrambleAcc_avx2(acc, secret);
             else if (Sse2.IsSupported)
                 XXH3_scrambleAcc_sse2(acc, secret);
             else
-#endif
                 XXH3_scrambleAcc_scalar(acc, secret);
         }
 
-#if NETCOREAPP
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static unsafe void XXH3_scrambleAcc_avx2(
             ulong* acc, byte* secret)
@@ -574,7 +568,6 @@ namespace RIS.Cryptography.Hash.Algorithms
             Unsafe.Write(acc + 4, result2);
             Unsafe.Write(acc + 6, result3);
         }
-#endif
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static unsafe void XXH3_scrambleAcc_scalar(
@@ -611,17 +604,14 @@ namespace RIS.Cryptography.Hash.Algorithms
         private static unsafe void XXH3_initCustomSecret(
             byte* customSecret, ulong seed)
         {
-#if NETCOREAPP
             if (Avx2.IsSupported)
                 XXH3_initCustomSecret_avx2(customSecret, seed);
             else if (Sse2.IsSupported)
                 XXH3_initCustomSecret_sse2(customSecret, seed);
             else
-#endif
                 XXH3_initCustomSecret_scalar(customSecret, seed);
         }
 
-#if NETCOREAPP
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static unsafe void XXH3_initCustomSecret_avx2(
             byte* customSecret, ulong seed64)
@@ -701,7 +691,6 @@ namespace RIS.Cryptography.Hash.Algorithms
                 Unsafe.Write((long*)customSecret + 22, dst11);
             }
         }
-#endif
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static unsafe void XXH3_initCustomSecret_scalar(

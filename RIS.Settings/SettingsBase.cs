@@ -50,7 +50,7 @@ namespace RIS.Settings
 
                 if (Attribute.IsDefined(property, typeof(ExcludedSettingAttribute)))
                     continue;
-                
+
                 var declaringProperty = property
                     .GetDeclaring();
                 var setting = new Setting(this,
@@ -114,16 +114,7 @@ namespace RIS.Settings
 
                 if (appVersionCheck)
                 {
-
-#if NETCOREAPP
-
                     var appFilePath = Environment.ExecAppAssemblyFilePath;
-
-#elif NETFRAMEWORK
-
-                    var appFilePath = Environment.ExecAppFilePath;
-
-#endif
 
                     var currentAppVersion = FileVersionInfo
                         .GetVersionInfo(appFilePath)

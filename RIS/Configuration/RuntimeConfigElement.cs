@@ -5,25 +5,6 @@ using System;
 
 namespace RIS.Configuration
 {
-#if NETFRAMEWORK
-
-    public struct AppConfigElement
-    {
-        public string Name { get; }
-        public string XmlPath { get; }
-
-
-
-        internal AppConfigElement(
-            string name, string xmlPath)
-        {
-            Name = name;
-            XmlPath = xmlPath;
-        }
-    }
-
-#elif NETCOREAPP
-
     public struct RuntimeConfigElement
     {
         public string Name { get; }
@@ -38,6 +19,4 @@ namespace RIS.Configuration
             JsonPath = jsonPath;
         }
     }
-
-#endif
 }

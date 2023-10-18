@@ -52,7 +52,7 @@ namespace RIS.Cryptography.Hash.Algorithms
             {
                 var ptr = (byte*) c;
                 var length = data.Length * 2;
-                
+
                 return UnsafeComputeHash(ptr, length, seed);
             }
         }

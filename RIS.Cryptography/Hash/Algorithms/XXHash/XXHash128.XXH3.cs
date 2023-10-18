@@ -3,11 +3,9 @@
 
 using System;
 using System.Runtime.CompilerServices;
-#if NETCOREAPP
 using System.Runtime.Intrinsics;
 using System.Runtime.Intrinsics.X86;
-#endif
-using RIS.Cryptography.Entities;
+using RIS.Extensions;
 
 namespace RIS.Cryptography.Hash.Algorithms
 {
@@ -29,7 +27,7 @@ namespace RIS.Cryptography.Hash.Algorithms
             0x2b, 0x16, 0xbe, 0x58, 0x7d, 0x47, 0xa1, 0xfc, 0x8f, 0xf8, 0xb8, 0xd1, 0x7a, 0xd0, 0x31, 0xce,
             0x45, 0xcb, 0x3a, 0x8f, 0x95, 0x16, 0x04, 0x28, 0xaf, 0xd7, 0xfb, 0xca, 0xbb, 0x4b, 0x40, 0x7e,
         };
-        
+
         private static readonly ulong[] XXH3_INIT_ACC =
         {
             XXH_PRIME32_3, XXH_PRIME64_1, XXH_PRIME64_2, XXH_PRIME64_3,
@@ -42,7 +40,7 @@ namespace RIS.Cryptography.Hash.Algorithms
         private static readonly int XXH3_MIDSIZE_STARTOFFSET = 3;
         private static readonly int XXH3_MIDSIZE_LASTOFFSET = 17;
         private static readonly int XXH3_ACC_SIZE = 64;
-        
+
 
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -97,8 +95,10 @@ namespace RIS.Cryptography.Hash.Algorithms
 
             var m128 = XXH_mult64to128(keyed, XXH_PRIME64_1 + ((ulong)len << 2));
 
-            var lower = m128.Lower;
-            var upper = m128.Upper;
+            ref var m128Split = ref m128.AsSplit();
+
+            var lower = m128Split.Lower;
+            var upper = m128Split.Upper;
 
             upper += (lower << 1);
             lower ^= (upper >> 3);
@@ -139,8 +139,10 @@ namespace RIS.Cryptography.Hash.Algorithms
 
             var m128 = XXH_mult64to128(input_lo ^ input_hi ^ bitflipl, XXH_PRIME64_1);
 
-            var lower = m128.Lower;
-            var upper = m128.Upper;
+            ref var m128Split = ref m128.AsSplit();
+
+            var lower = m128Split.Lower;
+            var upper = m128Split.Upper;
 
             lower += (ulong)(len - 1) << 54;
             input_hi ^= bitfliph;
@@ -150,8 +152,10 @@ namespace RIS.Cryptography.Hash.Algorithms
 
             var h128 = XXH_mult64to128(lower, XXH_PRIME64_2);
 
-            var lowerH = h128.Lower;
-            var upperH = h128.Upper;
+            ref var h128Split = ref h128.AsSplit();
+
+            var lowerH = h128Split.Lower;
+            var upperH = h128Split.Upper;
 
             upperH += upper * XXH_PRIME64_2;
 
@@ -184,9 +188,11 @@ namespace RIS.Cryptography.Hash.Algorithms
 
             acc = XXH128_mix32B(acc, input, input+len-16, secret, seed);
 
-            var lower = acc.Lower + acc.Upper;
-            var upper = (acc.Lower  * XXH_PRIME64_1)
-                          + (acc.Upper   * XXH_PRIME64_4)
+            ref var accSplit = ref acc.AsSplit();
+
+            var lower = accSplit.Lower + accSplit.Upper;
+            var upper = (accSplit.Lower * XXH_PRIME64_1)
+                          + (accSplit.Upper * XXH_PRIME64_4)
                           + (((ulong) len - seed) * XXH_PRIME64_2);
             lower  = XXH3_avalanche(lower);
             upper = (ulong) 0 - XXH3_avalanche(upper);
@@ -211,7 +217,9 @@ namespace RIS.Cryptography.Hash.Algorithms
                     seed);
             }
 
-            acc = new UInt128(XXH3_avalanche(acc.Upper), XXH3_avalanche(acc.Lower));
+            ref var accSplit = ref acc.AsSplit();
+
+            acc = new UInt128(XXH3_avalanche(accSplit.Upper), XXH3_avalanche(accSplit.Lower));
 
             for (var i = 4 ; i < nbRounds; ++i)
             {
@@ -221,16 +229,18 @@ namespace RIS.Cryptography.Hash.Algorithms
                     secret + XXH3_MIDSIZE_STARTOFFSET + (32 * (i - 4)),
                     seed);
             }
-            
+
             acc = XXH128_mix32B(acc,
                 input + len - 16,
                 input + len - 32,
                 secret + XXH3_SECRET_SIZE_MIN - XXH3_MIDSIZE_LASTOFFSET - 16,
                 0UL - seed);
-            
-            var lower  = acc.Lower + acc.Upper;
-            var upper = (acc.Lower * XXH_PRIME64_1)
-                          + (acc.Upper * XXH_PRIME64_4)
+
+            accSplit = ref acc.AsSplit();
+
+            var lower  = accSplit.Lower + accSplit.Upper;
+            var upper = (accSplit.Lower * XXH_PRIME64_1)
+                          + (accSplit.Upper * XXH_PRIME64_4)
                           + (((ulong)len - seed) * XXH_PRIME64_2);
             lower  = XXH3_avalanche(lower);
             upper = (ulong)0 - XXH3_avalanche(upper);
@@ -269,11 +279,13 @@ namespace RIS.Cryptography.Hash.Algorithms
         private static unsafe UInt128 XXH128_mix32B(
             UInt128 acc, byte* input1, byte* input2, byte* secret, ulong seed)
         {
-            var lower = acc.Lower;
+            ref var accSplit = ref acc.AsSplit();
+
+            var lower = accSplit.Lower;
             lower += XXH3_mix16B(input1, secret + 0, seed);
             lower ^= XXH_readLE64(input2) + XXH_readLE64(input2 + 8);
 
-            var upper = acc.Upper;
+            var upper = accSplit.Upper;
             upper += XXH3_mix16B(input2, secret + 16, seed);
             upper ^= XXH_readLE64(input1) + XXH_readLE64(input1 + 8);
 
@@ -288,7 +300,9 @@ namespace RIS.Cryptography.Hash.Algorithms
         {
             var product = XXH_mult64to128(lhs, rhs);
 
-            return product.Lower ^ product.Upper;
+            ref var productSplit = ref product.AsSplit();
+
+            return productSplit.Lower ^ productSplit.Upper;
         }
 
 
@@ -337,7 +351,7 @@ namespace RIS.Cryptography.Hash.Algorithms
                 return new UInt128(upper, lower);
             }
         }
-        
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static unsafe void XXH3_hashLong_internal_loop(
             ulong* acc, byte* input, int len, byte* secret, int secretSize)
@@ -351,16 +365,16 @@ namespace RIS.Cryptography.Hash.Algorithms
                 XXH3_accumulate(acc, input + n * block_len, secret, nbStripesPerBlock);
                 XXH3_scrambleAcc(acc, secret + secretSize - XXH_STRIPE_LEN);
             }
-            
+
             var nbStripes = ((len - 1) - (block_len * nb_blocks)) / XXH_STRIPE_LEN;
 
             XXH3_accumulate(acc, input + nb_blocks * block_len, secret, nbStripes);
-            
+
             var p = input + len - XXH_STRIPE_LEN;
 
             XXH3_accumulate_512(acc, p, secret + secretSize - XXH_STRIPE_LEN - XXH_SECRET_LASTACC_START);
         }
-        
+
 
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -376,7 +390,7 @@ namespace RIS.Cryptography.Hash.Algorithms
 
             return XXH3_avalanche(result64);
         }
-        
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static unsafe ulong XXH3_mix2Accs(
             ulong* acc, byte* secret)
@@ -385,7 +399,7 @@ namespace RIS.Cryptography.Hash.Algorithms
                 acc[0] ^ XXH_readLE64(secret),
                 acc[1] ^ XXH_readLE64(secret + 8));
         }
-        
+
 
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -406,17 +420,14 @@ namespace RIS.Cryptography.Hash.Algorithms
         private static unsafe void XXH3_accumulate_512(
             ulong* acc, byte* input, byte* secret)
         {
-#if NETCOREAPP
             if (Avx2.IsSupported)
                 XXH3_accumulate_512_avx2(acc, input, secret);
             else if (Sse2.IsSupported)
                 XXH3_accumulate_512_sse2(acc, input, secret);
             else
-#endif
                 XXH3_accumulate_512_scalar(acc, input, secret);
         }
 
-#if NETCOREAPP
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static unsafe void XXH3_accumulate_512_avx2(
             ulong* acc, byte* input, byte* secret)
@@ -506,7 +517,6 @@ namespace RIS.Cryptography.Hash.Algorithms
             Unsafe.Write(acc + 4, result2);
             Unsafe.Write(acc + 6, result3);
         }
-#endif
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static unsafe void XXH3_accumulate_512_scalar(
@@ -541,17 +551,14 @@ namespace RIS.Cryptography.Hash.Algorithms
         private static unsafe void XXH3_scrambleAcc(
             ulong* acc, byte* secret)
         {
-#if NETCOREAPP
             if (Avx2.IsSupported)
                 XXH3_scrambleAcc_avx2(acc, secret);
             else if (Sse2.IsSupported)
                 XXH3_scrambleAcc_sse2(acc, secret);
             else
-#endif
                 XXH3_scrambleAcc_scalar(acc, secret);
         }
 
-#if NETCOREAPP
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static unsafe void XXH3_scrambleAcc_avx2(
             ulong* acc, byte* secret)
@@ -641,7 +648,6 @@ namespace RIS.Cryptography.Hash.Algorithms
             Unsafe.Write(acc + 4, result2);
             Unsafe.Write(acc + 6, result3);
         }
-#endif
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static unsafe void XXH3_scrambleAcc_scalar(
@@ -678,17 +684,14 @@ namespace RIS.Cryptography.Hash.Algorithms
         private static unsafe void XXH3_initCustomSecret(
             byte* customSecret, ulong seed)
         {
-#if NETCOREAPP
             if (Avx2.IsSupported)
                 XXH3_initCustomSecret_avx2(customSecret, seed);
             else if (Sse2.IsSupported)
                 XXH3_initCustomSecret_sse2(customSecret, seed);
             else
-#endif
                 XXH3_initCustomSecret_scalar(customSecret, seed);
         }
 
-#if NETCOREAPP
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static unsafe void XXH3_initCustomSecret_avx2(
             byte* customSecret, ulong seed64)
@@ -768,7 +771,6 @@ namespace RIS.Cryptography.Hash.Algorithms
                 Unsafe.Write((long*)customSecret + 22, dst11);
             }
         }
-#endif
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static unsafe void XXH3_initCustomSecret_scalar(

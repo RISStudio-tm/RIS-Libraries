@@ -4,9 +4,7 @@
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-#if NETCOREAPP
 using System.Diagnostics.CodeAnalysis;
-#endif
 using System.Threading;
 using System.Threading.Tasks;
 using System.Threading.Tasks.Sources;
@@ -32,9 +30,7 @@ namespace RIS.Synchronization
 
 
 
-#if NETCOREAPP
         [DisallowNull]
-#endif
         private object LocalScope
         {
             get
@@ -131,11 +127,7 @@ namespace RIS.Synchronization
 
 
 
-#if NETCOREAPP
             private static readonly Action<object> PumpDelegate;
-#elif NETFRAMEWORK
-            private static readonly WaitCallback PumpDelegate;
-#endif
             private static readonly SendOrPostCallback SetManualResetEventDelegate;
 
             private static readonly ConcurrentBag<ManualResetEventSlim> UnusedManualResetEvents;
@@ -206,9 +198,6 @@ namespace RIS.Synchronization
 
                     lock (_gate)
                     {
-
-#if NETCOREAPP
-
                         if (!_queue.TryDequeue(out entry))
                         {
                             _isPumping = false;
@@ -224,31 +213,6 @@ namespace RIS.Synchronization
 
                             return;
                         }
-
-#elif NETFRAMEWORK
-
-                        if (_queue.Count == 0)
-                        {
-                            _isPumping = false;
-
-#pragma warning disable ParallelChecker
-
-                            CurrentThreadId = null;
-
-#pragma warning restore ParallelChecker
-
-                            SetSynchronizationContext(
-                                oldContext);
-
-                            return;
-                        }
-                        else
-                        {
-                            entry = _queue.Dequeue();
-                        }
-
-#endif
-
                     }
 
                     try
@@ -295,16 +259,7 @@ namespace RIS.Synchronization
                     _isPumping = true;
                 }
 
-#if NETCOREAPP
-
                 ThreadPool.QueueUserWorkItem(PumpDelegate, this, false);
-
-#elif NETFRAMEWORK
-
-                ThreadPool.QueueUserWorkItem(PumpDelegate, this);
-
-#endif
-
             }
 
             public override void Send(
@@ -406,10 +361,7 @@ namespace RIS.Synchronization
                     var taskCompletionSource = new TaskCompletionSource<object>(
                         TaskCreationOptions.RunContinuationsAsynchronously);
 
-#if NETCOREAPP
-                    await
-#endif
-                    using (cancellationToken.Register(
+                    await using (cancellationToken.Register(
                                      CancelTaskCompletionSource,
                                      taskCompletionSource))
                     {

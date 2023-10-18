@@ -52,10 +52,7 @@ namespace RIS.Synchronization
             if (isFirst)
                 completion.SetResult(LockStatus.Activated);
 
-#if NETCOREAPP
-            await
-#endif
-            using (cancellation.Register(() => completion.TrySetResult(LockStatus.Cancelled)))
+            await using (cancellation.Register(() => completion.TrySetResult(LockStatus.Cancelled)))
             {
                 if (cancellation.IsCancellationRequested)
                     completion.TrySetResult(LockStatus.Cancelled);

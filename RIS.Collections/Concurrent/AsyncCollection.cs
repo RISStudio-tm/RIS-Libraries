@@ -10,10 +10,7 @@ using System.Threading.Tasks;
 
 namespace RIS.Collections.Concurrent
 {
-    public sealed class AsyncCollection<T> : IDisposable
-#if NETCOREAPP
-        ,IAsyncEnumerable<T>
-#endif
+    public sealed class AsyncCollection<T> : IDisposable, IAsyncEnumerable<T>
     {
         private const int COMPLETE_ADDING_ON_MASK = unchecked((int)0x80000000);
 
@@ -272,8 +269,6 @@ namespace RIS.Collections.Concurrent
             }
         }
 
-#if NETCOREAPP
-
         public async IAsyncEnumerator<T> GetAsyncEnumerator([EnumeratorCancellation] CancellationToken cancellationToken = new CancellationToken())
         {
             CheckDisposed();
@@ -298,8 +293,6 @@ namespace RIS.Collections.Concurrent
                 linked.Dispose();
             }
         }
-
-#endif
 
         public void Dispose()
         {

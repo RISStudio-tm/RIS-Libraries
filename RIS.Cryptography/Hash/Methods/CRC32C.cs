@@ -4,9 +4,8 @@
 using System;
 using System.Globalization;
 using System.Text;
-#if NETCOREAPP
+using RIS.Utilities;
 using System.Runtime.Intrinsics.X86;
-#endif
 
 namespace RIS.Cryptography.Hash.Methods
 {
@@ -21,8 +20,6 @@ namespace RIS.Cryptography.Hash.Methods
 
         static CRC32C()
         {
-#if NETCOREAPP
-
             if (Sse42.X64.IsSupported && Sse42.IsSupported)
             {
                 InitializeFunction = _ =>
@@ -99,22 +96,6 @@ namespace RIS.Cryptography.Hash.Methods
                     return service.ComputeHash(data);
                 };
             }
-
-#elif NETFRAMEWORK
-
-            InitializeFunction = instance =>
-            {
-                instance.CRCService = new Algorithms.CRC32C();
-                instance.CRCService.Initialize();
-
-                return true;
-            };
-            GetHashFunction = (data, service) =>
-            {
-                return service.ComputeHash(data);
-            };
-
-#endif
         }
 
         public CRC32C()

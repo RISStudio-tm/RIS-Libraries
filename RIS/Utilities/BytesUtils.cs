@@ -2,16 +2,14 @@
 // Licensed under the Apache License, Version 2.0. See LICENSE file in the project root for license information.
 
 using System;
-using System.Buffers.Binary;
+using System.Numerics;
 using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
-using RIS.Cryptography.Entities;
+using RIS.Extensions;
 
-namespace RIS.Cryptography
+namespace RIS.Utilities
 {
     public static class BytesUtils
     {
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static unsafe void BlockCopy(
             byte[] source, int sourceOffset,
             byte[] destination, int destinationOffset,
@@ -22,7 +20,7 @@ namespace RIS.Cryptography
             {
                 var sourcePointer = fixedSourcePointer;
                 var destinationPointer = fixedDestinationPointer;
-                
+
                 // Label
                 Table32C:
 
@@ -119,7 +117,6 @@ namespace RIS.Cryptography
                         *(long*)(destinationPointer + 8) = *(long*)(sourcePointer + 8);
                         *(int*)(destinationPointer + 16) = *(int*)(sourcePointer + 16);
                         return;
-    
                     case 21:
                         *(long*)destinationPointer = *(long*)sourcePointer;
                         *(long*)(destinationPointer + 8) = *(long*)(sourcePointer + 8);
@@ -232,7 +229,7 @@ namespace RIS.Cryptography
                     longSourcePointer += 4;
                     longDestinationPointer += 4;
                 }
-                
+
                 sourcePointer = (byte*)longSourcePointer;
                 destinationPointer = (byte*)longDestinationPointer;
 
@@ -242,15 +239,35 @@ namespace RIS.Cryptography
 
 
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static byte[] ToBytes(UInt128 source)
         {
-            var bytes = new byte[sizeof(ulong) * 2];
+            var buffer = new byte[sizeof(ulong) * 2];
 
-            Unsafe.As<byte, ulong>(ref bytes[0]) = source.Lower;
-            Unsafe.As<byte, ulong>(ref bytes[8]) = source.Upper;
+            ToBytesUnsafe(source, buffer);
 
-            return bytes;
+            return buffer;
         }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool ToBytes(UInt128 source, Span<byte> buffer)
+        {
+            if (buffer.Length < sizeof(ulong) * 2)
+                return false;
+
+            ToBytesUnsafe(source, buffer);
+
+            return true;
+        }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void ToBytesUnsafe(UInt128 source, Span<byte> buffer)
+        {
+            ref var sourceSplit = ref source.AsSplit();
+
+            Unsafe.As<byte, ulong>(ref buffer[0]) = sourceSplit.Lower;
+            Unsafe.As<byte, ulong>(ref buffer[8]) = sourceSplit.Upper;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static byte[] ToBytesLE(UInt128 source)
         {
             var buffer = new byte[sizeof(ulong) * 2];
@@ -259,41 +276,25 @@ namespace RIS.Cryptography
 
             return buffer;
         }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool ToBytesLE(UInt128 source, Span<byte> buffer)
         {
-            if (buffer.Length < UInt128.Size)
+            if (buffer.Length < sizeof(ulong) * 2)
                 return false;
 
             ToBytesLEUnsafe(source, buffer);
 
             return true;
         }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void ToBytesLEUnsafe(UInt128 source, Span<byte> buffer)
         {
-            var lower = source.Lower;
-            var upper = source.Upper;
+            var result = (IBinaryInteger<UInt128>)source;
 
-            if (!BitConverter.IsLittleEndian)
-            {
-                lower = BinaryPrimitives
-                    .ReverseEndianness(lower);
-                upper = BinaryPrimitives
-                    .ReverseEndianness(upper);
-            }
-
-            ref var address =
-                ref MemoryMarshal.GetReference(
-                    buffer);
-
-            Unsafe.WriteUnaligned(
-                ref address,
-                lower);
-            Unsafe.WriteUnaligned(
-                ref Unsafe.AddByteOffset(
-                    ref address,
-                    sizeof(ulong)),
-                upper);
+            result.WriteLittleEndian(buffer);
         }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static byte[] ToBytesBE(UInt128 source)
         {
             var buffer = new byte[sizeof(ulong) * 2];
@@ -302,50 +303,51 @@ namespace RIS.Cryptography
 
             return buffer;
         }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool ToBytesBE(UInt128 source, Span<byte> buffer)
         {
-            if (buffer.Length < UInt128.Size)
+            if (buffer.Length < sizeof(ulong) * 2)
                 return false;
 
             ToBytesBEUnsafe(source, buffer);
 
             return true;
         }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void ToBytesBEUnsafe(UInt128 source, Span<byte> buffer)
         {
-            var lower = source.Lower;
-            var upper = source.Upper;
+            var result = (IBinaryInteger<UInt128>)source;
 
-            if (BitConverter.IsLittleEndian)
-            {
-                lower = BinaryPrimitives
-                    .ReverseEndianness(lower);
-                upper = BinaryPrimitives
-                    .ReverseEndianness(upper);
-            }
-
-            ref var address =
-                ref MemoryMarshal.GetReference(
-                    buffer);
-
-            Unsafe.WriteUnaligned(
-                ref address,
-                upper);
-            Unsafe.WriteUnaligned(
-                ref Unsafe.AddByteOffset(
-                    ref address,
-                    sizeof(ulong)),
-                lower);
+            result.WriteBigEndian(buffer);
         }
 
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static byte[] ToBytes(ulong source)
         {
-            var bytes = new byte[sizeof(ulong)];
+            var buffer = new byte[sizeof(ulong)];
 
-            Unsafe.As<byte, ulong>(ref bytes[0]) = source;
+            ToBytesUnsafe(source, buffer);
 
-            return bytes;
+            return buffer;
         }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool ToBytes(ulong source, Span<byte> buffer)
+        {
+            if (buffer.Length < sizeof(ulong))
+                return false;
+
+            ToBytesUnsafe(source, buffer);
+
+            return true;
+        }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void ToBytesUnsafe(ulong source, Span<byte> buffer)
+        {
+            Unsafe.As<byte, ulong>(ref buffer[0]) = source;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static byte[] ToBytesLE(ulong source)
         {
             var buffer = new byte[sizeof(ulong)];
@@ -354,6 +356,7 @@ namespace RIS.Cryptography
 
             return buffer;
         }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool ToBytesLE(ulong source, Span<byte> buffer)
         {
             if (buffer.Length < sizeof(ulong))
@@ -363,24 +366,15 @@ namespace RIS.Cryptography
 
             return true;
         }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void ToBytesLEUnsafe(ulong source, Span<byte> buffer)
         {
-            var value = source;
+            var result = (IBinaryInteger<ulong>)source;
 
-            if (!BitConverter.IsLittleEndian)
-            {
-                value = BinaryPrimitives
-                    .ReverseEndianness(value);
-            }
-
-            ref var address =
-                ref MemoryMarshal.GetReference(
-                    buffer);
-
-            Unsafe.WriteUnaligned(
-                ref address,
-                value);
+            result.WriteLittleEndian(buffer);
         }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static byte[] ToBytesBE(ulong source)
         {
             var buffer = new byte[sizeof(ulong)];
@@ -389,6 +383,7 @@ namespace RIS.Cryptography
 
             return buffer;
         }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool ToBytesBE(ulong source, Span<byte> buffer)
         {
             if (buffer.Length < sizeof(ulong))
@@ -398,33 +393,41 @@ namespace RIS.Cryptography
 
             return true;
         }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void ToBytesBEUnsafe(ulong source, Span<byte> buffer)
         {
-            var value = source;
+            var result = (IBinaryInteger<ulong>)source;
 
-            if (BitConverter.IsLittleEndian)
-            {
-                value = BinaryPrimitives
-                    .ReverseEndianness(value);
-            }
-
-            ref var address =
-                ref MemoryMarshal.GetReference(
-                    buffer);
-
-            Unsafe.WriteUnaligned(
-                ref address,
-                value);
+            result.WriteBigEndian(buffer);
         }
 
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static byte[] ToBytes(uint source)
         {
-            var bytes = new byte[sizeof(uint)];
+            var buffer = new byte[sizeof(uint)];
 
-            Unsafe.As<byte, uint>(ref bytes[0]) = source;
+            ToBytesUnsafe(source, buffer);
 
-            return bytes;
+            return buffer;
         }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool ToBytes(uint source, Span<byte> buffer)
+        {
+            if (buffer.Length < sizeof(uint))
+                return false;
+
+            ToBytesUnsafe(source, buffer);
+
+            return true;
+        }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void ToBytesUnsafe(uint source, Span<byte> buffer)
+        {
+            Unsafe.As<byte, uint>(ref buffer[0]) = source;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static byte[] ToBytesLE(uint source)
         {
             var buffer = new byte[sizeof(uint)];
@@ -433,6 +436,7 @@ namespace RIS.Cryptography
 
             return buffer;
         }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool ToBytesLE(uint source, Span<byte> buffer)
         {
             if (buffer.Length < sizeof(uint))
@@ -442,24 +446,15 @@ namespace RIS.Cryptography
 
             return true;
         }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void ToBytesLEUnsafe(uint source, Span<byte> buffer)
         {
-            var value = source;
+            var result = (IBinaryInteger<uint>)source;
 
-            if (!BitConverter.IsLittleEndian)
-            {
-                value = BinaryPrimitives
-                    .ReverseEndianness(value);
-            }
-
-            ref var address =
-                ref MemoryMarshal.GetReference(
-                    buffer);
-
-            Unsafe.WriteUnaligned(
-                ref address,
-                value);
+            result.WriteLittleEndian(buffer);
         }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static byte[] ToBytesBE(uint source)
         {
             var buffer = new byte[sizeof(uint)];
@@ -468,6 +463,7 @@ namespace RIS.Cryptography
 
             return buffer;
         }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool ToBytesBE(uint source, Span<byte> buffer)
         {
             if (buffer.Length < sizeof(uint))
@@ -477,23 +473,92 @@ namespace RIS.Cryptography
 
             return true;
         }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void ToBytesBEUnsafe(uint source, Span<byte> buffer)
         {
-            var value = source;
+            var result = (IBinaryInteger<uint>)source;
 
-            if (BitConverter.IsLittleEndian)
-            {
-                value = BinaryPrimitives
-                    .ReverseEndianness(value);
-            }
+            result.WriteBigEndian(buffer);
+        }
 
-            ref var address =
-                ref MemoryMarshal.GetReference(
-                    buffer);
 
-            Unsafe.WriteUnaligned(
-                ref address,
-                value);
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static byte[] ToBytes(ushort source)
+        {
+            var buffer = new byte[sizeof(ushort)];
+
+            ToBytesUnsafe(source, buffer);
+
+            return buffer;
+        }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool ToBytes(ushort source, Span<byte> buffer)
+        {
+            if (buffer.Length < sizeof(ushort))
+                return false;
+
+            ToBytesUnsafe(source, buffer);
+
+            return true;
+        }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void ToBytesUnsafe(ushort source, Span<byte> buffer)
+        {
+            Unsafe.As<byte, ushort>(ref buffer[0]) = source;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static byte[] ToBytesLE(ushort source)
+        {
+            var buffer = new byte[sizeof(ushort)];
+
+            ToBytesLEUnsafe(source, buffer);
+
+            return buffer;
+        }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool ToBytesLE(ushort source, Span<byte> buffer)
+        {
+            if (buffer.Length < sizeof(ushort))
+                return false;
+
+            ToBytesLEUnsafe(source, buffer);
+
+            return true;
+        }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void ToBytesLEUnsafe(ushort source, Span<byte> buffer)
+        {
+            var result = (IBinaryInteger<ushort>)source;
+
+            result.WriteLittleEndian(buffer);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static byte[] ToBytesBE(ushort source)
+        {
+            var buffer = new byte[sizeof(ushort)];
+
+            ToBytesBEUnsafe(source, buffer);
+
+            return buffer;
+        }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool ToBytesBE(ushort source, Span<byte> buffer)
+        {
+            if (buffer.Length < sizeof(ushort))
+                return false;
+
+            ToBytesBEUnsafe(source, buffer);
+
+            return true;
+        }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void ToBytesBEUnsafe(ushort source, Span<byte> buffer)
+        {
+            var result = (IBinaryInteger<ushort>)source;
+
+            result.WriteBigEndian(buffer);
         }
     }
 }
