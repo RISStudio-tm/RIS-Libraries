@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "RIS.Localization.LocalizedList.Generator": {
+      "commandName": "DebugRoslynComponent",
+      "targetProject": "../ConsoleTest/ConsoleTest.csproj"
+    }
+  }
+}

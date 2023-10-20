@@ -10,11 +10,11 @@
     <EnforceExtendedAnalyzerRules>True</EnforceExtendedAnalyzerRules>
     <RootNamespace>RIS.Unions.Generator</RootNamespace>
     <AssemblyName>RIS.Unions.Generator</AssemblyName>
-    <AssemblyVersion>1.2.1.0</AssemblyVersion>
-    <FileVersion>1.2.1.0</FileVersion>
+    <AssemblyVersion>1.2.2.0</AssemblyVersion>
+    <FileVersion>1.2.2.0</FileVersion>
     <PackageId>RIS.Unions.Generator</PackageId>
     <Product>RIS.Unions.Generator</Product>
-    <Version>1.2.1</Version>
+    <Version>1.2.2</Version>
     <Description>A source generator for automaticly implements RIS.Unions.UnionBase hierarchies, etc. Part of the RIS "ecosystem".</Description>
     <PackageTags>dotnet, dotnetcore, netframework, netcore, generator, source generator</PackageTags>
     <Authors>Dmitry Ponomarev</Authors>

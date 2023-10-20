@@ -40,7 +40,7 @@ namespace RIS.Localization.LocalizedList.Generator
             ITypeSymbol arg)
         {
             return PropertyDeclaration(
-                    IdentifierName(arg.ToDisplayString()),
+                    IdentifierName(arg.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)),
                     Identifier(InstancePropertyName))
                 .WithModifiers(
                     TokenList(
@@ -54,7 +54,7 @@ namespace RIS.Localization.LocalizedList.Generator
                                 .WithTypeArgumentList(
                                     TypeArgumentList(
                                         SingletonSeparatedList<TypeSyntax>(
-                                            IdentifierName(arg.ToDisplayString())))))))
+                                            IdentifierName(arg.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat))))))))
                 .WithSemicolonToken(
                     Token(SyntaxKind.SemicolonToken))
                 .NormalizeWhitespace();

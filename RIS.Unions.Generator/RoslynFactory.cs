@@ -42,7 +42,7 @@ namespace RIS.Unions.Generator
             TypedConstant name)
         {
             return PropertyDeclaration(
-                    IdentifierName(arg.ToDisplayString()),
+                    IdentifierName(arg.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)),
                     Identifier("As" + name.Value))
                 .WithModifiers(
                     TokenList(
@@ -66,7 +66,7 @@ namespace RIS.Unions.Generator
         {
             var remainderArgs = paramArgsPairs
                 .Except(new[] { (param, arg) })
-                .Select(x => x.arg.ToDisplayString())
+                .Select(x => x.arg.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat))
                 .Select(x => IdentifierName(x))
                 .ToArray();
             TypeSyntax remainderType = remainderArgs.Count() > 1
@@ -90,7 +90,7 @@ namespace RIS.Unions.Generator
                                     .WithModifiers(
                                         TokenList(
                                             Token(SyntaxKind.OutKeyword)))
-                                    .WithType(IdentifierName(arg.ToDisplayString())),
+                                    .WithType(IdentifierName(arg.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat))),
                                 Token(SyntaxKind.CommaToken),
                                 Parameter(Identifier("remainder"))
                                     .WithModifiers(
