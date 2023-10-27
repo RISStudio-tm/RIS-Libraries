@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.Linq.Expressions;
 using System.Text;
 using RIS.Collections.Chunked;
 using RIS.Collections.Extensions;
@@ -20,6 +21,7 @@ namespace RIS.Collections.Nestable
 
 
 
+        private static readonly Dictionary<(Type CollectionType, Type ElementType, Type ConstructorParameterType), Func<object, INestableCollection>> CollectionsConstructorsCache;
         private static readonly Dictionary<string, NestableCollectionType> CollectionsTypes;
         private static readonly Dictionary<NestableCollectionType, Type> CollectionsInfo;
 
@@ -27,6 +29,8 @@ namespace RIS.Collections.Nestable
 
         static NestableHelper()
         {
+            CollectionsConstructorsCache = new Dictionary<(Type CollectionType, Type ElementType, Type ConstructorParameterType), Func<object, INestableCollection>>(10);
+
             var names = Enum.GetNames(typeof(NestableCollectionType));
 
             CollectionsTypes = new Dictionary<string, NestableCollectionType>(names.Length);
@@ -79,6 +83,83 @@ namespace RIS.Collections.Nestable
         public static void OnError(object sender, RErrorEventArgs e)
         {
             Error?.Invoke(sender, e);
+        }
+
+
+
+        private static Func<object, INestableCollection> GetConstructorDelegate(
+            Type collectionType, Type elementType,
+            Type constructorParameterType = null)
+        {
+            if (CollectionsConstructorsCache.TryGetValue(
+                    (collectionType, elementType, constructorParameterType),
+                    out var constructorDelegate))
+            {
+                return constructorDelegate;
+            }
+
+            Expression<Func<object, INestableCollection>> constructor;
+
+            if (constructorParameterType != null
+                && constructorParameterType != typeof(void))
+            {
+                var constructorInfo = collectionType
+                    .MakeGenericType(elementType)
+                    .GetConstructor(new[] { constructorParameterType })!;
+                var constructorParameter = Expression.Parameter(
+                    typeof(object));
+
+                constructor = Expression.Lambda<Func<object, INestableCollection>>(
+                    Expression.New(
+                        constructorInfo,
+                        Expression.Convert(
+                            constructorParameter,
+                            constructorParameterType)),
+                    constructorParameter);
+            }
+            else
+            {
+                var constructorInfo = collectionType
+                    .MakeGenericType(elementType)
+                    .GetConstructor(Array.Empty<Type>())!;
+                var constructorParameter = Expression.Parameter(
+                    typeof(object));
+
+                constructor = Expression.Lambda<Func<object, INestableCollection>>(
+                    Expression.New(
+                        constructorInfo),
+                    constructorParameter);
+            }
+
+            var expression = constructor.Compile();
+
+            CollectionsConstructorsCache[(collectionType, elementType, constructorParameterType)] = expression;
+
+            return expression;
+        }
+
+        private static INestableCollection<TValue> InvokeConstructor<TValue>(
+            Type collectionType, Type constructorParameterType = null,
+            object constructorParameter = null)
+        {
+            var constructorDelegate = GetConstructorDelegate(
+                collectionType, typeof(TValue),
+                constructorParameterType);
+
+            return (INestableCollection<TValue>)constructorDelegate(
+                constructorParameter);
+        }
+        private static INestableCollection InvokeConstructor(
+            Type collectionType, Type elementType,
+            Type constructorParameterType = null,
+            object constructorParameter = null)
+        {
+            var constructorDelegate = GetConstructorDelegate(
+                collectionType, elementType,
+                constructorParameterType);
+
+            return constructorDelegate(
+                constructorParameter);
         }
 
 
@@ -180,14 +261,11 @@ namespace RIS.Collections.Nestable
         public static (INestableCollection<TValue> Collection, CollectionGeneralType GeneralType) CreateCollectionByType<TValue>(
             NestableCollectionType type)
         {
-            if (!CollectionsInfo.TryGetValue(type, out var typeInfo))
+            if (!CollectionsInfo.TryGetValue(type, out var collectionType))
                 return (null, CollectionGeneralType.Unknown);
 
-            var collectionType = typeInfo
-                .MakeGenericType(typeof(TValue));
-            var collection = (INestableCollection<TValue>)collectionType
-                .GetConstructor(Array.Empty<Type>())?
-                .Invoke(Array.Empty<object>());
+            var collection = InvokeConstructor<TValue>(
+                collectionType);
             var generalType = GetGeneralType(collection);
 
             return (collection, generalType);
@@ -195,14 +273,12 @@ namespace RIS.Collections.Nestable
         public static (INestableCollection<TValue> Collection, CollectionGeneralType GeneralType) CreateCollectionByType<TValue>(
             NestableCollectionType type, string represent)
         {
-            if (!CollectionsInfo.TryGetValue(type, out var typeInfo))
+            if (!CollectionsInfo.TryGetValue(type, out var collectionType))
                 return (null, CollectionGeneralType.Unknown);
 
-            var collectionType = typeInfo
-                .MakeGenericType(typeof(TValue));
-            var collection = (INestableCollection<TValue>)collectionType
-                .GetConstructor(new[] { typeof(string) })?
-                .Invoke(new object[] { represent });
+            var collection = InvokeConstructor<TValue>(
+                collectionType, typeof(string),
+                represent);
             var generalType = GetGeneralType(collection);
 
             return (collection, generalType);
@@ -210,14 +286,12 @@ namespace RIS.Collections.Nestable
         public static (INestableCollection<TValue> Collection, CollectionGeneralType GeneralType) CreateCollectionByType<TValue>(
             NestableCollectionType type, int length)
         {
-            if (!CollectionsInfo.TryGetValue(type, out var typeInfo))
+            if (!CollectionsInfo.TryGetValue(type, out var collectionType))
                 return (null, CollectionGeneralType.Unknown);
 
-            var collectionType = typeInfo
-                .MakeGenericType(typeof(TValue));
-            var collection = (INestableCollection<TValue>)collectionType
-                .GetConstructor(new[] { typeof(int) })?
-                .Invoke(new object[] { length });
+            var collection = InvokeConstructor<TValue>(
+                collectionType, typeof(int),
+                length);
             var generalType = GetGeneralType(collection);
 
             return (collection, generalType);
@@ -347,7 +421,7 @@ namespace RIS.Collections.Nestable
             if (key != null)
             {
                 ToStringRepresent(ref builder, key);
-                
+
                 builder.Append("::");
             }
 
@@ -699,7 +773,7 @@ namespace RIS.Collections.Nestable
             {
                 var keyDivide = represent
                     .IndexOf("::", 0, StringComparison.Ordinal);
-                
+
                 if (keyDivide != -1)
                 {
                     key = FromStringRepresent(represent
