@@ -27,6 +27,15 @@ namespace RIS.Collections.Nestable
 
 
 
+        private static readonly char[] Replacers = { 'n', '|', ':', ',', '\"', '[', ']', '{', '}' };
+        private static readonly string[] ReplacersFull = { "null" };
+        private static readonly char Delimiter = '/';
+
+        private static readonly string TypeDivide = "||";
+        private static readonly string KeyDivide = "::";
+
+
+
         static NestableHelper()
         {
             CollectionsConstructorsCache = new Dictionary<(Type CollectionType, Type ElementType, Type ConstructorParameterType), Func<object, INestableCollection>>(10);
@@ -164,8 +173,218 @@ namespace RIS.Collections.Nestable
 
 
 
+        private static string EncodeRepresent(
+            string source)
+        {
+            var preAllocatedLength =
+                (int)(source.Length * 1.2) + 8;
+
+            return EncodeRepresent(source,
+                preAllocatedLength);
+        }
+        private static string EncodeRepresent(
+            string source, int preAllocatedLength)
+        {
+            var result = new StringBuilder(
+                preAllocatedLength);
+            var skippedCount = 0;
+            var buffer = '\0';
+
+            int index;
+
+
+
+            void AppendSkippedChars()
+            {
+                if (skippedCount <= 0)
+                    return;
+
+                result.Append(source,
+                    index - skippedCount,
+                    skippedCount);
+
+                skippedCount = 0;
+            }
+
+
+
+            for (index = 0; index < source.Length; ++index)
+            {
+                var ch = source[index];
+
+                switch (ch)
+                {
+                    case 'n':
+                        if (index >= source.Length - 3
+                            || source[index + 1] != 'u'
+                            || source[index + 2] != 'l'
+                            || source[index + 3] != 'l')
+                        {
+                            ++skippedCount;
+
+                            break;
+                        }
+
+                        AppendSkippedChars();
+
+                        result.Append(
+                            $"{Delimiter}null{Delimiter}");
+
+                        index += 3;
+
+                        break;
+                    case '|':
+                        buffer = '|';
+                        break;
+                    case ':':
+                        buffer = ':';
+                        break;
+                    case ',':
+                        buffer = ',';
+                        break;
+                    case '\"':
+                        buffer = '\"';
+                        break;
+                    case '[':
+                        buffer = '[';
+                        break;
+                    case ']':
+                        buffer = ']';
+                        break;
+                    case '{':
+                        buffer = '{';
+                        break;
+                    case '}':
+                        buffer = '}';
+                        break;
+                    default:
+                        ++skippedCount;
+                        break;
+                }
+
+                if (buffer != '\0')
+                {
+                    AppendSkippedChars();
+
+                    result.Append(Delimiter);
+                    result.Append(buffer);
+                    result.Append(Delimiter);
+
+                    buffer = '\0';
+                }
+            }
+
+            AppendSkippedChars();
+
+            return result.ToString();
+        }
+
+        private static string DecodeRepresent(
+            ReadOnlySpan<char> source)
+        {
+            var preAllocatedLength =
+                source.Length;
+
+            return DecodeRepresent(source,
+                preAllocatedLength);
+        }
+        private static string DecodeRepresent(
+            ReadOnlySpan<char> source, int preAllocatedLength)
+        {
+            var prefixIndex = source.IndexOf(
+                Delimiter);
+
+            if (prefixIndex == -1)
+                return new string(source);
+
+            var result = new Span<char>(
+                new char[preAllocatedLength]);
+
+            var sourceSpan = source;
+            var position = 0;
+
+            do
+            {
+                var replaced = false;
+
+                for (var i = 0; i < ReplacersFull.Length; ++i)
+                {
+                    ref var replacer = ref ReplacersFull[i];
+
+                    var replacerLength = replacer.Length;
+                    var postfixIndex = prefixIndex + replacerLength + 1;
+
+                    if (sourceSpan.Length <= postfixIndex
+                        || sourceSpan[postfixIndex] != Delimiter
+                        || !sourceSpan.Slice(prefixIndex + 1, replacerLength).SequenceEqual(replacer))
+                    {
+                        continue;
+                    }
+
+                    sourceSpan[..(prefixIndex + 1)].CopyTo(
+                        result[position..]);
+                    replacer.CopyTo(
+                        result[(position + prefixIndex)..]);
+
+                    position += prefixIndex + replacerLength + 1;
+                    sourceSpan = sourceSpan[(postfixIndex + 1)..];
+
+                    replaced = true;
+
+                    goto FinishReplacing;
+                }
+
+                for (var i = ReplacersFull.Length; i < Replacers.Length; ++i)
+                {
+                    ref var replacer = ref Replacers[i];
+
+                    var postfixIndex = prefixIndex + 2;
+
+                    if (sourceSpan.Length <= postfixIndex
+                        || sourceSpan[postfixIndex] != Delimiter
+                        || sourceSpan[prefixIndex + 1] != replacer)
+                    {
+                        continue;
+                    }
+
+                    sourceSpan[..(prefixIndex + 1)].CopyTo(
+                        result[position..]);
+                    result[position + prefixIndex] =
+                        replacer;
+
+                    position += prefixIndex + 2;
+                    sourceSpan = sourceSpan[(postfixIndex + 1)..];
+
+                    replaced = true;
+
+                    goto FinishReplacing;
+                }
+
+                //Label
+                FinishReplacing:
+
+
+
+                if (replaced)
+                    continue;
+
+                sourceSpan[..(prefixIndex + 1)].CopyTo(
+                    result[position..]);
+
+                position += prefixIndex + 1;
+                sourceSpan = sourceSpan[(prefixIndex + 1)..];
+            } while ((prefixIndex = sourceSpan.IndexOf(Delimiter)) != -1);
+
+            sourceSpan.CopyTo(
+                result[position..]);
+
+            return new string(result[..(position + sourceSpan.Length)]);
+        }
+
+
+
         private static (NestedType Type, int StartIndex, int EndIndex, int Length) GetRepresentPart(
-            ref string represent, int startIndex)
+            ReadOnlySpan<char> represent, int startIndex)
         {
             if (represent == null)
             {
@@ -192,53 +411,54 @@ namespace RIS.Collections.Nestable
 
             var parseInfo = RepresentPartParseInfo.Get(
                 represent[startIndex]);
-            var skippedOccurrencesCount = 0;
+            var endIndex = -1;
 
             if (parseInfo.Type == NestedType.Collection)
             {
                 var parentheses = 0;
                 var parenthesesMap = parseInfo.ParenthesesMap;
 
-                for (int i = startIndex; i < represent.Length; ++i)
+                for (var i = startIndex; i < represent.Length; ++i)
                 {
                     var ch = represent[i];
 
                     if (ch == parenthesesMap.Key)
                     {
-                        if (i > 0 && represent[i - 1] == '/')
+                        if (i > 0
+                            && represent[i - 1] == '/')
+                        {
                             continue;
+                        }
 
                         ++parentheses;
                     }
                     else if (ch == parenthesesMap.Value)
                     {
+                        if (i < represent.Length - 1
+                            && represent[i + 1] == '/')
+                        {
+                            continue;
+                        }
+
                         --parentheses;
 
                         if (parentheses == 0)
-                            break;
+                        {
+                            endIndex = i;
 
-                        ++skippedOccurrencesCount;
+                            break;
+                        }
                     }
                 }
             }
-
-            var endIndex = -1;
-            var startIndexOccurrence = startIndex;
-
-            for (int i = 0; i < skippedOccurrencesCount + 1; ++i)
+            else
             {
                 endIndex =
-                    startIndexOccurrence +
+                    startIndex +
                     parseInfo.EndValuesTrie
-                        .IndexOfAny(represent
-                            .AsSpan()
-                            .Slice(startIndexOccurrence))
+                        .IndexOfAny(
+                            represent[startIndex..])
                         .Index;
-
-                if (endIndex == -1)
-                    break;
-
-                startIndexOccurrence = endIndex + 1;
             }
 
             if (endIndex == -1)
@@ -399,16 +619,8 @@ namespace RIS.Collections.Nestable
                 return;
             }
 
-            key = key
-                .Replace("null", "/null/")
-                .Replace("|", "/|/")
-                .Replace(":", "/:/")
-                .Replace(",", "/,/")
-                .Replace("\"", "/\"/")
-                .Replace("[", "/[/")
-                .Replace("]", "/]/")
-                .Replace("{", "/{/")
-                .Replace("}", "/}/");
+            key = EncodeRepresent(
+                key);
 
             builder.Append(key);
         }
@@ -471,16 +683,8 @@ namespace RIS.Collections.Nestable
                 goto FinishElementProcessing;
             }
 
-            valueString = valueString
-                .Replace("null", "/null/")
-                .Replace("|", "/|/")
-                .Replace(":", "/:/")
-                .Replace(",", "/,/")
-                .Replace("\"", "/\"/")
-                .Replace("[", "/[/")
-                .Replace("]", "/]/")
-                .Replace("{", "/{/")
-                .Replace("}", "/}/");
+            valueString = EncodeRepresent(
+                valueString);
 
             builder.Append(valueString);
 
@@ -721,37 +925,27 @@ namespace RIS.Collections.Nestable
 
 
         private static string FromStringRepresent(
-            string key)
+            ReadOnlySpan<char> key)
         {
             if (key == null)
                 return null;
-            else if (key == "null")
+            else if (key.SequenceEqual("null"))
                 return null;
             else if (key.Length == 0)
                 return string.Empty;
 
-            key = key
-                .Replace("/null/", "null")
-                .Replace("/|/", "|")
-                .Replace("/:/", ":")
-                .Replace("/,/", ",")
-                .Replace("/\"/", "\"")
-                .Replace("/[/", "[")
-                .Replace("/]/", "]")
-                .Replace("/{/", "{")
-                .Replace("/}/", "}");
-
-            return key;
+            return DecodeRepresent(
+                key);
         }
         // ReSharper disable RedundantAssignment
         private static (string Key, TValue Value) FromStringRepresent<TValue>(
-            ref string represent, ref TValue value,
+            ReadOnlySpan<char> represent, ref TValue value,
             bool includingKey = false,
             bool includingQuotes = true)
         {
             if (includingQuotes)
             {
-                if (represent[0] != '"' || represent[represent.Length - 1] != '"')
+                if (represent[0] != '"' || represent[^1] != '"')
                 {
                     var exception = new ArgumentException(
                         $"Неверный формат строки[{0}, {represent.Length - 1}] для преобразования в элемент",
@@ -764,7 +958,7 @@ namespace RIS.Collections.Nestable
                 }
 
                 represent = represent
-                    .Substring(1, represent.Length - 2);
+                    .Slice(1, represent.Length - 2);
             }
 
             string key = null;
@@ -772,15 +966,13 @@ namespace RIS.Collections.Nestable
             if (includingKey)
             {
                 var keyDivide = represent
-                    .IndexOf("::", 0, StringComparison.Ordinal);
+                    .IndexOf(KeyDivide);
 
                 if (keyDivide != -1)
                 {
-                    key = FromStringRepresent(represent
-                        .Substring(0, keyDivide));
-
-                    represent = represent
-                        .Substring(keyDivide + 2);
+                    key = FromStringRepresent(
+                        represent[..keyDivide]);
+                    represent = represent[(keyDivide + 2)..];
                 }
             }
 
@@ -799,13 +991,13 @@ namespace RIS.Collections.Nestable
 
                 return (key, value);
             }
-            else if (represent == "null")
+            else if (represent.SequenceEqual("null"))
             {
                 value = default;
 
                 return (key, value);
             }
-            else if (represent == "db_null")
+            else if (represent.SequenceEqual("db_null"))
             {
                 if (typeof(TValue) == typeof(string))
                 {
@@ -820,16 +1012,8 @@ namespace RIS.Collections.Nestable
                 return (key, value);
             }
 
-            valueString = represent
-                .Replace("/null/", "null")
-                .Replace("/|/", "|")
-                .Replace("/:/", ":")
-                .Replace("/,/", ",")
-                .Replace("/\"/", "\"")
-                .Replace("/[/", "[")
-                .Replace("/]/", "]")
-                .Replace("/{/", "{")
-                .Replace("/}/", "}");
+            valueString = DecodeRepresent(
+                represent);
 
             // Label
             FinishElementProcessing:
@@ -843,14 +1027,13 @@ namespace RIS.Collections.Nestable
         }
         // ReSharper restore RedundantAssignment
         private static (string Key, TValue[] Value) FromStringRepresent<TValue>(
-            ref string represent, ref TValue[] value,
-            int startIndex, int endIndex, int length,
+            ReadOnlySpan<char> represent, ref TValue[] value,
             bool includingKey = false)
         {
-            if (represent[startIndex] != '[' || represent[endIndex] != ']')
+            if (represent[0] != '[' || represent[^1] != ']')
             {
                 var exception = new ArgumentException(
-                    $"Неверный формат строки[{startIndex}, {endIndex}] для преобразования в массив",
+                    $"Неверный формат строки[{0}, {represent.Length - 1}] для преобразования в массив",
                     nameof(represent));
                 Events.OnError(
                     new RErrorEventArgs(exception, exception.Message));
@@ -859,56 +1042,73 @@ namespace RIS.Collections.Nestable
                 throw exception;
             }
 
-            var startElementsIndex = startIndex + 1;
+            represent = represent
+                .Slice(1, represent.Length - 2);
+
             string key = null;
 
             if (includingKey)
             {
-                var keyDivide = represent.IndexOf("::",
-                    startIndex + 1, length - 1,
-                    StringComparison.Ordinal);
+                var keyDivide = represent
+                    .IndexOf(KeyDivide);
 
                 if (keyDivide != -1)
                 {
-                    startElementsIndex = keyDivide + 2;
-
-                    key = FromStringRepresent(represent
-                        .Substring(startIndex + 1, keyDivide - startIndex - 1));
+                    key = FromStringRepresent(
+                        represent[..keyDivide]);
+                    represent = represent[(keyDivide + 2)..];
                 }
             }
 
-            if (startElementsIndex == endIndex)
+            if (represent.Length == 0)
             {
                 value = Array.Empty<TValue>();
 
                 return (key, value);
             }
-            else if (startElementsIndex + 4 == endIndex
-                     && string.Compare(represent, startElementsIndex,
-                         "null", 0, 4, StringComparison.Ordinal) == 0)
+            else if (represent.SequenceEqual("null"))
             {
                 value = null;
 
                 return (key, value);
             }
 
-            var values = represent
-                .Substring(startElementsIndex + 1,
-                    endIndex - startElementsIndex - 2)
-                .Split(new[] { "\",\"" }, StringSplitOptions.None);
+            var values = new ChunkedArrayL<TValue>();
+            TValue result;
 
-            value = Array.ConvertAll(values, stringValue =>
+            var valueDivideIndex = represent
+                .IndexOf("\",\"");
+
+            while (valueDivideIndex != -1)
             {
-                var result = default(TValue);
-
-                return FromStringRepresent(ref stringValue,
+                result = default;
+                result = FromStringRepresent(represent[1..valueDivideIndex],
                     ref result, false, false).Value;
-            });
+
+                values.Add(
+                    result);
+
+                represent = represent[(valueDivideIndex + 2)..];
+
+                valueDivideIndex = represent
+                    .IndexOf("\",\"");
+            }
+
+            result = default;
+            result = FromStringRepresent(represent[1..^1],
+                ref result, false, false).Value;
+
+            values.Add(
+                result);
+
+            value = new TValue[values.Length];
+
+            values.CopyTo(value, 0);
 
             return (key, value);
         }
         public static INestableCollection<TValue> FromStringRepresent<TValue>(
-            string represent)
+            ReadOnlySpan<char> represent)
         {
             if (represent[0] != '{' || represent[represent.Length - 1] != '}')
             {
@@ -922,26 +1122,27 @@ namespace RIS.Collections.Nestable
                 throw exception;
             }
 
-            int keyDivide;
+            var typeDivideSpan = TypeDivide
+                .AsSpan();
+            var keyDivideSpan = KeyDivide
+                .AsSpan();
+
             ReadOnlySpan<char> type;
 
-            var typeDivide = represent.IndexOf(
-                "||", 1, represent.Length - 1,
-                StringComparison.Ordinal);
+            var typeDivide = represent[..^1]
+                .IndexOf(typeDivideSpan);
+            var keyDivide = represent[..(typeDivide - 1)]
+                .IndexOf(keyDivideSpan);
 
-            if ((keyDivide = represent.IndexOf(
-                "::", 1, typeDivide - 1,
-                StringComparison.Ordinal)) != -1)
+            if (keyDivide != -1)
             {
                 type = represent
-                    .AsSpan()
                     .Slice(keyDivide + 2,
                         typeDivide - keyDivide - 2);
             }
             else
             {
                 type = represent
-                    .AsSpan()
                     .Slice(1,
                         typeDivide - 1);
             }
@@ -954,9 +1155,14 @@ namespace RIS.Collections.Nestable
         }
         // ReSharper disable PossibleNullReferenceException
         public static INestableCollection<TValue> FromStringRepresent<TValue>(
-            string represent, INestableCollection<TValue> value)
+            ReadOnlySpan<char> represent, INestableCollection<TValue> value)
         {
             value.Clear();
+
+            var typeDivideSpan = TypeDivide
+                .AsSpan();
+            var keyDivideSpan = KeyDivide
+                .AsSpan();
 
             var collectionFrames =
                 new ChunkedArrayL<NestableCollectionUnstringifyFrame<TValue>>(0, 32);
@@ -1013,38 +1219,38 @@ namespace RIS.Collections.Nestable
                     throw exception;
             }
 
-            int keyDivide;
             ReadOnlySpan<char> type;
 
-            var typeDivide = represent.IndexOf(
-                "||", currentStartIndex + 1, currentLength - 1,
-                StringComparison.Ordinal);
+            var typeDivide = represent
+                .Slice(currentStartIndex,
+                    currentLength - 1)
+                .IndexOf(typeDivideSpan);
+            var keyDivide = represent
+                .Slice(currentStartIndex,
+                    typeDivide - 1)
+                .IndexOf(keyDivideSpan);
 
-            if ((keyDivide = represent.IndexOf(
-                "::", currentStartIndex + 1, typeDivide - currentStartIndex - 1,
-                StringComparison.Ordinal)) != -1)
+            if (keyDivide != -1)
             {
                 var key = FromStringRepresent(represent
-                    .Substring(currentStartIndex + 1,
-                        keyDivide - currentStartIndex - 1));
+                    .Slice(currentStartIndex + 1,
+                        keyDivide - 1));
 
                 if (currentCollectionIsDictionary)
                     currentDictionary.Key = key;
 
                 type = represent
-                    .AsSpan()
-                    .Slice(keyDivide + 2,
+                    .Slice(currentStartIndex + keyDivide + 2,
                         typeDivide - keyDivide - 2);
             }
             else
             {
                 type = represent
-                    .AsSpan()
                     .Slice(currentStartIndex + 1,
-                        typeDivide - currentStartIndex - 1);
+                        typeDivide - 1);
             }
 
-            currentDivideIndex = typeDivide + 1;
+            currentDivideIndex = currentStartIndex + typeDivide + 1;
 
             if (GetCollectionType(type) != GetCollectionType(currentCollection))
             {
@@ -1058,7 +1264,7 @@ namespace RIS.Collections.Nestable
                 throw exception;
             }
 
-            if (typeDivide + 2 == currentEndIndex)
+            if (currentStartIndex + typeDivide + 2 == currentEndIndex)
                 goto FinishCollectionProcessing;
 
             // Label
@@ -1075,16 +1281,16 @@ namespace RIS.Collections.Nestable
             do
             {
                 var (partType, partStartIndex, partEndIndex, partLength) = GetRepresentPart(
-                    ref represent, currentDivideIndex + 1);
+                    represent, currentDivideIndex + 1);
 
                 if (partType == NestedType.Element)
                 {
-                    var partRepresent = represent.Substring(
-                        partStartIndex + 1, partEndIndex - (partStartIndex + 1));
+                    var partRepresent = represent.Slice(
+                        partStartIndex + 1, partEndIndex - partStartIndex - 1);
 
                     var result = default(TValue);
                     var (resultKey, resultValue) = FromStringRepresent(
-                        ref partRepresent, ref result,
+                        partRepresent, ref result,
                         currentCollectionIsDictionary,
                         false);
 
@@ -1102,10 +1308,12 @@ namespace RIS.Collections.Nestable
                 }
                 else if (partType == NestedType.Array)
                 {
+                    var partRepresent = represent.Slice(
+                        partStartIndex, partEndIndex - partStartIndex + 1);
+
                     var result = Array.Empty<TValue>();
                     var (resultKey, resultValue) = FromStringRepresent(
-                        ref represent, ref result,
-                        partStartIndex, partEndIndex, partLength,
+                        partRepresent, ref result,
                         currentCollectionIsDictionary);
 
                     if (currentCollectionIsDictionary)
@@ -1122,32 +1330,32 @@ namespace RIS.Collections.Nestable
                 }
                 else if (partType == NestedType.Collection)
                 {
-                    int resultKeyDivide;
                     string resultKey = null;
                     ReadOnlySpan<char> resultType;
 
-                    var resultTypeDivide = represent.IndexOf(
-                        "||", partStartIndex + 1, partLength - 1,
-                        StringComparison.Ordinal);
+                    var resultTypeDivide = represent
+                        .Slice(partStartIndex,
+                            partLength - 1)
+                        .IndexOf(typeDivideSpan);
+                    var resultKeyDivide = represent
+                        .Slice(partStartIndex,
+                            resultTypeDivide - 1)
+                        .IndexOf(keyDivideSpan);
 
-                    if ((resultKeyDivide = represent.IndexOf(
-                            "::", partStartIndex + 1, resultTypeDivide - partStartIndex - 1,
-                            StringComparison.Ordinal)) != -1)
+                    if (resultKeyDivide != -1)
                     {
                         resultKey = FromStringRepresent(represent
-                            .Substring(partStartIndex + 1,
-                                resultKeyDivide - partStartIndex - 1));
+                            .Slice(partStartIndex + 1,
+                                resultKeyDivide - 1));
                         resultType = represent
-                            .AsSpan()
-                            .Slice(resultKeyDivide + 2,
+                            .Slice(partStartIndex + resultKeyDivide + 2,
                                 resultTypeDivide - resultKeyDivide - 2);
                     }
                     else
                     {
                         resultType = represent
-                            .AsSpan()
                             .Slice(partStartIndex + 1,
-                                resultTypeDivide - partStartIndex - 1);
+                                resultTypeDivide - 1);
                     }
 
                     var result = CreateCollectionByType<TValue>(
