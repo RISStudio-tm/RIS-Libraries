@@ -4892,12 +4892,12 @@
                 Экземпляр сервиса <see cref="T:RIS.Connection.MySQL.IRequestEngine"/>, с помощью которого будет выполняться запрос.
             </param>
         </member>
-        <member name="M:RIS.Connection.MySQL.Requests.StoredProcedureRequest.RIS#Connection#MySQL#Requests#IQueryRequest{(System#Int64Result,System#String[]OutputValues)}#Copy">
+        <member name="M:RIS.Connection.MySQL.Requests.StoredProcedureRequest.RIS#Connection#MySQL#Requests#IQueryRequest{System#ValueTuple{System#Int64,System#String[]}}#Copy">
             <summary>
                 Создаёт копию запроса.
             </summary>
         </member>
-        <member name="M:RIS.Connection.MySQL.Requests.StoredProcedureRequest.RIS#Connection#MySQL#Requests#IQueryRequest{(System#Int64Result,System#String[]OutputValues)}#Copy(RIS.Connection.MySQL.IRequestEngine)">
+        <member name="M:RIS.Connection.MySQL.Requests.StoredProcedureRequest.RIS#Connection#MySQL#Requests#IQueryRequest{System#ValueTuple{System#Int64,System#String[]}}#Copy(RIS.Connection.MySQL.IRequestEngine)">
             <summary>
                 Создаёт копию запроса.
             </summary>

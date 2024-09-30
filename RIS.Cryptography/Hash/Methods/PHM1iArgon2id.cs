@@ -16,7 +16,7 @@ namespace RIS.Cryptography.Hash.Methods
         private const int PartHashLength = 16;
         private const int MinInputStringLength = 8;
 
-        private static SHA256iCSP KeyHashProvider { get; }
+        private static SHA256 KeyHashProvider { get; }
         private static IUnbiasedRandom RandomGenerator { get; }
 
         private Argon2idWP HashProvider { get; }
@@ -112,7 +112,7 @@ namespace RIS.Cryptography.Hash.Methods
 
         static PHM1iArgon2id()
         {
-            KeyHashProvider = new SHA256iCSP();
+            KeyHashProvider = new SHA256();
             RandomGenerator = new SecureRandom();
         }
 

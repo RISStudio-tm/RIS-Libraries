@@ -7,27 +7,17 @@ namespace RIS.Cryptography.Hash
 {
     public enum DefaultHashMethod : byte
     {
-        MD5iCSP = 1,
-#if NETFRAMEWORK
-        MD5iCNG = 2,
-#endif
+        //MD5iCSP = 1,
+        //MD5iCNG = 2,
         RIPEMD160 = 3,
-        SHA1iCSP = 4,
-#if NETFRAMEWORK
-        SHA1iCNG = 5,
-#endif
-        SHA256iCSP = 6,
-#if NETFRAMEWORK
-        SHA256iCNG = 7,
-#endif
-        SHA384iCSP = 8,
-#if NETFRAMEWORK
-        SHA384iCNG = 9,
-#endif
-        SHA512iCSP = 10,
-#if NETFRAMEWORK
-        SHA512iCNG = 11,
-#endif
+        //SHA1iCSP = 4,
+        //SHA1iCNG = 5,
+        //SHA256iCSP = 6,
+        //SHA256iCNG = 7,
+        //SHA384iCSP = 8,
+        //SHA384iCNG = 9,
+        //SHA512iCSP = 10,
+        //SHA512iCNG = 11,
         CRC32 = 12,
         CRC32C = 13,
         CRC32D = 14,
@@ -46,6 +36,11 @@ namespace RIS.Cryptography.Hash
         XXHash32 = 27,
         XXHash64 = 28,
         XXHash3b64 = 29,
-        XXHash3b128 = 30
+        XXHash3b128 = 30,
+        MD5 = 31,
+        SHA1 = 32,
+        SHA256 = 33,
+        SHA384 = 34,
+        SHA512 = 35
     }
 }

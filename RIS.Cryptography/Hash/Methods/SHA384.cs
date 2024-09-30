@@ -3,20 +3,19 @@
 
 using System;
 using System.Globalization;
-using System.Security.Cryptography;
 using System.Text;
 
 namespace RIS.Cryptography.Hash.Methods
 {
-    public sealed class SHA1iCSP : IRawHashMethod
+    public sealed class SHA384 : IRawHashMethod
     {
-        private SHA1CryptoServiceProvider SHAService { get; }
+        private System.Security.Cryptography.SHA384 SHAService { get; }
 
         public bool Initialized { get; }
 
-        public SHA1iCSP()
+        public SHA384()
         {
-            SHAService = new SHA1CryptoServiceProvider();
+            SHAService = System.Security.Cryptography.SHA384.Create();
             SHAService.Initialize();
 
             Initialized = true;

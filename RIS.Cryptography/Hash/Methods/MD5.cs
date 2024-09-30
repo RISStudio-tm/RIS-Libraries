@@ -3,20 +3,19 @@
 
 using System;
 using System.Globalization;
-using System.Security.Cryptography;
 using System.Text;
 
 namespace RIS.Cryptography.Hash.Methods
 {
-    public sealed class MD5iCSP : IHashMethod
+    public sealed class MD5 : IHashMethod
     {
-        private MD5CryptoServiceProvider MDService { get; }
+        private System.Security.Cryptography.MD5 MDService { get; }
 
         public bool Initialized { get; }
 
-        public MD5iCSP()
+        public MD5()
         {
-            MDService = new MD5CryptoServiceProvider();
+            MDService = System.Security.Cryptography.MD5.Create();
             MDService.Initialize();
 
             Initialized = true;

@@ -8,9 +8,14 @@ namespace RIS.Cryptography.Cipher
     public enum DefaultCipherMethod : byte
     {
         Rijndael = 1,
-        RSAiCSP = 2,
-#if NETFRAMEWORK
-        RSAiCNG = 3
-#endif
+        //RSAiCSP = 2,
+        //RSAiCNG = 3,
+        RSA = 4,
+        AES = 5
+    }
+
+    public enum DefaultSignMethod : byte
+    {
+        RSA = 1
     }
 }
