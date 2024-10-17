@@ -3,6 +3,7 @@
 
 using System;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Reflection;
 
@@ -23,6 +24,57 @@ namespace RIS.Extensions
                 .OfType<DebuggableAttribute>()
                 .Select(attribute => attribute.IsJITTrackingEnabled)
                 .FirstOrDefault();
+        }
+
+        public static byte[] GetManifestResourceAsBytes(this Assembly assembly,
+            string resourceName)
+        {
+            if (assembly == null)
+                return null;
+
+            var resourceInfo = assembly.GetManifestResourceInfo(resourceName);
+
+            if (resourceInfo == null)
+                return null;
+
+            using (var resourceStream = assembly
+                       .GetManifestResourceStream(resourceName))
+            {
+                if (resourceStream == null)
+                    return null;
+
+                using (var reader = new BinaryReader(
+                           resourceStream))
+                {
+                    return reader.ReadBytes(
+                        (int)reader.BaseStream.Length);
+                }
+            }
+        }
+
+        public static string GetManifestResourceAsString(this Assembly assembly,
+            string resourceName)
+        {
+            if (assembly == null)
+                return null;
+
+            var resourceInfo = assembly.GetManifestResourceInfo(resourceName);
+
+            if (resourceInfo == null)
+                return null;
+
+            using (var resourceStream = assembly
+                       .GetManifestResourceStream(resourceName))
+            {
+                if (resourceStream == null)
+                    return null;
+
+                using (var reader = new StreamReader(
+                           resourceStream))
+                {
+                    return reader.ReadToEnd();
+                }
+            }
         }
     }
 }

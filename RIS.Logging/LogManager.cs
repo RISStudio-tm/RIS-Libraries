@@ -9,12 +9,17 @@ using System.Runtime.ExceptionServices;
 using System.Threading;
 using NLog;
 using NLog.Config;
+using RIS.Extensions;
 using RIS.Providers;
 
 namespace RIS.Logging
 {
     public static class LogManager
     {
+        private const string ConfigManifestResourceName = "RIS.Logging.Resources.Configs.nlog.config";
+
+
+
         public static event EventHandler<EventArgs> LoggingStartup;
         public static event EventHandler<EventArgs> LoggingShutdown;
         public static event EventHandler<EventArgs> LoggingPaused;
@@ -248,9 +253,18 @@ namespace RIS.Logging
                 Disposed = false;
                 Running = true;
 
-                LogFactory.Configuration = XmlLoggingConfiguration
-                    .CreateFromXmlString(ResourceProvider
-                        .GetEmbeddedAsString(@"Resources\Configs\nlog.config"));
+                try
+                {
+                    var assembly = Assembly.GetAssembly(typeof(LogManager));
+
+                    LogFactory.Configuration = XmlLoggingConfiguration
+                        .CreateFromXmlString(assembly.GetManifestResourceAsString(
+                            ConfigManifestResourceName));
+                }
+                catch (Exception e)
+                {
+                    LogFactory.Configuration = null;
+                }
 
                 if (LogFactory.Configuration == null)
                 {
@@ -584,7 +598,7 @@ namespace RIS.Logging
                 {
                     var exception = new DirectoryNotFoundException($"Cannot start log files deletion. Directory '{filesDirectoryPath}' not found");
                     Events.OnError(new RErrorEventArgs(exception, exception.Message));
-                    throw exception;
+                    return 0;
                 }
 
                 var currentFileNameDate = GlobalDiagnosticsContext.Get(

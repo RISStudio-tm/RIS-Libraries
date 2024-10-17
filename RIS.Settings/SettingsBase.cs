@@ -116,6 +116,9 @@ namespace RIS.Settings
                 {
                     var appFilePath = Environment.ExecAppAssemblyFilePath;
 
+                    if (string.IsNullOrEmpty(appFilePath) || appFilePath == "Unknown" )
+                        appFilePath = Environment.ExecProcessFilePath;
+
                     var currentAppVersion = FileVersionInfo
                         .GetVersionInfo(appFilePath)
                         .ProductVersion;

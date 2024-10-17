@@ -169,6 +169,9 @@ namespace RIS
             if (string.IsNullOrWhiteSpace(path) || !File.Exists(path))
                 return "Unknown";
 
+            if (path.EndsWith($"{Path.DirectorySeparatorChar}Unknown") || path.EndsWith($"{Path.AltDirectorySeparatorChar}Unknown"))
+                return "Unknown";
+
             return path;
         }
 
