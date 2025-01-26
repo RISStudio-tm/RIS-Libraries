@@ -4,12 +4,15 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
+using System.IO;
 using System.Reflection;
 using System.Threading.Tasks;
 using RIS.Extensions;
 
 namespace RIS.Settings
 {
+    [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicProperties)]
     public abstract class SettingsBase
     {
         public event EventHandler<EventArgs> Loading;
@@ -40,25 +43,34 @@ namespace RIS.Settings
 
             string category = null;
 
-            foreach (PropertyInfo property in GetType().GetProperties(BindingFlags.Instance
-                                                                      | BindingFlags.Public
-                                                                      | BindingFlags.GetProperty
-                                                                      | BindingFlags.SetProperty))
+            foreach (var property in GetType().GetProperties(BindingFlags.Instance
+                                                             | BindingFlags.Public
+                                                             | BindingFlags.GetProperty
+                                                             | BindingFlags.SetProperty))
             {
+                var declaringProperty = property
+                    .GetDeclaring();
+
                 if (Attribute.IsDefined(property, typeof(SettingCategoryAttribute)))
                     category = ((SettingCategoryAttribute)property.GetCustomAttribute(typeof(SettingCategoryAttribute)))?.Name;
+                else if (Attribute.IsDefined(declaringProperty, typeof(SettingCategoryAttribute)))
+                    category = ((SettingCategoryAttribute)declaringProperty.GetCustomAttribute(typeof(SettingCategoryAttribute)))?.Name;
 
                 if (Attribute.IsDefined(property, typeof(ExcludedSettingAttribute)))
                     continue;
+                else if (Attribute.IsDefined(declaringProperty, typeof(ExcludedSettingAttribute)))
+                    continue;
 
-                var declaringProperty = property
-                    .GetDeclaring();
                 var setting = new Setting(this,
                     declaringProperty, category);
 
                 if (Attribute.IsDefined(property, typeof(DefaultSettingValueAttribute)))
                 {
                     setting.DefaultValue = ((DefaultSettingValueAttribute)property.GetCustomAttribute(typeof(DefaultSettingValueAttribute)))?.DefaultValue;
+                }
+                else if (Attribute.IsDefined(declaringProperty, typeof(DefaultSettingValueAttribute)))
+                {
+                    setting.DefaultValue = ((DefaultSettingValueAttribute)declaringProperty.GetCustomAttribute(typeof(DefaultSettingValueAttribute)))?.DefaultValue;
                 }
                 else if (setting.Type.IsEnum)
                 {
@@ -116,27 +128,39 @@ namespace RIS.Settings
                 {
                     var appFilePath = Environment.ExecAppAssemblyFilePath;
 
+                    if (string.IsNullOrEmpty(appFilePath) || appFilePath == "Unknown")
+                        appFilePath = Environment.ExecAppFilePath;
                     if (string.IsNullOrEmpty(appFilePath) || appFilePath == "Unknown" )
                         appFilePath = Environment.ExecProcessFilePath;
 
-                    var currentAppVersion = FileVersionInfo
-                        .GetVersionInfo(appFilePath)
-                        .ProductVersion;
-
-                    if (AppVersion != currentAppVersion)
+                    if (File.Exists(appFilePath))
                     {
-                        var oldAppVersion = AppVersion;
+                        var currentAppVersion = FileVersionInfo
+                            .GetVersionInfo(appFilePath)
+                            .ProductVersion;
 
-                        OnLoadSettings(_settingsList,
-                            appVersionCheckOptions);
+                        if (AppVersion != currentAppVersion)
+                        {
+                            var oldAppVersion = AppVersion;
 
-                        AppVersion = currentAppVersion;
+                            OnLoadSettings(_settingsList,
+                                appVersionCheckOptions);
 
-                        OnSaveSettings(_settingsList);
+                            AppVersion = currentAppVersion;
 
-                        AppVersionChanged?.Invoke(this,
-                            new AppVersionChangedEventArgs(
-                                oldAppVersion, currentAppVersion));
+                            OnSaveSettings(_settingsList);
+
+                            AppVersionChanged?.Invoke(this,
+                                new AppVersionChangedEventArgs(
+                                    oldAppVersion, currentAppVersion));
+                        }
+                    }
+                    else
+                    {
+                        var exception =
+                            new FileNotFoundException($"File[Path={appFilePath}] not found", appFilePath);
+                        Events.OnError(this,
+                            new RErrorEventArgs(exception, exception.Message));
                     }
                 }
 

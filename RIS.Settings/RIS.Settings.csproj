@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFrameworks>net8.0</TargetFrameworks>
@@ -7,11 +7,11 @@
     <ImplicitUsings>disable</ImplicitUsings>
     <RootNamespace>RIS.Settings</RootNamespace>
     <AssemblyName>RIS.Settings</AssemblyName>
-    <AssemblyVersion>3.0.1.0</AssemblyVersion>
-    <FileVersion>3.0.1.0</FileVersion>
+    <AssemblyVersion>3.0.2.0</AssemblyVersion>
+    <FileVersion>3.0.2.0</FileVersion>
     <PackageId>RIS.Settings</PackageId>
     <Product>RIS.Settings</Product>
-    <Version>3.0.1</Version>
+    <Version>3.0.2</Version>
     <Description>A library designed for various types of tasks. Part of the RIS "ecosystem".</Description>
     <PackageTags>dotnet, dotnetcore, netframework, netcore, library</PackageTags>
     <Authors>Dmitry Ponomarev</Authors>
